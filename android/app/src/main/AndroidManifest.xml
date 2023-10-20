@@ -7,6 +7,13 @@
         android:label="tourguide_app"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
+
+        <!-- MY EDITS -->
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="AIzaSyBa7mCp1FUiWMhfTHPWNJ2Cy-A84w4i2I4"/>
+        <!-- End of my edits -->
+
         <activity
             android:name=".MainActivity"
             android:exported="true"
@@ -33,8 +40,5 @@
         <meta-data
             android:name="flutterEmbedding"
             android:value="2" />
-        <meta-data
-            android:name="com.google.android.geo.API_KEY"
-            android:value="AIzaSyDPcY_4LL7QygTSnpvu_CkMpvXFAqjlvuU"/>
     </application>
 </manifest>
