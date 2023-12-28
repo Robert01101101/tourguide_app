@@ -2,6 +2,10 @@
 
 Flutter app that helps guide users such as tourists around a city, with GPS and google maps driven info prompts.
 
+Links:
+
+- [GDoc with further links and notes](https://docs.google.com/document/d/163i37yum3VPPOEcq8DF8_kD8VAgpzDPC4ht41BfP4zg/edit?usp=sharing)
+
 ## Getting Started
 
 This project is a starting point for a Flutter application.
