@@ -65,6 +65,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.0.6"
+  dio:
+    dependency: transitive
+    description:
+      name: dio
+      sha256: "7d328c4d898a61efc3cd93655a0955858e29a0aa647f0f9e02d59b3bb275e2e8"
+      url: "https://pub.dev"
+    source: hosted
+    version: "4.0.6"
   fake_async:
     dependency: transitive
     description:
@@ -152,6 +160,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.2.1"
+  google_map_polyline_new:
+    dependency: "direct main"
+    description:
+      name: google_map_polyline_new
+      sha256: d6b20fe5e807a1e867c0f477edfae35aaba9e21905a1de65848969978296a8b0
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.3.0+2"
   google_maps:
     dependency: transitive
     description:
@@ -208,6 +224,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.15.4"
+  http_parser:
+    dependency: transitive
+    description:
+      name: http_parser
+      sha256: "2aa08ce0341cc9b354a498388e30986515406668dbcc4f7c950c3e715496693b"
+      url: "https://pub.dev"
+    source: hosted
+    version: "4.0.2"
   js:
     dependency: transitive
     description:

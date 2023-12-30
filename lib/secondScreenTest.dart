@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:tourguide_app/utilities/custom_import.dart';
 
 class SecondRoute extends StatelessWidget {
   const SecondRoute({super.key});
@@ -11,11 +11,25 @@ class SecondRoute extends StatelessWidget {
         title: const Text('Second Route'),
       ),
       body: Center(
-        child: ElevatedButton(
-          onPressed: () {
-            Navigator.pop(context);
-          },
-          child: const Text('Go back!'),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          children: [
+            ElevatedButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              child: const Text('Go back!'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const MapSample()),
+                );
+              },
+              child: const Text('Go to Map Sample!'),
+            ),
+          ],
         ),
       ),
     );

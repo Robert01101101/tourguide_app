@@ -51,6 +51,12 @@ class DebugScreenState extends State<DebugScreen> {
               ElevatedButton(onPressed: () {
                 Navigator.push(
                   context,
+                  MaterialPageRoute(builder: (context) => const MapSampleDrawRoute()),
+                );
+              }, child: const Text("Map Routing")),
+              ElevatedButton(onPressed: () {
+                Navigator.push(
+                  context,
                   MaterialPageRoute(builder: (context) => const SecondRoute()),
                 );
               }, child: const Text("Route 2")),
