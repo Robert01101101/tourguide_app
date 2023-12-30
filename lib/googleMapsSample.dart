@@ -1,8 +1,8 @@
-import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'dart:async';
-import 'package:tourguide_app/secondScreenTest.dart';
+
+import 'package:tourguide_app/utilities/custom_import.dart';
 
 
 // FROM FLUTTER SAMPLE
@@ -109,45 +109,53 @@ class MapSampleState extends State<MapSample> {
   //________________________________________________________________________________________ MapSample StatefulWidget - BUILD
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      height: 600,
-      child: Column(
-        children: [
-          Expanded(
-            child: GoogleMap(
-              mapType: MapType.hybrid,
-              initialCameraPosition: _kLake,
-              onMapCreated: (GoogleMapController controller) {
-                _controller.complete(controller);
-              },
+    return Scaffold(
+      appBar: AppBar(
+        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+        title: const Text('Map Sample'),
+      ),
+      body: Center(
+        child: Column(
+          children: [
+            Expanded(
+              child: GoogleMap(
+                mapType: MapType.hybrid,
+                initialCameraPosition: _kLake,
+                onMapCreated: (GoogleMapController controller) {
+                  _controller.complete(controller);
+                },
+              ),
             ),
-          ),
-          const SizedBox(
-            height: 20,
-          ),
-          const Text(
-            'Your current GPS Location is:',
-          ),
-          _currentPosition != null
-              ? Text(
-            'LAT: ${(_currentPosition!!).latitude}, \n LNG: ${(_currentPosition!!).longitude}',//cast to non nullable
-            style: TextStyle(fontSize: 24),
-          )
-              : CircularProgressIndicator(),
-          const SizedBox(
-            height: 80,
-          ),
-          Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly,children: [
-            ElevatedButton(onPressed: _goToMyLocation, child: const Text("My Location")),
-            ElevatedButton(onPressed: _goToGoogleHq, child: const Text("Google's HQ")),
-            ElevatedButton(onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const SecondRoute()),
-              );
-            }, child: const Text("Route 2")),
-          ],)
-        ],
+            const SizedBox(
+              height: 20,
+            ),
+            const Text(
+              'Your current GPS Location is:',
+            ),
+            _currentPosition != null
+                ? Text(
+              'LAT: ${(_currentPosition!!).latitude}, \n LNG: ${(_currentPosition!!).longitude}',//cast to non nullable
+              style: TextStyle(fontSize: 24),
+            )
+                : CircularProgressIndicator(),
+            const SizedBox(
+              height: 20,
+            ),
+            Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly,children: [
+              ElevatedButton(onPressed: _goToMyLocation, child: const Text("My Location")),
+              ElevatedButton(onPressed: _goToGoogleHq, child: const Text("Google's HQ")),
+              ElevatedButton(onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const SecondRoute()),
+                );
+              }, child: const Text("Route 2")),
+            ],),
+            const SizedBox(
+              height: 20,
+            ),
+          ],
+        )
       ),
     );
   }
