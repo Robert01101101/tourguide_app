@@ -47,6 +47,7 @@ class MyHomePage extends StatefulWidget {
 //________________________________________________________________________________________ MY HOMEPAGE STATE
 class _MyHomePageState extends State<MyHomePage> {
 
+  int currentPageIndex = 0;
 
 
   //________________________________________________________________________________________ MY HOMEPAGE STATE - BUILD
@@ -59,8 +60,43 @@ class _MyHomePageState extends State<MyHomePage> {
     // fast, so that you can just rebuild anything that needs updating rather
     // than having to individually change instances of widgets.
     return Scaffold(
+
+      bottomNavigationBar: NavigationBar(
+        onDestinationSelected: (int index) {
+          setState(() {
+            currentPageIndex = index;
+          });
+        },
+        indicatorColor: Colors.amber,
+        selectedIndex: currentPageIndex,
+        destinations: const <Widget>[
+          NavigationDestination(
+            selectedIcon: Icon(Icons.home),
+            icon: Icon(Icons.developer_mode),
+            label: 'Debug',
+          ),
+          NavigationDestination(
+            icon: Badge(child: Icon(Icons.map)),
+            label: 'Map Sample',
+          ),
+          NavigationDestination(
+            icon: Badge(
+              label: Text('2'),
+              child: Icon(Icons.navigation),
+            ),
+            label: 'Second Route',
+          ),
+        ],
+      ),
+
+
+
       body:
-      DebugScreen(),
+        <Widget>[
+          DebugScreen(),
+          MapSample(),
+          SecondRoute()
+        ][currentPageIndex],
     );
   }
 }
