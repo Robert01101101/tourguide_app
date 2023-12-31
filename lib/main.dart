@@ -72,19 +72,23 @@ class _MyHomePageState extends State<MyHomePage> {
         destinations: const <Widget>[
           NavigationDestination(
             selectedIcon: Icon(Icons.home),
-            icon: Icon(Icons.developer_mode),
-            label: 'Debug',
+            icon: Icon(Icons.explore),
+            label: 'Explore',
           ),
           NavigationDestination(
-            icon: Badge(child: Icon(Icons.map)),
-            label: 'Map Sample',
+            icon: Icon(Icons.map),
+            label: 'Map',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.favorite),
+            label: 'My Tours',
           ),
           NavigationDestination(
             icon: Badge(
               label: Text('2'),
-              child: Icon(Icons.navigation),
+              child: Icon(Icons.account_circle),
             ),
-            label: 'Second Route',
+            label: 'Profile',
           ),
         ],
       ),
@@ -93,9 +97,10 @@ class _MyHomePageState extends State<MyHomePage> {
 
       body:
         <Widget>[
-          DebugScreen(),
-          MapSample(),
-          SecondRoute()
+          Explore(),
+          Map(),
+          MyTours(),
+          Profile()
         ][currentPageIndex],
     );
   }
