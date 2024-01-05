@@ -1,7 +1,8 @@
-import 'package:tourguide_app/debugScreen.dart';
 import 'package:tourguide_app/utilities/custom_import.dart';
+import 'package:go_router/go_router.dart';
 
 void main() {
+  CustomNavigationHelper.instance;
   runApp(const MyApp());
 }
 
@@ -11,64 +12,242 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return MaterialApp.router(
       title: 'Tourguide App',
+      routerConfig: CustomNavigationHelper.router,
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepOrange),
         useMaterial3: true,
       ),
-      home: const MyHomePage(title: 'Tourguide App'),
     );
   }
 }
 
 
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});
+//______________________________________________________________________________________________ CustomNavigationHelper
+// from https://medium.com/flutter-community/integrating-bottom-navigation-with-go-router-in-flutter-c4ec388da16a
+// example https://dartpad.dev/?id=aed0372c987b4ae32311fe32bb4c1209
+class CustomNavigationHelper {
+  static final CustomNavigationHelper _instance =
+  CustomNavigationHelper._internal();
 
-  // This widget is the home page of your application. It is stateful, meaning
-  // that it has a State object (defined below) that contains fields that affect
-  // how it looks.
+  static CustomNavigationHelper get instance => _instance;
 
-  // This class is the configuration for the state. It holds the values (in this
-  // case the title) provided by the parent (in this case the App widget) and
-  // used by the build method of the State. Fields in a Widget subclass are
-  // always marked "final".
+  static late final GoRouter router;
 
-  final String title;
+  static final GlobalKey<NavigatorState> parentNavigatorKey =
+  GlobalKey<NavigatorState>();
+  static final GlobalKey<NavigatorState> exploreTabNavigatorKey =
+  GlobalKey<NavigatorState>();
+  static final GlobalKey<NavigatorState> mapTabNavigatorKey =
+  GlobalKey<NavigatorState>();
+  static final GlobalKey<NavigatorState> myToursTabNavigatorKey =
+  GlobalKey<NavigatorState>();
+  static final GlobalKey<NavigatorState> profileTabNavigatorKey =
+  GlobalKey<NavigatorState>();
 
-  @override
-  State<MyHomePage> createState() => _MyHomePageState();
+  BuildContext get context =>
+      router.routerDelegate.navigatorKey.currentContext!;
+
+  GoRouterDelegate get routerDelegate => router.routerDelegate;
+
+  GoRouteInformationParser get routeInformationParser =>
+      router.routeInformationParser;
+
+  static const String debugPath = '/debug'; //signUp
+  static const String mapSamplePath = '/mapSample'; //signIn
+  static const String mapRoutingPath = '/mapRouting'; //detail //TODO: Figure out what this was used for (see below in code as well)
+  static const String routeTwoPath = '/routeTwo'; //NEW
+  static const String rootDetailPath = '/rootDetail'; //rootDetail
+
+  static const String explorePath = '/explore'; //home
+  static const String mapPath = '/map'; //settings
+  static const String myToursPath = '/myTours'; //search
+  static const String profilePath = '/profile'; //NEW
+
+  factory CustomNavigationHelper() {
+    return _instance;
+  }
+
+  CustomNavigationHelper._internal() {
+    final routes = [
+      StatefulShellRoute.indexedStack(
+        parentNavigatorKey: parentNavigatorKey,
+        branches: [
+          StatefulShellBranch(
+            navigatorKey: exploreTabNavigatorKey,
+            routes: [
+              GoRoute(
+                path: explorePath,
+                pageBuilder: (context, GoRouterState state) {
+                  return getPage(
+                    child: const Explore(), //TODO change
+                    state: state,
+                  );
+                },
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            navigatorKey: mapTabNavigatorKey,
+            routes: [
+              GoRoute(
+                path: mapPath,
+                pageBuilder: (context, state) {
+                  return getPage(
+                    child: const Map(),
+                    state: state,
+                  );
+                },
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            navigatorKey: myToursTabNavigatorKey,
+            routes: [
+              GoRoute(
+                path: myToursPath,
+                pageBuilder: (context, state) {
+                  return getPage(
+                    child: const MyTours(),
+                    state: state,
+                  );
+                },
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            navigatorKey: profileTabNavigatorKey,
+            routes: [
+              GoRoute(
+                path: profilePath,
+                pageBuilder: (context, state) {
+                  return getPage(
+                    child: const Profile(),
+                    state: state,
+                  );
+                },
+              ),
+            ],
+          ),
+        ],
+        pageBuilder: (
+            BuildContext context,
+            GoRouterState state,
+            StatefulNavigationShell navigationShell,
+            ) {
+          return getPage(
+            child: BottomNavigationPage(
+              child: navigationShell,
+            ),
+            state: state,
+          );
+        },
+      ),
+      GoRoute(
+        parentNavigatorKey: parentNavigatorKey, //?? TODO figure out meaning
+        path: debugPath,
+        pageBuilder: (context, state) {
+          return getPage(
+            child: const DebugScreen(),
+            state: state,
+          );
+        },
+      ),
+      GoRoute(
+        parentNavigatorKey: parentNavigatorKey, //?? TODO figure out meaning
+        path: mapSamplePath,
+        pageBuilder: (context, state) {
+          return getPage(
+            child: const MapSample(),
+            state: state,
+          );
+        },
+      ),
+      GoRoute(
+        path: mapRoutingPath,
+        pageBuilder: (context, state) {
+          return getPage(
+            child: const MapSampleDrawRoute(),
+            state: state,
+          );
+        },
+      ),
+      GoRoute(
+        path: routeTwoPath,
+        pageBuilder: (context, state) {
+          return getPage(
+            child: const SecondRoute(),
+            state: state,
+          );
+        },
+      ),
+      /* //TODO figure out what this was used for
+      GoRoute(
+        parentNavigatorKey: parentNavigatorKey,
+        path: rootDetailPath,
+        pageBuilder: (context, state) {
+          return getPage(
+            child: const DetailPage(),
+            state: state,
+          );
+        },
+      ),*/
+    ];
+
+    router = GoRouter(
+      navigatorKey: parentNavigatorKey,
+      initialLocation: explorePath,
+      routes: routes,
+    );
+  }
+
+  static Page getPage({
+    required Widget child,
+    required GoRouterState state,
+  }) {
+    return MaterialPage(
+      key: state.pageKey,
+      child: child,
+    );
+  }
 }
 
 
+//______________________________________________________________________________________________ BottomNavigationPage
+class BottomNavigationPage extends StatefulWidget {
+  const BottomNavigationPage({
+    super.key,
+    required this.child,
+  });
 
+  final StatefulNavigationShell child;
 
-//________________________________________________________________________________________ MY HOMEPAGE STATE
-class _MyHomePageState extends State<MyHomePage> {
+  @override
+  State<BottomNavigationPage> createState() => _BottomNavigationPageState();
+}
 
-  int currentPageIndex = 0;
-
-
-  //________________________________________________________________________________________ MY HOMEPAGE STATE - BUILD
+class _BottomNavigationPageState extends State<BottomNavigationPage> {
   @override
   Widget build(BuildContext context) {
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
     return Scaffold(
-
+      /*
+      appBar: AppBar(
+        title: const Text('Bottom Navigator Shell'),    //TODO - decide if I can remove this, use for optional shell header bar
+      ),*/
+      body: SafeArea(
+        child: widget.child,
+      ),
       bottomNavigationBar: NavigationBar(
         onDestinationSelected: (int index) {
-          setState(() {
-            currentPageIndex = index;
-          });
+          widget.child.goBranch(
+            index,
+            initialLocation: index == widget.child.currentIndex,
+          );
+          setState(() {});
         },
         indicatorColor: Colors.amber,
-        selectedIndex: currentPageIndex,
+        selectedIndex:  widget.child.currentIndex,
         destinations: const <Widget>[
           NavigationDestination(
             selectedIcon: Icon(Icons.home),
@@ -92,16 +271,6 @@ class _MyHomePageState extends State<MyHomePage> {
           ),
         ],
       ),
-
-
-
-      body:
-        <Widget>[
-          Explore(),
-          Map(),
-          MyTours(),
-          Profile()
-        ][currentPageIndex],
     );
   }
 }
