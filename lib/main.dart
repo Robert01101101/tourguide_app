@@ -1,3 +1,4 @@
+import 'package:scroll_to_hide/scroll_to_hide.dart';
 import 'package:tourguide_app/utilities/custom_import.dart';
 import 'package:go_router/go_router.dart';
 
@@ -228,6 +229,7 @@ class BottomNavigationPage extends StatefulWidget {
 }
 
 class _BottomNavigationPageState extends State<BottomNavigationPage> {
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -238,39 +240,52 @@ class _BottomNavigationPageState extends State<BottomNavigationPage> {
       body: SafeArea(
         child: widget.child,
       ),
-      bottomNavigationBar: NavigationBar(
-        onDestinationSelected: (int index) {
-          widget.child.goBranch(
-            index,
-            initialLocation: index == widget.child.currentIndex,
-          );
-          setState(() {});
-        },
-        indicatorColor: Colors.amber,
-        selectedIndex:  widget.child.currentIndex,
-        destinations: const <Widget>[
-          NavigationDestination(
-            selectedIcon: Icon(Icons.home),
-            icon: Icon(Icons.explore),
-            label: 'Explore',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.map),
-            label: 'Map',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.favorite),
-            label: 'My Tours',
-          ),
-          NavigationDestination(
-            icon: Badge(
-              label: Text('2'),
-              child: Icon(Icons.account_circle),
+      bottomNavigationBar: ScrollToHide (
+        scrollController: MyGlobals.scrollController,
+        hideDirection: Axis.vertical,
+        height: 80,
+        duration: const Duration(milliseconds: 300),
+        child: NavigationBar(
+          onDestinationSelected: (int index) {
+            widget.child.goBranch(
+              index,
+              initialLocation: index == widget.child.currentIndex,
+            );
+            setState(() {});
+          },
+          indicatorColor: Colors.amber,
+          selectedIndex:  widget.child.currentIndex,
+          destinations: const <Widget>[
+            NavigationDestination(
+              selectedIcon: Icon(Icons.home),
+              icon: Icon(Icons.explore),
+              label: 'Explore',
             ),
-            label: 'Profile',
-          ),
-        ],
+            NavigationDestination(
+              icon: Icon(Icons.map),
+              label: 'Map',
+            ),
+            NavigationDestination(
+              icon: Icon(Icons.favorite),
+              label: 'My Tours',
+            ),
+            NavigationDestination(
+              icon: Badge(
+                label: Text('2'),
+                child: Icon(Icons.account_circle),
+              ),
+              label: 'Profile',
+            ),
+          ],
+        ),
       ),
     );
   }
+}
+
+
+
+
+class MyGlobals {
+  static final ScrollController scrollController = ScrollController();
 }
