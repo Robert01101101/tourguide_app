@@ -7,11 +7,10 @@ class MyTours extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         title: const Text('My Tours'),
       ),
       body: Center(
-          child: Text("Test")
+          child: Text("My Tours Test")
       ),
     );
   }

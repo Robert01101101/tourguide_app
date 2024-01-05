@@ -100,7 +100,6 @@ class MapSampleDrawRouteState extends State<MapSampleDrawRoute> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         title: const Text('Map Routing'),
       ),
       body: Center(

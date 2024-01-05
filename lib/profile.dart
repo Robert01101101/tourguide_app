@@ -7,11 +7,10 @@ class Profile extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         title: const Text('Profile'),
       ),
       body: Center(
-          child: Text("Test")
+          child: Text("Profile Test")
       ),
     );
   }
