@@ -1,0 +1,70 @@
+{
+  "project_info": {
+    "project_number": "1076620464241",
+    "project_id": "tourguideapp-45a06",
+    "storage_bucket": "tourguideapp-45a06.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1076620464241:android:615de7760d0c4d6da44bd0",
+        "android_client_info": {
+          "package_name": "com.robertMichelsDigitalMedia.tourguide_app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1076620464241-b8s14147r7g08v7m1cna4bh7qehulpgi.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.robertMichelsDigitalMedia.tourguide_app",
+            "certificate_hash": "5be4272727ff7f47b883dc5bc401fbeb9adfbbe7"
+          }
+        },
+        {
+          "client_id": "1076620464241-eaqae7kctmsoaa8duvno4aukev8fekse.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.robertMichelsDigitalMedia.tourguide_app",
+            "certificate_hash": "cb81b72b9d845512cf57cd403d1383f8c02fcb3c"
+          }
+        },
+        {
+          "client_id": "1076620464241-knbvpdo03a0nuait2gjqu96bp5uh3l2p.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.robertMichelsDigitalMedia.tourguide_app",
+            "certificate_hash": "2e069eec471a71961f682ebe55d3c78326fefc99"
+          }
+        },
+        {
+          "client_id": "1076620464241-7etco7s6192kq1i1hniiqm5h60o1snbt.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC8jDV22Bj1Lri2QrKmxCSPxHd8J9dxkMM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1076620464241-7etco7s6192kq1i1hniiqm5h60o1snbt.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "1076620464241-acjn41je8pp9c9sgl07ftimgf3sr1ik4.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.robertMichelsDigitalMedia.tourguideApp"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
