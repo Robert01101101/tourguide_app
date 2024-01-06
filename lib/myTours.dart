@@ -24,19 +24,25 @@ class MyTours extends StatelessWidget {
           context,
           MaterialPageRoute(builder: (context) => const ListViewA()),
         );
-      }, child: const Text("List View A")),
+      }, child: const Text("LV A")),
       ElevatedButton(onPressed: () {
         Navigator.push(
           context,
           MaterialPageRoute(builder: (context) => const ListViewB()),
         );
-      }, child: const Text("List View B")),
+      }, child: const Text("LV B")),
       ElevatedButton(onPressed: () {
         Navigator.push(
           context,
           MaterialPageRoute(builder: (context) => const ListViewC()),
         );
-      }, child: const Text("List View C")),
+      }, child: const Text("LV C")),
+      ElevatedButton(onPressed: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => const ListViewD()),
+        );
+      }, child: const Text("LV D")),
     ],),
   );
 }
@@ -127,6 +133,40 @@ class ListViewC extends StatelessWidget {
 }
 
 
+
+class ListViewD extends StatelessWidget {
+  const ListViewD({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('My Tours - List View D'),
+      ),
+      body: listViewD(),
+    );
+  }
+
+
+
+  Widget listViewD() => ListView(
+      controller: MyGlobals.scrollController,
+      padding: const EdgeInsets.all(12),
+      children: List.generate(
+          100,
+              (index) => Column(
+            children: [
+              buildCardImmediate(index),
+              const SizedBox(height: 12,)
+            ],
+          ))
+  );
+}
+
+
+
+
+
 Widget buildCard(int index) => ClipRRect(
   borderRadius: BorderRadius.circular(30.0),
   child: Stack(
@@ -146,6 +186,42 @@ Widget buildCard(int index) => ClipRRect(
                 ),
               ),
           errorWidget: (context, url, error) => const Icon(Icons.error),
+          width: double.infinity,
+          height: 150,
+          fit: BoxFit.cover,
+        ),
+      ),
+      Text(
+        'Card $index',
+        style: const TextStyle(
+          color: Colors.white,
+          fontSize: 20.0,
+          fontWeight: FontWeight.bold,
+          shadows: <Shadow>[
+            Shadow(
+              blurRadius: 20.0,
+              color: Color.fromARGB(200, 0, 0, 0),
+            ),
+            Shadow(
+              blurRadius: 80.0,
+              color: Color.fromARGB(200, 0, 0, 0),
+            ),
+          ],
+        ),
+      ),
+    ],
+  ),
+);
+
+
+Widget buildCardImmediate(int index) => ClipRRect(
+  borderRadius: BorderRadius.circular(30.0),
+  child: Stack(
+    alignment: Alignment.center,
+    children: <Widget>[
+      Container(
+        child: Image.network(
+          'https://source.unsplash.com/random?sig=$index',
           width: double.infinity,
           height: 150,
           fit: BoxFit.cover,
