@@ -60,6 +60,7 @@ class CustomNavigationHelper {
   static const String mapRoutingPath = '/mapRouting'; //detail //TODO: Figure out what this was used for (see below in code as well)
   static const String routeTwoPath = '/routeTwo'; //NEW
   static const String rootDetailPath = '/rootDetail'; //rootDetail
+  static const String listViewAPath = '/listViewA';
 
   static const String explorePath = '/explore'; //home
   static const String mapPath = '/map'; //settings
@@ -183,6 +184,15 @@ class CustomNavigationHelper {
           );
         },
       ),
+      GoRoute(
+        path: listViewAPath,
+        pageBuilder: (context, state) {
+          return getPage(
+            child: const ListViewA(),
+            state: state,
+          );
+        },
+      ),
       /* //TODO figure out what this was used for
       GoRoute(
         parentNavigatorKey: parentNavigatorKey,
@@ -254,6 +264,7 @@ class _BottomNavigationPageState extends State<BottomNavigationPage> {
             setState(() {});
           },
           indicatorColor: Colors.amber,
+
           selectedIndex:  widget.child.currentIndex,
           destinations: const <Widget>[
             NavigationDestination(
