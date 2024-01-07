@@ -1,7 +1,7 @@
 {
   "file_generated_by": "FlutterFire CLI",
   "purpose": "FirebaseAppID & ProjectID for this Firebase app in this directory",
-  "GOOGLE_APP_ID": "1:1076620464241:ios:7c989ca654f8f857a44bd0",
-  "FIREBASE_PROJECT_ID": "tourguideapp-45a06",
-  "GCM_SENDER_ID": "1076620464241"
+  "GOOGLE_APP_ID": "1:69433430524:ios:380acdf793fd2d496aa279",
+  "FIREBASE_PROJECT_ID": "tourguide-firebase",
+  "GCM_SENDER_ID": "69433430524"
 }

@@ -47,30 +47,28 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions web = FirebaseOptions(
-    apiKey: 'AIzaSyDM72gUAVb8bkpEv20TQ7-WkBaEzDAc8Cs',
-    appId: '1:1076620464241:web:dc560070ea2842d2a44bd0',
-    messagingSenderId: '1076620464241',
-    projectId: 'tourguideapp-45a06',
-    authDomain: 'tourguideapp-45a06.firebaseapp.com',
-    storageBucket: 'tourguideapp-45a06.appspot.com',
-    measurementId: 'G-DVPTQGSN9S',
+    apiKey: 'AIzaSyBtJJxcbcbv8Y-JiQnfZP7e_GZ6LLL78VY',
+    appId: '1:69433430524:web:ac98581f828579d96aa279',
+    messagingSenderId: '69433430524',
+    projectId: 'tourguide-firebase',
+    authDomain: 'tourguide-firebase.firebaseapp.com',
+    storageBucket: 'tourguide-firebase.appspot.com',
   );
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyC8jDV22Bj1Lri2QrKmxCSPxHd8J9dxkMM',
-    appId: '1:1076620464241:android:615de7760d0c4d6da44bd0',
-    messagingSenderId: '1076620464241',
-    projectId: 'tourguideapp-45a06',
-    storageBucket: 'tourguideapp-45a06.appspot.com',
+    apiKey: 'AIzaSyDf-uyKpRcaTsQclO91D0fv7AgcEBAAUb8',
+    appId: '1:69433430524:android:40f52d44777c593d6aa279',
+    messagingSenderId: '69433430524',
+    projectId: 'tourguide-firebase',
+    storageBucket: 'tourguide-firebase.appspot.com',
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'AIzaSyAvhryptRU4d9PfI_iJyunsxGHKUtPTBik',
-    appId: '1:1076620464241:ios:7c989ca654f8f857a44bd0',
-    messagingSenderId: '1076620464241',
-    projectId: 'tourguideapp-45a06',
-    storageBucket: 'tourguideapp-45a06.appspot.com',
-    iosClientId: '1076620464241-acjn41je8pp9c9sgl07ftimgf3sr1ik4.apps.googleusercontent.com',
+    apiKey: 'AIzaSyA8X23vQAAxM5DUNqGXSpKrHHR99uYn33M',
+    appId: '1:69433430524:ios:380acdf793fd2d496aa279',
+    messagingSenderId: '69433430524',
+    projectId: 'tourguide-firebase',
+    storageBucket: 'tourguide-firebase.appspot.com',
     iosBundleId: 'com.robertMichelsDigitalMedia.tourguideApp',
   );
 }
