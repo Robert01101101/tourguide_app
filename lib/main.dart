@@ -74,7 +74,7 @@ class MyApp extends StatelessWidget {
       title: 'Tourguide App',
       routerConfig: CustomNavigationHelper.router,
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepOrange),
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.amber),
         useMaterial3: true,
       ),
     );
@@ -154,7 +154,7 @@ class CustomNavigationHelper {
                 path: mapPath,
                 pageBuilder: (context, state) {
                   return getPage(
-                    child: const Map(),
+                    child: const MapScreen(),
                     state: state,
                   );
                 },

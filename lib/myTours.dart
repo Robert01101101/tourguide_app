@@ -1,250 +1,312 @@
-import 'package:tourguide_app/utilities/custom_import.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:tourguide_app/main.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:tourguide_app/utilities/custom_import.dart';
 
-class MyTours extends StatelessWidget {
+import 'main.dart';
+
+
+class MyTours extends StatefulWidget {
   const MyTours({super.key});
 
-
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('My Tours'),
-      ),
-      body: listPicker(context),
-    );
-  }
-
-
-  Widget listPicker(BuildContext context) => Center(
-    child: Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly,children: [
-      ElevatedButton(onPressed: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => const ListViewA()),
-        );
-      }, child: const Text("LV A")),
-      ElevatedButton(onPressed: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => const ListViewB()),
-        );
-      }, child: const Text("LV B")),
-      ElevatedButton(onPressed: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => const ListViewC()),
-        );
-      }, child: const Text("LV C")),
-      ElevatedButton(onPressed: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => const ListViewD()),
-        );
-      }, child: const Text("LV D")),
-    ],),
-  );
+  State<MyTours> createState() => _MyTours();
 }
 
-
-
-class ListViewA extends StatelessWidget {
-  const ListViewA({super.key});
+class _MyTours extends State<MyTours> {
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('My Tours - List View A'),
+        title: const Text('Map'),
       ),
-      body: listViewA(),
-    );
-  }
-
-  Widget listViewA() => ListView.separated(
-    controller: MyGlobals.scrollController,
-    padding: const EdgeInsets.all(12),
-    itemCount: 100,
-    separatorBuilder: (context, index){
-      return const SizedBox(height: 12);  //spacing
-    },
-    itemBuilder: (content, index){
-      return buildCard(index);  //item
-    },
-  );
-}
-
-class ListViewB extends StatelessWidget {
-  const ListViewB({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('My Tours - List View B'),
-      ),
-      body: listViewB(),
-    );
-  }
-
-  Widget listViewB() => ListView.separated(
-    controller: MyGlobals.scrollController,
-    padding: const EdgeInsets.all(12),
-    itemCount: 100,
-    cacheExtent: 100,
-    separatorBuilder: (context, index){
-      return const SizedBox(height: 12);  //spacing
-    },
-    itemBuilder: (content, index){
-      return buildCard(index);  //item
-    },
-  );
-}
-
-
-class ListViewC extends StatelessWidget {
-  const ListViewC({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('My Tours - List View C'),
-      ),
-      body: listViewC(),
-    );
-  }
-
-
-
-  Widget listViewC() => ListView(
-    controller: MyGlobals.scrollController,
-    padding: const EdgeInsets.all(12),
-    children: List.generate(
-        100,
-            (index) => Column(
+      body: Padding(
+        padding: const EdgeInsets.symmetric(
+          vertical: 32.0, // Vertical padding
+          horizontal: 16.0, // Horizontal padding
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text("Create a new tour", style: Theme.of(context).textTheme.headlineSmall),
+            const SizedBox(height: 16),
+            ElevatedButton(onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const CreateTour()),
+              );
+            }, child: const Text("Create a tour")),
+            const SizedBox(height: 64),
+            Text("View existing tours", style: Theme.of(context).textTheme.headlineSmall),
+            const SizedBox(height: 16),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-                buildCard(index),
-                const SizedBox(height: 12,)
+                ElevatedButton(onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const PublicTours(isPublic: true)),
+                  );
+                }, child: const Text("Public tours")),
+                ElevatedButton(onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const PublicTours(isPublic: false)),
+                  );
+                }, child: const Text("Your private tours")),
               ],
-            ))
-  );
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 }
 
 
 
-class ListViewD extends StatelessWidget {
-  const ListViewD({super.key});
+//_________________________________________________________________________ PUBLIC TOURS
+class PublicTours extends StatefulWidget {
+  const PublicTours({super.key, required this.isPublic});
+
+  final bool isPublic;
+
+  @override
+  State<PublicTours> createState() => _PublicToursState();
+}
+
+
+class _PublicToursState extends State<PublicTours> {
+  FirebaseFirestore db = FirebaseFirestore.instance;
+  FirebaseAuth auth = FirebaseAuth.instance;
+  late bool isPublic;
+
+  // List to store tour data
+  List<Map<String, dynamic>> tours = [];
+
+  @override
+  void initState() {
+    super.initState();
+    isPublic = widget.isPublic;
+    _firestoreGetPublicTours(widget.isPublic);
+  }
+
+
+  _firestoreGetPublicTours(bool isPublic) async {
+    FirebaseFirestore db = FirebaseFirestore.instance;
+    FirebaseAuth auth = FirebaseAuth.instance;
+
+    //get userid
+    final User user = auth.currentUser!; //assuming we're logged in here
+    final uid = user.uid;
+
+    // get public tours
+    QuerySnapshot querySnapshot;
+    if (isPublic){
+      querySnapshot = await db
+          .collection("tours")
+          .where("visibility", isEqualTo: "public")
+          .get();
+    } else {
+      querySnapshot = await db
+          .collection("tours")
+          .where("visibility", isEqualTo: "private")
+          .where("uid", isEqualTo: uid)
+          .get();
+    }
+    
+
+    // populate tours list
+    setState(() {
+      tours = List<Map<String, dynamic>>.from(querySnapshot.docs.map((doc) {
+        final data = doc.data() as Map<String, dynamic>;
+        return {
+          'name': data['name'] ?? 'No Name Specified',
+          'city': data['city'] ?? 'No City Specified',
+          // Add more properties with null checks if needed
+        };
+      }));
+    });
+  }
+
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('My Tours - List View D'),
+        title: const Text('Public Tours'),
       ),
-      body: listViewD(),
+      body: ListView.builder(
+        itemCount: tours.length,
+        itemBuilder: (context, index) {
+          return Card(
+            child: ListTile(
+              title: Text(tours[index]['name']),
+              subtitle: Text(tours[index]['city']),
+              // You can customize the ListTile based on your data structure
+            ),
+          );
+        },
+      ),
     );
   }
-
-
-
-  Widget listViewD() => ListView(
-      controller: MyGlobals.scrollController,
-      padding: const EdgeInsets.all(12),
-      children: List.generate(
-          100,
-              (index) => Column(
-            children: [
-              buildCardImmediate(index),
-              const SizedBox(height: 12,)
-            ],
-          ))
-  );
 }
 
+//_________________________________________________________________________ CREATE FORM
+class CreateTour extends StatefulWidget {
+  const CreateTour({super.key});
+
+  @override
+  State<CreateTour> createState() => _CreateTourState();
+}
+
+class _CreateTourState extends State<CreateTour> {
+  final TextEditingController _nameController = TextEditingController();
+  final TextEditingController _descriptionController = TextEditingController();
+  final TextEditingController _cityController = TextEditingController();
+
+  bool _tourIsPublic = false; // Initial boolean value
+  bool _isFormSubmitted = false;
+
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+
+  final int _descriptionMaxChars = 100;
 
 
 
+  _firestoreCreateTour() async {
+    FirebaseFirestore db = FirebaseFirestore.instance;
+    FirebaseAuth auth = FirebaseAuth.instance;
 
-Widget buildCard(int index) => ClipRRect(
-  borderRadius: BorderRadius.circular(30.0),
-  child: Stack(
-    alignment: Alignment.center,
-    children: <Widget>[
-      Container(
-        child: CachedNetworkImage(
-          imageUrl: 'https://source.unsplash.com/random?sig=$index',
-          fadeInDuration: const Duration(milliseconds: 100),
-          placeholder: (context, url) =>
-              Container(
-                color: Colors.grey.shade300,
-                child: const SizedBox(
-                    width: 32,
-                    height: 32,
-                    child: Center(child: CircularProgressIndicator())
+    //get userid
+    final User user = auth.currentUser!; //assuming we're logged in here
+    final uid = user.uid;
+
+    final tour = <String, dynamic>{
+      "name": _nameController.text,
+      "description": _descriptionController.text,
+      "city": _cityController.text,
+      "uid": uid,
+      "visibility": _tourIsPublic ? "public" : "private",
+    };
+
+    // Add a new document with a generated ID
+    db.collection("tours").add(tour).then((DocumentReference doc){
+        print('DocumentSnapshot added with ID: ${doc.id}');
+        ScaffoldMessenger.of(context).removeCurrentSnackBar();
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Successfully created tour!')),
+        );
+
+        Navigator.pop(context);
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Create a new tour'),
+      ),
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(
+            vertical: 32.0, // Vertical padding
+            horizontal: 16.0, // Horizontal padding
+          ),
+          child: Form(
+            key: _formKey,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                SizedBox(height: 8),
+                TextFormField(
+                  controller: _nameController,
+                  decoration: const InputDecoration(
+                    labelText: 'Name',
+                  ),
+                  validator: (String? value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Please enter a name for your tour';
+                    }
+                    return null;
+                  },
+                  enabled: !_isFormSubmitted,
                 ),
-              ),
-          errorWidget: (context, url, error) => const Icon(Icons.error),
-          width: double.infinity,
-          height: 150,
-          fit: BoxFit.cover,
+                SizedBox(height: 8),
+                TextFormField(
+                  controller: _cityController,
+                  decoration: const InputDecoration(
+                    labelText: 'City',
+                  ),
+                  validator: (String? value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Please enter a city for your tour';
+                    }
+                    return null;
+                  },
+                  enabled: !_isFormSubmitted,
+                ),
+                SizedBox(height: 8),
+                TextFormField(
+                  controller: _descriptionController,
+                  keyboardType: TextInputType.multiline,
+                  maxLines: 3,
+                  maxLength: _descriptionMaxChars,
+                  decoration: InputDecoration(
+                    labelText: 'Description',
+                  ),
+                  validator: (String? value) {
+                    if (value != null && value.length > _descriptionMaxChars-1) {
+                      return 'Please enter a maximum of 100 characters';
+                    }
+                    return null;
+                  },
+                  onChanged: (value) {
+                    setState(() {}); // Trigger a rebuild to update the character counter
+                  },
+                  enabled: !_isFormSubmitted,
+                ),
+                SizedBox(height: 8),
+                SwitchListTile(
+                  title: const Text('Make Public'), // Text label for the switch
+                  value: _tourIsPublic, // The boolean value
+                  onChanged: !_isFormSubmitted
+                      ? (newValue) {
+                    setState(() {
+                      _tourIsPublic = newValue; // Update the boolean value
+                    });
+                  }
+                      : null, // Disable switch if form is submitted
+                  secondary: const Icon(Icons.public),
+                  inactiveThumbColor: _isFormSubmitted ? Colors.grey : null,
+                  inactiveTrackColor: _isFormSubmitted ? Colors.grey[300] : null,
+                ),
+                SizedBox(height: 32),
+                Align(
+                  alignment: Alignment.bottomCenter,
+                  child: ElevatedButton(onPressed: () {
+                    // Validate will return true if the form is valid, or false if
+                    // the form is invalid.
+                    if (_formKey.currentState!.validate()) {
+                      // If the form is valid, display a snackbar. In the real world,
+                      // you'd often call a server or save the information in a database.
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Uploading')),
+                      );
+                      setState(() {
+                        _isFormSubmitted = true;
+                      });
+                      _firestoreCreateTour();
+                    }
+                  }, child: const Text("Save and create tour")),
+                ),
+              ],
+            ),
+          ),
         ),
       ),
-      Text(
-        'Card $index',
-        style: const TextStyle(
-          color: Colors.white,
-          fontSize: 20.0,
-          fontWeight: FontWeight.bold,
-          shadows: <Shadow>[
-            Shadow(
-              blurRadius: 20.0,
-              color: Color.fromARGB(200, 0, 0, 0),
-            ),
-            Shadow(
-              blurRadius: 80.0,
-              color: Color.fromARGB(200, 0, 0, 0),
-            ),
-          ],
-        ),
-      ),
-    ],
-  ),
-);
-
-
-Widget buildCardImmediate(int index) => ClipRRect(
-  borderRadius: BorderRadius.circular(30.0),
-  child: Stack(
-    alignment: Alignment.center,
-    children: <Widget>[
-      Container(
-        child: Image.network(
-          'https://source.unsplash.com/random?sig=$index',
-          width: double.infinity,
-          height: 150,
-          fit: BoxFit.cover,
-        ),
-      ),
-      Text(
-        'Card $index',
-        style: const TextStyle(
-          color: Colors.white,
-          fontSize: 20.0,
-          fontWeight: FontWeight.bold,
-          shadows: <Shadow>[
-            Shadow(
-              blurRadius: 20.0,
-              color: Color.fromARGB(200, 0, 0, 0),
-            ),
-            Shadow(
-              blurRadius: 80.0,
-              color: Color.fromARGB(200, 0, 0, 0),
-            ),
-          ],
-        ),
-      ),
-    ],
-  ),
-);
+    );
+  }
+}

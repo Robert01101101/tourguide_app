@@ -63,13 +63,6 @@ class _ProfileState extends State<Profile> {
       print('Profile not found');
     }
 
-    /*
-    await db.collection("tours").where("visibility", isEqualTo: "public").get().then((event) {
-        print('GET -------');
-      for (var doc in event.docs) {
-        print("${doc.id} => ${doc.data()}");
-      }
-    });*/
 
 
     /*
@@ -248,8 +241,7 @@ class _ProfileState extends State<Profile> {
                     Expanded(
                       child: TextField(
                         controller: _usernameController,
-                        decoration: InputDecoration(
-                          border: OutlineInputBorder(),
+                        decoration: const InputDecoration(
                           hintText: 'Enter your new username',
                         ),
                       ),
