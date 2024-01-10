@@ -1,4 +1,5 @@
 import 'package:scroll_to_hide/scroll_to_hide.dart';
+import 'package:tourguide_app/signIn.dart';
 import 'package:tourguide_app/utilities/custom_import.dart';
 import 'package:go_router/go_router.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -6,6 +7,8 @@ import 'firebase_options.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
+
+
 
 void main() async {
   //ROUTING
@@ -19,6 +22,7 @@ void main() async {
   );
 
   //FIREBASE AUTH
+  /*
   FirebaseAuth.instance
       .userChanges()
       .listen((User? user) {
@@ -27,7 +31,7 @@ void main() async {
     } else {
       print('User is signed in!');
     }
-  });
+  });*/
 
 
   signInWithGoogle();
@@ -89,6 +93,7 @@ Future<UserCredential> signInWithGoogle() async {
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
+
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
@@ -145,6 +150,8 @@ class CustomNavigationHelper {
   static const String mapPath = '/map'; //settings
   static const String myToursPath = '/myTours'; //search
   static const String profilePath = '/profile'; //NEW
+
+  static const String signInPath = '/signIn';
 
   factory CustomNavigationHelper() {
     return _instance;
@@ -272,6 +279,15 @@ class CustomNavigationHelper {
           );
         },
       ),
+      GoRoute(
+        path: signInPath,
+        pageBuilder: (context, state) {
+          return getPage(
+            child: const SignIn(),
+            state: state,
+          );
+        },
+      )
       /* //TODO figure out what this was used for
       GoRoute(
         parentNavigatorKey: parentNavigatorKey,
@@ -287,7 +303,7 @@ class CustomNavigationHelper {
 
     router = GoRouter(
       navigatorKey: parentNavigatorKey,
-      initialLocation: explorePath,
+      initialLocation: signInPath,
       routes: routes,
     );
   }

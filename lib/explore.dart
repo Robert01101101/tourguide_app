@@ -12,31 +12,6 @@ class Explore extends StatefulWidget {
 }
 
 class ExploreState extends State<Explore> {
-  String loginStatus = "no login status";
-
-  @override
-  void initState() {
-    super.initState();
-
-    //FIREBASE AUTH
-    FirebaseAuth.instance
-        .userChanges()
-        .listen((User? user) {
-      if (user == null) {
-        print('User is currently signed out :(');
-        setState(() {
-          loginStatus = 'User is currently signed out!';
-        });
-      } else {
-        print('User is signed in!');
-        setState(() {
-          loginStatus = 'User is signed in!!  :)\n\nUsername: ${FirebaseAuth.instance.currentUser!.displayName}\nEmail: ${FirebaseAuth.instance.currentUser!.email}';
-        });
-      }
-    });
-  }
-
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -56,23 +31,12 @@ class ExploreState extends State<Explore> {
                 },
                 child: const Text('Debug Screen'),
               ),
-              Text(loginStatus),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  ElevatedButton(
-                    onPressed: () {
-                      signInWithGoogle();
-                    },
-                    child: const Text('Sign In'),
-                  ),
-                  ElevatedButton(
-                    onPressed: () {
-                      FirebaseAuth.instance.signOut();
-                    },
-                    child: const Text('Sign Out'),
-                  ),
-                ],
+              Text('User is signed in!!  :)\n\nUsername: ${FirebaseAuth.instance.currentUser!.displayName}\nEmail: ${FirebaseAuth.instance.currentUser!.email}'),
+              ElevatedButton(
+                onPressed: () {
+                  FirebaseAuth.instance.signOut();
+                },
+                child: const Text('Sign Out'),
               ),
             ],
           ),
