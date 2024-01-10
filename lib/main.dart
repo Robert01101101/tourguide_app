@@ -5,6 +5,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:firebase_analytics/firebase_analytics.dart';
 
 void main() async {
   //ROUTING
@@ -53,8 +54,29 @@ Future<UserCredential> signInWithGoogle() async {
     idToken: googleAuth?.idToken,
   );
 
+  // Sign in with the credential
+  UserCredential userCredential = await FirebaseAuth.instance.signInWithCredential(credential);
+
+  //Get Google Analytics to log login / signup events
+  FirebaseAnalytics analytics = FirebaseAnalytics.instance;
+
+  // Check if it's the first time the user is signing up
+  if (userCredential.additionalUserInfo?.isNewUser == true) {
+    // Perform actions for a new user (e.g., store additional user data, send welcome emails, etc.)
+    print("New user signed up with Google!");
+
+    // Log signup event
+    await analytics.logSignUp(signUpMethod: 'google');
+  } else {
+    // Perform actions for an existing user
+    print("Existing user signed in with Google!");
+
+    // Log login event
+    await analytics.logLogin(loginMethod: 'google');
+  }
+
   // Once signed in, return the UserCredential
-  return await FirebaseAuth.instance.signInWithCredential(credential);
+  return userCredential;
 }
 
 
