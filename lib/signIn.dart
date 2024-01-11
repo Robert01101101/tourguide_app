@@ -58,7 +58,7 @@ class _SignInState extends State<SignIn> {
       bool isAuthorized = account != null;
       // However, on web...
       if (kIsWeb && account != null) {
-        print(' -- initState() - _googleSignIn.onCurrentUserChanged (web) -> account=${account}');
+        print(' -- initState() - _googleSignIn.onCurrentUserChanged (web) -> account is null=${account == null}');
         isAuthorized = await _googleSignIn.canAccessScopes(scopes);
       }
 // #enddocregion CanAccessScopes
@@ -74,6 +74,8 @@ class _SignInState extends State<SignIn> {
       if (isAuthorized) {
         //unawaited(_handleGetContact(account!)); //CONTACT DEMO
         await _signInWithFirebase(account!); //from chatgpt
+      } else {
+        _handleAuthorizeScopes();
       }
     });
 
@@ -166,7 +168,7 @@ class _SignInState extends State<SignIn> {
     try {
       GoogleSignInAccount? googleSignInAccount = await _googleSignIn.signIn();
 
-      print(' -- _handleSignIn() - 1 googleSignInAccount=${googleSignInAccount}');
+      print(' -- _handleSignIn() - 1 googleSignInAccount is null=${googleSignInAccount == null}');
       if (googleSignInAccount != null) {
         print(' -- _handleSignIn() - 2 start await');
         GoogleSignInAuthentication googleAuth = await googleSignInAccount.authentication;
