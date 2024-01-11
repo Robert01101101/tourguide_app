@@ -1,4 +1,5 @@
 import 'package:tourguide_app/debugScreen.dart';
+import 'package:tourguide_app/signIn.dart';
 import 'package:tourguide_app/utilities/custom_import.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'main.dart';
@@ -32,11 +33,9 @@ class ExploreState extends State<Explore> {
                 child: const Text('Debug Screen'),
               ),
               Text('User is signed in!!  :)\n\nUsername: ${FirebaseAuth.instance.currentUser!.displayName}\nEmail: ${FirebaseAuth.instance.currentUser!.email}'),
-              ElevatedButton(
-                onPressed: () {
-                  FirebaseAuth.instance.signOut();
-                },
-                child: const Text('Sign Out'),
+              const ElevatedButton(
+                onPressed: handleSignOut,
+                child: Text('Sign Out'),
               ),
             ],
           ),

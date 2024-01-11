@@ -33,55 +33,9 @@ void main() async {
     }
   });*/
 
-
-  signInWithGoogle();
-
   runApp(const MyApp());
 }
 
-
-
-
-
-
-
-Future<UserCredential> signInWithGoogle() async {
-  // Trigger the authentication flow
-  final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
-
-  // Obtain the auth details from the request
-  final GoogleSignInAuthentication? googleAuth = await googleUser?.authentication;
-
-  // Create a new credential
-  final credential = GoogleAuthProvider.credential(
-    accessToken: googleAuth?.accessToken,
-    idToken: googleAuth?.idToken,
-  );
-
-  // Sign in with the credential
-  UserCredential userCredential = await FirebaseAuth.instance.signInWithCredential(credential);
-
-  //Get Google Analytics to log login / signup events
-  FirebaseAnalytics analytics = FirebaseAnalytics.instance;
-
-  // Check if it's the first time the user is signing up
-  if (userCredential.additionalUserInfo?.isNewUser == true) {
-    // Perform actions for a new user (e.g., store additional user data, send welcome emails, etc.)
-    print("New user signed up with Google!");
-
-    // Log signup event
-    await analytics.logSignUp(signUpMethod: 'google');
-  } else {
-    // Perform actions for an existing user
-    print("Existing user signed in with Google!");
-
-    // Log login event
-    await analytics.logLogin(loginMethod: 'google');
-  }
-
-  // Once signed in, return the UserCredential
-  return userCredential;
-}
 
 
 
