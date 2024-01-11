@@ -18,3 +18,7 @@ A few resources to get you started if this is your first Flutter project:
 For help getting started with Flutter development, view the
 [online documentation](https://docs.flutter.dev/), which offers tutorials,
 samples, guidance on mobile development, and a full API reference.
+
+## Notes
+
+- use `flutter run -d chrome --web-hostname localhost --web-port 60875` to run the app in debug mode, so that auth works (specific port required)

@@ -25,6 +25,7 @@ GoogleSignIn _googleSignIn = GoogleSignIn(
 
 
 Future<UserCredential> signInWithGoogle() async {
+  print("-- signInWithGoogle()");
   // Trigger the authentication flow
   final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
 
@@ -157,6 +158,7 @@ class SignInState extends State<SignIn> {
   // SDK, so this method can be considered mobile only.
   // #docregion SignIn
   Future<void> _handleSignIn() async {
+    print("-- _handleSignIn()");
     try {
       await _googleSignIn.signIn();
     } catch (error) {
@@ -173,6 +175,7 @@ class SignInState extends State<SignIn> {
   // On the web, this must be called from an user interaction (button click).
   // #docregion RequestScopes
   Future<void> _handleAuthorizeScopes() async {
+    print("-- _handleAuthorizeScopes()");
     final bool isAuthorized = await _googleSignIn.requestScopes(scopes);
     // #enddocregion RequestScopes
     setState(() {
@@ -212,6 +215,7 @@ class SignInState extends State<SignIn> {
 
 
 Future<void> handleSignOut() {
+  print("-- handleSignOut()");
   _googleSignIn.disconnect();
   return FirebaseAuth.instance.signOut();
 }
