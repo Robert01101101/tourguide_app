@@ -13,6 +13,24 @@ class Explore extends StatefulWidget {
 }
 
 class ExploreState extends State<Explore> {
+
+  @override
+  void initState() {
+
+    //Firebase auth
+    FirebaseAuth.instance
+        .userChanges()
+        .listen((User? user) {
+      if (user == null) {
+        print('FIREBASE AUTH (EXPLORE) - User is currently signed out!');
+      } else {
+        print('FIREBASE AUTH (EXPLORE) - User is signed in!');
+      }
+    });
+
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -32,9 +50,9 @@ class ExploreState extends State<Explore> {
                 },
                 child: const Text('Debug Screen'),
               ),
-              Text('User is signed in!!  :)\n\nUsername: ${FirebaseAuth.instance.currentUser!.displayName}\nEmail: ${FirebaseAuth.instance.currentUser!.email}'),
+              //Text('User is signed in!!  :)\n\nUsername: ${FirebaseAuth.instance.currentUser!.displayName}\nEmail: ${FirebaseAuth.instance.currentUser!.email}'),
               const ElevatedButton(
-                onPressed: handleSignOut,
+                onPressed: null,//handleSignOut,
                 child: Text('Sign Out'),
               ),
             ],

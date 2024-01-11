@@ -107,6 +107,7 @@ class _ProfileState extends State<Profile> {
 
 
   Future<DocumentSnapshot> _firestoreGetUserProfileData() async {
+    print('-- _firestoreGetUserProfileData()');
     FirebaseFirestore db = FirebaseFirestore.instance;
     FirebaseAuth auth = FirebaseAuth.instance;
 
@@ -132,6 +133,7 @@ class _ProfileState extends State<Profile> {
   }
 
   _firestoreSetUserProfileData() async {
+    print('-- _firestoreSetUserProfileData()');
     FirebaseFirestore db = FirebaseFirestore.instance;
     FirebaseAuth auth = FirebaseAuth.instance;
 
@@ -152,6 +154,8 @@ class _ProfileState extends State<Profile> {
   //db = FirebaseFirestore.instance;
   @override
   Widget build(BuildContext context) {
+    print('FirebaseAuth.instance.currentUser=${FirebaseAuth.instance.currentUser}');
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Profile'),
