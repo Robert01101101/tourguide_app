@@ -348,4 +348,6 @@ class _BottomNavigationPageState extends State<BottomNavigationPage> {
 
 class MyGlobals {
   static final ScrollController scrollController = ScrollController();
+
+  static GoogleSignInAccount? user;
 }

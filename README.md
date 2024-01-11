@@ -21,4 +21,4 @@ samples, guidance on mobile development, and a full API reference.
 
 ## Notes
 
-- use `flutter run -d chrome --web-hostname localhost --web-port 60875` to run the app in debug mode, so that auth works (specific port required)
+- use `flutter run -d chrome --web-hostname localhost --web-port 60875 --web-browser-flag "--disable-web-security"` to run the app in debug mode, so that auth works (specific port required)

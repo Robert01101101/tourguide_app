@@ -66,6 +66,7 @@ class _SignInState extends State<SignIn> {
       setState(() {
         print(' -- initState() - _googleSignIn.onCurrentUserChanged (web) setState() - isAuthorized=${isAuthorized}');
         _currentUser = account;
+        MyGlobals.user = _currentUser;
         _isAuthorized = isAuthorized;
       });
 
@@ -189,6 +190,7 @@ class _SignInState extends State<SignIn> {
 
         setState(() {
           _currentUser = googleSignInAccount;
+          MyGlobals.user = _currentUser;
           _isAuthorized = true;
         });
       }
