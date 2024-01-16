@@ -10,26 +10,14 @@ import 'dart:math';
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:http/http.dart' as http;
-
-import 'main.dart';
 import 'uiElements/sign_in_button.dart';
+import 'package:tourguide_app/utilities/custom_import.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:tourguide_app/utilities/authProvider.dart' as myAuth;
 
-/// The scopes required by this application.
-// #docregion Initialize
-const List<String> scopes = <String>[
-  'email',
-  //'https://www.googleapis.com/auth/contacts.readonly',  //CONTACT DEMO - for demo of using people API to get contacts etc
-];
 
-GoogleSignIn _googleSignIn = GoogleSignIn(
-  // Optional clientId
-  // clientId: 'your-client_id.apps.googleusercontent.com',
-  scopes: scopes,
-);
-// #enddocregion Initialize
 
 
 /// The SignIn app.
@@ -51,6 +39,8 @@ class _SignInState extends State<SignIn> {
   void initState() {
     super.initState();
 
+    //OLD
+    /*
     _googleSignIn.onCurrentUserChanged
         .listen((GoogleSignInAccount? account) async {
 // #docregion CanAccessScopes
@@ -74,11 +64,12 @@ class _SignInState extends State<SignIn> {
       // can call the REST API.
       if (isAuthorized) {
         //unawaited(_handleGetContact(account!)); //CONTACT DEMO
-        await _signInWithFirebase(account!); //from chatgpt
+        myAuth.AuthProvider authProvider = Provider.of(context);
+        await authProvider.signInWithFirebase(account!); //from chatgpt
       } else {
         _handleAuthorizeScopes();
       }
-    });
+    });*/
 
     // In the web, _googleSignIn.signInSilently() triggers the One Tap UX.
     //
@@ -86,26 +77,10 @@ class _SignInState extends State<SignIn> {
     // and the Google Sign In button together to "reduce friction and improve
     // sign-in rates" ([docs](https://developers.google.com/identity/gsi/web/guides/display-button#html)).
     print(' -- initState() - _googleSignIn.signInSilently()');
-    _googleSignIn.signInSilently();
+    myAuth.googleSignIn.signInSilently();
   }
 
-  // Add the following function to sign in with Firebase
-  Future<void> _signInWithFirebase(GoogleSignInAccount account) async {
-    try {
-      GoogleSignInAuthentication googleAuth = await account.authentication;
-      AuthCredential credential = GoogleAuthProvider.credential(
-        accessToken: googleAuth.accessToken,
-        idToken: googleAuth.idToken,
-      );
-      UserCredential authResult = await _auth.signInWithCredential(credential);
 
-      // Access the logged-in user using FirebaseAuth.instance.currentUser
-      User? firebaseUser = authResult.user;
-      print('Firebase User Info: ${firebaseUser?.displayName}, ${firebaseUser?.email}');
-    } catch (error) {
-      print('Error signing in with Firebase: $error');
-    }
-  }
 
   /* CONTACT DEMO
   // Calls the People API REST endpoint for the signed-in user to retrieve information.
@@ -159,78 +134,16 @@ class _SignInState extends State<SignIn> {
   } CONTACT DEMO END */
 
 
-  // This is the on-click handler for the Sign In button that is rendered by Flutter.
-  //
-  // On the web, the on-click handler of the Sign In button is owned by the JS
-  // SDK, so this method can be considered mobile only.
-  // #docregion SignIn
-  Future<void> _handleSignIn() async {
-    print(' -- _handleSignIn()');
-    try {
-      GoogleSignInAccount? googleSignInAccount = await _googleSignIn.signIn();
 
-      print(' -- _handleSignIn() - 1 googleSignInAccount is null=${googleSignInAccount == null}');
-      if (googleSignInAccount != null) {
-        print(' -- _handleSignIn() - 2 start await');
-        GoogleSignInAuthentication googleAuth = await googleSignInAccount.authentication;
-        print(' -- _handleSignIn() - 3 finished await');
-        AuthCredential credential = GoogleAuthProvider.credential(
-          accessToken: googleAuth.accessToken,
-          idToken: googleAuth.idToken,
-        );
-
-        print(' -- _handleSignIn() - 4 sign in');
-        // Sign in with Firebase using the obtained credentials
-        UserCredential authResult = await _auth.signInWithCredential(credential);
-
-        print(' -- _handleSignIn() - 5 access');
-        // Access the logged-in user using FirebaseAuth.instance.currentUser
-        User? firebaseUser = authResult.user;
-        print(' -- SUCCESS! -- Firebase User Info: ${firebaseUser?.displayName}, ${firebaseUser?.email}');
-
-        setState(() {
-          _currentUser = googleSignInAccount;
-          MyGlobals.user = _currentUser;
-          _isAuthorized = true;
-        });
-      }
-    } catch (error) {
-      print(error);
-    }
-  }
   // #enddocregion SignIn
 
-  // Prompts the user to authorize `scopes`.
-  //
-  // This action is **required** in platforms that don't perform Authentication
-  // and Authorization at the same time (like the web).
-  //
-  // On the web, this must be called from an user interaction (button click).
-  // #docregion RequestScopes
-  Future<void> _handleAuthorizeScopes() async {
-    final bool isAuthorized = await _googleSignIn.requestScopes(scopes);
-    // #enddocregion RequestScopes
-    setState(() {
-      _isAuthorized = isAuthorized;
-    });
-    // #docregion RequestScopes
-    if (isAuthorized) {
-      //unawaited(_handleGetContact(_currentUser!)); //CONTACT DEMO
-      //TODO: DO ON LOGIN
-    }
 
-    print('_handleAuthorizeScopes - isAuthorized=${isAuthorized}');
-    if (isAuthorized) {
-      //unawaited(_handleGetContact(account!)); //CONTACT DEMO
-      await _signInWithFirebase(_currentUser!); //from chatgpt
-    }
-    // #enddocregion RequestScopes
-  }
 
-  Future<void> _handleSignOut() => _googleSignIn.disconnect();
+  Future<void> _handleSignOut() =>  myAuth.googleSignIn.disconnect();
 
   Widget _buildBody() {
-    final GoogleSignInAccount? user = _currentUser;
+    myAuth.AuthProvider authProvider = Provider.of(context);
+    final GoogleSignInAccount? user = authProvider.user;
     if (user != null) {
       // The user is Authenticated
       return Column(
@@ -252,12 +165,12 @@ class _SignInState extends State<SignIn> {
               onPressed: () => _handleGetContact(user),
             ),
           ],*/
-          if (!_isAuthorized) ...<Widget>[
+          if (!authProvider.isAuthorized) ...<Widget>[
             // The user has NOT Authorized all required scopes.
             // (Mobile users may never see this button!)
             const Text('Additional permissions needed to read your contacts.'),
             ElevatedButton(
-              onPressed: _handleAuthorizeScopes,
+              onPressed: authProvider.handleAuthorizeScopes,
               child: const Text('REQUEST PERMISSIONS'),
             ),
           ],
@@ -293,7 +206,7 @@ class _SignInState extends State<SignIn> {
           // This method is used to separate mobile from web code with conditional exports.
           // See: src/sign_in_button.dart
           buildSignInButton(
-            onPressed: _handleSignIn,
+            onPressed: authProvider.handleSignIn,
           ),
         ],
       );

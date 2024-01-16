@@ -4,6 +4,7 @@ import 'package:tourguide_app/signIn.dart';
 import 'package:tourguide_app/utilities/custom_import.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'main.dart';
+import 'package:tourguide_app/utilities/authProvider.dart' as myAuth;
 
 
 // #docregion Initialize
@@ -65,7 +66,7 @@ class ExploreState extends State<Explore> {
 
   @override
   Widget build(BuildContext context) {
-
+    myAuth.AuthProvider authProvider = Provider.of(context);
     return Scaffold(
       appBar: AppBar(
         title: const Text('Explore'),
@@ -80,10 +81,10 @@ class ExploreState extends State<Explore> {
                     builder: (context, snapshot) {
                     return ListTile(
                       leading: GoogleUserCircleAvatar(
-                        identity: MyGlobals.user!,
+                        identity: authProvider.user!,
                       ),
-                      title: Text(MyGlobals.user!.displayName ?? ''),
-                      subtitle: Text(MyGlobals.user!.email),
+                      title: Text(authProvider.user!.displayName ?? ''),
+                      subtitle: Text(authProvider.user!.email),
                     );
                   }
                 ),
