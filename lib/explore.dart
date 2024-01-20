@@ -99,9 +99,9 @@ class ExploreState extends State<Explore> {
                 child: const Text('Debug Screen'),
               ),
               //Text('User is signed in!!  :)\n\nUsername: ${FirebaseAuth.instance.currentUser!.displayName}\nEmail: ${FirebaseAuth.instance.currentUser!.email}'),
-              const ElevatedButton(
-                onPressed: null,//handleSignOut,
-                child: Text('Sign Out'),
+              ElevatedButton(
+                onPressed: authProvider.signOut,
+                child: const Text('Sign Out'),
               ),
             ],
           ),

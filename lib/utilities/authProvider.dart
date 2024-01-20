@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:flutter/foundation.dart';
+import 'package:tourguide_app/main.dart';
+import 'package:tourguide_app/utilities/customNavigationHelper.dart';
 
 const List<String> scopes = <String>[
   'email',
@@ -106,6 +108,10 @@ class AuthProvider with ChangeNotifier {
   }*/
 
   void signOut() {
+    //Go to login page
+    CustomNavigationHelper.router.go(
+      CustomNavigationHelper.signInPath,
+    );
     FirebaseAuth.instance.signOut();
   }
 
@@ -191,6 +197,12 @@ class AuthProvider with ChangeNotifier {
 
         user = googleSignInAccount;
         isAuthorized = true;
+        //Show success message
+        SnackBarService.showSnackBar(content: 'You\'re signed in!');
+        //Go to main page
+        CustomNavigationHelper.router.go(
+          CustomNavigationHelper.explorePath,
+        );
         notifyListeners();
       }
     } catch (error) {

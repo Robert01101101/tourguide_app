@@ -47,6 +47,7 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => AuthProvider())
       ],
       child: MaterialApp.router(
+        scaffoldMessengerKey: SnackBarService.scaffoldKey,
         title: 'Tourguide App',
         routerConfig: CustomNavigationHelper.router,
         theme: ThemeData(
@@ -63,4 +64,11 @@ class MyApp extends StatelessWidget {
 
 class MyGlobals {
   static final ScrollController scrollController = ScrollController();
+}
+
+class SnackBarService {
+  static final scaffoldKey = GlobalKey<ScaffoldMessengerState>();
+  static void showSnackBar({required String content}) {
+    scaffoldKey.currentState?.showSnackBar(SnackBar(content: Text(content)));
+  }
 }

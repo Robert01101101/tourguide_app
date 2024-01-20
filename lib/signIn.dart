@@ -31,8 +31,6 @@ class SignIn extends StatefulWidget {
 
 class _SignInState extends State<SignIn> {
   GoogleSignInAccount? _currentUser;
-  bool _isAuthorized = false; // has granted permissions?
-  String _contactText = '';
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
   @override
@@ -157,6 +155,7 @@ class _SignInState extends State<SignIn> {
             subtitle: Text(user.email),
           ),
           const Text('Signed in successfully.'),
+
           /*if (_isAuthorized) ...<Widget>[  //CONTACT DEMO
             // The user has Authorized all required scopes
             Text(_contactText),
