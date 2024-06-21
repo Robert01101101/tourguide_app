@@ -258,7 +258,7 @@ class _BottomNavigationPageState extends State<BottomNavigationPage> {
           destinations: const <Widget>[
             NavigationDestination(
               selectedIcon: Icon(Icons.home),
-              icon: Icon(Icons.explore),
+              icon: Icon(Icons.language),
               label: 'Explore',
             ),
             NavigationDestination(

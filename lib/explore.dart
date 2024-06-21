@@ -72,38 +72,40 @@ class ExploreState extends State<Explore> {
         title: const Text('Explore'),
       ),
       body: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              Flexible(
-                child: FutureBuilder(
-                  future: _handleSignIn(),
-                    builder: (context, snapshot) {
-                    return ListTile(
-                      leading: GoogleUserCircleAvatar(
-                        identity: authProvider.user!,
-                      ),
-                      title: Text(authProvider.user!.displayName ?? ''),
-                      subtitle: Text(authProvider.user!.email),
-                    );
-                  }
+          child: Container(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                Flexible(
+                  child: FutureBuilder(
+                    future: _handleSignIn(),
+                      builder: (context, snapshot) {
+                      return ListTile(
+                        leading: GoogleUserCircleAvatar(
+                          identity: authProvider.user!,
+                        ),
+                        title: Text(authProvider.user!.displayName ?? ''),
+                        subtitle: Text(authProvider.user!.email),
+                      );
+                    }
+                  ),
                 ),
-              ),
-              ElevatedButton(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => const DebugScreen()),
-                  );
-                },
-                child: const Text('Debug Screen'),
-              ),
-              //Text('User is signed in!!  :)\n\nUsername: ${FirebaseAuth.instance.currentUser!.displayName}\nEmail: ${FirebaseAuth.instance.currentUser!.email}'),
-              ElevatedButton(
-                onPressed: authProvider.signOut,
-                child: const Text('Sign Out'),
-              ),
-            ],
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => const DebugScreen()),
+                    );
+                  },
+                  child: const Text('Debug Screen'),
+                ),
+                //Text('User is signed in!!  :)\n\nUsername: ${FirebaseAuth.instance.currentUser!.displayName}\nEmail: ${FirebaseAuth.instance.currentUser!.email}'),
+                ElevatedButton(
+                  onPressed: authProvider.signOut,
+                  child: const Text('Sign Out'),
+                ),
+              ],
+            ),
           ),
       ),
     );
