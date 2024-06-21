@@ -36,6 +36,7 @@ dependencies:
   cached_network_image: ^3.3.1
   scroll_to_hide: ^2.1.0
   flutter_polyline_points: ^2.0.0
+  flutter_google_places_sdk: ^0.3.9
 
 
   # The following adds the Cupertino Icons font to your application.

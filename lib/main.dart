@@ -64,6 +64,7 @@ class MyApp extends StatelessWidget {
 
 class MyGlobals {
   static final ScrollController scrollController = ScrollController();
+  static final String googleMapsApiKey = "AIzaSyBa7mCp1FUiWMhfTHPWNJ2Cy-A84w4i2I4";
 }
 
 class SnackBarService {

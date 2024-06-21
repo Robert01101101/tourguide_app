@@ -1,20 +1,21 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:tourguide_app/uiElements/CityAutocomplete.dart';
 import 'package:tourguide_app/utilities/custom_import.dart';
 import 'package:flutter_google_places_sdk/flutter_google_places_sdk.dart';
 
 import 'package:tourguide_app/main.dart';
 
 //_________________________________________________________________________ CREATE FORM
-class CreateTour extends StatefulWidget {
-  const CreateTour({super.key});
+class CreateTourTesting extends StatefulWidget {
+  const CreateTourTesting({super.key});
 
   @override
-  State<CreateTour> createState() => _CreateTourState();
+  State<CreateTourTesting> createState() => _CreateTourTestingState();
 }
 
-class _CreateTourState extends State<CreateTour> {
+class _CreateTourTestingState extends State<CreateTourTesting> {
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
   final TextEditingController _cityController = TextEditingController();
@@ -101,69 +102,7 @@ class _CreateTourState extends State<CreateTour> {
                   },
                   enabled: !_isFormSubmitted,
                 ),
-                SizedBox(height: 8),
-                TextFormField(
-                  controller: _descriptionController,
-                  keyboardType: TextInputType.multiline,
-                  maxLines: 3,
-                  maxLength: _descriptionMaxChars,
-                  decoration: InputDecoration(
-                    labelText: 'Description',
-                  ),
-                  validator: (String? value) {
-                    if (value != null && value.length > _descriptionMaxChars-1) {
-                      return 'Please enter a maximum of 100 characters';
-                    }
-                    return null;
-                  },
-                  onChanged: (value) {
-                    setState(() {}); // Trigger a rebuild to update the character counter
-                  },
-                  enabled: !_isFormSubmitted,
-                ),
-                SizedBox(height: 8),
-                SwitchListTile(
-                  title: const Text('Make Public'), // Text label for the switch
-                  value: _tourIsPublic, // The boolean value
-                  onChanged: !_isFormSubmitted
-                      ? (newValue) {
-                    setState(() {
-                      _tourIsPublic = newValue; // Update the boolean value
-                    });
-                  }
-                      : null, // Disable switch if form is submitted
-                  secondary: const Icon(Icons.public),
-                  inactiveThumbColor: _isFormSubmitted ? Colors.grey : null,
-                  inactiveTrackColor: _isFormSubmitted ? Colors.grey[300] : null,
-                ),
-                SizedBox(height: 32),
-                Align(
-                  alignment: Alignment.bottomCenter,
-                  child: ElevatedButton(onPressed: () {
-                    // Validate will return true if the form is valid, or false if
-                    // the form is invalid.
-                    if (_formKey.currentState!.validate()) {
-                      // If the form is valid, display a snackbar. In the real world,
-                      // you'd often call a server or save the information in a database.
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Uploading')),
-                      );
-                      setState(() {
-                        _isFormSubmitted = true;
-                      });
-                      _firestoreCreateTour();
-                    }
-                  }, child: const Text("Save and create tour")),
-                ),
-                ElevatedButton(
-                  onPressed: () async {
-                    final places = FlutterGooglePlacesSdk(MyGlobals.googleMapsApiKey);
-                    final predictions =
-                    await places.findAutocompletePredictions('Tel Aviv');
-                    print('Result: $predictions');
-                  },
-                  child: Text('Predict and print to console'),
-                ),
+                CityAutocomplete()
               ],
             ),
           ),

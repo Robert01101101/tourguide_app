@@ -1,3 +1,5 @@
+import 'package:tourguide_app/tourCreation/flutterGooglePlacesSample.dart';
+import 'package:tourguide_app/tourCreation/tourCreationPlacesTesting.dart';
 import 'package:tourguide_app/utilities/custom_import.dart';
 
 //Debug Screen
@@ -40,7 +42,7 @@ class DebugScreenState extends State<DebugScreen> {
             const SizedBox(
               height: 80,
             ),
-            Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly,children: [
+            Column(mainAxisAlignment: MainAxisAlignment.spaceEvenly,children: [
               ElevatedButton(onPressed: () {
                 Navigator.push(
                   context,
@@ -59,6 +61,18 @@ class DebugScreenState extends State<DebugScreen> {
                   MaterialPageRoute(builder: (context) => const SecondRoute()),
                 );
               }, child: const Text("Route 2")),
+              ElevatedButton(onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const FlutterGooglePlacesSample()),
+                );
+              }, child: const Text("Places")),
+              ElevatedButton(onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const CreateTourTesting()),
+                );
+              }, child: const Text("Tour creation places testing")),
             ],)
           ],
         ),
