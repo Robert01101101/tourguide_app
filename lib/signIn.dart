@@ -30,6 +30,7 @@ class SignIn extends StatefulWidget {
 class _SignInState extends State<SignIn> {
   GoogleSignInAccount? _currentUser;
   final FirebaseAuth _auth = FirebaseAuth.instance;
+  bool navigatedAwayFromSignIn = false;
 
   @override
   void initState() {
@@ -37,6 +38,15 @@ class _SignInState extends State<SignIn> {
 
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
       my_auth.AuthProvider authProvider = Provider.of(context, listen: false);
+      authProvider.addListener(() {
+        if (authProvider.user != null && authProvider.isAuthorized && !navigatedAwayFromSignIn) {
+          navigatedAwayFromSignIn = true;
+          // Navigate to the new screen once login is complete
+          Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const Explore())); // Update with your home route
+        }
+      });
       authProvider.signInSilently();
     });
   }
