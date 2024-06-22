@@ -1,4 +1,5 @@
 import 'package:tourguide_app/tourCreation/flutterGooglePlacesSample.dart';
+import 'package:tourguide_app/tourCreation/geminiChat.dart';
 import 'package:tourguide_app/tourCreation/tourCreationPlacesTesting.dart';
 import 'package:tourguide_app/utilities/custom_import.dart';
 
@@ -73,6 +74,12 @@ class DebugScreenState extends State<DebugScreen> {
                   MaterialPageRoute(builder: (context) => const CreateTourTesting()),
                 );
               }, child: const Text("Tour creation places testing")),
+              ElevatedButton(onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const GeminiChat()),
+                );
+              }, child: const Text("Gemini Chat")),
             ],)
           ],
         ),
