@@ -1,5 +1,6 @@
 import 'package:scroll_to_hide/scroll_to_hide.dart';
 import 'package:tourguide_app/signIn.dart';
+import 'package:tourguide_app/tourCreation/geminiChat.dart';
 import 'package:tourguide_app/utilities/custom_import.dart';
 import 'package:go_router/go_router.dart';
 
@@ -24,6 +25,8 @@ class CustomNavigationHelper {
   GlobalKey<NavigatorState>();
   static final GlobalKey<NavigatorState> profileTabNavigatorKey =
   GlobalKey<NavigatorState>();
+  static final GlobalKey<NavigatorState> geminiChatTabNavigatorKey =
+  GlobalKey<NavigatorState>();
 
   BuildContext get context =>
       router.routerDelegate.navigatorKey.currentContext!;
@@ -33,6 +36,12 @@ class CustomNavigationHelper {
   GoRouteInformationParser get routeInformationParser =>
       router.routeInformationParser;
 
+  static const String explorePath = '/explore'; //home
+  static const String mapPath = '/map'; //settings
+  static const String myToursPath = '/myTours'; //search
+  static const String profilePath = '/profile'; //NEW
+  static const String geminiChatPath = '/geminiChat'; //NEW
+
   static const String debugPath = '/debug'; //signUp
   static const String mapSamplePath = '/mapSample'; //signIn
   static const String mapRoutingPath = '/mapRouting'; //detail //TODO: Figure out what this was used for (see below in code as well)
@@ -40,10 +49,7 @@ class CustomNavigationHelper {
   static const String rootDetailPath = '/rootDetail'; //rootDetail
   static const String listViewAPath = '/listViewA';
 
-  static const String explorePath = '/explore'; //home
-  static const String mapPath = '/map'; //settings
-  static const String myToursPath = '/myTours'; //search
-  static const String profilePath = '/profile'; //NEW
+
 
   static const String signInPath = '/signIn';
 
@@ -106,6 +112,20 @@ class CustomNavigationHelper {
                 pageBuilder: (context, state) {
                   return getPage(
                     child: const Profile(),
+                    state: state,
+                  );
+                },
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            navigatorKey: geminiChatTabNavigatorKey,
+            routes: [
+              GoRoute(
+                path: geminiChatPath,
+                pageBuilder: (context, state) {
+                  return getPage(
+                    child: const GeminiChat(),
                     state: state,
                   );
                 },
@@ -275,6 +295,10 @@ class _BottomNavigationPageState extends State<BottomNavigationPage> {
                 child: Icon(Icons.account_circle),
               ),
               label: 'Profile',
+            ),
+            NavigationDestination(
+              icon: Icon(Icons.chat),
+              label: 'My Tours',
             ),
           ],
         ),

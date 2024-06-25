@@ -2,6 +2,7 @@ import 'package:provider/provider.dart';
 import 'package:tourguide_app/utilities/authProvider.dart';
 import 'package:tourguide_app/utilities/custom_import.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:tourguide_app/utilities/locationProvider.dart';
 import 'firebase_options.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
@@ -42,9 +43,10 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return MultiProvider(
+    return MultiProvider(                     //GLOBAL PROVIDERS
       providers: [
-        ChangeNotifierProvider(create: (_) => AuthProvider())
+        ChangeNotifierProvider(create: (_) => AuthProvider()),
+        ChangeNotifierProvider(create: (_) => LocationProvider()..getCurrentLocation())
       ],
       child: MaterialApp.router(
         scaffoldMessengerKey: SnackBarService.scaffoldKey,
