@@ -3,6 +3,7 @@ import 'package:tourguide_app/debugScreen.dart';
 import 'package:tourguide_app/signIn.dart';
 import 'package:tourguide_app/utilities/custom_import.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:tourguide_app/utilities/locationProvider.dart';
 import 'main.dart';
 import 'package:tourguide_app/utilities/authProvider.dart' as myAuth;
 
@@ -67,6 +68,8 @@ class ExploreState extends State<Explore> {
   @override
   Widget build(BuildContext context) {
     myAuth.AuthProvider authProvider = Provider.of(context);
+    LocationProvider locationProvider = Provider.of<LocationProvider>(context);
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Explore'),
@@ -90,6 +93,22 @@ class ExploreState extends State<Explore> {
                     }
                   ),
                 ),
+                /*
+                FutureBuilder<String>(
+                  future: locationProvider.getCurrentLocation(),
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return CircularProgressIndicator(); // Show a loading indicator
+                    } else if (snapshot.hasError) {
+                      return Text('Error: ${snapshot.error}');
+                    } else if (snapshot.hasData) {
+                      return Text(snapshot.data!); // Display the fetched text
+                    } else {
+                      return Text('No data found');
+                    }
+                  },
+                ),*/
+                Text("Welcome to ${locationProvider.currentCity}"),
                 ElevatedButton(
                   onPressed: () {
                     Navigator.push(

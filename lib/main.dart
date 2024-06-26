@@ -1,4 +1,5 @@
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tourguide_app/utilities/authProvider.dart';
 import 'package:tourguide_app/utilities/custom_import.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -36,14 +37,44 @@ void main() async {
 
 
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   const MyApp({super.key});
 
+  @override
+  _MyAppState createState() => _MyAppState();
+}
 
-  // This widget is the root of your application.
+
+
+class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.detached || state == AppLifecycleState.paused) {
+      clearPrefsOnClose();
+    }
+  }
+
+  void clearPrefsOnClose() async {
+    print("clearPrefsOnClose()");
+    final prefs = await SharedPreferences.getInstance();
+    prefs.remove('chat_messages');
+  }
+
   @override
   Widget build(BuildContext context) {
-    return MultiProvider(                     //GLOBAL PROVIDERS
+    return MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => AuthProvider()),
         ChangeNotifierProvider(create: (_) => LocationProvider()..getCurrentLocation())
@@ -60,7 +91,6 @@ class MyApp extends StatelessWidget {
     );
   }
 }
-
 
 
 

@@ -104,7 +104,7 @@ class _GeminiChatState extends State<GeminiChat> with WidgetsBindingObserver {
   void _startNewChat(){
     // Initialize the chat
     final locationProvider = Provider.of<LocationProvider>(context, listen: false);
-    String initialPrompt = 'Please act as my friendly and knowledgeable tourguide, and respond in normal written English. Try to keep your response short unless I ask for detailed or longer responses.';
+    String initialPrompt = 'Please act as my friendly and knowledgeable tourguide, and respond in normal written English. Try to keep your response short unless I ask for detailed or longer responses. If I ask for an address, inform me that information like a specific address might be inaccurate.';
     if (locationProvider.currentCity != null){
       initialPrompt += " I am currently located in ${locationProvider.currentCity}, ${locationProvider.currentState}, ${locationProvider.currentCountry}";
     }
