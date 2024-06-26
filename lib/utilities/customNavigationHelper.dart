@@ -105,20 +105,6 @@ class CustomNavigationHelper {
             ],
           ),
           StatefulShellBranch(
-            navigatorKey: profileTabNavigatorKey,
-            routes: [
-              GoRoute(
-                path: profilePath,
-                pageBuilder: (context, state) {
-                  return getPage(
-                    child: const Profile(),
-                    state: state,
-                  );
-                },
-              ),
-            ],
-          ),
-          StatefulShellBranch(
             navigatorKey: geminiChatTabNavigatorKey,
             routes: [
               GoRoute(
@@ -126,6 +112,20 @@ class CustomNavigationHelper {
                 pageBuilder: (context, state) {
                   return getPage(
                     child: const GeminiChat(),
+                    state: state,
+                  );
+                },
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            navigatorKey: profileTabNavigatorKey,
+            routes: [
+              GoRoute(
+                path: profilePath,
+                pageBuilder: (context, state) {
+                  return getPage(
+                    child: const Profile(),
                     state: state,
                   );
                 },
@@ -290,15 +290,15 @@ class _BottomNavigationPageState extends State<BottomNavigationPage> {
               label: 'My Tours',
             ),
             NavigationDestination(
+              icon: Icon(Icons.chat),
+              label: 'AI Chat',
+            ),
+            NavigationDestination(
               icon: Badge(
                 label: Text('2'),
                 child: Icon(Icons.account_circle),
               ),
               label: 'Profile',
-            ),
-            NavigationDestination(
-              icon: Icon(Icons.chat),
-              label: 'My Tours',
             ),
           ],
         ),

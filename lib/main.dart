@@ -5,7 +5,8 @@ import 'package:tourguide_app/utilities/custom_import.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:tourguide_app/utilities/locationProvider.dart';
 import 'firebase_options.dart';
-import 'package:google_sign_in/google_sign_in.dart';
+import 'package:flutter_native_splash/flutter_native_splash.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 
 void main() async {
@@ -19,17 +20,9 @@ void main() async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
 
-  //FIREBASE AUTH
-  /*
-  FirebaseAuth.instance
-      .userChanges()
-      .listen((User? user) {
-    if (user == null) {
-      print('User is currently signed out!');
-    } else {
-      print('User is signed in!');
-    }
-  });*/
+  //Splash
+  WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
+  FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
 
   runApp(const MyApp());
 }
@@ -83,10 +76,27 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
         scaffoldMessengerKey: SnackBarService.scaffoldKey,
         title: 'Tourguide App',
         routerConfig: CustomNavigationHelper.router,
-        theme: ThemeData(
-          useMaterial3: true,
-          colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF6fece4)),
-        ),
+        theme: _buildTheme(),
+      ),
+    );
+  }
+
+  ThemeData _buildTheme() {
+    var baseTheme = ThemeData(
+      useMaterial3: true,
+      colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF6fece4)),
+    );
+
+    final textTheme = baseTheme.textTheme;
+
+    return baseTheme.copyWith(
+      textTheme: GoogleFonts.latoTextTheme(textTheme).copyWith(
+        displayLarge: GoogleFonts.vollkorn(textStyle: textTheme.displayLarge, color: const Color(0xff3b4948)),
+        displayMedium: GoogleFonts.vollkorn(textStyle: textTheme.displayMedium, color: const Color(0xff3b4948)),
+        displaySmall: GoogleFonts.vollkorn(textStyle: textTheme.displaySmall, color: const Color(0xff3b4948)),
+        headlineLarge: GoogleFonts.vollkorn(textStyle: textTheme.headlineLarge, color: const Color(0xff3b4948)),
+        headlineMedium: GoogleFonts.vollkorn(textStyle: textTheme.headlineMedium, color: const Color(0xff3b4948)),
+        headlineSmall: GoogleFonts.vollkorn(textStyle: textTheme.headlineMedium, color: const Color(0xff3b4948)),
       ),
     );
   }

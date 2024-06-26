@@ -1,3 +1,4 @@
+import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:tourguide_app/debugScreen.dart';
 import 'package:tourguide_app/signIn.dart';
@@ -6,6 +7,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:tourguide_app/utilities/locationProvider.dart';
 import 'main.dart';
 import 'package:tourguide_app/utilities/authProvider.dart' as myAuth;
+import 'dart:ui' as ui;
 
 
 // #docregion Initialize
@@ -45,6 +47,7 @@ class ExploreState extends State<Explore> {
         print('ExploreState.initState() - FirabaseAuth listen - FIREBASE AUTH (EXPLORE) - User is currently signed out!');
       } else {
         print('ExploreState.initState() - FirabaseAuth listen - FIREBASE AUTH (EXPLORE) - User is signed in!');
+        FlutterNativeSplash.remove();
       }
     });
 
@@ -76,40 +79,31 @@ class ExploreState extends State<Explore> {
         title: const Text('Explore'),
       ),
       body: Center(
-          child: Container(
+          child: Padding(
+            padding: const EdgeInsets.all(8.0),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-                Flexible(
-                  child: FutureBuilder(
-                    future: _handleSignIn(),
-                      builder: (context, snapshot) {
-                      return ListTile(
-                        leading: GoogleUserCircleAvatar(
-                          identity: authProvider.user!,
-                        ),
-                        title: Text(authProvider.user!.displayName ?? ''),
-                        subtitle: Text(authProvider.user!.email),
-                      );
-                    }
-                  ),
-                ),
-                /*
-                FutureBuilder<String>(
-                  future: locationProvider.getCurrentLocation(),
+                FutureBuilder(
+                  future: _handleSignIn(),
                   builder: (context, snapshot) {
-                    if (snapshot.connectionState == ConnectionState.waiting) {
-                      return CircularProgressIndicator(); // Show a loading indicator
-                    } else if (snapshot.hasError) {
-                      return Text('Error: ${snapshot.error}');
-                    } else if (snapshot.hasData) {
-                      return Text(snapshot.data!); // Display the fetched text
-                    } else {
-                      return Text('No data found');
-                    }
-                  },
-                ),*/
-                Text("Welcome to ${locationProvider.currentCity}"),
+                    //Assemble welcome string
+                    String title = "Welcome";
+                    if (locationProvider.currentCity != null) title += " to ${locationProvider.currentCity}";
+                    String displayName = authProvider.user!.displayName!;
+                    if (displayName != null && displayName.isNotEmpty) title += ", ${displayName.split(' ').first}";
+
+                    //Stylized Welcome Banner
+                    return GradientText(
+                        title,
+                        style: Theme.of(context).textTheme.displaySmall,
+                        gradient: LinearGradient(colors: [
+                          const Color(0xff596F6D),
+                          const Color(0xff303C3A),
+                        ]),
+                      );
+                  }
+                ),
                 ElevatedButton(
                   onPressed: () {
                     Navigator.push(
@@ -128,6 +122,29 @@ class ExploreState extends State<Explore> {
             ),
           ),
       ),
+    );
+  }
+}
+
+class GradientText extends StatelessWidget {
+  const GradientText(
+      this.text, {
+        required this.gradient,
+        this.style,
+      });
+
+  final String text;
+  final TextStyle? style;
+  final Gradient gradient;
+
+  @override
+  Widget build(BuildContext context) {
+    return ShaderMask(
+      blendMode: BlendMode.srcIn,
+      shaderCallback: (bounds) => gradient.createShader(
+        Rect.fromLTWH(0, 0, bounds.width, bounds.height),
+      ),
+      child: Text(text, style: style),
     );
   }
 }

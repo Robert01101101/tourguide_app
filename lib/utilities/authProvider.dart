@@ -5,6 +5,7 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:flutter/foundation.dart';
 import 'package:tourguide_app/main.dart';
 import 'package:tourguide_app/utilities/customNavigationHelper.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 const List<String> scopes = <String>[
   'email',
@@ -37,11 +38,11 @@ class AuthProvider with ChangeNotifier {
       bool newIsAuthorized = account != null;
       // However, on web...
       if (kIsWeb && account != null) {
-        print(' -- AuthProvider() - _googleSignIn.onCurrentUserChanged (web) -> account is null=${account == null}');
+        print('AuthProvider.AuthProvider() - _googleSignIn.onCurrentUserChanged (web) -> account is null=${account == null}');
         newIsAuthorized = await googleSignIn.canAccessScopes(scopes);
       }
 
-      print(' -- AuthProvider() - _googleSignIn.onCurrentUserChanged (web) setState() - newIsAuthorized=${newIsAuthorized}');
+      print('AuthProvider.AuthProvider() - _googleSignIn.onCurrentUserChanged (web) setState() - newIsAuthorized=${newIsAuthorized}');
       user = account;
       isAuthorized = newIsAuthorized;
       notifyListeners();
@@ -93,9 +94,9 @@ class AuthProvider with ChangeNotifier {
 
       // Access the logged-in user using FirebaseAuth.instance.currentUser
       User? firebaseUser = authResult.user;
-      print('Firebase User Info: ${firebaseUser?.displayName}, ${firebaseUser?.email}');
+      print('AuthProvider.signInWithFirebase() - Firebase User Info: ${firebaseUser?.displayName}, ${firebaseUser?.email}');
     } catch (error) {
-      print('Error signing in with Firebase: $error');
+      print('AuthProvider.signInWithFirebase() - Error signing in with Firebase: $error');
     }
   }
 
@@ -110,24 +111,24 @@ class AuthProvider with ChangeNotifier {
     try {
       GoogleSignInAccount? googleSignInAccount = await googleSignIn.signIn();
 
-      print(' -- _handleSignIn() - 1 googleSignInAccount is null=${googleSignInAccount == null}');
+      print('AuthProvider.handleSignIn() - 1 googleSignInAccount is null=${googleSignInAccount == null}');
       if (googleSignInAccount != null) {
-        print(' -- _handleSignIn() - 2 start await');
+        print('AuthProvider.handleSignIn() - 2 start await');
         GoogleSignInAuthentication googleAuth = await googleSignInAccount.authentication;
-        print(' -- _handleSignIn() - 3 finished await');
+        print('AuthProvider.handleSignIn() - 3 finished await');
         AuthCredential credential = GoogleAuthProvider.credential(
           accessToken: googleAuth.accessToken,
           idToken: googleAuth.idToken,
         );
 
-        print(' -- _handleSignIn() - 4 sign in');
+        print('AuthProvider.handleSignIn() - 4 sign in');
         // Sign in with Firebase using the obtained credentials
         UserCredential authResult = await _auth.signInWithCredential(credential);
 
-        print(' -- _handleSignIn() - 5 access');
+        print('AuthProvider.handleSignIn() - 5 access');
         // Access the logged-in user using FirebaseAuth.instance.currentUser
         User? firebaseUser = authResult.user;
-        print(' -- SUCCESS! -- Firebase User Info: ${firebaseUser?.displayName}, ${firebaseUser?.email}');
+        print('AuthProvider.handleSignIn() -- SUCCESS! -- Firebase User Info: ${firebaseUser?.displayName}, ${firebaseUser?.email}');
 
         user = googleSignInAccount;
         isAuthorized = true;

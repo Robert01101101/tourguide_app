@@ -16,6 +16,7 @@ import 'uiElements/sign_in_button.dart';
 import 'package:tourguide_app/utilities/custom_import.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:tourguide_app/utilities/authProvider.dart' as my_auth;
+import 'package:flutter_native_splash/flutter_native_splash.dart';
 
 
 /// The SignIn app.
@@ -40,11 +41,15 @@ class _SignInState extends State<SignIn> {
       my_auth.AuthProvider authProvider = Provider.of(context, listen: false);
       authProvider.addListener(() {
         if (authProvider.user != null && authProvider.isAuthorized && !navigatedAwayFromSignIn) {
+          print("signIn.initState().authProviderListener -> user is no longer null");
           navigatedAwayFromSignIn = true;
           // Navigate to the new screen once login is complete
           CustomNavigationHelper.router.go(
             CustomNavigationHelper.explorePath,
           );
+        } else if (authProvider.user == null){
+          print("signIn.initState().authProviderListener -> user is null");
+          FlutterNativeSplash.remove();
         }
       });
       authProvider.signInSilently();

@@ -46,7 +46,7 @@ class LocationProvider with ChangeNotifier {
 
       if (placemarks != null && placemarks.isNotEmpty) {
         _currentCity = placemarks.first.locality ?? '';
-        print("_getLocationDetailsFromCoordinates() - _currentCity=$_currentCity!");
+        print("LocationProvider._getLocationDetailsFromCoordinates() - _currentCity=$_currentCity!");
         _currentState = placemarks.first.administrativeArea ?? '';
         _currentCountry = placemarks.first.country ?? '';
         notifyListeners();

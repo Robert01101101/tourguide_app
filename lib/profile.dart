@@ -1,6 +1,8 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:tourguide_app/utilities/custom_import.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:tourguide_app/utilities/authProvider.dart' as myAuth;
 
 class Profile extends StatefulWidget {
   const Profile({super.key});
@@ -155,6 +157,7 @@ class _ProfileState extends State<Profile> {
   @override
   Widget build(BuildContext context) {
     print('FirebaseAuth.instance.currentUser=${FirebaseAuth.instance.currentUser}');
+    myAuth.AuthProvider authProvider = Provider.of(context);
 
     return Scaffold(
       appBar: AppBar(
@@ -168,6 +171,13 @@ class _ProfileState extends State<Profile> {
               children: [
                 Column(
                   children: [
+                    ListTile(
+                      leading: GoogleUserCircleAvatar(
+                        identity: authProvider.user!,
+                      ),
+                      title: Text(authProvider.user!.displayName ?? ''),
+                      subtitle: Text(authProvider.user!.email),
+                    ),
                     Text("Your userdata:", style: Theme.of(context).textTheme.headlineSmall),
                     SizedBox(height: 10,),
                     Text("Google Auth data", style: Theme.of(context).textTheme.bodyLarge),
