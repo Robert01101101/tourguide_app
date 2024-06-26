@@ -84,8 +84,8 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
         title: 'Tourguide App',
         routerConfig: CustomNavigationHelper.router,
         theme: ThemeData(
-          colorScheme: ColorScheme.fromSeed(seedColor: Colors.amber),
           useMaterial3: true,
+          colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF6fece4)),
         ),
       ),
     );

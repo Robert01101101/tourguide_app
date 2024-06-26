@@ -51,9 +51,9 @@ class AuthProvider with ChangeNotifier {
         await signInWithFirebase(account!); //from chatgpt
 
         //Go to main page
-        CustomNavigationHelper.router.go(
+        /*CustomNavigationHelper.router.go(
           CustomNavigationHelper.explorePath,
-        );
+        );*/
       } else {
         handleAuthorizeScopes();
       }

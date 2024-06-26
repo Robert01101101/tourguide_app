@@ -6,7 +6,7 @@
     <application
         android:label="Tourguide"
         android:name="${applicationName}"
-        android:icon="@mipmap/ic_launcher">
+        android:icon="@mipmap/launcher_icon">
 
         <!-- MY EDITS -->
         <meta-data

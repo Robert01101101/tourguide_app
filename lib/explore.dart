@@ -35,15 +35,16 @@ class ExploreState extends State<Explore> {
 
   @override
   void initState() {
+    print('ExploreState.initState() !!!!!!!!!!!!!!!!!!!!');
 
     //Firebase auth
     FirebaseAuth.instance
         .userChanges()
         .listen((User? user) {
       if (user == null) {
-        print('FIREBASE AUTH (EXPLORE) - User is currently signed out!');
+        print('ExploreState.initState() - FirabaseAuth listen - FIREBASE AUTH (EXPLORE) - User is currently signed out!');
       } else {
-        print('FIREBASE AUTH (EXPLORE) - User is signed in!');
+        print('ExploreState.initState() - FirabaseAuth listen - FIREBASE AUTH (EXPLORE) - User is signed in!');
       }
     });
 

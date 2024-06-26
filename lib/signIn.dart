@@ -42,9 +42,9 @@ class _SignInState extends State<SignIn> {
         if (authProvider.user != null && authProvider.isAuthorized && !navigatedAwayFromSignIn) {
           navigatedAwayFromSignIn = true;
           // Navigate to the new screen once login is complete
-          Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => const Explore())); // Update with your home route
+          CustomNavigationHelper.router.go(
+            CustomNavigationHelper.explorePath,
+          );
         }
       });
       authProvider.signInSilently();
