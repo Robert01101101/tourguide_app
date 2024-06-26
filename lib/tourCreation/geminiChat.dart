@@ -2,7 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
 import 'package:flutter_chat_ui/flutter_chat_ui.dart';
 import 'dart:io';
-import 'package:google_generative_ai/google_generative_ai.dart';
+import 'package:firebase_vertexai/firebase_vertexai.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:tourguide_app/utilities/custom_import.dart';
@@ -54,17 +54,17 @@ class _GeminiChatState extends State<GeminiChat> with WidgetsBindingObserver {
     WidgetsBinding.instance.addObserver(this);
 
     // Access your API key as an environment variable (see "Set up your API key" above)
-    const apiKeyStringFromEnv = String.fromEnvironment('API_KEY');
+    // old approach with google_generative_ai
+    /*const apiKeyStringFromEnv = String.fromEnvironment('API_KEY');
     final apiKeyFromPlatform = Platform.environment['API_KEY'];
     apiKey = apiKeyStringFromEnv ?? apiKeyFromPlatform;
     if (apiKey == null) {
       print('No \$API_KEY environment variable: apiKey=$apiKeyFromPlatform, apiKeyStringFromEnv=$apiKeyStringFromEnv');
       exit(1);
-    }
+    }*/
 
-    generativeModel = GenerativeModel(
-        model: geminiVersion,
-        apiKey: apiKey);
+    generativeModel = FirebaseVertexAI.instance.generativeModel(
+        model: geminiVersion);
   }
 
   @override
@@ -108,8 +108,11 @@ class _GeminiChatState extends State<GeminiChat> with WidgetsBindingObserver {
     if (locationProvider.currentCity != null){
       initialPrompt += " I am currently located in ${locationProvider.currentCity}, ${locationProvider.currentState}, ${locationProvider.currentCountry}";
     }
+    print("geminiChat._startNewChat() - initialPrompt=$initialPrompt");
+
     _chat = generativeModel.startChat(history: [
-      Content.text(initialPrompt)
+      Content("user",Content.text(initialPrompt).parts),
+      Content("model",Content.text("Okay, how can I help you?").parts)
     ]);
     _user = types.User(
         id: userId,
@@ -180,6 +183,7 @@ class _GeminiChatState extends State<GeminiChat> with WidgetsBindingObserver {
     } catch (e) {
       setState(() {
         _handleGeminiResponse("Sorry, an error occurred. Try rephrasing your message.");
+        print(e);
       });
     }
 
