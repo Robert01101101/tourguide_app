@@ -1,6 +1,9 @@
+import 'package:bubble/bubble.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
-import 'package:flutter_chat_ui/flutter_chat_ui.dart';
+import 'package:flutter_chat_ui/flutter_chat_ui.dart' as chatUI;
 import 'dart:io';
 import 'package:firebase_vertexai/firebase_vertexai.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -161,7 +164,19 @@ class _GeminiChatState extends State<GeminiChat> with WidgetsBindingObserver {
         id: const Uuid().v4(),
         status: types.Status.delivered,
       );
+      Map<String, dynamic> aiTagMetadata = {
+        'aiCustomPrompt': 'true',
+      };
+      final mCustom = types.TextMessage(
+        author: _user!,
+        text: 'Suggest a local tour',
+        id: const Uuid().v4(),
+        status: types.Status.delivered,
+        metadata: aiTagMetadata,
+        showStatus: false
+      );
       setState((){
+        _messages.add(mCustom);
         _messages.add(m);
         print("_loadMessages() - init new - set state ${m.text}");
       });
@@ -235,15 +250,20 @@ class _GeminiChatState extends State<GeminiChat> with WidgetsBindingObserver {
 
   /// Submits the [message] written by the user to the chat history and prompts Gemini.
   void _handleSendPressed(types.PartialText message) {
+    _handleSendPrompt(message.text);
+  }
+
+  void _handleSendPrompt(String prompt){
     final textMessage = types.TextMessage(
       author: _user!,
       createdAt: DateTime.now().millisecondsSinceEpoch,
       id: uuid.v4(),
-      text: message.text,
+      text: prompt,
+      status: types.Status.sending
     );
 
     _addMessage(textMessage);
-    _promptGemini(message.text);
+    _promptGemini(prompt);
   }
 
   /// Submits the response [message] written by Gemini to the chat history .
@@ -255,6 +275,9 @@ class _GeminiChatState extends State<GeminiChat> with WidgetsBindingObserver {
       text: responseMessage,
     );
 
+    for (var i = 0; i < _messages.length; i++) {
+      _messages[i] = _messages[i].copyWith(status: types.Status.delivered);
+    }
     _addMessage(textMessage);
   }
 
@@ -282,8 +305,76 @@ class _GeminiChatState extends State<GeminiChat> with WidgetsBindingObserver {
           theme: const DefaultChatTheme(
             primaryColor: Color(0xffec8c6f),
           ),
+          bubbleBuilder: _customBubbleBuilder,
         ),
       ),
     );
   }
+
+
+
+  static const Radius radiusMessage = Radius.circular(20);
+
+  /// Build bubble message widget
+  Widget _customBubbleBuilder(
+      Widget child, {
+        required types.Message message,
+        required bool nextMessageInGroup,
+      }) {
+    bool isUser = message.author.id == _user?.id;
+    bool isAiCustomPrompt = message.metadata != null && message.metadata!.isNotEmpty && message.metadata!.containsKey("aiCustomPrompt");
+
+    return isAiCustomPrompt ?
+      Center(
+        child: Container(
+        decoration: const BoxDecoration(
+          borderRadius: BorderRadius.all(Radius.circular(36)),
+          color: Color(0xffC9ABA2),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(10.0),
+          child: ElevatedButton(
+            onPressed: (){
+              print("hi");
+              _handleSendPrompt("What's a nice scenic local tour I can take?");
+            },
+            style: ElevatedButton.styleFrom(backgroundColor: Color(0xffAB8D84), foregroundColor: Color(0xffec8c6f)),
+            child: child,
+          ),
+        )
+      ),
+    ) : Container(
+        decoration: BoxDecoration(
+          borderRadius: (isUser) ?
+          const BorderRadius.only(
+            topLeft: radiusMessage,
+            topRight: radiusMessage,
+            bottomLeft: radiusMessage,
+          ) : const BorderRadius.only(
+            topLeft: radiusMessage,
+            topRight: radiusMessage,
+            bottomRight: radiusMessage,
+          ),
+          color: isUser ?
+          const Color(0xffec8c6f) :
+          const Color(0xfff5f5f7),
+        ),
+        child: child
+    );
+  }
+
+
+  /// Build retry widget.
+  Widget _customRetryBuilder() {
+    return IconButton(
+      onPressed: () {
+        //_handleRetry();
+      },
+      icon: const Icon(
+        Icons.refresh,
+      ),
+      iconSize: 25,
+    );
+  }
+
 }
