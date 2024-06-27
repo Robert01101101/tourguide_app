@@ -12,10 +12,10 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:http/http.dart' as http;
-import 'uiElements/sign_in_button.dart';
+import 'ui/sign_in_button.dart';
 import 'package:tourguide_app/utilities/custom_import.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:tourguide_app/utilities/authProvider.dart' as my_auth;
+import 'package:tourguide_app/utilities/providers/auth_provider.dart' as my_auth;
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 
 

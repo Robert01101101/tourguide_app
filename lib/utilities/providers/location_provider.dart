@@ -7,7 +7,7 @@ import 'package:flutter_google_places_sdk/flutter_google_places_sdk.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tourguide_app/main.dart';
 
-import '../uiElements/google_places_image.dart';
+import '../../ui/google_places_image.dart';
 
 /// Global Location Provider so I can access location anywhere in the app
 class LocationProvider with ChangeNotifier {

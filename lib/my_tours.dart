@@ -1,7 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:tourguide_app/tourCreation/tourCreation.dart';
+import 'package:tourguide_app/tour_creation/tour_creation.dart';
 import 'package:tourguide_app/utilities/custom_import.dart';
 
 import 'main.dart';

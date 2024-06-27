@@ -1,7 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:tourguide_app/uiElements/CityAutocomplete.dart';
+import 'package:tourguide_app/ui/city_autocomplete.dart';
 import 'package:tourguide_app/utilities/custom_import.dart';
 import 'package:flutter_google_places_sdk/flutter_google_places_sdk.dart';
 

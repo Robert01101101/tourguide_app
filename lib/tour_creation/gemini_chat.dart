@@ -9,7 +9,7 @@ import 'package:firebase_vertexai/firebase_vertexai.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:tourguide_app/utilities/custom_import.dart';
-import 'package:tourguide_app/utilities/locationProvider.dart';
+import 'package:tourguide_app/utilities/providers/location_provider.dart';
 import 'package:uuid/uuid.dart';
 import 'package:tourguide_app/main.dart';
 

@@ -1,14 +1,14 @@
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import 'package:tourguide_app/debugScreen.dart';
+import 'package:tourguide_app/testing/debug_screen.dart';
 import 'package:tourguide_app/signIn.dart';
-import 'package:tourguide_app/uiElements/google_places_image.dart';
-import 'package:tourguide_app/uiElements/my_layouts.dart';
+import 'package:tourguide_app/ui/google_places_image.dart';
+import 'package:tourguide_app/ui/my_layouts.dart';
 import 'package:tourguide_app/utilities/custom_import.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:tourguide_app/utilities/locationProvider.dart';
+import 'package:tourguide_app/utilities/providers/location_provider.dart';
 import 'main.dart';
-import 'package:tourguide_app/utilities/authProvider.dart' as myAuth;
+import 'package:tourguide_app/utilities/providers/auth_provider.dart' as myAuth;
 import 'dart:ui' as ui;
 
 

@@ -2,7 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:tourguide_app/utilities/custom_import.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:tourguide_app/utilities/authProvider.dart' as myAuth;
+import 'package:tourguide_app/utilities/providers/auth_provider.dart' as myAuth;
 
 class Profile extends StatefulWidget {
   const Profile({super.key});

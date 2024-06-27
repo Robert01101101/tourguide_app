@@ -4,7 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:flutter/foundation.dart';
 import 'package:tourguide_app/main.dart';
-import 'package:tourguide_app/utilities/customNavigationHelper.dart';
+import 'package:tourguide_app/utilities/custom_navigation_helper.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 const List<String> scopes = <String>[

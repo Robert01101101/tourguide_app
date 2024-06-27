@@ -1,6 +1,6 @@
 import 'package:scroll_to_hide/scroll_to_hide.dart';
 import 'package:tourguide_app/signIn.dart';
-import 'package:tourguide_app/tourCreation/geminiChat.dart';
+import 'package:tourguide_app/tour_creation/gemini_chat.dart';
 import 'package:tourguide_app/utilities/custom_import.dart';
 import 'package:go_router/go_router.dart';
 

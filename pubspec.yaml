@@ -117,7 +117,7 @@ flutter:
 
 
 flutter_launcher_icons:
-  # dart pub run flutter_launcher_icons
+  # dart run flutter_launcher_icons
   android: "launcher_icon"
   ios: true
   image_path: "assets/icon/icon.png"
