@@ -77,7 +77,7 @@ class _FlutterGooglePlacesSampleState extends State<FlutterGooglePlacesSample> {
   void initState() {
     super.initState();
 
-    _places = FlutterGooglePlacesSdk(MyGlobals.googleMapsApiKey);
+    _places = FlutterGooglePlacesSdk(MyGlobals.googleApiKey);
     _places.isInitialized().then((value) {
       debugPrint('Places Initialized: $value');
     });

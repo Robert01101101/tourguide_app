@@ -110,7 +110,7 @@ class _CityAutocompleteState extends State<CityAutocomplete> {
     });
 
     try {
-      var apikey = MyGlobals.googleMapsApiKey;
+      var apikey = MyGlobals.googleApiKey;
       final response = await http.get(Uri.parse(
           'https://maps.googleapis.com/maps/api/place/autocomplete/json?input=$value&types=(cities)&key=$apikey&sessiontoken=$_sessionToken'));
 

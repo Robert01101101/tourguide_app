@@ -106,7 +106,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
 
 class MyGlobals {
   static final ScrollController scrollController = ScrollController();
-  static final String googleMapsApiKey = "AIzaSyBa7mCp1FUiWMhfTHPWNJ2Cy-A84w4i2I4";
+  static final String googleApiKey = "AIzaSyBa7mCp1FUiWMhfTHPWNJ2Cy-A84w4i2I4";
 }
 
 class SnackBarService {

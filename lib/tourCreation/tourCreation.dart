@@ -157,7 +157,7 @@ class _CreateTourState extends State<CreateTour> {
                 ),
                 ElevatedButton(
                   onPressed: () async {
-                    final places = FlutterGooglePlacesSdk(MyGlobals.googleMapsApiKey);
+                    final places = FlutterGooglePlacesSdk(MyGlobals.googleApiKey);
                     final predictions =
                     await places.findAutocompletePredictions('Tel Aviv');
                     print('Result: $predictions');
