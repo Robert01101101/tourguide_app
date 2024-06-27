@@ -1,4 +1,5 @@
 import 'package:provider/provider.dart';
+import 'package:scroll_to_index/scroll_to_index.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tourguide_app/utilities/providers/auth_provider.dart';
 import 'package:tourguide_app/utilities/custom_import.dart';
@@ -11,7 +12,7 @@ import 'package:google_fonts/google_fonts.dart';
 
 void main() async {
   //ROUTING
-  CustomNavigationHelper.instance;
+  TourguideNavigation.instance;
 
   //FIREBASE INIT
   //https://stackoverflow.com/a/63537567/7907510
@@ -75,7 +76,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
       child: MaterialApp.router(
         scaffoldMessengerKey: SnackBarService.scaffoldKey,
         title: 'Tourguide App',
-        routerConfig: CustomNavigationHelper.router,
+        routerConfig: TourguideNavigation.router,
         theme: _buildTheme(),
       ),
     );
@@ -91,12 +92,9 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
 
     return baseTheme.copyWith(
       textTheme: GoogleFonts.latoTextTheme(textTheme).copyWith(
-        displayLarge: GoogleFonts.vollkorn(textStyle: textTheme.displayLarge, color: const Color(0xff3b4948)),
-        displayMedium: GoogleFonts.vollkorn(textStyle: textTheme.displayMedium, color: const Color(0xff3b4948)),
-        displaySmall: GoogleFonts.vollkorn(textStyle: textTheme.displaySmall, color: const Color(0xff3b4948)),
-        headlineLarge: GoogleFonts.vollkorn(textStyle: textTheme.headlineLarge, color: const Color(0xff3b4948)),
-        headlineMedium: GoogleFonts.vollkorn(textStyle: textTheme.headlineMedium, color: const Color(0xff3b4948)),
-        headlineSmall: GoogleFonts.vollkorn(textStyle: textTheme.headlineMedium, color: const Color(0xff3b4948)),
+        displayLarge: GoogleFonts.vollkorn(textStyle: textTheme.displayLarge, color: const Color(0xff3b4948), fontWeight: FontWeight.w300),
+        displayMedium: GoogleFonts.vollkorn(textStyle: textTheme.displayMedium, color: const Color(0xff3b4948), fontWeight: FontWeight.w300),
+        displaySmall: GoogleFonts.vollkorn(textStyle: textTheme.displaySmall, color: const Color(0xff3b4948), fontWeight: FontWeight.w300),
       ),
     );
   }
@@ -105,8 +103,8 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
 
 
 class MyGlobals {
-  static final ScrollController scrollController = ScrollController();
-  static final String googleApiKey = "AIzaSyBa7mCp1FUiWMhfTHPWNJ2Cy-A84w4i2I4";
+  static final AutoScrollController scrollController = AutoScrollController();
+  static const String googleApiKey = "AIzaSyBa7mCp1FUiWMhfTHPWNJ2Cy-A84w4i2I4";
 }
 
 class SnackBarService {

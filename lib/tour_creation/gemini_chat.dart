@@ -220,7 +220,7 @@ class _GeminiChatState extends State<GeminiChat> with WidgetsBindingObserver {
               children: <Widget>[
                 Padding(
                   padding: const EdgeInsets.all(20.0),
-                  child: Center(child: Text("Powered by Google's $geminiVersion \n\nAI Tourguide might provide inaccurate information, use with care.")),
+                  child: Center(child: Text("Powered by Google's $geminiVersion.\n\nAI Tourguide might provide inaccurate information, use with care.")),
                 ),
                 ListTile(
                   leading: Icon(Icons.delete),
@@ -285,7 +285,7 @@ class _GeminiChatState extends State<GeminiChat> with WidgetsBindingObserver {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Gemini Chat'),
+        title: Text('AI Tourguide'),
           actions: [
             IconButton(
             icon: Icon(Icons.more_vert),
@@ -297,7 +297,7 @@ class _GeminiChatState extends State<GeminiChat> with WidgetsBindingObserver {
         ],
       ),
       body: Padding(
-        padding: const EdgeInsets.all(10.0),
+        padding: const EdgeInsets.fromLTRB(10, 0, 10, 10),
         child: Chat(
           messages: _messages,
           onSendPressed: _handleSendPressed,
@@ -306,6 +306,7 @@ class _GeminiChatState extends State<GeminiChat> with WidgetsBindingObserver {
             primaryColor: Color(0xffec8c6f),
           ),
           bubbleBuilder: _customBubbleBuilder,
+          scrollController: MyGlobals.scrollController,
         ),
       ),
     );
@@ -335,11 +336,20 @@ class _GeminiChatState extends State<GeminiChat> with WidgetsBindingObserver {
           padding: const EdgeInsets.all(10.0),
           child: ElevatedButton(
             onPressed: (){
-              print("hi");
               _handleSendPrompt("What's a nice scenic local tour I can take?");
             },
             style: ElevatedButton.styleFrom(backgroundColor: Color(0xffAB8D84), foregroundColor: Color(0xffec8c6f)),
-            child: child,
+            child: Wrap(
+              crossAxisAlignment: WrapCrossAlignment.center,
+              children: <Widget>[
+                const Icon(
+                  Icons.lightbulb,
+                  color: Colors.white,
+                  size: 24.0,
+                ),
+                child,
+              ],
+            ),
           ),
         )
       ),

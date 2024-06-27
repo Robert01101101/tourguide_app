@@ -7,11 +7,11 @@ import 'package:go_router/go_router.dart';
 //______________________________________________________________________________________________ CustomNavigationHelper
 // from https://medium.com/flutter-community/integrating-bottom-navigation-with-go-router-in-flutter-c4ec388da16a
 // example https://dartpad.dev/?id=aed0372c987b4ae32311fe32bb4c1209
-class CustomNavigationHelper {
-  static final CustomNavigationHelper _instance =
-  CustomNavigationHelper._internal();
+class TourguideNavigation {
+  static final TourguideNavigation _instance =
+  TourguideNavigation._internal();
 
-  static CustomNavigationHelper get instance => _instance;
+  static TourguideNavigation get instance => _instance;
 
   static late final GoRouter router;
 
@@ -53,11 +53,11 @@ class CustomNavigationHelper {
 
   static const String signInPath = '/signIn';
 
-  factory CustomNavigationHelper() {
+  factory TourguideNavigation() {
     return _instance;
   }
 
-  CustomNavigationHelper._internal() {
+  TourguideNavigation._internal() {
     final routes = [
       StatefulShellRoute.indexedStack(
         parentNavigatorKey: parentNavigatorKey,
@@ -252,10 +252,6 @@ class _BottomNavigationPageState extends State<BottomNavigationPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      /*
-      appBar: AppBar(
-        title: const Text('Bottom Navigator Shell'),    //TODO - decide if I can remove this, use for optional shell header bar
-      ),*/
       body: SafeArea(
         child: widget.child,
       ),
@@ -291,7 +287,7 @@ class _BottomNavigationPageState extends State<BottomNavigationPage> {
             ),
             NavigationDestination(
               icon: Icon(Icons.chat),
-              label: 'AI Chat',
+              label: 'AI Tourguide',
             ),
             NavigationDestination(
               icon: Badge(

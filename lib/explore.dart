@@ -77,9 +77,6 @@ class ExploreState extends State<Explore> {
     LocationProvider locationProvider = Provider.of<LocationProvider>(context);
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Explore'),
-      ),
       body: Stack(
         children: [
           Consumer<LocationProvider>(
@@ -126,17 +123,17 @@ class ExploreState extends State<Explore> {
 
                   //Stylized Welcome Banner
                   return SizedBox(
-                    height: 320,
+                    height: 300,
                     child: Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 50, horizontal: 0),
+                      padding: const EdgeInsets.symmetric(vertical: 30, horizontal: 0),
                       child: Align(
                         alignment: Alignment.bottomCenter,
                         child: GradientText(
                             title,
                             style: Theme.of(context).textTheme.displayMedium,
                             gradient: const LinearGradient(colors: [
-                              Color(0xffe8f3f3),
-                              Color(0xffbdf3f0),
+                              Color(0xeeF2F8F8),
+                              Color(0xeeE4F0EF),
                             ]),
                           ),
                       ),
@@ -144,6 +141,7 @@ class ExploreState extends State<Explore> {
                   );
                 }
               ),
+              Text("Explore local tours", style: Theme.of(context).textTheme.headlineSmall),
               ElevatedButton(
                 onPressed: () {
                   Navigator.push(

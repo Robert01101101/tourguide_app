@@ -44,8 +44,8 @@ class _SignInState extends State<SignIn> {
           print("signIn.initState().authProviderListener -> user is no longer null");
           navigatedAwayFromSignIn = true;
           // Navigate to the new screen once login is complete
-          CustomNavigationHelper.router.go(
-            CustomNavigationHelper.explorePath,
+          TourguideNavigation.router.go(
+            TourguideNavigation.explorePath,
           );
         } else if (authProvider.user == null){
           print("signIn.initState().authProviderListener -> user is null");

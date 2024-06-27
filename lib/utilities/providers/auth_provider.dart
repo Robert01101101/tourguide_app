@@ -4,7 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:flutter/foundation.dart';
 import 'package:tourguide_app/main.dart';
-import 'package:tourguide_app/utilities/custom_navigation_helper.dart';
+import 'package:tourguide_app/utilities/tourguide_navigation.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 const List<String> scopes = <String>[
@@ -166,8 +166,8 @@ class AuthProvider with ChangeNotifier {
       isLoggingOut = true;
       print('AuthProvider.signOut()');
       //Go to login page
-      CustomNavigationHelper.router.go(
-        CustomNavigationHelper.signInPath,
+      TourguideNavigation.router.go(
+        TourguideNavigation.signInPath,
       );
       await FirebaseAuth.instance.signOut();
       await googleSignIn.disconnect();

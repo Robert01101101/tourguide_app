@@ -11,4 +11,4 @@ export 'package:tourguide_app/explore.dart';
 export 'package:tourguide_app/map.dart';
 export 'package:tourguide_app/my_tours.dart';
 export 'package:tourguide_app/profile.dart';
-export 'package:tourguide_app/utilities/custom_navigation_helper.dart';
+export 'package:tourguide_app/utilities/tourguide_navigation.dart';
