@@ -2,6 +2,8 @@ import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:tourguide_app/debugScreen.dart';
 import 'package:tourguide_app/signIn.dart';
+import 'package:tourguide_app/uiElements/google_places_image.dart';
+import 'package:tourguide_app/uiElements/my_layouts.dart';
 import 'package:tourguide_app/utilities/custom_import.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:tourguide_app/utilities/locationProvider.dart';
@@ -78,49 +80,86 @@ class ExploreState extends State<Explore> {
       appBar: AppBar(
         title: const Text('Explore'),
       ),
-      body: Center(
-          child: Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      body: Stack(
+        children: [
+          Consumer<LocationProvider>(
+            builder: (context, locationProvider, child) {
+              return FutureBuilder<GooglePlacesImg?>(
+                future: locationProvider.fetchPlacePhoto(),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const CircularProgressIndicator();
+                  } else if (snapshot.hasError) {
+                    return Text('Error: ${snapshot.error}');
+                  } else if (snapshot.hasData && snapshot.data != null) {
+                    final googlePlacesImg = snapshot.data!;
+                    //return googlePlacesImg;
+
+                    return ShaderMask(
+                      shaderCallback: (rect) {
+                        return const LinearGradient(
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                          colors: [Colors.white, Colors.black45],
+                        ).createShader(Rect.fromLTRB(0, 0, rect.width, rect.height));
+                      },
+                      blendMode: BlendMode.multiply,
+                      child: googlePlacesImg
+                    );
+                  } else {
+                    return const Text('No photo available');
+                  }
+                },
+              );
+            },
+          ),
+          StandardLayout(
               children: [
                 FutureBuilder(
-                  future: _handleSignIn(),
-                  builder: (context, snapshot) {
-                    //Assemble welcome string
-                    String title = "Welcome";
-                    if (locationProvider.currentCity != null) title += " to ${locationProvider.currentCity}";
-                    String displayName = authProvider.user!.displayName!;
-                    if (displayName != null && displayName.isNotEmpty) title += ", ${displayName.split(' ').first}";
+                future: _handleSignIn(),
+                builder: (context, snapshot) {
+                  //Assemble welcome string
+                  String title = "Welcome";
+                  if (locationProvider.currentCity != null) title += " to ${locationProvider.currentCity}";
+                  String displayName = authProvider.user!.displayName!;
+                  if (displayName != null && displayName.isNotEmpty) title += ", ${displayName.split(' ').first}";
 
-                    //Stylized Welcome Banner
-                    return GradientText(
-                        title,
-                        style: Theme.of(context).textTheme.displaySmall,
-                        gradient: LinearGradient(colors: [
-                          const Color(0xff596F6D),
-                          const Color(0xff303C3A),
-                        ]),
-                      );
-                  }
-                ),
-                ElevatedButton(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => const DebugScreen()),
-                    );
-                  },
-                  child: const Text('Debug Screen'),
-                ),
-                //Text('User is signed in!!  :)\n\nUsername: ${FirebaseAuth.instance.currentUser!.displayName}\nEmail: ${FirebaseAuth.instance.currentUser!.email}'),
-                ElevatedButton(
-                  onPressed: authProvider.signOut,
-                  child: const Text('Sign Out'),
-                ),
-              ],
-            ),
+                  //Stylized Welcome Banner
+                  return SizedBox(
+                    height: 320,
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 50, horizontal: 0),
+                      child: Align(
+                        alignment: Alignment.bottomCenter,
+                        child: GradientText(
+                            title,
+                            style: Theme.of(context).textTheme.displayMedium,
+                            gradient: const LinearGradient(colors: [
+                              Color(0xffe8f3f3),
+                              Color(0xffbdf3f0),
+                            ]),
+                          ),
+                      ),
+                    ),
+                  );
+                }
+              ),
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const DebugScreen()),
+                  );
+                },
+                child: const Text('Debug Screen'),
+              ),
+              //Text('User is signed in!!  :)\n\nUsername: ${FirebaseAuth.instance.currentUser!.displayName}\nEmail: ${FirebaseAuth.instance.currentUser!.email}'),
+              ElevatedButton(
+                onPressed: authProvider.signOut,
+                child: const Text('Sign Out'),
+              ),]
           ),
+        ],
       ),
     );
   }

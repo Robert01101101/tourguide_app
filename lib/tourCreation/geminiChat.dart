@@ -279,6 +279,9 @@ class _GeminiChatState extends State<GeminiChat> with WidgetsBindingObserver {
           messages: _messages,
           onSendPressed: _handleSendPressed,
           user: _user!,
+          theme: const DefaultChatTheme(
+            primaryColor: Color(0xffec8c6f),
+          ),
         ),
       ),
     );
