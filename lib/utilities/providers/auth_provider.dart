@@ -26,6 +26,7 @@ class AuthProvider with ChangeNotifier {
   late StreamSubscription userAuthSub;
   bool isAuthorized = false; // has granted permissions?
   bool isLoggingOut = false;
+  bool silentSignInFailed = false;
 
   ////// PRIVATE /////
   final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -78,7 +79,11 @@ class AuthProvider with ChangeNotifier {
   void signInSilently() async {
     print('AuthProvider.signInSilently()');
     GoogleSignInAccount? silentlySignedInUser = await googleSignIn.signInSilently();
-    //if ()
+    print('AuthProvider.signInSilently() - silentlySignedInUser=$silentlySignedInUser');
+    if (silentlySignedInUser == null) {
+      silentSignInFailed = true;
+      notifyListeners();
+    }
   }
 
   // Called when the current auth user changes (google sign in), so we automatically log into Firebase as well

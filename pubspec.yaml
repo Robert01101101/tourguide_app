@@ -138,10 +138,8 @@ flutter_launcher_icons:
 
 
 flutter_native_splash:
-  # This package generates native code to customize Flutter's default white native splash screen
-  # with background color and splash image.
-  # Customize the parameters below, and run the following command in the terminal:
   # dart run flutter_native_splash:create
+  #
   # To restore Flutter's default white splash screen, run the following command in the terminal:
   # dart run flutter_native_splash:remove
 
@@ -193,10 +191,10 @@ flutter_native_splash:
   # 640 pixels in diameter.
   # App icon without an icon background: This should be 1152×1152 pixels, and fit within a circle
   # 768 pixels in diameter.
-  #image: assets/android12splash.png
+    image: assets/icon/splash_1152.png
 
   # Splash screen background color.
-  #color: "#42a5f5"
+    color: "#42a5f5"
 
   # App icon background color.
   #icon_background_color: "#111111"

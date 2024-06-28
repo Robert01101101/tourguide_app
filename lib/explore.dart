@@ -190,7 +190,7 @@ class ExploreState extends State<Explore> {
                   );
                 },
               ),
-              Stack(
+              Stack( //helps with the parallax effect by providing a spacer + white bg to cover the google img on scroll
                 children: [
                   Column(
                     children: [
@@ -283,7 +283,7 @@ class ExploreState extends State<Explore> {
                             child: HorizontalScroller(tiles: tiles),
                           ),
                         ),
-                      /*Row(
+                      Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Text("Tours in your province", style: Theme.of(context).textTheme.headlineSmall),
@@ -305,7 +305,7 @@ class ExploreState extends State<Explore> {
                             child: const Text('Sign Out'),
                           ),
                         ],
-                      ),*/
+                      ),
                       //Text('User is signed in!!  :)\n\nUsername: ${FirebaseAuth.instance.currentUser!.displayName}\nEmail: ${FirebaseAuth.instance.currentUser!.email}'),
                     ]
                   ),

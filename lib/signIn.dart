@@ -47,8 +47,8 @@ class _SignInState extends State<SignIn> {
           TourguideNavigation.router.go(
             TourguideNavigation.explorePath,
           );
-        } else if (authProvider.user == null){
-          print("signIn.initState().authProviderListener -> user is null");
+        } else if (authProvider.user == null || authProvider.silentSignInFailed){
+          print("signIn.initState().authProviderListener -> user is null or silentSignInFailed");
           FlutterNativeSplash.remove();
         }
       });
