@@ -55,6 +55,13 @@ class ExploreState extends State<Explore> {
     });
 
     super.initState();
+
+    //for parallax
+    _scrollController.addListener(() {
+      setState(() {
+        _scrollOffset = _scrollController.offset;
+      });
+    });
   }
 
 
@@ -101,6 +108,9 @@ class ExploreState extends State<Explore> {
   // Add more tiles as needed
   ];
 
+  final ScrollController _scrollController = ScrollController(); //for bg parallax effect
+  double _scrollOffset = 0;
+
 
   @override
   Widget build(BuildContext context) {
@@ -119,6 +129,7 @@ class ExploreState extends State<Explore> {
         ],
       ),*/
       body: SingleChildScrollView(
+        controller: _scrollController,
         child: Shimmer(
           linearGradient: MyGlobals.shimmerGradient,
           child: Stack(
@@ -128,26 +139,37 @@ class ExploreState extends State<Explore> {
                   return FutureBuilder<GooglePlacesImg?>(
                     future: locationProvider.fetchPlacePhoto(),
                     builder: (context, snapshot) {
-                      if (snapshot.connectionState == ConnectionState.waiting) {
+                      if (snapshot.connectionState == ConnectionState.waiting && !(snapshot.hasData && snapshot.data != null)) {
                         return const CircularProgressIndicator();
                       } else if (snapshot.hasError) {
                         return Text('Error: ${snapshot.error}');
                       } else if (snapshot.hasData && snapshot.data != null) {
                         final googlePlacesImg = snapshot.data!;
                         //return googlePlacesImg;
-        
                         return Stack(
                           children: [
-                            ShaderMask(
-                              shaderCallback: (rect) {
-                                return const LinearGradient(
-                                  begin: Alignment.topCenter,
-                                  end: Alignment.bottomCenter,
-                                  colors: [Colors.white, Colors.black45],
-                                ).createShader(Rect.fromLTRB(0, 0, rect.width, rect.height));
-                              },
-                              blendMode: BlendMode.multiply,
-                              child: googlePlacesImg
+                            Transform.translate(
+                              offset: Offset(0, _scrollOffset * 0.5), // Adjust the multiplier for the parallax effect
+                              child: ShaderMask(
+                                shaderCallback: (rect) {
+                                  return const LinearGradient(
+                                    begin: Alignment.topCenter,
+                                    end: Alignment.bottomCenter,
+                                    colors: [Colors.white, Colors.black45],
+                                  ).createShader(Rect.fromLTRB(0, 0, rect.width, rect.height));
+                                },
+                                blendMode: BlendMode.multiply,
+                                child: googlePlacesImg.placePhotoResponse.when(
+                                  image: (image) => Image(
+                                    image: image.image,
+                                    gaplessPlayback: true,
+                                  ),
+                                  imageUrl: (imageUrl) => Image.network(
+                                    imageUrl,
+                                    gaplessPlayback: true,
+                                  ),
+                                )
+                              ),
                             ),
                             Align(
                               alignment: Alignment.topRight,
@@ -168,110 +190,126 @@ class ExploreState extends State<Explore> {
                   );
                 },
               ),
-              StandardLayout(
-                  children: [
-                    FutureBuilder(
-                    future: _handleSignIn(),
-                    builder: (context, snapshot) {
-                      //Assemble welcome string
-                      String title = "Welcome";
-                      if (locationProvider.currentCity != null) title += " to ${locationProvider.currentCity}";
-                      String displayName = authProvider.user!.displayName!;
-                      if (displayName != null && displayName.isNotEmpty) title += ", ${displayName.split(' ').first}";
-        
-                      //Stylized Welcome Banner
-                      return SizedBox(
-                        height: 300,
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 30, horizontal: 0),
-                          child: Align(
-                            alignment: Alignment.bottomCenter,
-                            child: GradientText(
-                                title,
-                                style: Theme.of(context).textTheme.displayMedium,
-                                gradient: const LinearGradient(colors: [
-                                  Color(0xeeF2F8F8),
-                                  Color(0xeeE4F0EF),
-                                ]),
+              Stack(
+                children: [
+                  Column(
+                    children: [
+                      Container(
+                        height: 300,  //should match google image (TODO: ensure it's never under 300)
+                        color: Colors.transparent,
+                      ),
+                      Container(
+                        color: Colors.white,
+                        height: 400,  //BAD! Hardcoded, but it's fine for now since it only needs to be enough to cover the google img on scroll
+                      )
+                    ],
+                  ),
+                  StandardLayout(
+                      children: [
+                        FutureBuilder(
+                        future: _handleSignIn(),
+                        builder: (context, snapshot) {
+                          //Assemble welcome string
+                          String title = "Welcome";
+                          if (locationProvider.currentCity != null) title += " to ${locationProvider.currentCity}";
+                          String displayName = authProvider.user!.displayName!;
+                          if (displayName != null && displayName.isNotEmpty) title += ", ${displayName.split(' ').first}";
+
+                          //Stylized Welcome Banner text
+                          return SizedBox(
+                            height: 300,
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 30, horizontal: 0),
+                              child: Align(
+                                alignment: Alignment.bottomCenter,
+                                child: GradientText(
+                                    title,
+                                    style: Theme.of(context).textTheme.displayMedium,
+                                    gradient: const LinearGradient(colors: [
+                                      Color(0xeeF2F8F8),
+                                      Color(0xeeE4F0EF),
+                                    ]),
+                                  ),
                               ),
+                            ),
+                          );
+                        }
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text("Explore local tours", style: Theme.of(context).textTheme.headlineSmall),
+                          IconButton(onPressed: (){
+
+                          }, icon: const Icon(Icons.add_circle_outline_sharp))
+                        ],
+                      ),
+                      StandardLayoutChild(
+                        fullWidth: true,
+                        child: SizedBox(
+                          height: 200.0, // Set a fixed height for the horizontal scroller
+                          child: HorizontalScroller(tiles: tiles),
+                        ),
+                      ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text("Local activities", style: Theme.of(context).textTheme.headlineSmall),
+                            IconButton(onPressed: (){
+
+                            }, icon: const Icon(Icons.add_circle_outline_sharp))
+                          ],
+                        ),
+                      StandardLayoutChild(
+                          fullWidth: true,
+                          child: SizedBox(
+                            height: 200.0, // Set a fixed height for the horizontal scroller
+                            child: HorizontalScroller(tiles: tiles),
                           ),
                         ),
-                      );
-                    }
-                  ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text("Explore local tours", style: Theme.of(context).textTheme.headlineSmall),
-                      IconButton(onPressed: (){
-        
-                      }, icon: const Icon(Icons.add_circle_outline_sharp))
-                    ],
-                  ),
-                  StandardLayoutChild(
-                    fullWidth: true,
-                    child: SizedBox(
-                      height: 200.0, // Set a fixed height for the horizontal scroller
-                      child: HorizontalScroller(tiles: tiles),
-                    ),
-                  ),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text("Local activities", style: Theme.of(context).textTheme.headlineSmall),
-                        IconButton(onPressed: (){
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text("Tours in your province", style: Theme.of(context).textTheme.headlineSmall),
+                            IconButton(onPressed: (){
 
-                        }, icon: const Icon(Icons.add_circle_outline_sharp))
-                      ],
-                    ),
-                  StandardLayoutChild(
-                      fullWidth: true,
-                      child: SizedBox(
-                        height: 200.0, // Set a fixed height for the horizontal scroller
-                        child: HorizontalScroller(tiles: tiles),
-                      ),
-                    ),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text("Tours in your province", style: Theme.of(context).textTheme.headlineSmall),
-                        IconButton(onPressed: (){
-
-                        }, icon: const Icon(Icons.add_circle_outline_sharp))
-                      ],
-                    ),
-                    StandardLayoutChild(
-                      fullWidth: true,
-                      child: SizedBox(
-                        height: 200.0, // Set a fixed height for the horizontal scroller
-                        child: HorizontalScroller(tiles: tiles),
-                      ),
-                    ),
-                  /*Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text("Tours in your province", style: Theme.of(context).textTheme.headlineSmall),
-                      ],
-                    ),
-                  Row(
-                    children: [
-                      ElevatedButton(
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(builder: (context) => const DebugScreen()),
-                          );
-                        },
-                        child: const Text('Debug Screen'),
-                      ),
-                      ElevatedButton(
-                        onPressed: authProvider.signOut,
-                        child: const Text('Sign Out'),
-                      ),
-                    ],
-                  ),*/
-                  //Text('User is signed in!!  :)\n\nUsername: ${FirebaseAuth.instance.currentUser!.displayName}\nEmail: ${FirebaseAuth.instance.currentUser!.email}'),
-                ]
+                            }, icon: const Icon(Icons.add_circle_outline_sharp))
+                          ],
+                        ),
+                        StandardLayoutChild(
+                          fullWidth: true,
+                          child: SizedBox(
+                            height: 200.0, // Set a fixed height for the horizontal scroller
+                            child: HorizontalScroller(tiles: tiles),
+                          ),
+                        ),
+                      /*Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text("Tours in your province", style: Theme.of(context).textTheme.headlineSmall),
+                          ],
+                        ),
+                      Row(
+                        children: [
+                          ElevatedButton(
+                            onPressed: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(builder: (context) => const DebugScreen()),
+                              );
+                            },
+                            child: const Text('Debug Screen'),
+                          ),
+                          ElevatedButton(
+                            onPressed: authProvider.signOut,
+                            child: const Text('Sign Out'),
+                          ),
+                        ],
+                      ),*/
+                      //Text('User is signed in!!  :)\n\nUsername: ${FirebaseAuth.instance.currentUser!.displayName}\nEmail: ${FirebaseAuth.instance.currentUser!.email}'),
+                    ]
+                  ),
+                ],
               ),
             ],
           ),
