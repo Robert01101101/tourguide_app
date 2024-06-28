@@ -33,6 +33,39 @@ class LocationProvider with ChangeNotifier {
   }
 
   Future<void> getCurrentLocation() async {
+    bool serviceEnabled;
+    LocationPermission permission;
+
+    // Test if location services are enabled.
+    serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    if (!serviceEnabled) {
+      // Location services are not enabled don't continue
+      // accessing the position and request users of the
+      // App to enable the location services.
+      return Future.error('Location services are disabled.');
+    }
+
+    permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+      if (permission == LocationPermission.denied) {
+        // Permissions are denied, next time you could try
+        // requesting permissions again (this is also where
+        // Android's shouldShowRequestPermissionRationale
+        // returned true. According to Android guidelines
+        // your App should show an explanatory UI now.
+        return Future.error('Location permissions are denied');
+      }
+    }
+
+    if (permission == LocationPermission.deniedForever) {
+      // Permissions are denied forever, handle appropriately.
+      return Future.error(
+          'Location permissions are permanently denied, we cannot request permissions.');
+    }
+
+
+
     print("LocationProvider.getCurrentLocation()");
     try {
       Position position = await Geolocator.getCurrentPosition(
@@ -77,7 +110,7 @@ class LocationProvider with ChangeNotifier {
 
       // Get the Place ID using FlutterGooglePlacesSdk
       final result = await _places.findAutocompletePredictions(
-        _currentCity,
+        "$_currentCity, $_currentState, $_currentCountry",
         origin: LatLng(lat: position.latitude, lng: position.longitude),
       );
 
@@ -134,109 +167,6 @@ class LocationProvider with ChangeNotifier {
 
 
 
-
-
-
-
-
-
-
-
-
-  //GOOGLE MAPS COVER PHOTO
-  /*
-  Future<FetchPlacePhotoResponse?> fetchCoverPhotoUrl(String placeId) async {
-    print('PlaceService.fetchCoverPhotoUrl($placeId)');
-    try {
-      final result  = await _places.fetchPlace(placeId, fields: [PlaceField.PhotoMetadatas]);
-      final place = result.place;
-
-      await _fetchPlacePhoto(place!);
-      return _placePhoto;
-    } catch (e) {
-      print('Exception fetching place details: $e');
-      return null;
-    }
-  }
-
-  bool _fetchingPlacePhoto = false;
-  FetchPlacePhotoResponse? _placePhoto;
-  PhotoMetadata? _placePhotoMetadata;
-  dynamic _fetchingPlacePhotoErr;
-  //from https://pub.dev/packages/flutter_google_places_sdk/example
-  _fetchPlacePhoto(Place place) async {
-    print('PlaceService._fetchPlacePhoto()');
-    if (_fetchingPlacePhoto || place == null) {
-      return;
-    }
-
-    print('PlaceService._fetchPlacePhoto() - starting');
-    if ((place.photoMetadatas?.length ?? 0) == 0) {
-      //setState(() {
-      _fetchingPlacePhoto = false;
-      _fetchingPlacePhotoErr = "No photos for place";
-      print(_fetchingPlacePhotoErr);
-      //});
-      return;
-    }
-
-    print('PlaceService._fetchPlacePhoto() - photos found');
-
-    //setState(() {
-    _fetchingPlacePhoto = true;
-    _fetchingPlacePhotoErr = null;
-    //});
-
-    try {
-      final metadata = place.photoMetadatas![0];
-
-      print('PlaceService._fetchPlacePhoto() - fetching photo');
-      final result = await _places.fetchPlacePhoto(metadata);
-
-      //setState(() {
-      _placePhoto = result;
-      _placePhotoMetadata = metadata;
-      _fetchingPlacePhoto = false;
-      //});
-      return;
-    } catch (err) {
-      //setState(() {
-      _fetchingPlacePhotoErr = err;
-      _fetchingPlacePhoto = false;
-      //});
-      print(_fetchingPlacePhotoErr);
-      return;
-    }
-  }*/
-
-
-
-
-  //NEW from chatgpt based on locationProvider as starting point
-  /*
-  Future<void> _getCoverPhotoUrl(String placeId) async {
-    try {
-      print("LocationProvider._getCoverPhotoUrl()");
-      final details = await _places.fetchPlace(
-        placeId,
-        fields: [PlaceField.PhotoMetadatas],
-      );
-
-      if (details.place.photos != null && details.place.photos!.isNotEmpty) {
-        final photoReference = details.place.photos!.first.photoReference;
-        _coverPhotoUrl = 'https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photoreference=$photoReference&key=${MyGlobals.googleApiKey}';
-        notifyListeners();
-      }
-    } catch (e) {
-      print(e);
-    }
-  }
-  */
-
-
-
-
-
   //from https://pub.dev/packages/flutter_google_places_sdk/example, with modifications for simplification & integration to location_provider
   Future<GooglePlacesImg?> fetchPlacePhoto() async {
     //Ensure id is loaded
@@ -244,7 +174,7 @@ class LocationProvider with ChangeNotifier {
     while (_placeId == null || _placeId == "") {
       await Future.delayed(Duration(milliseconds: 100));
       attempts++;
-      if (attempts > 30) return null;
+      if (attempts > 100) return null;
     }
     // Check the cache first
     if (_imageCache.containsKey(_placeId)) {
