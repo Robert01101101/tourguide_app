@@ -5,39 +5,53 @@ class StandardLayout extends StatelessWidget {
   final double gap;
 
   const StandardLayout({
-    super.key,
+    Key? key,
     required this.children,
     this.gap = 16.0,
-  });
+  }) : super(key: key);
 
-  List<Widget> _addGaps(List<Widget> children) {
-    List<Widget> spacedChildren = [];
-    for (int i = 0; i < children.length; i++) {
-      spacedChildren.add(children[i]);
-      if (i < children.length - 1) {
-        spacedChildren.add(SizedBox(height: gap));
-      }
-    }
-    return spacedChildren;
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: children.map((widget) {
+        if (widget is StandardLayoutChild) {
+          return widget;
+        } else {
+          return Padding(
+            padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16),
+            child: widget,
+          );
+        }
+      }).toList(),
+    );
   }
+}
+
+//to allow setting some items to full width
+class StandardLayoutChild extends StatelessWidget {
+  final Widget child;
+  final bool fullWidth;
+
+  const StandardLayoutChild({
+    Key? key,
+    required this.child,
+    this.fullWidth = false,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.all(16.0),
-      child: Column(
-        children: _addGaps(children).map((widget) {
-          if (widget is Text) {
-            return Align(
-              alignment: Alignment.centerLeft,
-              child: widget,
-            );
-          }
-          return Align(
-            alignment: Alignment.center,
-            child: widget,
-          );
-        }).toList(),
+      padding: EdgeInsets.symmetric(vertical: 8.0),
+      child: fullWidth
+          ? SizedBox(
+        width: double.infinity,
+        child: child,
+      )
+          : Align(
+        alignment:
+        child is Text ? Alignment.centerLeft : Alignment.center,
+        child: child,
       ),
     );
   }

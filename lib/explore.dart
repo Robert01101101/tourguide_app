@@ -4,6 +4,7 @@ import 'package:tourguide_app/testing/debug_screen.dart';
 import 'package:tourguide_app/signIn.dart';
 import 'package:tourguide_app/ui/google_places_image.dart';
 import 'package:tourguide_app/ui/my_layouts.dart';
+import 'package:tourguide_app/ui/horizontal_scroller.dart';
 import 'package:tourguide_app/utilities/custom_import.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:tourguide_app/utilities/providers/location_provider.dart';
@@ -71,12 +72,52 @@ class ExploreState extends State<Explore> {
   }
 
 
+
+
+
+
+
+  final List<TileData> tiles = [
+  TileData(
+  imageUrl: 'https://via.placeholder.com/150',
+  title: 'Title 1',
+  description: 'Description 1',
+  ),
+  TileData(
+  imageUrl: 'https://via.placeholder.com/150',
+  title: 'Title 2',
+  description: 'Description 2',
+  ),
+  TileData(
+  imageUrl: 'https://via.placeholder.com/150',
+  title: 'Title 3',
+  description: 'Description 3',
+  ),
+  TileData(
+    imageUrl: 'https://via.placeholder.com/150',
+    title: 'Title 4',
+    description: 'Description 4',
+  ),
+  // Add more tiles as needed
+  ];
+
+
   @override
   Widget build(BuildContext context) {
     myAuth.AuthProvider authProvider = Provider.of(context);
     LocationProvider locationProvider = Provider.of<LocationProvider>(context);
 
     return Scaffold(
+      /*appBar: AppBar(
+        title: Text('AppBar'),
+        backgroundColor: Colors.transparent,
+        actions: [
+          IconButton(
+            onPressed: () {},
+            icon: Icon(Icons.more_vert),
+          ),
+        ],
+      ),*/
       body: Stack(
         children: [
           Consumer<LocationProvider>(
@@ -92,16 +133,30 @@ class ExploreState extends State<Explore> {
                     final googlePlacesImg = snapshot.data!;
                     //return googlePlacesImg;
 
-                    return ShaderMask(
-                      shaderCallback: (rect) {
-                        return const LinearGradient(
-                          begin: Alignment.topCenter,
-                          end: Alignment.bottomCenter,
-                          colors: [Colors.white, Colors.black45],
-                        ).createShader(Rect.fromLTRB(0, 0, rect.width, rect.height));
-                      },
-                      blendMode: BlendMode.multiply,
-                      child: googlePlacesImg
+                    return Stack(
+                      children: [
+                        ShaderMask(
+                          shaderCallback: (rect) {
+                            return const LinearGradient(
+                              begin: Alignment.topCenter,
+                              end: Alignment.bottomCenter,
+                              colors: [Colors.white, Colors.black45],
+                            ).createShader(Rect.fromLTRB(0, 0, rect.width, rect.height));
+                          },
+                          blendMode: BlendMode.multiply,
+                          child: googlePlacesImg
+                        ),
+                        Align(
+                          alignment: Alignment.topRight,
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 0),
+                            child: IconButton(
+                                onPressed: (){},
+                                icon: const Icon(Icons.more_vert),
+                                color: Color(0xeeF2F8F8)),
+                          ),
+                        ),
+                      ],
                     );
                   } else {
                     return const Text('No photo available');
@@ -141,21 +196,41 @@ class ExploreState extends State<Explore> {
                   );
                 }
               ),
-              Text("Explore local tours", style: Theme.of(context).textTheme.headlineSmall),
-              ElevatedButton(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => const DebugScreen()),
-                  );
-                },
-                child: const Text('Debug Screen'),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text("Explore local tours", style: Theme.of(context).textTheme.headlineSmall),
+                  IconButton(onPressed: (){
+
+                  }, icon: const Icon(Icons.add_circle_outline_sharp))
+                ],
+              ),
+                StandardLayoutChild(
+                  fullWidth: true,
+                  child: SizedBox(
+                  height: 200.0, // Set a fixed height for the horizontal scroller
+                  child: HorizontalScroller(tiles: tiles),
+                ),
+              ),
+              Row(
+                children: [
+                  ElevatedButton(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => const DebugScreen()),
+                      );
+                    },
+                    child: const Text('Debug Screen'),
+                  ),
+                  ElevatedButton(
+                    onPressed: authProvider.signOut,
+                    child: const Text('Sign Out'),
+                  ),
+                ],
               ),
               //Text('User is signed in!!  :)\n\nUsername: ${FirebaseAuth.instance.currentUser!.displayName}\nEmail: ${FirebaseAuth.instance.currentUser!.email}'),
-              ElevatedButton(
-                onPressed: authProvider.signOut,
-                child: const Text('Sign Out'),
-              ),]
+            ]
           ),
         ],
       ),

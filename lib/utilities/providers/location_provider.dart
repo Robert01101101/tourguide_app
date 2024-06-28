@@ -38,7 +38,18 @@ class LocationProvider with ChangeNotifier {
       Position position = await Geolocator.getCurrentPosition(
         desiredAccuracy: LocationAccuracy.high,
       );
-      _currentPosition = position;
+      Position testPos = Position(
+          latitude: 52.51253974139681,
+          longitude: 13.405139039805762,
+          timestamp: DateTime.now(),
+          accuracy: 0,
+          altitude: 0,
+          heading: 0,
+          speed: 0,
+          speedAccuracy: 0,
+          headingAccuracy: 0,
+          altitudeAccuracy: 0);
+      _currentPosition = position; // = testPos;
       notifyListeners();
 
       await _getLocationDetailsFromCoordinates(position);

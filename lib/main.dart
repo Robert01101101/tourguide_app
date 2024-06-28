@@ -83,14 +83,16 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
   }
 
   ThemeData _buildTheme() {
+    const Color primaryColor = Color(0xFF6fece4);
     var baseTheme = ThemeData(
       useMaterial3: true,
-      colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF6fece4)),
+      colorScheme: ColorScheme.fromSeed(seedColor: primaryColor),
     );
 
     final textTheme = baseTheme.textTheme;
 
     return baseTheme.copyWith(
+      scaffoldBackgroundColor: Colors.white,
       textTheme: GoogleFonts.latoTextTheme(textTheme).copyWith(
         displayLarge: GoogleFonts.vollkorn(textStyle: textTheme.displayLarge, color: const Color(0xff3b4948), fontWeight: FontWeight.w300),
         displayMedium: GoogleFonts.vollkorn(textStyle: textTheme.displayMedium, color: const Color(0xff3b4948), fontWeight: FontWeight.w300),
