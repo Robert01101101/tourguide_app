@@ -107,6 +107,21 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
 class MyGlobals {
   static final AutoScrollController scrollController = AutoScrollController();
   static const String googleApiKey = "AIzaSyBa7mCp1FUiWMhfTHPWNJ2Cy-A84w4i2I4";
+  static const shimmerGradient = LinearGradient(
+    colors: [
+      Color(0xFFEBEBF4),
+      Color(0xFFF4F4F4),
+      Color(0xFFEBEBF4),
+    ],
+    stops: [
+      0.1,
+      0.3,
+      0.4,
+    ],
+    begin: Alignment(-1.0, -0.3),
+    end: Alignment(1.0, 0.3),
+    tileMode: TileMode.clamp,
+  );
 }
 
 class SnackBarService {
