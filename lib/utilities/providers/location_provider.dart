@@ -9,6 +9,7 @@ import 'package:tourguide_app/main.dart';
 
 import '../../ui/google_places_image.dart';
 
+//TODO: Handle all types of errors as well as permission denied
 /// Global Location Provider so I can access location anywhere in the app
 class LocationProvider with ChangeNotifier {
   Position? _currentPosition;

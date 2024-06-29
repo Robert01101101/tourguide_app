@@ -5,6 +5,7 @@ import 'package:tourguide_app/signIn.dart';
 import 'package:tourguide_app/ui/google_places_image.dart';
 import 'package:tourguide_app/ui/my_layouts.dart';
 import 'package:tourguide_app/ui/horizontal_scroller.dart';
+import 'package:tourguide_app/ui/shimmer_loading.dart';
 import 'package:tourguide_app/utilities/custom_import.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:tourguide_app/utilities/providers/location_provider.dart';
@@ -140,7 +141,28 @@ class ExploreState extends State<Explore> {
                     future: locationProvider.fetchPlacePhoto(),
                     builder: (context, snapshot) {
                       if (snapshot.connectionState == ConnectionState.waiting && !(snapshot.hasData && snapshot.data != null)) {
-                        return const CircularProgressIndicator();
+                        return Stack(
+                          children: [
+                            Container(
+                              height: 300,
+                              width: double.infinity,
+                              decoration: const BoxDecoration(
+                                gradient: LinearGradient(
+                                  colors: [Color(0xffebebf4), Color(0xff7b7b80)], // Define the gradient colors
+                                  begin: Alignment.topCenter,
+                                  end: Alignment.bottomCenter,
+                                ),
+                              ),
+                            ),
+                            const Positioned.fill(
+                              child: Center(
+                                child: CircularProgressIndicator(
+                                  color: Color(0xffebebf4),
+                                ),
+                              ),
+                            ),
+                          ],
+                        );
                       } else if (snapshot.hasError) {
                         return Text('Error: ${snapshot.error}');
                       } else if (snapshot.hasData && snapshot.data != null) {
@@ -150,7 +172,7 @@ class ExploreState extends State<Explore> {
                           children: [
                             Transform.translate(
                               offset: Offset(0, _scrollOffset * 0.5), // Adjust the multiplier for the parallax effect
-                              child: ShaderMask(
+                              child: ShaderMask( //Image gradient
                                 shaderCallback: (rect) {
                                   return const LinearGradient(
                                     begin: Alignment.topCenter,
@@ -159,15 +181,27 @@ class ExploreState extends State<Explore> {
                                   ).createShader(Rect.fromLTRB(0, 0, rect.width, rect.height));
                                 },
                                 blendMode: BlendMode.multiply,
-                                child: googlePlacesImg.placePhotoResponse.when(
-                                  image: (image) => Image(
-                                    image: image.image,
-                                    gaplessPlayback: true,
-                                  ),
-                                  imageUrl: (imageUrl) => Image.network(
-                                    imageUrl,
-                                    gaplessPlayback: true,
-                                  ),
+                                child: LayoutBuilder( //Overflow to fit varying image sizes to area
+                                  builder: (context, constraints) {
+                                  return SizedBox(
+                                    width: constraints.maxWidth,
+                                    height:300,
+                                    child: FittedBox(
+                                      fit: BoxFit.cover,
+                                      alignment: Alignment.center,
+                                      child: googlePlacesImg.placePhotoResponse.when( //Display smoothly without flicker on scroll
+                                        image: (image) => Image(
+                                          image: image.image,
+                                          gaplessPlayback: true,
+                                        ),
+                                        imageUrl: (imageUrl) => Image.network(
+                                          imageUrl,
+                                          gaplessPlayback: true,
+                                        ),
+                                      ),
+                                    ),
+                                  );
+                                  }
                                 )
                               ),
                             ),
@@ -176,7 +210,9 @@ class ExploreState extends State<Explore> {
                               child: Padding(
                                 padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 0),
                                 child: IconButton(
-                                    onPressed: (){},
+                                    onPressed: (){
+                                      print("City options pressed");
+                                    },
                                     icon: const Icon(Icons.more_vert),
                                     color: Color(0xeeF2F8F8)),
                               ),
@@ -200,7 +236,7 @@ class ExploreState extends State<Explore> {
                       ),
                       Container(
                         color: Colors.white,
-                        height: 400,  //BAD! Hardcoded, but it's fine for now since it only needs to be enough to cover the google img on scroll
+                        height: 800,  //BAD! Hardcoded, but it's fine for now since it only needs to be enough to cover the google img on scroll
                       )
                     ],
                   ),
@@ -209,6 +245,7 @@ class ExploreState extends State<Explore> {
                         FutureBuilder(
                         future: _handleSignIn(),
                         builder: (context, snapshot) {
+
                           //Assemble welcome string
                           String title = "Welcome";
                           if (locationProvider.currentCity != null) title += " to ${locationProvider.currentCity}";
