@@ -2,6 +2,7 @@ import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:tourguide_app/testing/debug_screen.dart';
 import 'package:tourguide_app/signIn.dart';
+import 'package:tourguide_app/tour_creation/tour_creation.dart';
 import 'package:tourguide_app/ui/google_places_image.dart';
 import 'package:tourguide_app/ui/my_layouts.dart';
 import 'package:tourguide_app/ui/horizontal_scroller.dart';
@@ -277,7 +278,10 @@ class ExploreState extends State<Explore> {
                         children: [
                           Text("Explore local tours", style: Theme.of(context).textTheme.headlineSmall),
                           IconButton(onPressed: (){
-
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (context) => const CreateTour()),
+                            );
                           }, icon: const Icon(Icons.add_circle_outline_sharp))
                         ],
                       ),
@@ -293,7 +297,10 @@ class ExploreState extends State<Explore> {
                           children: [
                             Text("Local activities", style: Theme.of(context).textTheme.headlineSmall),
                             IconButton(onPressed: (){
-
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(builder: (context) => const CreateTour()),
+                              );
                             }, icon: const Icon(Icons.add_circle_outline_sharp))
                           ],
                         ),
@@ -309,7 +316,10 @@ class ExploreState extends State<Explore> {
                           children: [
                             Text("Tours in your province", style: Theme.of(context).textTheme.headlineSmall),
                             IconButton(onPressed: (){
-
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(builder: (context) => const CreateTour()),
+                              );
                             }, icon: const Icon(Icons.add_circle_outline_sharp))
                           ],
                         ),

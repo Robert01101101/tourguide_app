@@ -1,6 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:google_places_autocomplete_text_field/google_places_autocomplete_text_field.dart';
 import 'package:tourguide_app/utilities/custom_import.dart';
 import 'package:flutter_google_places_sdk/flutter_google_places_sdk.dart';
 
@@ -88,18 +89,31 @@ class _CreateTourState extends State<CreateTour> {
                   enabled: !_isFormSubmitted,
                 ),
                 SizedBox(height: 8),
-                TextFormField(
-                  controller: _cityController,
-                  decoration: const InputDecoration(
-                    labelText: 'City',
-                  ),
-                  validator: (String? value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please enter a city for your tour';
+                GooglePlacesAutoCompleteTextFormField(  //TODO: Add location bias, restrict to cities only
+                    decoration: const InputDecoration(
+                      labelText: 'City',
+                    ),
+                    validator: (String? value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Please enter a city';
+                      }
+                      return null;
+                    },
+                    enabled: !_isFormSubmitted,
+                    textEditingController: _cityController,
+                    googleAPIKey: MyGlobals.googleApiKey,
+                    //proxyURL: "https://your-proxy.com/", // only needed if you build for the web
+                    debounceTime: 400, // defaults to 600 ms
+                    //countries: ["de"], // optional, by default the list is empty (no restrictions)
+                    //isLatLngRequired: true, // if you require the coordinates from the place details
+                    /*getPlaceDetailWithLatLng: (prediction) {
+                      // this method will return latlng with place detail
+                      print("Coordinates: (${prediction.lat},${prediction.lng})");
+                    },*/ // this callback is called when isLatLngRequired is true
+                    itmClick: (prediction) {
+                      _cityController.text = prediction.description!;
+                      _cityController.selection = TextSelection.fromPosition(TextPosition(offset: prediction.description!.length));
                     }
-                    return null;
-                  },
-                  enabled: !_isFormSubmitted,
                 ),
                 SizedBox(height: 8),
                 TextFormField(
@@ -154,15 +168,6 @@ class _CreateTourState extends State<CreateTour> {
                       _firestoreCreateTour();
                     }
                   }, child: const Text("Save and create tour")),
-                ),
-                ElevatedButton(
-                  onPressed: () async {
-                    final places = FlutterGooglePlacesSdk(MyGlobals.googleApiKey);
-                    final predictions =
-                    await places.findAutocompletePredictions('Tel Aviv');
-                    print('Result: $predictions');
-                  },
-                  child: Text('Predict and print to console'),
                 ),
               ],
             ),
