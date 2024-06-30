@@ -60,6 +60,7 @@ dependencies:
   bubble: ^1.2.1
   scroll_to_index: ^3.0.1
   google_places_autocomplete_text_field: ^0.1.3
+  url_launcher: ^6.3.0
 
 
 dev_dependencies:

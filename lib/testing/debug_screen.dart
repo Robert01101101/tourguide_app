@@ -2,6 +2,7 @@ import 'package:tourguide_app/testing/flutter_google_places_sample.dart';
 import 'package:tourguide_app/tour_creation/gemini_chat.dart';
 import 'package:tourguide_app/tour_creation/tour_creation_places_testing.dart';
 import 'package:tourguide_app/utilities/custom_import.dart';
+import 'package:tourguide_app/utilities/map_utils.dart';
 
 //Debug Screen
 
@@ -80,6 +81,12 @@ class DebugScreenState extends State<DebugScreen> {
                   MaterialPageRoute(builder: (context) => const GeminiChat()),
                 );
               }, child: const Text("Gemini Chat")),
+              ElevatedButton(onPressed: (){
+                MapUtils.openMap(-3.823216,-38.481700);
+              }, child: const Text("Google Maps GPS link")),
+              ElevatedButton(onPressed: (){
+                MapUtils.openMapWithQuery("Waterfront Vancouver BC Canada");
+              }, child: const Text("Google Maps Address link")),
             ],)
           ],
         ),
