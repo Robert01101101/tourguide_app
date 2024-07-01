@@ -6,6 +6,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_places_autocomplete_text_field/google_places_autocomplete_text_field.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:tourguide_app/ui/add_image_tile.dart';
 import 'package:tourguide_app/ui/city_autocomplete.dart';
 import 'package:tourguide_app/ui/my_layouts.dart';
 import 'package:tourguide_app/utilities/custom_import.dart';
@@ -152,54 +153,10 @@ class _CreateTourState extends State<CreateTour> {
                 inactiveTrackColor: _isFormSubmitted ? Colors.grey[300] : null,
               ),
               Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: <Widget>[
-                    _image != null
-                        ? Container(
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(20.0), // Adjust the radius as needed
-                            border: Border.all(color: Theme.of(context).primaryColor, width: 2.0), // Grey border, adjust width as needed
-                            color: Colors.transparent, // Transparent fill
-                          ),
-                          height: 200,
-                          width: 200,
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(18.0),
-                            child: Image.file(
-                              _image!,
-                              fit: BoxFit.cover,
-                            ),
-                          ),
-                        )
-                        : Container(
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(20.0), // Adjust the radius as needed
-                        border: Border.all(color: Theme.of(context).primaryColor, width: 2.0), // Grey border, adjust width as needed
-                        color: Colors.transparent, // Transparent fill
-                      ),
-                      height: 200,
-                      width: 200,
-                      child: Center(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text('Add an image'),
-                            SizedBox(height: 15),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                IconButton(onPressed: () => _pickImage(ImageSource.camera), icon: Icon(Icons.camera_alt)),
-                                SizedBox(width: 5),
-                                IconButton(onPressed: () => _pickImage(ImageSource.gallery), icon: Icon(Icons.collections)),
-                              ],
-                            )
-                          ],
-                        ),
-                      ),
-                    ),
-
-                  ],
+                child: AddImageTile(
+                  imageFile: _image,
+                  pickImageFromCamera: () => _pickImage(ImageSource.camera),
+                  pickImageFromGallery: () => _pickImage(ImageSource.gallery),
                 ),
               ),
               Align(
