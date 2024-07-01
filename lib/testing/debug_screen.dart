@@ -1,6 +1,6 @@
 import 'package:tourguide_app/testing/flutter_google_places_sample.dart';
-import 'package:tourguide_app/tour_creation/gemini_chat.dart';
-import 'package:tourguide_app/tour_creation/tour_creation_places_testing.dart';
+import 'package:tourguide_app/gemini_chat.dart';
+import 'package:tourguide_app/testing/tour_creation_places_testing.dart';
 import 'package:tourguide_app/utilities/custom_import.dart';
 import 'package:tourguide_app/utilities/map_utils.dart';
 

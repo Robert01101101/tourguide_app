@@ -151,32 +151,56 @@ class _CreateTourState extends State<CreateTour> {
                 inactiveThumbColor: _isFormSubmitted ? Colors.grey : null,
                 inactiveTrackColor: _isFormSubmitted ? Colors.grey[300] : null,
               ),
-              Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-                  _image != null
-                      ? Image.file(
-                    _image!,
-                    height: 200,
-                  )
-                      : Container(
-                    color: Colors.grey[300],
-                    height: 200,
-                    child: Center(
-                      child: Text('No image selected'),
+              Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    _image != null
+                        ? Container(
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(20.0), // Adjust the radius as needed
+                            border: Border.all(color: Theme.of(context).primaryColor, width: 2.0), // Grey border, adjust width as needed
+                            color: Colors.transparent, // Transparent fill
+                          ),
+                          height: 200,
+                          width: 200,
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(18.0),
+                            child: Image.file(
+                              _image!,
+                              fit: BoxFit.cover,
+                            ),
+                          ),
+                        )
+                        : Container(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(20.0), // Adjust the radius as needed
+                        border: Border.all(color: Theme.of(context).primaryColor, width: 2.0), // Grey border, adjust width as needed
+                        color: Colors.transparent, // Transparent fill
+                      ),
+                      height: 200,
+                      width: 200,
+                      child: Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text('Add an image'),
+                            SizedBox(height: 15),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                IconButton(onPressed: () => _pickImage(ImageSource.camera), icon: Icon(Icons.camera_alt)),
+                                SizedBox(width: 5),
+                                IconButton(onPressed: () => _pickImage(ImageSource.gallery), icon: Icon(Icons.collections)),
+                              ],
+                            )
+                          ],
+                        ),
+                      ),
                     ),
-                  ),
-                  SizedBox(height: 5),
-                  ElevatedButton(
-                    onPressed: () => _pickImage(ImageSource.camera),
-                    child: Text('Take Picture'),
-                  ),
-                  SizedBox(height: 5),
-                  ElevatedButton(
-                    onPressed: () => _pickImage(ImageSource.gallery),
-                    child: Text('Choose from Gallery'),
-                  ),
-                ],
+
+                  ],
+                ),
               ),
               Align(
                 alignment: Alignment.bottomCenter,
