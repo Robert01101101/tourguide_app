@@ -2,6 +2,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_places_autocomplete_text_field/google_places_autocomplete_text_field.dart';
+import 'package:tourguide_app/ui/city_autocomplete.dart';
 import 'package:tourguide_app/utilities/custom_import.dart';
 import 'package:flutter_google_places_sdk/flutter_google_places_sdk.dart';
 
@@ -89,7 +90,7 @@ class _CreateTourState extends State<CreateTour> {
                   enabled: !_isFormSubmitted,
                 ),
                 SizedBox(height: 8),
-                GooglePlacesAutoCompleteTextFormField(  //TODO: Add location bias, restrict to cities only
+                /*GooglePlacesAutoCompleteTextFormField(  //TODO: Add location bias, restrict to cities only
                     decoration: const InputDecoration(
                       labelText: 'City',
                     ),
@@ -114,7 +115,12 @@ class _CreateTourState extends State<CreateTour> {
                       _cityController.text = prediction.description!;
                       _cityController.selection = TextSelection.fromPosition(TextPosition(offset: prediction.description!.length));
                     }
-                ),
+                ),*/
+                CityAutocomplete(textEditingController: _cityController,
+                    isFormSubmitted: _isFormSubmitted,
+                    onItemSelected: (AutocompletePrediction prediction) {
+                      print("Selected city: ${prediction.primaryText}");
+                    },),
                 SizedBox(height: 8),
                 TextFormField(
                   controller: _descriptionController,

@@ -1,4 +1,6 @@
+import 'dart:developer';
 import 'dart:io';
+import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:geocoding/geocoding.dart';
@@ -109,22 +111,62 @@ class LocationProvider with ChangeNotifier {
         notifyListeners();
       }
 
-      // Get the Place ID using FlutterGooglePlacesSdk
-      final result = await _places.findAutocompletePredictions(
-        "$_currentCity, $_currentState, $_currentCountry",
-        origin: LatLng(lat: position.latitude, lng: position.longitude),
-      );
+      var resultSorted = await getAutocompleteSuggestions("$_currentCity, $_currentState, $_currentCountry");
 
-      print("LocationProvider._getLocationDetailsFromCoordinates() - result.predictions.first.placeId=${result.predictions.first.placeId}");
-
-      if (result.predictions.isNotEmpty) {
-        _placeId = result.predictions.first.placeId ?? '';
+      if (resultSorted != null && resultSorted.isNotEmpty) {
+        _placeId = resultSorted.first.placeId ?? '';
         notifyListeners();
       }
 
     } catch (e) {
       print(e);
     }
+  }
+
+  Future<List<AutocompletePrediction>?> getAutocompleteSuggestions(String query) async {
+    if (query == null || query.isEmpty) return null;
+    try {
+      // Get the Place ID using FlutterGooglePlacesSdk
+      LatLng location = LatLng(lat: _currentPosition!.latitude, lng: _currentPosition!.longitude);
+      LatLngBounds locationBias = _createBounds(location, 50);
+      final result = await _places.findAutocompletePredictions(
+        query,
+        placeTypesFilter: [PlaceTypeFilter.CITIES],
+        locationBias: locationBias,
+        origin: location,
+      );
+
+      List<AutocompletePrediction> resultSorted = List.from(result.predictions);
+
+      resultSorted.sort((a, b) => a.distanceMeters!.compareTo(b.distanceMeters!));
+      log(resultSorted.toString());
+      print("LocationProvider._getLocationDetailsFromCoordinates() - result.predictions.first.placeId=${resultSorted.first.placeId}");
+
+      return resultSorted;
+    } catch (e){
+      print(e);
+      return null;
+    }
+  }
+
+  LatLngBounds _createBounds(LatLng center, double distanceInKm) {
+    // Earth's radius in kilometers
+    const double earthRadius = 6378.137;
+
+    // Calculate the offset in latitude and longitude
+    double latOffset = distanceInKm / earthRadius;
+    double lngOffset = distanceInKm / (earthRadius * math.cos(math.pi * center.lat / 180));
+
+    // Convert offsets from radians to degrees
+    latOffset = latOffset * 180 / math.pi;
+    lngOffset = lngOffset * 180 / math.pi;
+
+    // Create the southwest and northeast corners of the LatLngBounds
+    LatLng southwest = LatLng(lat: center.lat - latOffset, lng: center.lng - lngOffset);
+    LatLng northeast = LatLng(lat: center.lat + latOffset, lng: center.lng + lngOffset);
+
+    // Return the LatLngBounds
+    return LatLngBounds(southwest: southwest, northeast: northeast);
   }
 
   Future<void> _saveLocation() async {
