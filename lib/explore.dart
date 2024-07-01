@@ -1,5 +1,7 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:tourguide_app/model/tour.dart';
 import 'package:tourguide_app/testing/debug_screen.dart';
 import 'package:tourguide_app/signIn.dart';
 import 'package:tourguide_app/tour_creation.dart';
@@ -39,6 +41,8 @@ class Explore extends StatefulWidget {
 
 class ExploreState extends State<Explore> {
   GoogleSignInAccount? _currentUser;
+  bool downloadingTours = false;
+  List<Tour>? tours;
 
   @override
   void initState() {
@@ -52,6 +56,10 @@ class ExploreState extends State<Explore> {
         print('ExploreState.initState() - FirabaseAuth listen - FIREBASE AUTH (EXPLORE) - User is currently signed out!');
       } else {
         print('ExploreState.initState() - FirabaseAuth listen - FIREBASE AUTH (EXPLORE) - User is signed in!');
+        if (!downloadingTours){
+          downloadingTours = true;
+          downloadTours();
+        }
         FlutterNativeSplash.remove();
       }
     });
@@ -80,13 +88,67 @@ class ExploreState extends State<Explore> {
     }
   }
 
+  //TODO: Move
+  Future<void> downloadTours() async {
+    print('downloadTours');
+    /*
+    FirebaseFirestore db = FirebaseFirestore.instance;
+    FirebaseAuth auth = FirebaseAuth.instance;
+
+    try {
+      // Ensure user is signed in
+      User? user = auth.currentUser;
+      if (user == null) {
+        throw Exception('User not signed in');
+      }
+
+      // Reference to the 'tours' collection
+      CollectionReference toursRef = db.collection('tours');
+
+      // Fetch tours where visibility is 'public' or user is the owner
+      QuerySnapshot querySnapshot = await toursRef.where('visibility', isEqualTo: 'public')
+          .where('uid', isEqualTo: user.uid)
+          .get();
+
+      // Extract data from each document
+      List<Map<String, dynamic>> tours = querySnapshot.docs.map((doc) {
+        Map<String, dynamic>? data = doc.data() as Map<String, dynamic>?;
+
+        if (data != null) {
+          // Include document ID in the data map
+          data['id'] = doc.id;
+          print("data.length=");
+          print(data.length);
+          return data;
+        } else {
+          throw Exception('Document data was null or not of type Map<String, dynamic>');
+        }
+      }).toList();
+
+      return tours;
+    } catch (e) {
+      // Handle any errors
+      print('Error fetching tours: $e');
+      return [];
+    }*/
+    List<Tour> toursFetched = await TourService.fetchAllTours();
+    setState((){
+      tours = toursFetched;
+      tiles[0] = TileData(
+        imageUrl: toursFetched[2].imageUrl,
+        title: toursFetched[2].name,
+        description: 'Description 1',
+      );
+    });
+  }
 
 
 
 
 
 
-  final List<TileData> tiles = [
+
+  List<TileData> tiles = [
   TileData(
   imageUrl: 'https://via.placeholder.com/150',
   title: 'Title 1',

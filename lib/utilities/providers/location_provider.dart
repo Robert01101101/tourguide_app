@@ -227,6 +227,12 @@ class LocationProvider with ChangeNotifier {
       if (attempts > 100) return null;
     }
 
+    // Check if the image is already cached in memory
+    if (_imageCache.containsKey(_placeId!)) {
+      print("locationProvider._fetchPlacePhoto() - found photo in cache for $_placeId");
+      return _imageCache[_placeId!];
+    }
+
     // Get the directory to store the image and metadata
     final directory = await getApplicationDocumentsDirectory();
     final filePath = '${directory.path}/$_placeId.jpg';
@@ -247,10 +253,15 @@ class LocationProvider with ChangeNotifier {
         height: metadataMap['height'],
         attributions: metadataMap['attributions'],
       );
-      return GooglePlacesImg(
+      final googlePlacesImg = GooglePlacesImg(
         photoMetadata: metadata,
         placePhotoResponse: FetchPlacePhotoResponse.image(Image.memory(bytes)),
       );
+
+      // Cache the image in memory
+      _imageCache[_placeId!] = googlePlacesImg;
+
+      return googlePlacesImg;
     }
 
     print("locationProvider._fetchPlacePhoto() - placeId=$_placeId");

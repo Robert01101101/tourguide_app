@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:google_places_autocomplete_text_field/google_places_autocomplete_text_field.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -66,19 +67,30 @@ class _CreateTourState extends State<CreateTour> {
     FirebaseFirestore db = FirebaseFirestore.instance;
     FirebaseAuth auth = FirebaseAuth.instance;
 
-    //get userid
-    final User user = auth.currentUser!; //assuming we're logged in here
+    // Get user ID
+    final User user = auth.currentUser!;
     final uid = user.uid;
 
+    // Prepare tour data
     final tour = <String, dynamic>{
       "name": _nameController.text,
       "description": _descriptionController.text,
+      "createdDateTime": DateTime.now(), // Add created date and time
       "city": _cityController.text,
       "uid": uid,
       "visibility": _tourIsPublic ? "public" : "private",
+      "imageUrl": "", // Placeholder for image URL
     };
 
-    // Add a new document with a generated ID
+    // Upload image and get download URL
+    if (_image != null){
+      String imageUrl = await uploadImage(_image!);
+
+      // Update tour data with image URL
+      tour["imageUrl"] = imageUrl;
+    }
+
+    // Add a new document with generated ID to Firestore
     db.collection("tours").add(tour).then((DocumentReference doc){
       print('DocumentSnapshot added with ID: ${doc.id}');
       ScaffoldMessenger.of(context).removeCurrentSnackBar();
@@ -88,6 +100,24 @@ class _CreateTourState extends State<CreateTour> {
 
       Navigator.pop(context);
     });
+  }
+
+
+  // Function to upload image to Firebase Storage
+  Future<String> uploadImage(File imageFile) async {
+    // Create a reference to the location you want to upload to in Firebase Storage
+    Reference ref = FirebaseStorage.instance.ref().child('tour_images').child(DateTime.now().millisecondsSinceEpoch.toString());
+
+    // Upload the file to Firebase Storage
+    UploadTask uploadTask = ref.putFile(imageFile);
+
+    // Await the completion of the upload task
+    TaskSnapshot taskSnapshot = await uploadTask.whenComplete(() => null);
+
+    // Upon completion, get the download URL for the image
+    String imageUrl = await taskSnapshot.ref.getDownloadURL();
+
+    return imageUrl;
   }
 
   @override

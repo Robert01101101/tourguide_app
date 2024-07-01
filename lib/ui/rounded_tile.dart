@@ -30,7 +30,7 @@ class RoundedTile extends StatelessWidget {
             child: Stack(
               children: [
                 ShimmerLoading(
-                  isLoading: true,
+                  isLoading: false,
                   child: Image.network(
                     tile.imageUrl,
                     width: 150.0,
