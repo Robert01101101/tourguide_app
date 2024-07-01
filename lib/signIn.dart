@@ -41,14 +41,14 @@ class _SignInState extends State<SignIn> {
       my_auth.AuthProvider authProvider = Provider.of(context, listen: false);
       authProvider.addListener(() {
         if (authProvider.user != null && authProvider.isAuthorized && !navigatedAwayFromSignIn) {
-          print("signIn.initState().authProviderListener -> user is no longer null");
+          logger.t("signIn.initState().authProviderListener -> user is no longer null");
           navigatedAwayFromSignIn = true;
           // Navigate to the new screen once login is complete
           TourguideNavigation.router.go(
             TourguideNavigation.explorePath,
           );
         } else if (authProvider.user == null || authProvider.silentSignInFailed){
-          print("signIn.initState().authProviderListener -> user is null or silentSignInFailed");
+          logger.t("signIn.initState().authProviderListener -> user is null or silentSignInFailed");
           FlutterNativeSplash.remove();
         }
       });

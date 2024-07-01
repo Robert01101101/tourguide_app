@@ -25,10 +25,7 @@ class DefaultFirebaseOptions {
       case TargetPlatform.iOS:
         return ios;
       case TargetPlatform.macOS:
-        throw UnsupportedError(
-          'DefaultFirebaseOptions have not been configured for macos - '
-          'you can reconfigure this by running the FlutterFire CLI again.',
-        );
+        return macos;
       case TargetPlatform.windows:
         throw UnsupportedError(
           'DefaultFirebaseOptions have not been configured for windows - '
@@ -73,5 +70,16 @@ class DefaultFirebaseOptions {
     androidClientId: '69433430524-051aek1jtn1j9ml9gl2fao9i1jrqmbvr.apps.googleusercontent.com',
     iosClientId: '69433430524-q50ntvvjnb08v75f7c4uej3mua53e7jc.apps.googleusercontent.com',
     iosBundleId: 'com.robertMichelsDigitalMedia.tourguideApp',
+  );
+
+  static const FirebaseOptions macos = FirebaseOptions(
+    apiKey: 'AIzaSyA8X23vQAAxM5DUNqGXSpKrHHR99uYn33M',
+    appId: '1:69433430524:ios:523b496cfb10538c6aa279',
+    messagingSenderId: '69433430524',
+    projectId: 'tourguide-firebase',
+    storageBucket: 'tourguide-firebase.appspot.com',
+    androidClientId: '69433430524-051aek1jtn1j9ml9gl2fao9i1jrqmbvr.apps.googleusercontent.com',
+    iosClientId: '69433430524-l135gic6e4vikfvgjmuquapodikuu5c8.apps.googleusercontent.com',
+    iosBundleId: 'com.robertMichelsDigitalMedia.tourguideApp.RunnerTests',
   );
 }

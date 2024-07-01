@@ -1,3 +1,7 @@
+import 'dart:ui';
+
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
+import 'package:logger/logger.dart';
 import 'package:provider/provider.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -9,8 +13,12 @@ import 'firebase_options.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+var logger = Logger();
 
-void main() async {
+Future<void> main() async {
+  //LOGGING
+  Logger.level = Level.trace;
+
   //ROUTING
   TourguideNavigation.instance;
 
@@ -20,6 +28,17 @@ void main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+
+  //CRASHLYTICS
+  // Pass all uncaught "fatal" errors from the framework to Crashlytics
+  FlutterError.onError = (errorDetails) {
+    FirebaseCrashlytics.instance.recordFlutterFatalError(errorDetails);
+  };
+  // Pass all uncaught asynchronous errors that aren't handled by the Flutter framework to Crashlytics
+  PlatformDispatcher.instance.onError = (error, stack) {
+    FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
+    return true;
+  };
 
   //Splash
   WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
@@ -61,7 +80,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
   }
 
   void clearPrefsOnClose() async {
-    print("clearPrefsOnClose()");
+    logger.t("clearPrefsOnClose()");
     final prefs = await SharedPreferences.getInstance();
     prefs.remove('chat_messages');
   }

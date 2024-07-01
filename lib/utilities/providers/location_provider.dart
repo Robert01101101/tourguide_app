@@ -36,7 +36,7 @@ class LocationProvider with ChangeNotifier {
   Map<String, GooglePlacesImg> _imageCache = {};
 
   LocationProvider() {
-    print("LocationProvider()");
+    logger.t("LocationProvider()");
     _places = FlutterGooglePlacesSdk(MyGlobals.googleApiKey);
     _loadSavedLocation();
   }
@@ -75,7 +75,7 @@ class LocationProvider with ChangeNotifier {
 
 
 
-    print("LocationProvider.getCurrentLocation()");
+    logger.t("LocationProvider.getCurrentLocation()");
     try {
       Position position = await Geolocator.getCurrentPosition(
         desiredAccuracy: LocationAccuracy.high,
@@ -97,13 +97,13 @@ class LocationProvider with ChangeNotifier {
       await _getLocationDetailsFromCoordinates(position);
       await _saveLocation();
     } catch (e) {
-      print(e);
+      logger.t(e);
     }
   }
 
   Future<void> _getLocationDetailsFromCoordinates(Position position) async {
     try {
-      print("LocationProvider._getLocationDetailsFromCoordinates()");
+      logger.t("LocationProvider._getLocationDetailsFromCoordinates()");
       List<Placemark> placemarks = await placemarkFromCoordinates(
         position.latitude,
         position.longitude,
@@ -111,7 +111,7 @@ class LocationProvider with ChangeNotifier {
 
       if (placemarks != null && placemarks.isNotEmpty) {
         _currentCity = placemarks.first.locality ?? '';
-        print("LocationProvider._getLocationDetailsFromCoordinates() - _currentCity=$_currentCity!");
+        logger.t("LocationProvider._getLocationDetailsFromCoordinates() - _currentCity=$_currentCity!");
         _currentState = placemarks.first.administrativeArea ?? '';
         _currentCountry = placemarks.first.country ?? '';
         notifyListeners();
@@ -125,7 +125,7 @@ class LocationProvider with ChangeNotifier {
       }
 
     } catch (e) {
-      print(e);
+      logger.t(e);
     }
   }
 
@@ -145,12 +145,12 @@ class LocationProvider with ChangeNotifier {
       List<AutocompletePrediction> resultSorted = List.from(result.predictions);
 
       resultSorted.sort((a, b) => a.distanceMeters!.compareTo(b.distanceMeters!));
-      log(resultSorted.toString());
-      print("LocationProvider._getLocationDetailsFromCoordinates() - result.predictions.first.placeId=${resultSorted.first.placeId}");
+      logger.t(resultSorted.toString());
+      logger.t("LocationProvider._getLocationDetailsFromCoordinates() - result.predictions.first.placeId=${resultSorted.first.placeId}");
 
       return resultSorted;
     } catch (e){
-      print(e);
+      logger.t(e);
       return null;
     }
   }
@@ -176,7 +176,7 @@ class LocationProvider with ChangeNotifier {
   }
 
   Future<void> _saveLocation() async {
-    print("LocationProvider._saveLocation()");
+    logger.t("LocationProvider._saveLocation()");
     SharedPreferences prefs = await SharedPreferences.getInstance();
     if (_currentPosition != null) {
       prefs.setDouble('latitude', _currentPosition!.latitude);
@@ -189,7 +189,7 @@ class LocationProvider with ChangeNotifier {
   }
 
   Future<void> _loadSavedLocation() async {
-    print("LocationProvider._loadSavedLocation()");
+    logger.t("LocationProvider._loadSavedLocation()");
     SharedPreferences prefs = await SharedPreferences.getInstance();
     double? latitude = prefs.getDouble('latitude');
     double? longitude = prefs.getDouble('longitude');
@@ -229,7 +229,7 @@ class LocationProvider with ChangeNotifier {
 
     // Check if the image is already cached in memory
     if (_imageCache.containsKey(_placeId!)) {
-      print("locationProvider._fetchPlacePhoto() - found photo in cache for $_placeId");
+      logger.t("locationProvider._fetchPlacePhoto() - found photo in cache for $_placeId");
       return _imageCache[_placeId!];
     }
 
@@ -242,7 +242,7 @@ class LocationProvider with ChangeNotifier {
     final file = File(filePath);
     final metadataFile = File(metadataPath);
     if (await file.exists() && await metadataFile.exists()) {
-      print("locationProvider._fetchPlacePhoto() - found photo and metadata through placeid in local storage, loading");
+      logger.t("locationProvider._fetchPlacePhoto() - found photo and metadata through placeid in local storage, loading");
       // Load the image and metadata from local storage
       final bytes = await file.readAsBytes();
       final metadataJson = await metadataFile.readAsString();
@@ -264,7 +264,7 @@ class LocationProvider with ChangeNotifier {
       return googlePlacesImg;
     }
 
-    print("locationProvider._fetchPlacePhoto() - placeId=$_placeId");
+    logger.t("locationProvider._fetchPlacePhoto() - placeId=$_placeId");
 
     final result = await _places.fetchPlace(
       _placeId,
@@ -273,7 +273,7 @@ class LocationProvider with ChangeNotifier {
     final place = result.place;
 
     if ((place?.photoMetadatas?.length ?? 0) == 0) {
-      print("locationProvider._fetchPlacePhoto() - place or place.photoMetadatas is null");
+      logger.t("locationProvider._fetchPlacePhoto() - place or place.photoMetadatas is null");
     }
 
     try {
@@ -288,7 +288,7 @@ class LocationProvider with ChangeNotifier {
       if (imageBytes != null) {
         // Save the image to local storage
         await file.writeAsBytes(imageBytes);
-        print("locationProvider._fetchPlacePhoto() - saving photo and metadata through placeid in local storage");
+        logger.t("locationProvider._fetchPlacePhoto() - saving photo and metadata through placeid in local storage");
 
         // Save metadata to local storage
         final metadataMap = {
@@ -311,7 +311,7 @@ class LocationProvider with ChangeNotifier {
         return null;
       }
     } catch (err) {
-      print("locationProvider._fetchPlacePhoto() - Exception occured: $err");
+      logger.t("locationProvider._fetchPlacePhoto() - Exception occured: $err");
       return null;
     }
   }

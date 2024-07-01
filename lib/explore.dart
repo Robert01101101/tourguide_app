@@ -47,16 +47,16 @@ class ExploreState extends State<Explore> {
 
   @override
   void initState() {
-    print('ExploreState.initState() !!!!!!!!!!!!!!!!!!!!');
+    logger.t('ExploreState.initState() !!!!!!!!!!!!!!!!!!!!');
 
     //Firebase auth
     FirebaseAuth.instance
         .userChanges()
         .listen((User? user) {
       if (user == null) {
-        print('ExploreState.initState() - FirabaseAuth listen - FIREBASE AUTH (EXPLORE) - User is currently signed out!');
+        logger.t('ExploreState.initState() - FirabaseAuth listen - FIREBASE AUTH (EXPLORE) - User is currently signed out!');
       } else {
-        print('ExploreState.initState() - FirabaseAuth listen - FIREBASE AUTH (EXPLORE) - User is signed in!');
+        logger.t('ExploreState.initState() - FirabaseAuth listen - FIREBASE AUTH (EXPLORE) - User is signed in!');
         if (!downloadingTours){
           downloadingTours = true;
           downloadTours();
@@ -80,27 +80,32 @@ class ExploreState extends State<Explore> {
   Future<GoogleSignInAccount> _handleSignIn() async {
     try {
       _currentUser = await _googleSignIn.signInSilently();
-      if (_currentUser == null) print("USER IS SIGNED OUT WHEN THEY SHOULDN'T BE!");
+      if (_currentUser == null) logger.t("USER IS SIGNED OUT WHEN THEY SHOULDN'T BE!");
       return _currentUser!;
     } catch (error) {
       // Handle sign-in errors
-      print("Error during Google Sign-In: $error");
+      logger.t("Error during Google Sign-In: $error");
       return _currentUser!;
     }
   }
 
   //TODO: Move
   Future<void> downloadTours() async {
-    print('downloadTours');
+    logger.t('downloadTours');
 
     List<Tour> toursFetched = await TourService.fetchAllTours();
     setState((){
       tours = toursFetched;
-      tiles[0] = TileData(
+      TileData newTile = TileData(
         imageUrl: toursFetched[3].imageUrl,
         title: toursFetched[3].name,
         description: "hi",
       );
+      tiles[0] = newTile;
+      tiles[1] = newTile;
+      tiles[2] = newTile;
+      tiles[3] = newTile;
+      logger.t(newTile.imageUrl);
     });
   }
 
@@ -222,7 +227,7 @@ class ExploreState extends State<Explore> {
                                 padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 0),
                                 child: IconButton(
                                     onPressed: (){
-                                      print("City options pressed");
+                                      logger.t("City options pressed");
                                     },
                                     icon: const Icon(Icons.more_vert),
                                     color: Color(0xeeF2F8F8)),

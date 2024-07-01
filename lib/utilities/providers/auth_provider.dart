@@ -39,11 +39,11 @@ class AuthProvider with ChangeNotifier {
       bool newIsAuthorized = account != null;
       // However, on web...
       if (kIsWeb && account != null) {
-        print('AuthProvider.AuthProvider() - _googleSignIn.onCurrentUserChanged (web) -> account is null=${account == null}');
+        logger.t('AuthProvider.AuthProvider() - _googleSignIn.onCurrentUserChanged (web) -> account is null=${account == null}');
         newIsAuthorized = await googleSignIn.canAccessScopes(scopes);
       }
 
-      print('AuthProvider.AuthProvider() - _googleSignIn.onCurrentUserChanged (web) setState() - newIsAuthorized=${newIsAuthorized}');
+      logger.t('AuthProvider.AuthProvider() - _googleSignIn.onCurrentUserChanged (web) setState() - newIsAuthorized=${newIsAuthorized}');
       user = account;
       isAuthorized = newIsAuthorized;
       notifyListeners();
@@ -77,9 +77,9 @@ class AuthProvider with ChangeNotifier {
 
 //#region REGION: Sign in / out methods
   void signInSilently() async {
-    print('AuthProvider.signInSilently()');
+    logger.t('AuthProvider.signInSilently()');
     GoogleSignInAccount? silentlySignedInUser = await googleSignIn.signInSilently();
-    print('AuthProvider.signInSilently() - silentlySignedInUser=$silentlySignedInUser');
+    logger.t('AuthProvider.signInSilently() - silentlySignedInUser=$silentlySignedInUser');
     if (silentlySignedInUser == null) {
       silentSignInFailed = true;
       notifyListeners();
@@ -88,7 +88,7 @@ class AuthProvider with ChangeNotifier {
 
   // Called when the current auth user changes (google sign in), so we automatically log into Firebase as well
   Future<void> signInWithFirebase(GoogleSignInAccount account) async {
-    print('AuthProvider.signInWithFirebase()');
+    logger.t('AuthProvider.signInWithFirebase()');
     try {
       GoogleSignInAuthentication googleAuth = await account.authentication;
       AuthCredential credential = GoogleAuthProvider.credential(
@@ -99,9 +99,9 @@ class AuthProvider with ChangeNotifier {
 
       // Access the logged-in user using FirebaseAuth.instance.currentUser
       User? firebaseUser = authResult.user;
-      print('AuthProvider.signInWithFirebase() - Firebase User Info: ${firebaseUser?.displayName}, ${firebaseUser?.email}');
+      logger.t('AuthProvider.signInWithFirebase() - Firebase User Info: ${firebaseUser?.displayName}, ${firebaseUser?.email}');
     } catch (error) {
-      print('AuthProvider.signInWithFirebase() - Error signing in with Firebase: $error');
+      logger.e('AuthProvider.signInWithFirebase() - Error signing in with Firebase: $error');
     }
   }
 
@@ -112,28 +112,28 @@ class AuthProvider with ChangeNotifier {
   // SDK, so this method can be considered mobile only. - is this still true? not sure - > TODO: verify description
   // #docregion SignIn
   Future<void> handleSignIn() async {
-    print('AuthProvider.handleSignIn()');
+    logger.t('AuthProvider.handleSignIn()');
     try {
       GoogleSignInAccount? googleSignInAccount = await googleSignIn.signIn();
 
-      print('AuthProvider.handleSignIn() - 1 googleSignInAccount is null=${googleSignInAccount == null}');
+      logger.t('AuthProvider.handleSignIn() - 1 googleSignInAccount is null=${googleSignInAccount == null}');
       if (googleSignInAccount != null) {
-        print('AuthProvider.handleSignIn() - 2 start await');
+        logger.t('AuthProvider.handleSignIn() - 2 start await');
         GoogleSignInAuthentication googleAuth = await googleSignInAccount.authentication;
-        print('AuthProvider.handleSignIn() - 3 finished await');
+        logger.t('AuthProvider.handleSignIn() - 3 finished await');
         AuthCredential credential = GoogleAuthProvider.credential(
           accessToken: googleAuth.accessToken,
           idToken: googleAuth.idToken,
         );
 
-        print('AuthProvider.handleSignIn() - 4 sign in');
+        logger.t('AuthProvider.handleSignIn() - 4 sign in');
         // Sign in with Firebase using the obtained credentials
         UserCredential authResult = await _auth.signInWithCredential(credential);
 
-        print('AuthProvider.handleSignIn() - 5 access');
+        logger.t('AuthProvider.handleSignIn() - 5 access');
         // Access the logged-in user using FirebaseAuth.instance.currentUser
         User? firebaseUser = authResult.user;
-        print('AuthProvider.handleSignIn() -- SUCCESS! -- Firebase User Info: ${firebaseUser?.displayName}, ${firebaseUser?.email}');
+        logger.t('AuthProvider.handleSignIn() -- SUCCESS! -- Firebase User Info: ${firebaseUser?.displayName}, ${firebaseUser?.email}');
 
         user = googleSignInAccount;
         isAuthorized = true;
@@ -142,7 +142,7 @@ class AuthProvider with ChangeNotifier {
         notifyListeners();
       }
     } catch (error) {
-      print(error);
+      logger.t(error);
     }
   }
 
@@ -154,7 +154,7 @@ class AuthProvider with ChangeNotifier {
   //
   // On the web, this must be called from an user interaction (button click).
   Future<void> handleAuthorizeScopes() async {
-    print('AuthProvider.handleAuthorizeScopes()');
+    logger.t('AuthProvider.handleAuthorizeScopes()');
     final bool newIsAuthorized = await googleSignIn.requestScopes(scopes);
     isAuthorized = newIsAuthorized;
     notifyListeners();
@@ -169,7 +169,7 @@ class AuthProvider with ChangeNotifier {
   void signOut() async {
     try {
       isLoggingOut = true;
-      print('AuthProvider.signOut()');
+      logger.t('AuthProvider.signOut()');
       //Go to login page
       TourguideNavigation.router.go(
         TourguideNavigation.signInPath,
@@ -179,7 +179,7 @@ class AuthProvider with ChangeNotifier {
       SnackBarService.showSnackBar(content: 'You\'re signed out!');
       isLoggingOut = false;
     } catch (e){
-      print(e);
+      logger.t(e);
       isLoggingOut = false;
     }
 

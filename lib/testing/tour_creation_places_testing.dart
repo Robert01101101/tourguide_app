@@ -47,7 +47,7 @@ class _CreateTourTestingState extends State<CreateTourTesting> {
 
     // Add a new document with a generated ID
     db.collection("tours").add(tour).then((DocumentReference doc){
-      print('DocumentSnapshot added with ID: ${doc.id}');
+      logger.t('DocumentSnapshot added with ID: ${doc.id}');
       ScaffoldMessenger.of(context).removeCurrentSnackBar();
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Successfully created tour!')),

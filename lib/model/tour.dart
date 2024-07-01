@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:tourguide_app/main.dart';
 
 class Tour {
   final String id;
@@ -11,6 +12,11 @@ class Tour {
   final String visibility;
   final String imageUrl;
   final DateTime createdDateTime;
+  final double latitude;
+  final double longitude;
+  final String placeId;
+  final String authorName;
+  final String authorId;
 
   Tour({
     required this.id,
@@ -21,6 +27,11 @@ class Tour {
     required this.visibility,
     required this.imageUrl,
     required this.createdDateTime,
+    required this.latitude,
+    required this.longitude,
+    required this.placeId,
+    required this.authorName,
+    required this.authorId,
   });
 
   factory Tour.fromFirestore(DocumentSnapshot doc) {
@@ -46,11 +57,23 @@ class Tour {
       uid: data['uid'] ?? '',
       visibility: data['visibility'] ?? '',
       imageUrl: data['imageUrl'] ?? '',
-      createdDateTime: createdDateTime ?? DateTime.now(), // Ensure createdDateTime is not null
+      createdDateTime: createdDateTime,
+      latitude: data['latitude']?.toDouble() ?? 0.0,
+      longitude: data['longitude']?.toDouble() ?? 0.0,
+      placeId: data['placeId'] ?? '',
+      authorName: data['authorName'] ?? '',
+      authorId: data['authorId'] ?? '',
     );
   }
 
-  Tour copyWith({String? imageUrl}) {
+  Tour copyWith({
+    String? imageUrl,
+    double? latitude,
+    double? longitude,
+    String? placeId,
+    String? authorName,
+    String? authorId,
+  }) {
     return Tour(
       id: this.id,
       name: this.name,
@@ -60,10 +83,14 @@ class Tour {
       visibility: this.visibility,
       imageUrl: imageUrl ?? this.imageUrl,
       createdDateTime: this.createdDateTime,
+      latitude: latitude ?? this.latitude,
+      longitude: longitude ?? this.longitude,
+      placeId: placeId ?? this.placeId,
+      authorName: authorName ?? this.authorName,
+      authorId: authorId ?? this.authorId,
     );
   }
 }
-
 
 class TourService {
   static Future<List<Tour>> fetchAllTours() async {
@@ -95,10 +122,16 @@ class TourService {
           // Fetch image URL from Firebase Storage if imageUrl is not empty
           if (tour.imageUrl.isNotEmpty) {
             try {
-              String imageUrl = await storage.ref(tour.imageUrl).getDownloadURL();
+              // Extract the path from the full URL
+              String fullUrl = tour.imageUrl;
+              Uri uri = Uri.parse(fullUrl);
+              String path = uri.path.replaceFirst('/v0/b/tourguide-firebase.appspot.com/o/', '').replaceAll('%2F', '/');
+              logger.t(path);
+
+              String imageUrl = await storage.ref(path).getDownloadURL();
               tour = tour.copyWith(imageUrl: imageUrl); // Update Tour object with image URL
             } catch (e) {
-              print('Error fetching image: $e');
+              logger.t('Error fetching image: $e');
             }
           }
 
@@ -106,7 +139,7 @@ class TourService {
         }
       }
     } catch (e) {
-      print('Error fetching tours: $e');
+      logger.t('Error fetching tours: $e');
     }
 
     return tours;

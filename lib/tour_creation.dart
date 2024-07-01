@@ -57,7 +57,7 @@ class _CreateTourState extends State<CreateTour> {
         });
       }
     } catch (e) {
-      print('Error picking image: $e');
+      logger.t('Error picking image: $e');
     }
   }
 
@@ -92,7 +92,7 @@ class _CreateTourState extends State<CreateTour> {
 
     // Add a new document with generated ID to Firestore
     db.collection("tours").add(tour).then((DocumentReference doc){
-      print('DocumentSnapshot added with ID: ${doc.id}');
+      logger.t('DocumentSnapshot added with ID: ${doc.id}');
       ScaffoldMessenger.of(context).removeCurrentSnackBar();
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Successfully created tour!')),
@@ -147,7 +147,7 @@ class _CreateTourState extends State<CreateTour> {
               CityAutocomplete(textEditingController: _cityController,
                 isFormSubmitted: _isFormSubmitted,
                 onItemSelected: (AutocompletePrediction prediction) {
-                  print("Selected city: ${prediction.primaryText}");
+                  logger.t("Selected city: ${prediction.primaryText}");
                 },),
               TextFormField(
                 controller: _descriptionController,

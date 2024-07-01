@@ -62,7 +62,7 @@ class _GeminiChatState extends State<GeminiChat> with WidgetsBindingObserver {
     final apiKeyFromPlatform = Platform.environment['API_KEY'];
     apiKey = apiKeyStringFromEnv ?? apiKeyFromPlatform;
     if (apiKey == null) {
-      print('No \$API_KEY environment variable: apiKey=$apiKeyFromPlatform, apiKeyStringFromEnv=$apiKeyStringFromEnv');
+      logger.t('No \$API_KEY environment variable: apiKey=$apiKeyFromPlatform, apiKeyStringFromEnv=$apiKeyStringFromEnv');
       exit(1);
     }*/
 
@@ -111,7 +111,7 @@ class _GeminiChatState extends State<GeminiChat> with WidgetsBindingObserver {
     if (locationProvider.currentCity != null){
       initialPrompt += " I am currently located in ${locationProvider.currentCity}, ${locationProvider.currentState}, ${locationProvider.currentCountry}";
     }
-    print("geminiChat._startNewChat() - initialPrompt=$initialPrompt");
+    logger.t("geminiChat._startNewChat() - initialPrompt=$initialPrompt");
 
     _chat = generativeModel.startChat(history: [
       Content("user",Content.text(initialPrompt).parts),
@@ -147,7 +147,7 @@ class _GeminiChatState extends State<GeminiChat> with WidgetsBindingObserver {
 
   /// Loads saved messages so that when the user exits and returns to the screen, they don't disappear
   Future<void> _loadMessages() async {
-    print("_loadMessages()");
+    logger.t("_loadMessages()");
     final prefs = await SharedPreferences.getInstance();
     final List<String>? messages = prefs.getStringList('chat_messages');
     if (messages != null) {
@@ -156,7 +156,7 @@ class _GeminiChatState extends State<GeminiChat> with WidgetsBindingObserver {
         _messages.addAll(messages.map((message) => types.Message.fromJson(jsonDecode(message))));
       });
     } else {
-      print("_loadMessages() - init new");
+      logger.t("_loadMessages() - init new");
       // Initialize with a welcome message if no messages are stored
       final m = types.TextMessage(
         author: _bot!,
@@ -178,7 +178,7 @@ class _GeminiChatState extends State<GeminiChat> with WidgetsBindingObserver {
       setState((){
         _messages.add(mCustom);
         _messages.add(m);
-        print("_loadMessages() - init new - set state ${m.text}");
+        logger.t("_loadMessages() - init new - set state ${m.text}");
       });
 
     }
@@ -190,7 +190,7 @@ class _GeminiChatState extends State<GeminiChat> with WidgetsBindingObserver {
     final content = Content.text(message);
     try {
       final response = await _chat.sendMessage(content);
-      debugPrint(response.text!);
+      logger.t(response.text!);
 
       setState(() {
         _handleGeminiResponse(_cleanUpAiResponseString(response.text!));
@@ -198,7 +198,7 @@ class _GeminiChatState extends State<GeminiChat> with WidgetsBindingObserver {
     } catch (e) {
       setState(() {
         _handleGeminiResponse("Sorry, an error occurred. Try rephrasing your message.");
-        print(e);
+        logger.t(e);
       });
     }
 

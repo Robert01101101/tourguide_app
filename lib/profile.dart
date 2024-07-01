@@ -41,7 +41,7 @@ class _ProfileState extends State<Profile> {
     // Add a new document with the userid
     /*
     db.collection("profiles").doc(uid).set(profile).then((_) =>
-        print('DocumentSnapshot added with ID: ${uid}'));*/
+        logger.t('DocumentSnapshot added with ID: ${uid}'));*/
 
     /*
     final tourPrivate = <String, dynamic>{
@@ -51,18 +51,18 @@ class _ProfileState extends State<Profile> {
 
     // Add a new document with a generated ID
     db.collection("tours").add(tourPrivate).then((DocumentReference doc) =>
-        print('DocumentSnapshot added with ID: ${doc.id}'));*/
+        logger.t('DocumentSnapshot added with ID: ${doc.id}'));*/
 
     //get
-    print('GET -------');
+    logger.t('GET -------');
     DocumentSnapshot profileSnapshot = await db.collection("profiles").doc(uid).get();
     if (profileSnapshot.exists) {
       // Profile exists, you can access the data
       var profileData = profileSnapshot.data();
-      print('Profile data: $profileData');
+      logger.t('Profile data: $profileData');
     } else {
       // Profile doesn't exist
-      print('Profile not found');
+      logger.t('Profile not found');
     }
 
 
@@ -81,7 +81,7 @@ class _ProfileState extends State<Profile> {
 
     // Add a new document with a generated ID
     db.collection("users").add(user).then((DocumentReference doc) =>
-        print('DocumentSnapshot added with ID: ${doc.id}'));
+        logger.t('DocumentSnapshot added with ID: ${doc.id}'));
 
     //Now add another document to the users collection. Notice that this document includes a key-value pair (middle name) that does not
     // appear in the first document. Documents in a collection can contain different sets of information.
@@ -95,13 +95,13 @@ class _ProfileState extends State<Profile> {
 
     // Add a new document with a generated ID
     db.collection("users").add(userAlt).then((DocumentReference doc) =>
-        print('DocumentSnapshot added with ID: ${doc.id}'));
+        logger.t('DocumentSnapshot added with ID: ${doc.id}'));
 
     //Use the data viewer in the Firebase console to quickly verify that you've added data to Cloud Firestore.
     // You can also use the "get" method to retrieve the entire collection.
     await db.collection("users").get().then((event) {
       for (var doc in event.docs) {
-        print("${doc.id} => ${doc.data()}");
+        logger.t("${doc.id} => ${doc.data()}");
       }
     });
     */
@@ -109,7 +109,7 @@ class _ProfileState extends State<Profile> {
 
 
   Future<DocumentSnapshot> _firestoreGetUserProfileData() async {
-    print('-- _firestoreGetUserProfileData()');
+    logger.t('-- _firestoreGetUserProfileData()');
     FirebaseFirestore db = FirebaseFirestore.instance;
     FirebaseAuth auth = FirebaseAuth.instance;
 
@@ -118,15 +118,15 @@ class _ProfileState extends State<Profile> {
     final uid = user.uid;
 
     //get
-    print('GET -------');
+    logger.t('GET -------');
     DocumentSnapshot profileSnapshot = await db.collection("profiles").doc(uid).get();
     if (profileSnapshot.exists) {
       // Profile exists, you can access the data
       var profileData = profileSnapshot.data();
-      print('Profile data: $profileData');
+      logger.t('Profile data: $profileData');
     } else {
       // Profile doesn't exist
-      print('Profile not found');
+      logger.t('Profile not found');
     }
 
 
@@ -135,7 +135,7 @@ class _ProfileState extends State<Profile> {
   }
 
   _firestoreSetUserProfileData() async {
-    print('-- _firestoreSetUserProfileData()');
+    logger.t('-- _firestoreSetUserProfileData()');
     FirebaseFirestore db = FirebaseFirestore.instance;
     FirebaseAuth auth = FirebaseAuth.instance;
 
@@ -149,14 +149,14 @@ class _ProfileState extends State<Profile> {
     };
 
     db.collection("profiles").doc(uid).set(profile).then((_) =>
-        print('DocumentSnapshot added with ID: ${uid}'));
+        logger.t('DocumentSnapshot added with ID: ${uid}'));
   }
 
 
   //db = FirebaseFirestore.instance;
   @override
   Widget build(BuildContext context) {
-    print('FirebaseAuth.instance.currentUser=${FirebaseAuth.instance.currentUser}');
+    logger.t('FirebaseAuth.instance.currentUser=${FirebaseAuth.instance.currentUser}');
     myAuth.AuthProvider authProvider = Provider.of(context);
 
     return Scaffold(

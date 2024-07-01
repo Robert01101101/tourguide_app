@@ -39,7 +39,7 @@ class _CityAutocompleteOldState extends State<CityAutocompleteOld> {
   }
 
   void _showOverlay() {
-    print('Showing overlay');
+    logger.t('Showing overlay');
     if (_overlayEntry != null) {
       _overlayEntry!.remove();
     }
@@ -48,7 +48,7 @@ class _CityAutocompleteOldState extends State<CityAutocompleteOld> {
   }
 
   void _hideOverlay() {
-    print('Hiding overlay');
+    logger.t('Hiding overlay');
     if (_overlayEntry != null) {
       _overlayEntry!.remove();
       _overlayEntry = null;
@@ -83,7 +83,7 @@ class _CityAutocompleteOldState extends State<CityAutocompleteOld> {
                 return ListTile(
                   title: Text(_suggestions[index]),
                   onTap: () {
-                    print('Selected: ${_suggestions[index]}');
+                    logger.t('Selected: ${_suggestions[index]}');
                     _cityController.text = _suggestions[index];
                     _hideOverlay();
                   },
@@ -97,7 +97,7 @@ class _CityAutocompleteOldState extends State<CityAutocompleteOld> {
   }
 
   void _onTextChanged(String value) async {
-    print('Text changed: $value');
+    logger.t('Text changed: $value');
     if (value.isEmpty) {
       setState(() {
         _suggestions = [];
@@ -123,18 +123,18 @@ class _CityAutocompleteOldState extends State<CityAutocompleteOld> {
           _isLoading = false;
         });
         _showOverlay();
-        print('Suggestions: $_suggestions');
+        logger.t('Suggestions: $_suggestions');
       } else {
         setState(() {
           _isLoading = false;
         });
-        print('Failed to fetch suggestions. Status code: ${response.statusCode}');
+        logger.t('Failed to fetch suggestions. Status code: ${response.statusCode}');
       }
     } catch (e) {
       setState(() {
         _isLoading = false;
       });
-      print('Error fetching suggestions: $e');
+      logger.t('Error fetching suggestions: $e');
     }
   }
 
