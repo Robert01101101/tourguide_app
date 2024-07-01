@@ -8,6 +8,7 @@ import 'package:tourguide_app/tour_creation.dart';
 import 'package:tourguide_app/ui/google_places_image.dart';
 import 'package:tourguide_app/ui/my_layouts.dart';
 import 'package:tourguide_app/ui/horizontal_scroller.dart';
+import 'package:tourguide_app/ui/rounded_tile.dart';
 import 'package:tourguide_app/ui/shimmer_loading.dart';
 import 'package:tourguide_app/utilities/custom_import.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -91,81 +92,38 @@ class ExploreState extends State<Explore> {
   //TODO: Move
   Future<void> downloadTours() async {
     print('downloadTours');
-    /*
-    FirebaseFirestore db = FirebaseFirestore.instance;
-    FirebaseAuth auth = FirebaseAuth.instance;
 
-    try {
-      // Ensure user is signed in
-      User? user = auth.currentUser;
-      if (user == null) {
-        throw Exception('User not signed in');
-      }
-
-      // Reference to the 'tours' collection
-      CollectionReference toursRef = db.collection('tours');
-
-      // Fetch tours where visibility is 'public' or user is the owner
-      QuerySnapshot querySnapshot = await toursRef.where('visibility', isEqualTo: 'public')
-          .where('uid', isEqualTo: user.uid)
-          .get();
-
-      // Extract data from each document
-      List<Map<String, dynamic>> tours = querySnapshot.docs.map((doc) {
-        Map<String, dynamic>? data = doc.data() as Map<String, dynamic>?;
-
-        if (data != null) {
-          // Include document ID in the data map
-          data['id'] = doc.id;
-          print("data.length=");
-          print(data.length);
-          return data;
-        } else {
-          throw Exception('Document data was null or not of type Map<String, dynamic>');
-        }
-      }).toList();
-
-      return tours;
-    } catch (e) {
-      // Handle any errors
-      print('Error fetching tours: $e');
-      return [];
-    }*/
     List<Tour> toursFetched = await TourService.fetchAllTours();
     setState((){
       tours = toursFetched;
       tiles[0] = TileData(
-        imageUrl: toursFetched[2].imageUrl,
-        title: toursFetched[2].name,
-        description: 'Description 1',
+        imageUrl: toursFetched[3].imageUrl,
+        title: toursFetched[3].name,
+        description: "hi",
       );
     });
   }
 
 
 
-
-
-
-
   List<TileData> tiles = [
   TileData(
-  imageUrl: 'https://via.placeholder.com/150',
+  imageUrl: "",
   title: 'Title 1',
   description: 'Description 1',
   ),
   TileData(
-  imageUrl: 'https://via.placeholder.com/150',
+    imageUrl: "",
   title: 'Title 2',
   description: 'Description 2',
   ),
   TileData(
-  imageUrl: 'https://via.placeholder.com/150',
+    imageUrl: "",
   title: 'Title 3',
   description: 'Description 3',
   ),
   TileData(
-    imageUrl: 'https://via.placeholder.com/150',
+    imageUrl: "",
     title: 'Title 4',
     description: 'Description 4',
   ),
@@ -182,16 +140,6 @@ class ExploreState extends State<Explore> {
     LocationProvider locationProvider = Provider.of<LocationProvider>(context);
 
     return Scaffold(
-      /*appBar: AppBar(
-        title: Text('AppBar'),
-        backgroundColor: Colors.transparent,
-        actions: [
-          IconButton(
-            onPressed: () {},
-            icon: Icon(Icons.more_vert),
-          ),
-        ],
-      ),*/
       body: SingleChildScrollView(
         controller: _scrollController,
         child: Shimmer(
