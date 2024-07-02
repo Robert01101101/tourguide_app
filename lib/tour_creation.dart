@@ -14,6 +14,7 @@ import 'package:tourguide_app/utilities/custom_import.dart';
 import 'package:flutter_google_places_sdk/flutter_google_places_sdk.dart';
 
 import 'package:tourguide_app/main.dart';
+import 'package:tourguide_app/utilities/providers/location_provider.dart';
 
 //_________________________________________________________________________ CREATE FORM
 class CreateTour extends StatefulWidget {
@@ -66,6 +67,7 @@ class _CreateTourState extends State<CreateTour> {
   _firestoreCreateTour() async {
     FirebaseFirestore db = FirebaseFirestore.instance;
     FirebaseAuth auth = FirebaseAuth.instance;
+    LocationProvider locationProvider = Provider.of<LocationProvider>(context, listen: false);
 
     // Get user ID
     final User user = auth.currentUser!;
@@ -75,11 +77,16 @@ class _CreateTourState extends State<CreateTour> {
     final tour = <String, dynamic>{
       "name": _nameController.text,
       "description": _descriptionController.text,
-      "createdDateTime": DateTime.now(), // Add created date and time
       "city": _cityController.text,
       "uid": uid,
       "visibility": _tourIsPublic ? "public" : "private",
       "imageUrl": "", // Placeholder for image URL
+      "createdDateTime": DateTime.now(), // Add created date and time
+      "latitude": locationProvider.currentPosition!.latitude,
+      "longitude": locationProvider.currentPosition!.longitude,
+      "placeId": locationProvider.placeId,
+      "authorName": user.displayName,
+      "authorId": uid,
     };
 
     // Upload image and get download URL

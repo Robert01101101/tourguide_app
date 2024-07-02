@@ -90,6 +90,11 @@ class Tour {
       authorId: authorId ?? this.authorId,
     );
   }
+
+  @override
+  String toString() {
+    return 'Tour{id: $id, name: $name, description: $description, city: $city, uid: $uid, visibility: $visibility, imageUrl: $imageUrl, createdDateTime: $createdDateTime, latitude: $latitude, longitude: $longitude, placeId: $placeId, authorName: $authorName, authorId: $authorId}';
+  }
 }
 
 class TourService {

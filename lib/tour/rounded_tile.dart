@@ -1,12 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:tourguide_app/tour/tour_details.dart';
 import 'package:tourguide_app/ui/shimmer_loading.dart';
+import 'package:tourguide_app/utilities/providers/tour_provider.dart';
 
 class TileData {
+  final String tourId;
   final String imageUrl;
   final String title;
   final String description;
 
-  TileData({required this.imageUrl, required this.title, required this.description});
+  TileData({required this.tourId, required this.imageUrl, required this.title, required this.description});
 }
 
 class RoundedTile extends StatefulWidget {
@@ -131,6 +135,8 @@ class _RoundedTileState extends State<RoundedTile> {
                     fontSize: 16.0,
                     fontWeight: FontWeight.bold,
                   ),
+                  overflow: TextOverflow.ellipsis,
+                  maxLines: 1,
                 ) :
                 Container(width: 100, height: 23,  decoration: BoxDecoration(
                   color: Colors.white,
@@ -149,6 +155,8 @@ class _RoundedTileState extends State<RoundedTile> {
                     fontSize: 12.0,
                     color: Colors.grey[600],
                   ),
+                   overflow: TextOverflow.ellipsis,
+                   maxLines: 2,
                 ) :
                 Container(width: 100, height: 23,  decoration: BoxDecoration(
                   color: Colors.white,
@@ -190,6 +198,8 @@ class _ExpandedTileOverlayState extends State<ExpandedTileOverlay> {
   }
 
   void tourDetails() {
+    TourProvider tourProvider = Provider.of<TourProvider>(context, listen: false);
+    tourProvider.selectTourById(widget.tile.tourId);
     // Navigate to the fullscreen tour page
     Navigator.push(
       context,
@@ -212,6 +222,8 @@ class _ExpandedTileOverlayState extends State<ExpandedTileOverlay> {
               child: Text(
                 widget.tile.title,
                 style: TextStyle(fontSize: 24.0, fontWeight: FontWeight.bold),
+                overflow: TextOverflow.ellipsis,
+                maxLines: 1,
               ),
             ),
             IconButton(
@@ -309,122 +321,3 @@ class _ExpandedTileOverlayState extends State<ExpandedTileOverlay> {
   }
 }
 
-class FullscreenTourPage extends StatelessWidget {
-  final TileData tile;
-
-  const FullscreenTourPage({Key? key, required this.tile}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(tile.title),
-      ),
-      body: SingleChildScrollView(
-        child: Container(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              if (tile.imageUrl != null && tile.imageUrl.isNotEmpty)
-                Image.network(
-                  tile.imageUrl,
-                  width: MediaQuery.of(context).size.width,
-                  height: 300.0, // Adjust height as needed
-                  fit: BoxFit.cover,
-                ),
-              const SizedBox(height: 16.0),
-              Text(
-                tile.description,
-                style: const TextStyle(fontSize: 18.0),
-              ),
-              const SizedBox(height: 16.0),
-              // Add more content as needed
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class TourContentWidget extends StatelessWidget {
-  final TileData tile;
-  final bool fullscreen;
-
-  const TourContentWidget({Key? key, required this.tile, this.fullscreen = false}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Container(
-              padding: const EdgeInsets.fromLTRB(16, 0, 0, 0),
-              child: Text(
-                tile.title,
-                style: const TextStyle(fontSize: 24.0, fontWeight: FontWeight.bold),
-              ),
-            ),
-            if (fullscreen)
-              IconButton(
-                onPressed: () => Navigator.of(context).pop(),
-                icon: const Icon(Icons.close),
-              ),
-          ],
-        ),
-        Expanded(
-          child: SingleChildScrollView(
-            child: Container(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  if (tile.imageUrl != null && tile.imageUrl.isNotEmpty)
-                    Image.network(
-                      tile.imageUrl,
-                      width: MediaQuery.of(context).size.width,
-                      height: fullscreen ? 300.0 : 200.0,
-                      fit: BoxFit.cover,
-                    ),
-                  const SizedBox(height: 16.0),
-                  Text(
-                    tile.description,
-                    style: const TextStyle(fontSize: 18.0),
-                  ),
-                  const SizedBox(height: 16.0),
-                ],
-              ),
-            ),
-          ),
-        ),
-        if (!fullscreen)
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                ElevatedButton(
-                  onPressed: () {}, // Placeholder for Start Tour functionality
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Theme.of(context).primaryColor, // background
-                    foregroundColor: Colors.white, // foreground
-                  ),
-                  child: const Text("Start Tour"),
-                ),
-                const SizedBox(width: 8.0),
-                ElevatedButton(
-                  onPressed: () {}, // Placeholder for Tour Details functionality
-                  child: const Text("Tour Details"),
-                ),
-              ],
-            ),
-          ),
-      ],
-    );
-  }
-}

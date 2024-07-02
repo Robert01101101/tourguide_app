@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:tourguide_app/ui/rounded_tile.dart';
+import 'package:tourguide_app/tour/rounded_tile.dart';
 
 class HorizontalScroller extends StatelessWidget {
   final List<TileData> tiles;

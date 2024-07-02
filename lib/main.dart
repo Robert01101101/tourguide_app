@@ -10,6 +10,7 @@ import 'package:tourguide_app/utilities/providers/auth_provider.dart';
 import 'package:tourguide_app/utilities/custom_import.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:tourguide_app/utilities/providers/location_provider.dart';
+import 'package:tourguide_app/utilities/providers/tour_provider.dart';
 import 'firebase_options.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -111,7 +112,8 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => AuthProvider()),
-        ChangeNotifierProvider(create: (_) => LocationProvider()..getCurrentLocation())
+        ChangeNotifierProvider(create: (_) => LocationProvider()..getCurrentLocation()),
+        ChangeNotifierProvider(create: (_) => TourProvider()),
       ],
       child: MaterialApp.router(
         scaffoldMessengerKey: SnackBarService.scaffoldKey,

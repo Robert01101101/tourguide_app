@@ -8,11 +8,12 @@ import 'package:tourguide_app/tour_creation.dart';
 import 'package:tourguide_app/ui/google_places_image.dart';
 import 'package:tourguide_app/ui/my_layouts.dart';
 import 'package:tourguide_app/ui/horizontal_scroller.dart';
-import 'package:tourguide_app/ui/rounded_tile.dart';
+import 'package:tourguide_app/tour/rounded_tile.dart';
 import 'package:tourguide_app/ui/shimmer_loading.dart';
 import 'package:tourguide_app/utilities/custom_import.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:tourguide_app/utilities/providers/location_provider.dart';
+import 'package:tourguide_app/utilities/providers/tour_provider.dart';
 import 'main.dart';
 import 'package:tourguide_app/utilities/providers/auth_provider.dart' as myAuth;
 import 'dart:ui' as ui;
@@ -93,12 +94,15 @@ class ExploreState extends State<Explore> {
   Future<void> downloadTours() async {
     logger.t('downloadTours');
 
-    List<Tour> toursFetched = await TourService.fetchAndSortToursByDateTime();
+    final tourProvider = Provider.of<TourProvider>(context, listen: false);
+    await tourProvider.fetchAndSetTours();
+    List<Tour> toursFetched = tourProvider.tours;
     setState((){
       tours = toursFetched;
 
       tiles = toursFetched.take(4).map((tour) {
         return TileData(
+          tourId: tour.id,
           imageUrl: tour.imageUrl,
           title: tour.name,
           description: tour.description,
@@ -111,21 +115,25 @@ class ExploreState extends State<Explore> {
 
   List<TileData> tiles = [
   TileData(
+    tourId: "",
     imageUrl: "",
     title: "",
     description: "",
   ),
   TileData(
+    tourId: "",
     imageUrl: "",
     title: "",
     description: "",
   ),
   TileData(
+    tourId: "",
     imageUrl: "",
     title: "",
     description: "",
   ),
   TileData(
+    tourId: "",
     imageUrl: "",
     title: "",
     description: "",
