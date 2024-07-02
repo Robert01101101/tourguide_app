@@ -1,6 +1,7 @@
 import 'dart:ui';
 
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
+import 'package:firebase_remote_config/firebase_remote_config.dart';
 import 'package:logger/logger.dart';
 import 'package:provider/provider.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
@@ -14,8 +15,12 @@ import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 var logger = Logger();
+final FirebaseRemoteConfig remoteConfig = FirebaseRemoteConfig.instance;
 
 Future<void> main() async {
+  //LOAD ENVIRONMENT (SECURE VARS)
+  await fetchConfig();
+
   //LOGGING
   Logger.level = Level.trace;
 
@@ -45,6 +50,22 @@ Future<void> main() async {
   FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
 
   runApp(const MyApp());
+}
+
+Future<void> fetchConfig() async {
+  try {
+    // Set settings to fetch from the server with a timeout and a minimum fetch interval
+    await remoteConfig.setConfigSettings(
+      RemoteConfigSettings(
+        fetchTimeout: Duration(minutes: 1),
+        minimumFetchInterval: Duration(hours: 1),
+      ),
+    );
+    // Fetch and activate the remote config values
+    await remoteConfig.fetchAndActivate();
+  } catch (e) {
+    print("Failed to fetch remote config: $e");
+  }
 }
 
 
@@ -125,7 +146,6 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
 
 class MyGlobals {
   static final AutoScrollController scrollController = AutoScrollController();
-  static const String googleApiKey = "AIzaSyBa7mCp1FUiWMhfTHPWNJ2Cy-A84w4i2I4";
   static const shimmerGradient = LinearGradient(
     colors: [
       Color(0xFFEBEBF4),

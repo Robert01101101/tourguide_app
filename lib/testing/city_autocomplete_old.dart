@@ -110,7 +110,7 @@ class _CityAutocompleteOldState extends State<CityAutocompleteOld> {
     });
 
     try {
-      var apikey = MyGlobals.googleApiKey;
+      var apikey = remoteConfig.getString('google_api_key');
       final response = await http.get(Uri.parse(
           'https://maps.googleapis.com/maps/api/place/autocomplete/json?input=$value&types=(cities)&key=$apikey&sessiontoken=$_sessionToken'));
 
