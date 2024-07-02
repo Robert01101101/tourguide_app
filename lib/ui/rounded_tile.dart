@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:tourguide_app/ui/horizontal_scroller.dart';
 import 'package:tourguide_app/ui/shimmer_loading.dart';
 
 class TileData {
@@ -21,6 +20,7 @@ class RoundedTile extends StatefulWidget {
 
 class _RoundedTileState extends State<RoundedTile> {
   late String imageUrl;
+  bool isLoading = true;
 
   @override
   void initState() {
@@ -33,14 +33,34 @@ class _RoundedTileState extends State<RoundedTile> {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.tile.imageUrl != widget.tile.imageUrl) {
       setState(() {
+        bool imageUrlReady = imageUrl == null || imageUrl == "";
         imageUrl = widget.tile.imageUrl;
+        if (imageUrlReady) _loadImage();
       });
     }
   }
 
+  Future<void> _loadImage() async {
+    final ImageStream imageStream = NetworkImage(imageUrl).resolve(ImageConfiguration.empty);
+    final ImageStreamListener listener = ImageStreamListener((ImageInfo info, bool synchronousCall) {
+      if (mounted) {
+        setState(() {
+          isLoading = false;
+        });
+      }
+    }, onError: (dynamic exception, StackTrace? stackTrace) {
+      if (mounted) {
+        setState(() {
+          isLoading = false;
+        });
+      }
+    });
+    imageStream.addListener(listener);
+  }
+
   @override
   Widget build(BuildContext context) {
-    bool isLoading = imageUrl == null || imageUrl == "";
+    bool textDataReady = widget.tile.title != null && widget.tile.title != "";
 
     return Container(
       width: 150.0,
@@ -71,29 +91,45 @@ class _RoundedTileState extends State<RoundedTile> {
                     height: 100.0,
                     fit: BoxFit.cover,
                   ) :
-                  Container(width: 150, height: 100, color: Colors.red,),
+                  Container(width: 150, height: 100, color: Colors.white,),
                 ),
               ],
             ),
           ),
           Padding(
             padding: const EdgeInsets.all(8.0),
-            child: Text(
-              widget.tile.title,
-              style: const TextStyle(
-                fontSize: 16.0,
-                fontWeight: FontWeight.bold,
-              ),
+            child: ShimmerLoading(
+              isLoading: !textDataReady,
+              child: textDataReady ?
+              Text(
+                widget.tile.title,
+                style: const TextStyle(
+                  fontSize: 16.0,
+                  fontWeight: FontWeight.bold,
+                ),
+              ) :
+              Container(width: 100, height: 23,  decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(10), // Adjust the value to your preference
+              ),),
             ),
           ),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 8.0),
-            child: Text(
-              widget.tile.description,
-              style: TextStyle(
-                fontSize: 12.0,
-                color: Colors.grey[600],
-              ),
+            child: ShimmerLoading(
+              isLoading: !textDataReady,
+              child: textDataReady ?
+               Text(
+                widget.tile.description,
+                style: TextStyle(
+                  fontSize: 12.0,
+                  color: Colors.grey[600],
+                ),
+              ) :
+              Container(width: 100, height: 23,  decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(10), // Adjust the value to your preference
+              ),),
             ),
           ),
         ],

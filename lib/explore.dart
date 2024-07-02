@@ -93,19 +93,17 @@ class ExploreState extends State<Explore> {
   Future<void> downloadTours() async {
     logger.t('downloadTours');
 
-    List<Tour> toursFetched = await TourService.fetchAllTours();
+    List<Tour> toursFetched = await TourService.fetchAndSortToursByDateTime();
     setState((){
       tours = toursFetched;
-      TileData newTile = TileData(
-        imageUrl: toursFetched[3].imageUrl,
-        title: toursFetched[3].name,
-        description: "hi",
-      );
-      tiles[0] = newTile;
-      tiles[1] = newTile;
-      tiles[2] = newTile;
-      tiles[3] = newTile;
-      logger.t(newTile.imageUrl);
+
+      tiles = toursFetched.take(4).map((tour) {
+        return TileData(
+          imageUrl: tour.imageUrl,
+          title: tour.name,
+          description: "hi",
+        );
+      }).toList();
     });
   }
 
@@ -113,24 +111,24 @@ class ExploreState extends State<Explore> {
 
   List<TileData> tiles = [
   TileData(
-  imageUrl: "",
-  title: 'Title 1',
-  description: 'Description 1',
+    imageUrl: "",
+    title: "",
+    description: "",
   ),
   TileData(
     imageUrl: "",
-  title: 'Title 2',
-  description: 'Description 2',
+    title: "",
+    description: "",
   ),
   TileData(
     imageUrl: "",
-  title: 'Title 3',
-  description: 'Description 3',
+    title: "",
+    description: "",
   ),
   TileData(
     imageUrl: "",
-    title: 'Title 4',
-    description: 'Description 4',
+    title: "",
+    description: "",
   ),
   // Add more tiles as needed
   ];

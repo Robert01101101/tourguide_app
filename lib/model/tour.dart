@@ -11,7 +11,7 @@ class Tour {
   final String uid;
   final String visibility;
   final String imageUrl;
-  final DateTime createdDateTime;
+  final DateTime? createdDateTime;
   final double latitude;
   final double longitude;
   final String placeId;
@@ -46,7 +46,7 @@ class Tour {
       Timestamp timestamp = data['createdDateTime'] as Timestamp;
       createdDateTime = timestamp.toDate();
     } else {
-      createdDateTime = DateTime.now(); // Default value or handle as needed
+      createdDateTime = null; // Default value or handle as needed
     }
 
     return Tour(
@@ -141,6 +141,26 @@ class TourService {
     } catch (e) {
       logger.t('Error fetching tours: $e');
     }
+
+    return tours;
+  }
+
+  static Future<List<Tour>> fetchAndSortToursByDateTime() async {
+    List<Tour> tours = await fetchAllTours();
+
+    // Sort tours by createdDateTime in descending order (most recent first),
+    // treating null values as older dates (moving them to the end)
+    tours.sort((a, b) {
+      if (a.createdDateTime == null && b.createdDateTime == null) {
+        return 0;
+      } else if (a.createdDateTime == null) {
+        return 1; // Move null date to the end
+      } else if (b.createdDateTime == null) {
+        return -1; // Move null date to the end
+      } else {
+        return b.createdDateTime!.compareTo(a.createdDateTime!);
+      }
+    });
 
     return tours;
   }

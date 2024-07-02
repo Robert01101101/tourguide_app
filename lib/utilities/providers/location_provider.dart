@@ -36,7 +36,16 @@ class LocationProvider with ChangeNotifier {
   Map<String, GooglePlacesImg> _imageCache = {};
 
   LocationProvider() {
+    _init();
+  }
+
+  // Initialization method
+  Future<void> _init() async {
+    // Wait for remoteConfig to fetch and activate
+    await remoteConfig.fetchAndActivate();
+
     logger.t("LocationProvider()");
+    logger.i(remoteConfig.getString('google_api_key')!);
     _places = FlutterGooglePlacesSdk(remoteConfig.getString('google_api_key')!);
     _loadSavedLocation();
   }
@@ -150,7 +159,7 @@ class LocationProvider with ChangeNotifier {
 
       return resultSorted;
     } catch (e){
-      logger.t(e);
+      logger.e(e);
       return null;
     }
   }
