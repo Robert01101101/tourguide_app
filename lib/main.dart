@@ -136,6 +136,13 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
     return baseTheme.copyWith(
       scaffoldBackgroundColor: Colors.white,
       textTheme: GoogleFonts.latoTextTheme(textTheme).copyWith(
+        //Titles are GoogleFonts latoTextTheme but bold
+        titleLarge: GoogleFonts.lato(textStyle: textTheme.titleLarge, color: const Color(0xff3b4948), fontWeight: FontWeight.bold),
+        titleMedium: GoogleFonts.lato(textStyle: textTheme.titleMedium, color: const Color(0xff3b4948), fontWeight: FontWeight.bold),
+        titleSmall: GoogleFonts.lato(textStyle: textTheme.titleSmall, color: const Color(0xff3b4948), fontWeight: FontWeight.bold),
+        headlineLarge: GoogleFonts.lato(textStyle: textTheme.headlineLarge, color: const Color(0xff3b4948), fontWeight: FontWeight.bold),
+        headlineMedium: GoogleFonts.lato(textStyle: textTheme.headlineMedium, color: const Color(0xff3b4948), fontWeight: FontWeight.bold),
+        headlineSmall: GoogleFonts.lato(textStyle: textTheme.headlineSmall, color: const Color(0xff3b4948), fontWeight: FontWeight.bold),
         displayLarge: GoogleFonts.vollkorn(textStyle: textTheme.displayLarge, color: const Color(0xff3b4948), fontWeight: FontWeight.w300),
         displayMedium: GoogleFonts.vollkorn(textStyle: textTheme.displayMedium, color: const Color(0xff3b4948), fontWeight: FontWeight.w300),
         displaySmall: GoogleFonts.vollkorn(textStyle: textTheme.displaySmall, color: const Color(0xff3b4948), fontWeight: FontWeight.w300),

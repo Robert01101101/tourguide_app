@@ -131,10 +131,7 @@ class _RoundedTileState extends State<RoundedTile> {
                 child: textDataReady ?
                 Text(
                   widget.tile.title,
-                  style: const TextStyle(
-                    fontSize: 16.0,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: Theme.of(context).textTheme.titleMedium,
                   overflow: TextOverflow.ellipsis,
                   maxLines: 1,
                 ) :
@@ -151,10 +148,7 @@ class _RoundedTileState extends State<RoundedTile> {
                 child: textDataReady ?
                  Text(
                   widget.tile.description,
-                  style: TextStyle(
-                    fontSize: 12.0,
-                    color: Colors.grey[600],
-                  ),
+                   style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Colors.grey[600]),
                    overflow: TextOverflow.ellipsis,
                    maxLines: 2,
                 ) :
@@ -221,7 +215,7 @@ class _ExpandedTileOverlayState extends State<ExpandedTileOverlay> {
               padding: EdgeInsets.fromLTRB(16, 0, 0, 0),
               child: Text(
                 widget.tile.title,
-                style: TextStyle(fontSize: 24.0, fontWeight: FontWeight.bold),
+                style: Theme.of(context).textTheme.headlineSmall,
                 overflow: TextOverflow.ellipsis,
                 maxLines: 1,
               ),
@@ -250,7 +244,7 @@ class _ExpandedTileOverlayState extends State<ExpandedTileOverlay> {
                   SizedBox(height: 16.0),
                   Text(
                     widget.tile.description,
-                    style: TextStyle(fontSize: 18.0),
+                    style: Theme.of(context).textTheme.bodyLarge,
                   ),
                   SizedBox(height: 16.0),
                 ],

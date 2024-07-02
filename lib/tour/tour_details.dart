@@ -1,5 +1,4 @@
 import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -18,6 +17,7 @@ class FullscreenTourPage extends StatefulWidget {
 
 class _FullscreenTourPageState extends State<FullscreenTourPage> {
   final Completer<GoogleMapController> _controller = Completer<GoogleMapController>();
+  bool _isFullScreen = false;
 
   @override
   Widget build(BuildContext context) {
@@ -31,74 +31,169 @@ class _FullscreenTourPageState extends State<FullscreenTourPage> {
       );
     }
 
+    // Check if latitude or longitude is null or zero
+    bool showMap = tour.latitude != null && tour.latitude != 0 && tour.longitude != null && tour.longitude != 0;
+
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.tile.title),
       ),
-      body: SingleChildScrollView(
-        child: Container(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              if (widget.tile.imageUrl != null && widget.tile.imageUrl.isNotEmpty)
-                Image.network(
-                  widget.tile.imageUrl,
-                  width: MediaQuery.of(context).size.width,
-                  height: 300.0, // Adjust height as needed
-                  fit: BoxFit.cover,
-                ),
-              const SizedBox(height: 16.0),
-              Text(
-                widget.tile.description,
-                style: const TextStyle(fontSize: 18.0),
-              ),
-              const SizedBox(height: 16.0),
-              // Google Map
-              Container(
-                height: 300.0, // Adjust height as needed
-                child: GoogleMap(
-                  mapType: MapType.normal,
-                  initialCameraPosition: CameraPosition(
-                    target: LatLng(49.1836983, -122.843655), //_originLatitude = 6.5212402, _originLongitude = 3.3679965;
-                    zoom: 13.0,
-                  ),
-                  markers: {
-                    Marker(
-                      markerId: MarkerId(tour.id),
-                      position: LatLng(tour.latitude, tour.longitude),
-                      infoWindow: InfoWindow(
-                        title: tour.name,
-                        snippet: tour.description,
+      body: Stack(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      if (widget.tile.imageUrl != null && widget.tile.imageUrl.isNotEmpty)
+                        Container(
+                          height: 250,
+                          child: ClipRRect(
+                            child: Image.network(
+                              widget.tile.imageUrl,
+                              width: MediaQuery.of(context).size.width,
+                              height: 300.0, // Adjust height as needed
+                              fit: BoxFit.cover,
+                            ),
+                          ),
+                        ),
+                      const SizedBox(height: 16.0),
+                      Text(
+                        widget.tile.description,
+                        style: const TextStyle(fontSize: 18.0),
                       ),
-                    ),
-                  },
-                  onMapCreated: (GoogleMapController controller) {
-                    _controller.complete(controller);
-                  },
-                ),
-                /*GoogleMap(
-                  initialCameraPosition: CameraPosition(
-                    target: LatLng(tour.latitude, tour.longitude),
-                    zoom: 14.0,
+                      const SizedBox(height: 16.0),
+                    ],
                   ),
-                  markers: {
-                    Marker(
-                      markerId: MarkerId(tour.id),
-                      position: LatLng(tour.latitude, tour.longitude),
-                      infoWindow: InfoWindow(
-                        title: tour.name,
-                        snippet: tour.description,
+                ),
+                // Google Map
+                if (showMap)
+                Container(
+                  height: 200.0, // Adjust height as needed
+                  child: Stack(
+                    children: [
+                      GoogleMap(  //SHOULD ALIGN TO THE BOTTOM OF LAYOUT
+                        mapType: MapType.normal,
+                        initialCameraPosition: CameraPosition(
+                          target: LatLng(tour.latitude, tour.longitude),
+                          zoom: 13.0,
+                        ),
+                        markers: {
+                          Marker(
+                            markerId: MarkerId(tour.id),
+                            position: LatLng(tour.latitude, tour.longitude),
+                            infoWindow: InfoWindow(
+                              title: tour.name,
+                              snippet: tour.description,
+                            ),
+                          ),
+                        },
+                        onMapCreated: (GoogleMapController controller) {
+                          _controller.complete(controller);
+                        },
                       ),
-                    ),
-                  },
-                ),*/
-              ),
-              const SizedBox(height: 16.0),
-              // Add more content as needed
-            ],
+                      Positioned(
+                        top: 10,
+                        right: 10,
+                        child: SizedBox(
+                          width: 42,
+                          height: 42,
+                          child: RawMaterialButton(
+                            onPressed: () {
+                              setState(() {
+                                _isFullScreen = !_isFullScreen;
+                              });
+                            },
+                            elevation: 2.0,
+                            fillColor: Colors.white.withOpacity(0.9),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8.0), // Adjust the radius as needed
+                            ),
+                            child: Padding(
+                              padding: const EdgeInsets.all(1.0), // Adjust inner padding as needed
+                              child: Icon(
+                                _isFullScreen ? Icons.fullscreen_exit : Icons.fullscreen,
+                                color: const Color(0xff666666),
+                                size: 32.0, // Adjust the size of the icon as needed
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                // Add more content as needed
+              ],
+            ),
           ),
-        ),
+          // Fullscreen map overlay
+          if (_isFullScreen)
+            Positioned.fill(
+              child: Stack(
+                children: [
+                  GoogleMap(
+                    mapType: MapType.normal,
+                    initialCameraPosition: CameraPosition(
+                      target: LatLng(tour.latitude, tour.longitude),
+                      zoom: 13.0,
+                    ),
+                    markers: {
+                      Marker(
+                        markerId: MarkerId(tour.id),
+                        position: LatLng(tour.latitude, tour.longitude),
+                        infoWindow: InfoWindow(
+                          title: tour.name,
+                          snippet: tour.description,
+                        ),
+                      ),
+                    },
+                    onMapCreated: (GoogleMapController controller) async {
+                      if (!_controller.isCompleted) {
+                        _controller.complete(controller);
+                      } else {
+                        final GoogleMapController mapController = await _controller.future;
+                        controller = mapController;
+                      }
+                    },
+                  ),
+                  Positioned(
+                    top: 10,
+                    right: 10,
+                    child: SizedBox(
+                      width: 42,
+                      height: 42,
+                      child: RawMaterialButton(
+                        onPressed: () {
+                          setState(() {
+                            _isFullScreen = !_isFullScreen;
+                          });
+                        },
+                        elevation: 2.0,
+                        fillColor: Colors.white.withOpacity(0.9),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8.0), // Adjust the radius as needed
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.all(1.0), // Adjust inner padding as needed
+                          child: Icon(
+                            _isFullScreen ? Icons.fullscreen_exit : Icons.fullscreen,
+                            color: const Color(0xff666666),
+                            size: 32.0, // Adjust the size of the icon as needed
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+        ],
       ),
     );
   }
