@@ -101,7 +101,7 @@ class ExploreState extends State<Explore> {
         return TileData(
           imageUrl: tour.imageUrl,
           title: tour.name,
-          description: "hi",
+          description: tour.description,
         );
       }).toList();
     });
