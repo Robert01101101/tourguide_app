@@ -3,6 +3,7 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:tourguide_app/utilities/custom_import.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:tourguide_app/utilities/providers/auth_provider.dart' as myAuth;
+import 'package:url_launcher/url_launcher.dart';
 
 class Profile extends StatefulWidget {
   const Profile({super.key});
@@ -171,6 +172,9 @@ class _ProfileState extends State<Profile> {
               children: [
                 Column(
                   children: [
+                    ElevatedButton(onPressed: (){
+                      launchUrl(Uri.parse("https://tourguide.rmichels.com/privacyPolicy.html"));
+                    }, child: Text("Privacy Policy")),
                     ListTile(
                       leading: GoogleUserCircleAvatar(
                         identity: authProvider.user!,

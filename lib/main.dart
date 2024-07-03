@@ -19,6 +19,8 @@ var logger = Logger();
 final FirebaseRemoteConfig remoteConfig = FirebaseRemoteConfig.instance;
 
 Future<void> main() async {
+  await WidgetsFlutterBinding.ensureInitialized();
+
   //LOAD ENVIRONMENT (SECURE VARS)
   await fetchConfig();
 
@@ -26,7 +28,7 @@ Future<void> main() async {
   Logger.level = Level.trace;
 
   //ROUTING
-  TourguideNavigation.instance;
+  await TourguideNavigation.instance.initialize();
 
   //FIREBASE INIT
   //https://stackoverflow.com/a/63537567/7907510

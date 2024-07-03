@@ -1,12 +1,23 @@
 import 'package:scroll_to_hide/scroll_to_hide.dart';
+import 'package:tourguide_app/onboarding.dart';
 import 'package:tourguide_app/signIn.dart';
 import 'package:tourguide_app/gemini_chat.dart';
 import 'package:tourguide_app/utilities/custom_import.dart';
 import 'package:go_router/go_router.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 //______________________________________________________________________________________________ CustomNavigationHelper
 // from https://medium.com/flutter-community/integrating-bottom-navigation-with-go-router-in-flutter-c4ec388da16a
 // example https://dartpad.dev/?id=aed0372c987b4ae32311fe32bb4c1209
+// Usage:
+// Navigator.push(
+//    context,
+//    MaterialPageRoute(builder: (context) => const GeminiChat()),
+// );
+// Usage without push pop:
+// TourguideNavigation.router.go(
+//     TourguideNavigation.signInPath,
+// );
 class TourguideNavigation {
   static final TourguideNavigation _instance =
   TourguideNavigation._internal();
@@ -50,14 +61,22 @@ class TourguideNavigation {
   static const String listViewAPath = '/listViewA';
 
 
-
+  static const String onboardingPath = '/onboarding'; //onboarding
   static const String signInPath = '/signIn';
 
   factory TourguideNavigation() {
     return _instance;
   }
 
-  TourguideNavigation._internal() {
+  TourguideNavigation._internal();
+
+  Future<void> initialize() async {
+    await _initializeRouter();
+  }
+
+  Future<void> _initializeRouter() async {
+    await checkFirstTimeUser();
+
     final routes = [
       StatefulShellRoute.indexedStack(
         parentNavigatorKey: parentNavigatorKey,
@@ -201,6 +220,15 @@ class TourguideNavigation {
             state: state,
           );
         },
+      ),
+      GoRoute(
+        path: onboardingPath,
+        pageBuilder: (context, state) {
+          return getPage(
+            child: const TourguideOnboard(),
+            state: state,
+          );
+        },
       )
       /* //TODO figure out what this was used for
       GoRoute(
@@ -217,10 +245,11 @@ class TourguideNavigation {
 
     router = GoRouter(
       navigatorKey: parentNavigatorKey,
-      initialLocation: signInPath,
+      initialLocation: isFirstTime ? onboardingPath : signInPath,
       routes: routes,
     );
   }
+
 
   static Page getPage({
     required Widget child,
@@ -231,6 +260,15 @@ class TourguideNavigation {
       child: child,
     );
   }
+
+  bool isFirstTime = true;
+
+  Future<void> checkFirstTimeUser() async {
+    var _prefs = await SharedPreferences.getInstance();
+    isFirstTime = true;//_prefs.getBool('firstTimeUser') ?? true;
+    logger.i('isFirstTime: $isFirstTime');
+  }
+
 }
 
 
