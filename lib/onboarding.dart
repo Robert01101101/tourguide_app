@@ -205,10 +205,10 @@ class _TourguideOnboardState extends State<TourguideOnboard> {
                   ),
                 ),
                 TextButton(
-                  onPressed: CompleteOnboarding,
+                  onPressed: currentIndex == 3 ? CompleteOnboarding : () => setIndex(currentIndex + 1),
                   child: Text(
                     currentIndex == 3 ?
-                    'Get Started' : 'Skip',
+                    'Get Started' : 'Next',
                     style: TextStyle(fontSize: 18.0, fontWeight: FontWeight.bold, color: Theme.of(context).primaryColor),
                   ),
                 ),
