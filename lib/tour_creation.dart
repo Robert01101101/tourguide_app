@@ -34,33 +34,9 @@ class _CreateTourState extends State<CreateTour> {
 
   bool _tourIsPublic = false; // Initial boolean value
   bool _isFormSubmitted = false;
-  final int _descriptionMaxChars = 100;
+  final int _descriptionMaxChars = 150;
   File? _image;
   List<TourguidePlace> _places = []; // List to hold TourguidePlace instances
-
-  Future<void> _pickImage(ImageSource source) async {
-    // Check and request permissions if needed
-    if (source == ImageSource.camera) {
-      if (await Permission.camera.request().isDenied) {
-        return; // Permission denied, do not proceed
-      }
-    } else if (source == ImageSource.gallery) {
-      if (await Permission.photos.request().isDenied) {
-        return; // Permission denied, do not proceed
-      }
-    }
-
-    try {
-      final pickedFile = await ImagePicker().pickImage(source: source);
-      if (pickedFile != null) {
-        setState(() {
-          _image = File(pickedFile.path);
-        });
-      }
-    } catch (e) {
-      logger.t('Error picking image: $e');
-    }
-  }
 
 
   void _addPlace() {
@@ -195,8 +171,11 @@ class _CreateTourState extends State<CreateTour> {
                   labelText: 'Description',
                 ),
                 validator: (String? value) {
-                  if (value != null && value.length > _descriptionMaxChars-1) {
-                    return 'Please enter a maximum of 100 characters';
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter a description for your tour';
+                  }
+                  if (value != null && value.length > _descriptionMaxChars) {
+                    return 'Please enter a maximum of $_descriptionMaxChars characters';
                   }
                   return null;
                 },
@@ -247,7 +226,7 @@ class _CreateTourState extends State<CreateTour> {
                               labelText: 'Place ${index + 1}',
                               border: const UnderlineInputBorder(),
                               suffixIcon: IconButton(
-                                icon: const Icon(Icons.remove_circle_outline, color: Colors.red),
+                                icon: const Icon(Icons.remove_circle_outline),
                                 onPressed: () {
                                   _removePlace(index);
                                 },
@@ -279,9 +258,20 @@ class _CreateTourState extends State<CreateTour> {
               ),
               Center(
                 child: AddImageTile(
-                  imageFile: _image,
-                  pickImageFromCamera: () => _pickImage(ImageSource.camera),
-                  pickImageFromGallery: () => _pickImage(ImageSource.gallery),
+                  initialValue: _image,
+                  validator: (value) {
+                    if (value == null) {
+                      return 'Please add an image';
+                    }
+                    return null;
+                  },
+                  onSaved: (value) {
+                    _image = value;
+                  },
+                  onChanged: (value) {
+                    setState(() {_image = value;});
+                  },
+                  enabled: !_isFormSubmitted,
                 ),
               ),
               Align(

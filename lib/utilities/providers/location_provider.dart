@@ -155,7 +155,7 @@ class LocationProvider with ChangeNotifier {
 
       resultSorted.sort((a, b) => a.distanceMeters!.compareTo(b.distanceMeters!));
       logger.t(resultSorted.toString());
-      logger.t("LocationProvider._getLocationDetailsFromCoordinates() - result.predictions.first.placeId=${resultSorted.first.placeId}");
+      logger.t("LocationProvider.getAutocompleteSuggestions() - result.predictions.first.placeId=${resultSorted.first.placeId}");
 
       return resultSorted;
     } catch (e){
