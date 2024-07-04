@@ -205,112 +205,115 @@ class _ExpandedTileOverlayState extends State<ExpandedTileOverlay> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Container(
-              padding: EdgeInsets.fromLTRB(16, 0, 0, 0),
-              child: Text(
-                widget.tile.title,
-                style: Theme.of(context).textTheme.headlineSmall,
-                overflow: TextOverflow.ellipsis,
-                maxLines: 1,
-              ),
-            ),
-            IconButton(
-              onPressed: () => Navigator.of(context).pop(),
-              icon: Icon(Icons.close),
-            ),
-          ],
-        ),
-        Expanded(
-          child: SingleChildScrollView(
-            child: Container(
-              padding: EdgeInsets.all(16.0),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  if (widget.tile.imageUrl != null && widget.tile.imageUrl.isNotEmpty)
-                    Image.network(
-                      widget.tile.imageUrl,
-                      width: MediaQuery.of(context).size.width,
-                      height: 200.0,
-                      fit: BoxFit.cover,
-                    ),
-                  SizedBox(height: 16.0),
-                  Text(
-                    widget.tile.description,
-                    style: Theme.of(context).textTheme.bodyLarge,
-                  ),
-                  SizedBox(height: 16.0),
-                ],
-              ),
-            ),
-          ),
-        ),
-        Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Row(
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(0, 8, 0, 0),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Row(
-                children: [
-                  ElevatedButton(
-                    onPressed: () {},
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Theme.of(context).primaryColor, // background
-                      foregroundColor: Colors.white, // foreground
-                    ),
-                    child: Text("Start Tour"),),
-                  SizedBox(width: 8.0),
-                  ElevatedButton(onPressed: tourDetails, child: Text("Tour Details")),
-                ],
+              Container(
+                padding: EdgeInsets.fromLTRB(16, 0, 0, 0),
+                child: Text(
+                  widget.tile.title,
+                  style: Theme.of(context).textTheme.headlineSmall,
+                  overflow: TextOverflow.ellipsis,
+                  maxLines: 1,
+                ),
               ),
-              Row(
-                children: [
-                  Column(
-                    children: [
-                      SizedBox(
-                        width: 30,
-                        height: 30,
-                        child: IconButton(
-                          onPressed: incrementThumbsUp,
-                          icon: Icon(Icons.thumb_up),
-                          iconSize: 18,
-                          padding: EdgeInsets.all(6),
-                          constraints: BoxConstraints(),
-                        ),
-                      ),
-                      Text(thumbsUpCount.toString(), style: Theme.of(context).textTheme.labelSmall),
-                    ],
-                  ),
-                  SizedBox(width: 2),
-                  Column(
-                    children: [
-                      SizedBox(
-                        width: 30,
-                        height: 30,
-                        child: IconButton(
-                          onPressed: incrementThumbsDown,
-                          icon: Icon(Icons.thumb_down),
-                          iconSize: 18,
-                          padding: EdgeInsets.all(6),
-                          constraints: BoxConstraints(),
-                        ),
-                      ),
-                      Text(thumbsDownCount.toString(), style: Theme.of(context).textTheme.labelSmall),
-                    ],
-                  ),
-                ],
+              IconButton(
+                onPressed: () => Navigator.of(context).pop(),
+                icon: Icon(Icons.close),
               ),
             ],
           ),
-        ),
-      ],
+          Expanded(
+            child: SingleChildScrollView(
+              child: Container(
+                padding: EdgeInsets.all(16.0),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    if (widget.tile.imageUrl != null && widget.tile.imageUrl.isNotEmpty)
+                      Image.network(
+                        widget.tile.imageUrl,
+                        width: MediaQuery.of(context).size.width,
+                        height: 200.0,
+                        fit: BoxFit.cover,
+                      ),
+                    SizedBox(height: 16.0),
+                    Text(
+                      widget.tile.description,
+                      style: Theme.of(context).textTheme.bodyLarge,
+                    ),
+                    SizedBox(height: 16.0),
+                  ],
+                ),
+              ),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Row(
+                  children: [
+                    ElevatedButton(
+                      onPressed: () {},
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Theme.of(context).primaryColor, // background
+                        foregroundColor: Colors.white, // foreground
+                      ),
+                      child: Text("Start Tour"),),
+                    SizedBox(width: 8.0),
+                    ElevatedButton(onPressed: tourDetails, child: Text("Tour Details")),
+                  ],
+                ),
+                Row(
+                  children: [
+                    Column(
+                      children: [
+                        SizedBox(
+                          width: 30,
+                          height: 30,
+                          child: IconButton(
+                            onPressed: incrementThumbsUp,
+                            icon: Icon(Icons.thumb_up),
+                            iconSize: 18,
+                            padding: EdgeInsets.all(6),
+                            constraints: BoxConstraints(),
+                          ),
+                        ),
+                        Text(thumbsUpCount.toString(), style: Theme.of(context).textTheme.labelSmall),
+                      ],
+                    ),
+                    SizedBox(width: 2),
+                    Column(
+                      children: [
+                        SizedBox(
+                          width: 30,
+                          height: 30,
+                          child: IconButton(
+                            onPressed: incrementThumbsDown,
+                            icon: Icon(Icons.thumb_down),
+                            iconSize: 18,
+                            padding: EdgeInsets.all(6),
+                            constraints: BoxConstraints(),
+                          ),
+                        ),
+                        Text(thumbsDownCount.toString(), style: Theme.of(context).textTheme.labelSmall),
+                      ],
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

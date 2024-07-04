@@ -18,7 +18,7 @@ class FullscreenTourPage extends StatefulWidget {
 class _FullscreenTourPageState extends State<FullscreenTourPage> {
   final Completer<GoogleMapController> _controller = Completer<GoogleMapController>();
   bool _isFullScreen = false;
-  bool _isLoading = true;
+  bool _isLoading = true, _isLoadingFullscreen = true;
   CameraPosition _currentCameraPosition = CameraPosition(
     target: LatLng(0, 0),
     zoom: 14.0,
@@ -118,19 +118,30 @@ class _FullscreenTourPageState extends State<FullscreenTourPage> {
                                 ),
                               ),
                             },
-                            onMapCreated: (GoogleMapController controller) {
+                            onMapCreated: (GoogleMapController controller) async {
                               if (!_controller.isCompleted) {
                                 _controller.complete(controller);
                               } else {
-                                controller.moveCamera(
-                                  CameraUpdate.newCameraPosition(_currentCameraPosition),
-                                );
+                                final GoogleMapController mapController = await _controller.future;
+                                mapController.moveCamera(CameraUpdate.newCameraPosition(_currentCameraPosition));
                               }
+                              await Future.delayed(const Duration(milliseconds: 200)); //avoid flicker
+                              setState(() {
+                                _isLoading = false;
+                              });
                             },
                             onCameraMove: (CameraPosition position) {
                               _currentCameraPosition = position;
                             },
                           ),
+                          if (_isLoading)
+                            Container(
+                              color: Color(0xffe8eaed),
+                              child: Center(
+                                child: CircularProgressIndicator(),
+                              ),
+                            ),
+                          if (!_isLoading)
                           Positioned(
                             bottom: 120,
                             right: 10,
@@ -142,6 +153,7 @@ class _FullscreenTourPageState extends State<FullscreenTourPage> {
                                   final controller = await _controller.future;
                                   setState(() {
                                     _isFullScreen = !_isFullScreen;
+                                    _isLoadingFullscreen = true;
                                   });
                                   controller.moveCamera(
                                     CameraUpdate.newCameraPosition(_currentCameraPosition),
@@ -193,23 +205,23 @@ class _FullscreenTourPageState extends State<FullscreenTourPage> {
                           final GoogleMapController mapController = await _controller.future;
                           mapController.moveCamera(CameraUpdate.newCameraPosition(_currentCameraPosition));
                         }
-                        await Future.delayed(const Duration(milliseconds: 200)); //avoid flicker
+                        await Future.delayed(const Duration(milliseconds: 300)); //avoid flicker
                         setState(() {
-                          _isLoading = false;
+                          _isLoadingFullscreen = false;
                         });
                       },
                       onCameraMove: (CameraPosition position) {
                         _currentCameraPosition = position;
                       },
                     ),
-                    if (_isLoading)
+                    if (_isLoadingFullscreen)
                       Container(
                         color: Color(0xffe8eaed),
                         child: Center(
                           child: CircularProgressIndicator(),
                         ),
                       ),
-                    if (!_isLoading)
+                    if (!_isLoadingFullscreen)
                     Positioned(
                       bottom: 120,
                       right: 10,
@@ -221,7 +233,6 @@ class _FullscreenTourPageState extends State<FullscreenTourPage> {
                             final controller = await _controller.future;
                             setState(() {
                               _isFullScreen = !_isFullScreen;
-                              _isLoading = true;
                             });
                             controller.moveCamera(
                               CameraUpdate.newCameraPosition(_currentCameraPosition),

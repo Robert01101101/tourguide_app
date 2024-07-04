@@ -7,8 +7,9 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:google_places_autocomplete_text_field/google_places_autocomplete_text_field.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:tourguide_app/model/tourguide_place.dart';
 import 'package:tourguide_app/ui/add_image_tile.dart';
-import 'package:tourguide_app/ui/city_autocomplete.dart';
+import 'package:tourguide_app/ui/place_autocomplete.dart';
 import 'package:tourguide_app/ui/my_layouts.dart';
 import 'package:tourguide_app/utilities/custom_import.dart';
 import 'package:flutter_google_places_sdk/flutter_google_places_sdk.dart';
@@ -28,15 +29,14 @@ class _CreateTourState extends State<CreateTour> {
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
   final TextEditingController _cityController = TextEditingController();
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  final List<TextEditingController> _placeControllers = [];
 
   bool _tourIsPublic = false; // Initial boolean value
   bool _isFormSubmitted = false;
-
-  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-
   final int _descriptionMaxChars = 100;
-
   File? _image;
+  List<TourguidePlace> _places = []; // List to hold TourguidePlace instances
 
   Future<void> _pickImage(ImageSource source) async {
     // Check and request permissions if needed
@@ -63,55 +63,85 @@ class _CreateTourState extends State<CreateTour> {
   }
 
 
-
-  _firestoreCreateTour() async {
-    FirebaseFirestore db = FirebaseFirestore.instance;
-    FirebaseAuth auth = FirebaseAuth.instance;
-    LocationProvider locationProvider = Provider.of<LocationProvider>(context, listen: false);
-
-    // Get user ID
-    final User user = auth.currentUser!;
-    final uid = user.uid;
-
-    // Prepare tour data
-    final tour = <String, dynamic>{
-      "name": _nameController.text,
-      "description": _descriptionController.text,
-      "city": _cityController.text,
-      "uid": uid,
-      "visibility": _tourIsPublic ? "public" : "private",
-      "imageUrl": "", // Placeholder for image URL
-      "createdDateTime": DateTime.now(), // Add created date and time
-      "latitude": locationProvider.currentPosition!.latitude,
-      "longitude": locationProvider.currentPosition!.longitude,
-      "placeId": locationProvider.placeId,
-      "authorName": user.displayName,
-      "authorId": uid,
-    };
-
-    // Upload image and get download URL
-    if (_image != null){
-      String imageUrl = await uploadImage(_image!);
-
-      // Update tour data with image URL
-      tour["imageUrl"] = imageUrl;
-    }
-
-    // Add a new document with generated ID to Firestore
-    db.collection("tours").add(tour).then((DocumentReference doc){
-      logger.t('DocumentSnapshot added with ID: ${doc.id}');
-      ScaffoldMessenger.of(context).removeCurrentSnackBar();
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Successfully created tour!')),
-      );
-
-      Navigator.pop(context);
+  void _addPlace() {
+    setState(() {
+      _places.add(TourguidePlace(
+        latitude: 0.0,
+        longitude: 0.0,
+        googleMapPlaceId: '',
+        title: '',
+        description: '',
+        photoUrls: [],
+      ));
+      _placeControllers.add(TextEditingController());
     });
+  }
+
+  void _removePlace(int index) {
+    setState(() {
+      _places.removeAt(index);
+      _placeControllers[index].dispose();
+      _placeControllers.removeAt(index);
+    });
+  }
+
+  Future<void> _firestoreCreateTour() async {
+    if (_formKey.currentState!.validate()) {
+      // Validation passed, proceed with tour creation
+      FirebaseFirestore db = FirebaseFirestore.instance;
+      FirebaseAuth auth = FirebaseAuth.instance;
+      LocationProvider locationProvider =
+      Provider.of<LocationProvider>(context, listen: false);
+      final User user = auth.currentUser!;
+      final uid = user.uid;
+
+      final tourData = {
+        "name": _nameController.text,
+        "description": _descriptionController.text,
+        "city": _cityController.text,
+        "uid": uid,
+        "visibility": _tourIsPublic ? "public" : "private",
+        "imageUrl": "", // Placeholder for image URL
+        "createdDateTime": DateTime.now(),
+        "latitude": locationProvider.currentPosition!.latitude,
+        "longitude": locationProvider.currentPosition!.longitude,
+        "placeId": locationProvider.placeId,
+        "authorName": user.displayName,
+        "authorId": uid,
+        "tourguidePlaces": _places.map((place) => {
+          "latitude": place.latitude,
+          "longitude": place.longitude,
+          "googleMapPlaceId": place.googleMapPlaceId,
+          "title": place.title,
+          "description": place.description,
+          "photoUrls": place.photoUrls,
+        }).toList(),
+      };
+
+      // Upload image if available
+      if (_image != null) {
+        String imageUrl = await _uploadImage(_image!);
+        tourData["imageUrl"] = imageUrl;
+      }
+
+      try {
+        await db.collection("tours").add(tourData);
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Successfully created tour!')),
+        );
+        Navigator.pop(context); // Navigate back after successful creation
+      } catch (e) {
+        logger.t('Error creating tour: $e');
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Failed to create tour. Please try again.')),
+        );
+      }
+    }
   }
 
 
   // Function to upload image to Firebase Storage
-  Future<String> uploadImage(File imageFile) async {
+  Future<String> _uploadImage(File imageFile) async {
     // Create a reference to the location you want to upload to in Firebase Storage
     Reference ref = FirebaseStorage.instance.ref().child('tour_images').child(DateTime.now().millisecondsSinceEpoch.toString());
 
@@ -151,7 +181,7 @@ class _CreateTourState extends State<CreateTour> {
                 },
                 enabled: !_isFormSubmitted,
               ),
-              CityAutocomplete(textEditingController: _cityController,
+              PlaceAutocomplete(textEditingController: _cityController,
                 isFormSubmitted: _isFormSubmitted,
                 onItemSelected: (AutocompletePrediction prediction) {
                   logger.t("Selected city: ${prediction.primaryText}");
@@ -188,6 +218,64 @@ class _CreateTourState extends State<CreateTour> {
                 secondary: const Icon(Icons.public),
                 inactiveThumbColor: _isFormSubmitted ? Colors.grey : null,
                 inactiveTrackColor: _isFormSubmitted ? Colors.grey[300] : null,
+              ),
+              //PLACES LIST----------------------------------------------
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Padding(
+                    padding: EdgeInsets.symmetric(vertical: 8.0),
+                    child: Text('Tourguide Places', style: TextStyle(fontSize: 16.0)),
+                  ),
+                  ..._places.asMap().entries.map((entry) {
+                    int index = entry.key;
+                    TourguidePlace place = entry.value;
+
+                    // Initialize controller text if it hasn't been set
+                    if (_placeControllers[index].text.isEmpty) {
+                      _placeControllers[index].text = place.title;
+                    }
+                    return Row(
+                      key: ValueKey(_placeControllers[index]), // Add a unique key
+                      children: [
+                        Expanded(
+                          child: PlaceAutocomplete(
+                            textEditingController: _placeControllers[index],
+                            restrictToCities: false,
+                            isFormSubmitted: _isFormSubmitted,
+                            decoration: InputDecoration(
+                              labelText: 'Place ${index + 1}',
+                              border: const UnderlineInputBorder(),
+                              suffixIcon: IconButton(
+                                icon: const Icon(Icons.remove_circle_outline, color: Colors.red),
+                                onPressed: () {
+                                  _removePlace(index);
+                                },
+                              ),
+                            ),
+                            onItemSelected: (AutocompletePrediction prediction) {
+                              setState(() {
+                                place = TourguidePlace(
+                                  latitude: place.latitude,
+                                  longitude: place.longitude,
+                                  googleMapPlaceId: place.googleMapPlaceId,
+                                  title: prediction.primaryText,
+                                  description: place.description,
+                                  photoUrls: place.photoUrls,
+                                );
+                                // You might need to fetch more details about the place here
+                              });
+                            },
+                          ),
+                        ),
+                      ],
+                    );
+                  }).toList(),
+                  ElevatedButton(
+                    onPressed: _addPlace,
+                    child: const Text('Add Place'),
+                  ),
+                ],
               ),
               Center(
                 child: AddImageTile(

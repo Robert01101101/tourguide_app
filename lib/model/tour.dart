@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:tourguide_app/main.dart';
+import 'package:tourguide_app/model/tourguide_place.dart';
 
 class Tour {
   final String id;
@@ -17,6 +18,7 @@ class Tour {
   final String placeId;
   final String authorName;
   final String authorId;
+  final List<TourguidePlace> tourguidePlaces; // New field
 
   Tour({
     required this.id,
@@ -32,6 +34,7 @@ class Tour {
     required this.placeId,
     required this.authorName,
     required this.authorId,
+    required this.tourguidePlaces, // Initialize with an empty list or from constructor
   });
 
   factory Tour.fromFirestore(DocumentSnapshot doc) {
@@ -49,6 +52,22 @@ class Tour {
       createdDateTime = null; // Default value or handle as needed
     }
 
+    // Extract tourguide places from data
+    List<TourguidePlace> tourguidePlaces = [];
+    if (data['tourguidePlaces'] != null) {
+      List<dynamic> places = data['tourguidePlaces'];
+      tourguidePlaces = places.map((place) {
+        return TourguidePlace(
+          latitude: place['latitude']?.toDouble() ?? 0.0,
+          longitude: place['longitude']?.toDouble() ?? 0.0,
+          googleMapPlaceId: place['googleMapPlaceId'] ?? '',
+          title: place['title'] ?? '',
+          description: place['description'] ?? '',
+          photoUrls: List<String>.from(place['photoUrls'] ?? []),
+        );
+      }).toList();
+    }
+
     return Tour(
       id: doc.id,
       name: data['name'] ?? '',
@@ -63,6 +82,7 @@ class Tour {
       placeId: data['placeId'] ?? '',
       authorName: data['authorName'] ?? '',
       authorId: data['authorId'] ?? '',
+      tourguidePlaces: tourguidePlaces,
     );
   }
 
@@ -73,6 +93,7 @@ class Tour {
     String? placeId,
     String? authorName,
     String? authorId,
+    List<TourguidePlace>? tourguidePlaces,
   }) {
     return Tour(
       id: this.id,
@@ -88,14 +109,16 @@ class Tour {
       placeId: placeId ?? this.placeId,
       authorName: authorName ?? this.authorName,
       authorId: authorId ?? this.authorId,
+      tourguidePlaces: tourguidePlaces ?? this.tourguidePlaces,
     );
   }
 
   @override
   String toString() {
-    return 'Tour{id: $id, name: $name, description: $description, city: $city, uid: $uid, visibility: $visibility, imageUrl: $imageUrl, createdDateTime: $createdDateTime, latitude: $latitude, longitude: $longitude, placeId: $placeId, authorName: $authorName, authorId: $authorId}';
+    return 'Tour{id: $id, name: $name, description: $description, city: $city, uid: $uid, visibility: $visibility, imageUrl: $imageUrl, createdDateTime: $createdDateTime, latitude: $latitude, longitude: $longitude, placeId: $placeId, authorName: $authorName, authorId: $authorId, tourguidePlaces: ${tourguidePlaces.toString()}}';
   }
 }
+
 
 class TourService {
   static Future<List<Tour>> fetchAllTours() async {

@@ -6,22 +6,26 @@ import 'package:provider/provider.dart';
 import 'package:tourguide_app/utilities/providers/location_provider.dart';
 import 'package:flutter_google_places_sdk/flutter_google_places_sdk.dart';
 
-class CityAutocomplete extends StatefulWidget {
+class PlaceAutocomplete extends StatefulWidget {
   final TextEditingController textEditingController;
   final bool isFormSubmitted;
   final Function(AutocompletePrediction) onItemSelected;
+  final bool restrictToCities;
+  final InputDecoration? decoration;
 
-  CityAutocomplete({
+  PlaceAutocomplete({
     required this.textEditingController,
     required this.isFormSubmitted,
     required this.onItemSelected,
+    this.restrictToCities = true, //default true
+    this.decoration,
   });
 
   @override
-  _CityAutocompleteState createState() => _CityAutocompleteState();
+  _PlaceAutocompleteState createState() => _PlaceAutocompleteState();
 }
 
-class _CityAutocompleteState extends State<CityAutocomplete> {
+class _PlaceAutocompleteState extends State<PlaceAutocomplete> {
   // The query currently being searched for. If null, there is no pending
   // request.
   String? _currentQuery;
@@ -35,7 +39,8 @@ class _CityAutocompleteState extends State<CityAutocomplete> {
   void initState() {
     super.initState();
     LocationProvider locationProvider = Provider.of<LocationProvider>(context, listen: false);
-    _debouncedSearch = _debounce<Iterable<AutocompletePrediction>?, String>(locationProvider.getAutocompleteSuggestions);
+    _debouncedSearch = _debounce<Iterable<AutocompletePrediction>?, String>(
+            (query) => locationProvider.getAutocompleteSuggestions(query, restrictToCities: widget.restrictToCities));
   }
 
 
@@ -62,10 +67,12 @@ class _CityAutocompleteState extends State<CityAutocomplete> {
         return TextFormField(
           controller: fieldTextEditingController,
           focusNode: fieldFocusNode,
-          decoration: InputDecoration(
-            labelText: 'City',
-            errorText:
-            _networkError ? 'Network error, please try again.' : null,
+          decoration: widget.decoration?.copyWith(
+            labelText: widget.restrictToCities ? 'City' : 'Place',
+            errorText: _networkError ? 'Network error, please try again.' : null,
+          ) ?? InputDecoration(
+            labelText: widget.restrictToCities ? 'City' : 'Place',
+            errorText: _networkError ? 'Network error, please try again.' : null,
           ),
           validator: (String? value) {
             if (value == null || value.isEmpty) {
