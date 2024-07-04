@@ -215,15 +215,6 @@ class _TourguideOnboardState extends State<TourguideOnboard> {
               ],
             ),
           );
-          /*return Indicator<LinePainter>(
-            painter: LinePainter(
-              currentPageIndex: currentIndex,
-              pagesLength: pagesLength,
-              netDragPercent: dragDistance,
-              lineWidth: 20,
-              translate: false, slideDirection: slideDirection,
-            ),
-          );*/
         },
         animationInMilliseconds: 500, // Animation speed in milliseconds
       ),

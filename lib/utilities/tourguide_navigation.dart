@@ -265,7 +265,7 @@ class TourguideNavigation {
 
   Future<void> checkFirstTimeUser() async {
     var _prefs = await SharedPreferences.getInstance();
-    isFirstTime = true;//_prefs.getBool('firstTimeUser') ?? true;
+    isFirstTime = _prefs.getBool('firstTimeUser') ?? true;
     logger.i('isFirstTime: $isFirstTime');
   }
 
