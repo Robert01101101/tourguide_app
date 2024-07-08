@@ -145,9 +145,9 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
         headlineLarge: GoogleFonts.lato(textStyle: textTheme.headlineLarge, color: const Color(0xff3b4948), fontWeight: FontWeight.bold),
         headlineMedium: GoogleFonts.lato(textStyle: textTheme.headlineMedium, color: const Color(0xff3b4948), fontWeight: FontWeight.bold),
         headlineSmall: GoogleFonts.lato(textStyle: textTheme.headlineSmall, color: const Color(0xff3b4948), fontWeight: FontWeight.bold),
-        displayLarge: GoogleFonts.vollkorn(textStyle: textTheme.displayLarge, color: const Color(0xff3b4948), fontWeight: FontWeight.w300),
-        displayMedium: GoogleFonts.vollkorn(textStyle: textTheme.displayMedium, color: const Color(0xff3b4948), fontWeight: FontWeight.w300),
-        displaySmall: GoogleFonts.vollkorn(textStyle: textTheme.displaySmall, color: const Color(0xff3b4948), fontWeight: FontWeight.w300),
+        displayLarge: GoogleFonts.vollkorn(textStyle: textTheme.displayLarge, color: const Color(0xff3b4948), fontWeight: FontWeight.w400),
+        displayMedium: GoogleFonts.vollkorn(textStyle: textTheme.displayMedium, color: const Color(0xff3b4948), fontWeight: FontWeight.w400),
+        displaySmall: GoogleFonts.vollkorn(textStyle: textTheme.displaySmall, color: const Color(0xff3b4948), fontWeight: FontWeight.w400),
       ),
     );
   }

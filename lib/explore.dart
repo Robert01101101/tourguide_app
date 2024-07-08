@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:tourguide_app/model/tour.dart';
 import 'package:tourguide_app/testing/debug_screen.dart';
@@ -190,56 +191,40 @@ class ExploreState extends State<Explore> {
                       } else if (snapshot.hasData && snapshot.data != null) {
                         final googlePlacesImg = snapshot.data!;
                         //return googlePlacesImg;
-                        return Stack(
-                          children: [
-                            Transform.translate(
-                              offset: Offset(0, _scrollOffset * 0.5), // Adjust the multiplier for the parallax effect
-                              child: ShaderMask( //Image gradient
-                                shaderCallback: (rect) {
-                                  return const LinearGradient(
-                                    begin: Alignment.topCenter,
-                                    end: Alignment.bottomCenter,
-                                    colors: [Colors.white, Colors.black45],
-                                  ).createShader(Rect.fromLTRB(0, 0, rect.width, rect.height));
-                                },
-                                blendMode: BlendMode.multiply,
-                                child: LayoutBuilder( //Overflow to fit varying image sizes to area
-                                  builder: (context, constraints) {
-                                  return SizedBox(
-                                    width: constraints.maxWidth,
-                                    height:300,
-                                    child: FittedBox(
-                                      fit: BoxFit.cover,
-                                      alignment: Alignment.center,
-                                      child: googlePlacesImg.placePhotoResponse.when( //Display smoothly without flicker on scroll
-                                        image: (image) => Image(
-                                          image: image.image,
-                                          gaplessPlayback: true,
-                                        ),
-                                        imageUrl: (imageUrl) => Image.network(
-                                          imageUrl,
-                                          gaplessPlayback: true,
-                                        ),
-                                      ),
+                        return Transform.translate(
+                          offset: Offset(0, _scrollOffset * 0.5), // Adjust the multiplier for the parallax effect
+                          child: ShaderMask( //Image gradient
+                            shaderCallback: (rect) {
+                              return const LinearGradient(
+                                begin: Alignment.topCenter,
+                                end: Alignment.bottomCenter,
+                                colors: [Colors.white, Colors.black45],
+                              ).createShader(Rect.fromLTRB(0, 0, rect.width, rect.height));
+                            },
+                            blendMode: BlendMode.multiply,
+                            child: LayoutBuilder( //Overflow to fit varying image sizes to area
+                              builder: (context, constraints) {
+                              return SizedBox(
+                                width: constraints.maxWidth,
+                                height:300,
+                                child: FittedBox(
+                                  fit: BoxFit.cover,
+                                  alignment: Alignment.center,
+                                  child: googlePlacesImg.placePhotoResponse.when( //Display smoothly without flicker on scroll
+                                    image: (image) => Image(
+                                      image: image.image,
+                                      gaplessPlayback: true,
                                     ),
-                                  );
-                                  }
-                                )
-                              ),
-                            ),
-                            Align(
-                              alignment: Alignment.topRight,
-                              child: Padding(
-                                padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 0),
-                                child: IconButton(
-                                    onPressed: (){
-                                      logger.t("City options pressed");
-                                    },
-                                    icon: const Icon(Icons.more_vert),
-                                    color: Color(0xeeF2F8F8)),
-                              ),
-                            ),
-                          ],
+                                    imageUrl: (imageUrl) => Image.network(
+                                      imageUrl,
+                                      gaplessPlayback: true,
+                                    ),
+                                  ),
+                                ),
+                              );
+                              }
+                            )
+                          ),
                         );
                       } else {
                         return const Text('No photo available');
@@ -267,14 +252,10 @@ class ExploreState extends State<Explore> {
                         FutureBuilder(
                         future: _handleSignIn(),
                         builder: (context, snapshot) {
-
                           //Assemble welcome string
-                          String title = "Welcome";
-                          if (locationProvider.currentCity != null) title += " to ${locationProvider.currentCity}";
                           String displayName = authProvider.user!.displayName!;
-                          if (displayName != null && displayName.isNotEmpty) title += ", ${displayName.split(' ').first}";
 
-                          //Stylized Welcome Banner text
+                          // Stylized Welcome Banner text
                           return SizedBox(
                             height: 300,
                             child: Padding(
@@ -282,13 +263,31 @@ class ExploreState extends State<Explore> {
                               child: Align(
                                 alignment: Alignment.bottomCenter,
                                 child: GradientText(
-                                    title,
-                                    style: Theme.of(context).textTheme.displayMedium,
-                                    gradient: const LinearGradient(colors: [
-                                      Color(0xeeF2F8F8),
-                                      Color(0xeeE4F0EF),
-                                    ]),
+                                  gradient: const LinearGradient(colors: [
+                                    Color(0xeeF2F8F8),
+                                    Color(0xeeE4F0EF),
+                                  ]),
+                                  richText: RichText(
+                                    text: TextSpan(
+                                      style: Theme.of(context).textTheme.displayMedium,
+                                      children: <TextSpan>[
+                                        const TextSpan(text: 'Welcome'),
+                                        if (locationProvider.currentCity != null)
+                                          const TextSpan(text: ' to \r',),
+                                        if (locationProvider.currentCity != null)
+                                          TextSpan(
+                                            text: locationProvider.currentCity,
+                                            style: GoogleFonts.vollkorn(  //need to explicitly specify font for weight setting to work for some reason
+                                              textStyle: Theme.of(context).textTheme.displayMedium,
+                                              fontWeight: FontWeight.w600,
+                                              fontStyle: FontStyle.italic,
+                                            ),
+                                          ),
+                                        if (displayName != null && displayName.isNotEmpty) TextSpan(text: ', ${displayName.split(' ').first}'),
+                                      ],
+                                    ),
                                   ),
+                                ),
                               ),
                             ),
                           );
@@ -377,6 +376,18 @@ class ExploreState extends State<Explore> {
                       //Text('User is signed in!!  :)\n\nUsername: ${FirebaseAuth.instance.currentUser!.displayName}\nEmail: ${FirebaseAuth.instance.currentUser!.email}'),
                     ]
                   ),
+                  Align(
+                    alignment: Alignment.topRight,
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 0),
+                      child: IconButton(
+                          onPressed: (){
+                            logger.t("City options pressed");
+                          },
+                          icon: const Icon(Icons.more_vert),
+                          color: Color(0xeeF2F8F8)),
+                    ),
+                  ),
                 ],
               ),
             ],
@@ -388,14 +399,12 @@ class ExploreState extends State<Explore> {
 }
 
 class GradientText extends StatelessWidget {
-  const GradientText(
-      this.text, {
-        required this.gradient,
-        this.style,
-      });
+  const GradientText({
+    required this.richText,
+    required this.gradient,
+  });
 
-  final String text;
-  final TextStyle? style;
+  final RichText richText;
   final Gradient gradient;
 
   @override
@@ -405,7 +414,7 @@ class GradientText extends StatelessWidget {
       shaderCallback: (bounds) => gradient.createShader(
         Rect.fromLTWH(0, 0, bounds.width, bounds.height),
       ),
-      child: Text(text, style: style),
+      child: richText,
     );
   }
 }
