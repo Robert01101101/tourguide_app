@@ -30,9 +30,7 @@ class TourguideNavigation {
   GlobalKey<NavigatorState>();
   static final GlobalKey<NavigatorState> exploreTabNavigatorKey =
   GlobalKey<NavigatorState>();
-  static final GlobalKey<NavigatorState> mapTabNavigatorKey =
-  GlobalKey<NavigatorState>();
-  static final GlobalKey<NavigatorState> myToursTabNavigatorKey =
+  static final GlobalKey<NavigatorState> contributeTabNavigatorKey =
   GlobalKey<NavigatorState>();
   static final GlobalKey<NavigatorState> profileTabNavigatorKey =
   GlobalKey<NavigatorState>();
@@ -49,7 +47,7 @@ class TourguideNavigation {
 
   static const String explorePath = '/explore'; //home
   static const String mapPath = '/map'; //settings
-  static const String myToursPath = '/myTours'; //search
+  static const String contributePath = '/contribute'; //search
   static const String profilePath = '/profile'; //NEW
   static const String geminiChatPath = '/geminiChat'; //NEW
 
@@ -96,34 +94,6 @@ class TourguideNavigation {
             ],
           ),
           StatefulShellBranch(
-            navigatorKey: mapTabNavigatorKey,
-            routes: [
-              GoRoute(
-                path: mapPath,
-                pageBuilder: (context, state) {
-                  return getPage(
-                    child: const MapScreen(),
-                    state: state,
-                  );
-                },
-              ),
-            ],
-          ),
-          StatefulShellBranch(
-            navigatorKey: myToursTabNavigatorKey,
-            routes: [
-              GoRoute(
-                path: myToursPath,
-                pageBuilder: (context, state) {
-                  return getPage(
-                    child: const MyTours(),
-                    state: state,
-                  );
-                },
-              ),
-            ],
-          ),
-          StatefulShellBranch(
             navigatorKey: geminiChatTabNavigatorKey,
             routes: [
               GoRoute(
@@ -131,6 +101,20 @@ class TourguideNavigation {
                 pageBuilder: (context, state) {
                   return getPage(
                     child: const GeminiChat(),
+                    state: state,
+                  );
+                },
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            navigatorKey: contributeTabNavigatorKey,
+            routes: [
+              GoRoute(
+                path: contributePath,
+                pageBuilder: (context, state) {
+                  return getPage(
+                    child: const Contribute(),
                     state: state,
                   );
                 },
@@ -316,16 +300,12 @@ class _BottomNavigationPageState extends State<BottomNavigationPage> {
               label: 'Explore',
             ),
             NavigationDestination(
-              icon: Icon(Icons.map),
-              label: 'Map',
-            ),
-            NavigationDestination(
-              icon: Icon(Icons.favorite),
-              label: 'My Tours',
-            ),
-            NavigationDestination(
               icon: Icon(Icons.chat),
               label: 'AI Tourguide',
+            ),
+            NavigationDestination(
+              icon: Icon(Icons.library_add),
+              label: 'Contribute',
             ),
             NavigationDestination(
               icon: Badge(

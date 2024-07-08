@@ -87,6 +87,12 @@ class DebugScreenState extends State<DebugScreen> {
               ElevatedButton(onPressed: (){
                 MapUtils.openMapWithQuery("Waterfront Vancouver BC Canada");
               }, child: const Text("Google Maps Address link")),
+              ElevatedButton(onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const MapScreen()),
+                );
+              }, child: const Text("Old Map Menu Option")),
             ],)
           ],
         ),

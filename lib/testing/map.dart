@@ -2,10 +2,14 @@ import 'package:tourguide_app/utilities/custom_import.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:tourguide_app/main.dart';
 
-class MapScreen extends StatelessWidget {
+class MapScreen extends StatefulWidget {
   const MapScreen({super.key});
 
+  @override
+  State<MapScreen> createState() => _MapScreenState();
+}
 
+class _MapScreenState extends State<MapScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -15,7 +19,6 @@ class MapScreen extends StatelessWidget {
       body: listPicker(context),
     );
   }
-
 
   Widget listPicker(BuildContext context) => Center(
     child: Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly,children: [

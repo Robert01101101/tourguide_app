@@ -7,20 +7,20 @@ import 'package:tourguide_app/utilities/custom_import.dart';
 import 'main.dart';
 
 
-class MyTours extends StatefulWidget {
-  const MyTours({super.key});
+class Contribute extends StatefulWidget {
+  const Contribute({super.key});
 
   @override
-  State<MyTours> createState() => _MyTours();
+  State<Contribute> createState() => _ContributeState();
 }
 
-class _MyTours extends State<MyTours> {
+class _ContributeState extends State<Contribute> {
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Map'),
+        title: const Text('Contribute'),
       ),
       body: Padding(
         padding: const EdgeInsets.symmetric(
