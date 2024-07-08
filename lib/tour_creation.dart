@@ -37,6 +37,7 @@ class _CreateTourState extends State<CreateTour> {
   final int _descriptionMaxChars = 150;
   File? _image;
   List<TourguidePlace> _places = []; // List to hold TourguidePlace instances
+  Place? _city;
 
 
   void _addPlace() {
@@ -79,8 +80,8 @@ class _CreateTourState extends State<CreateTour> {
         "visibility": _tourIsPublic ? "public" : "private",
         "imageUrl": "", // Placeholder for image URL
         "createdDateTime": DateTime.now(),
-        "latitude": locationProvider.currentPosition!.latitude,
-        "longitude": locationProvider.currentPosition!.longitude,
+        "latitude": _city!.latLng!.lat,
+        "longitude": _city!.latLng!.lng,
         "placeId": locationProvider.placeId,
         "authorName": user.displayName,
         "authorId": uid,
@@ -161,7 +162,13 @@ class _CreateTourState extends State<CreateTour> {
                 isFormSubmitted: _isFormSubmitted,
                 onItemSelected: (AutocompletePrediction prediction) {
                   logger.t("Selected city: ${prediction.primaryText}");
-                },),
+                },
+                onPlaceInfoFetched: (Place? place) {
+                  if (place != null) {
+                    _city = place;
+                  }
+                },
+              ),
               TextFormField(
                 controller: _descriptionController,
                 keyboardType: TextInputType.multiline,

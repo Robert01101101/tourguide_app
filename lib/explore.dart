@@ -10,6 +10,7 @@ import 'package:tourguide_app/ui/google_places_image.dart';
 import 'package:tourguide_app/ui/my_layouts.dart';
 import 'package:tourguide_app/ui/horizontal_scroller.dart';
 import 'package:tourguide_app/tour/rounded_tile.dart';
+import 'package:tourguide_app/ui/place_autocomplete.dart';
 import 'package:tourguide_app/ui/shimmer_loading.dart';
 import 'package:tourguide_app/utilities/custom_import.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -110,6 +111,24 @@ class ExploreState extends State<Explore> {
         );
       }).toList();
     });
+  }
+
+  final TextEditingController _cityEditController = TextEditingController();
+  void _showOptionsDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Change Location'),
+          content: SingleChildScrollView(
+            child: PlaceAutocomplete(
+              textEditingController: _cityEditController,
+              isFormSubmitted: false,
+              onItemSelected: (AutocompletePrediction ) {  },),
+          ),
+        );
+      },
+    );
   }
 
 

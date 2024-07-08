@@ -137,6 +137,29 @@ class LocationProvider with ChangeNotifier {
     }
   }
 
+  Future<Place?> getLocationDetailsFromPlaceId(String placeId) async {
+    try {
+      final placeDetails = await _places.fetchPlace(
+        placeId,
+        fields: [ //Option to add more! Or remove if not needed to save cost
+          PlaceField.Address,
+          PlaceField.Location,
+          PlaceField.PhoneNumber,
+          PlaceField.Name,
+          PlaceField.Rating,
+          PlaceField.WebsiteUri,
+          PlaceField.Location,
+          PlaceField.OpeningHours,
+        ],
+      );
+
+      return placeDetails.place;
+    } catch (e) {
+      logger.e("Error fetching place details: $e");
+      return null;
+    }
+  }
+
   Future<List<AutocompletePrediction>?> getAutocompleteSuggestions(String query, {bool restrictToCities = true}) async {
     if (query == null || query.isEmpty) return null;
     try {

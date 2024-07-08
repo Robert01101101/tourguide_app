@@ -10,6 +10,7 @@ class PlaceAutocomplete extends StatefulWidget {
   final TextEditingController textEditingController;
   final bool isFormSubmitted;
   final Function(AutocompletePrediction) onItemSelected;
+  final Function(Place?)? onPlaceInfoFetched;
   final bool restrictToCities;
   final InputDecoration? decoration;
 
@@ -17,6 +18,7 @@ class PlaceAutocomplete extends StatefulWidget {
     required this.textEditingController,
     required this.isFormSubmitted,
     required this.onItemSelected,
+    this.onPlaceInfoFetched,
     this.restrictToCities = true, //default true
     this.decoration,
   });
@@ -34,6 +36,7 @@ class _PlaceAutocompleteState extends State<PlaceAutocomplete> {
   late final _Debounceable<Iterable<AutocompletePrediction>?, String> _debouncedSearch;
   // A network error was received on the most recent query.
   bool _networkError = false;
+  bool _isValidSelection = false;
 
   @override
   void initState() {
@@ -52,7 +55,8 @@ class _PlaceAutocompleteState extends State<PlaceAutocomplete> {
     return Autocomplete<AutocompletePrediction>(
       optionsBuilder: (TextEditingValue textEditingValue) async {
         setState(() {
-          _networkError = false;
+          _networkError = false; //reset
+          _isValidSelection = false;
         });
         final Iterable<AutocompletePrediction>? options =
         await _debouncedSearch(textEditingValue.text);
@@ -78,6 +82,9 @@ class _PlaceAutocompleteState extends State<PlaceAutocomplete> {
             if (value == null || value.isEmpty) {
               return 'Please enter a city';
             }
+            if (!_isValidSelection) {
+              return 'Select a city from the dropdown';
+            }
             return null;
           },
           enabled: !widget.isFormSubmitted,
@@ -98,9 +105,16 @@ class _PlaceAutocompleteState extends State<PlaceAutocomplete> {
                   final AutocompletePrediction option = options.elementAt(index);
                   return ListTile(
                     title: Text(option.fullText!),
-                    onTap: () {
+                    onTap: () async {
                       onSelected(option);
                       widget.onItemSelected(option);
+                      setState(() {
+                        _isValidSelection = true;
+                      });
+                      if (widget.onPlaceInfoFetched != null) {
+                        Place? place = await locationProvider.getLocationDetailsFromPlaceId(option.placeId!);
+                        widget.onPlaceInfoFetched!(place);
+                      }
                     },
                   );
                 },
