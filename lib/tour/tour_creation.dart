@@ -16,6 +16,7 @@ import 'package:flutter_google_places_sdk/flutter_google_places_sdk.dart';
 
 import 'package:tourguide_app/main.dart';
 import 'package:tourguide_app/utilities/providers/location_provider.dart';
+import 'package:profanity_filter/profanity_filter.dart';
 
 //_________________________________________________________________________ CREATE FORM
 class CreateTour extends StatefulWidget {
@@ -71,10 +72,12 @@ class _CreateTourState extends State<CreateTour> {
       Provider.of<LocationProvider>(context, listen: false);
       final User user = auth.currentUser!;
       final uid = user.uid;
+      final filter = ProfanityFilter();
+
 
       final tourData = {
-        "name": _nameController.text,
-        "description": _descriptionController.text,
+        "name": filter.censor(_nameController.text),
+        "description": filter.censor(_descriptionController.text),
         "city": _cityController.text,
         "uid": uid,
         "visibility": _tourIsPublic ? "public" : "private",
@@ -82,7 +85,7 @@ class _CreateTourState extends State<CreateTour> {
         "createdDateTime": DateTime.now(),
         "latitude": _city!.latLng!.lat,
         "longitude": _city!.latLng!.lng,
-        "placeId": locationProvider.placeId,
+        "placeId": _city!.id,
         "authorName": user.displayName,
         "authorId": uid,
         "tourguidePlaces": _places.map((place) => {
