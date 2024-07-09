@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
+import 'package:introduction_screen/introduction_screen.dart';
 import 'package:onboarding/onboarding.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tourguide_app/signIn.dart';
 import 'package:tourguide_app/utilities/tourguide_navigation.dart';
+
 
 class TourguideOnboard extends StatefulWidget {
   const TourguideOnboard({super.key});
@@ -13,13 +16,15 @@ class TourguideOnboard extends StatefulWidget {
 }
 
 class _TourguideOnboardState extends State<TourguideOnboard> {
+  final _introKey = GlobalKey<IntroductionScreenState>();
+
   @override
   void initState() {
     FlutterNativeSplash.remove();
     super.initState();
   }
 
-  CompleteOnboarding() async {
+  void _completeOnboarding() async {
     var _prefs = await SharedPreferences.getInstance();
     _prefs.setBool('firstTimeUser', false);
     TourguideNavigation.router.go(
@@ -29,194 +34,75 @@ class _TourguideOnboardState extends State<TourguideOnboard> {
 
   @override
   Widget build(BuildContext context) {
+    PageDecoration pageDecoration = PageDecoration(
+      titleTextStyle: Theme.of(context).textTheme.displaySmall!.copyWith(
+        color: Colors.white,
+      ),
+        bodyTextStyle: Theme.of(context).textTheme.bodyLarge!.copyWith(
+        color: Colors.white,
+      ),
+      pageMargin: EdgeInsets.only(bottom: 80.0),
+      contentMargin: EdgeInsets.all(50),
+    );
+
     return Scaffold(
-      body: Onboarding(
-        // List of swipeable widgets
-        swipeableBody: [
-          Container(
-            color: Theme.of(context).primaryColor.withOpacity(1),
-            padding: EdgeInsets.all(50.0),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: [
-                SizedBox(height: 50),
-                Image.asset('assets/onboarding/onboard1.png', width: 250, height: 250,),
-                SizedBox(height: 20),
-                Text(
-                  'Welcome to Tourguide',
-                  textAlign: TextAlign.center,
-                  //style from theme header
-                  style: Theme.of(context).textTheme.displaySmall?.copyWith(
-                    color: Colors.white,
-                  ),
-                ),
-                SizedBox(height: 20),
-                Text(
-                  '[Internal Testing]',
-                  textAlign: TextAlign.center,
-                  //style from theme header
-                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    color: Colors.white,
-                  ),
-                ),
-                SizedBox(height: 40),
-                Text(
-                  'Tourguide helps you find your way around and learn about the places you visit.',
-                  textAlign: TextAlign.center,
-                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                    color: Colors.white,
-                  ),
-                ),
-                SizedBox(height: 20),
-                Text(
-                  'This app is still in development and may not work as expected. Please report any issues to the developers.',
-                  textAlign: TextAlign.center,
-                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                    color: Colors.white,
-                  ),
-                ),
-              ],
-            ),
+      body: IntroductionScreen(
+        key: _introKey,
+        pages: [
+          PageViewModel(
+            title: 'Welcome to \nTourguide',
+            body: 'Tourguide helps you find your way around and learn about the places you visit.\n\n'
+                'This app is still in development and may not work as expected. Please report any issues to the developers.',
+            image: Image.asset('assets/onboarding/onboard1.png', width: 250, height: 250),
+            decoration: pageDecoration.copyWith(pageColor: Color(0x00ffffff),),
           ),
-          Container(
-            color: Theme.of(context).primaryColor.withOpacity(.93),
-            padding: EdgeInsets.all(50.0),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: [
-                SizedBox(height: 50),
-                Image.asset('assets/onboarding/onboard2.png', width: 250, height: 250,),
-                SizedBox(height: 20),
-                Text(
-                  'Explore your destination',
-                  textAlign: TextAlign.center,
-                  //style from theme header
-                  style: Theme.of(context).textTheme.displaySmall?.copyWith(
-                    color: Colors.white,
-                  ),
-                ),
-                SizedBox(height: 40),
-                Text(
-                  'Plan your day and route, find your way around, discover new places, and chat with an AI tourguide.',
-                  textAlign: TextAlign.center,
-                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                    color: Colors.white,
-                  ),
-                ),
-              ],
-            ),
+          PageViewModel(
+            title: 'Explore your destination',
+            body: 'Plan your day and route, find your way around, discover new places, and chat with an AI tourguide.',
+            image: Image.asset('assets/onboarding/onboard2.png', width: 250, height: 250),
+            decoration: pageDecoration.copyWith(pageColor: Color(0x11ffffff),),
           ),
-          Container(
-            color: Theme.of(context).primaryColor.withOpacity(.87),
-            padding: EdgeInsets.all(50.0),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: [
-                SizedBox(height: 50),
-                Image.asset('assets/onboarding/onboard3.png', width: 250, height: 250,),
-                SizedBox(height: 20),
-                Text(
-                  'Contribute',
-                  textAlign: TextAlign.center,
-                  //style from theme header
-                  style: Theme.of(context).textTheme.displaySmall?.copyWith(
-                    color: Colors.white,
-                  ),
-                ),
-                SizedBox(height: 40),
-                Text(
-                  'Tourguide is a community-driven app. You can contribute by adding new tours, updating information, and sharing your experiences.',
-                  textAlign: TextAlign.center,
-                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                    color: Colors.white,
-                  ),
-                ),
-              ],
-            ),
+          PageViewModel(
+            title: 'Contribute',
+            body: 'Tourguide is a community-driven app. You can contribute by adding new tours, updating information, and sharing your experiences.',
+            image: Image.asset('assets/onboarding/onboard3.png', width: 250, height: 250),
+            decoration: pageDecoration.copyWith(pageColor: Color(0x22ffffff),),
           ),
-          Container(
-            color: Theme.of(context).primaryColor.withOpacity(.8),
-            padding: EdgeInsets.all(50.0),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: [
-                SizedBox(height: 50),
-                Image.asset('assets/onboarding/onboard4.png', width: 250, height: 250,),
-                SizedBox(height: 20),
-                Text(
-                  'Safe Travels!',
-                  textAlign: TextAlign.center,
-                  //style from theme header
-                  style: Theme.of(context).textTheme.displaySmall?.copyWith(
-                    color: Colors.white,
-                  ),
-                ),
-                SizedBox(height: 40),
-                Text(
-                  'Start exploring local tours, and have a great time! Please share any feedback with us.',
-                  textAlign: TextAlign.center,
-                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                    color: Colors.white,
-                  ),
-                ),
-              ],
-            ),
+          PageViewModel(
+            title: 'Safe Travels!',
+            body: 'Start exploring local tours, and have a great time! Please share any feedback with us.',
+            image: Image.asset('assets/onboarding/onboard4.png', width: 250, height: 250),
+            decoration: pageDecoration.copyWith(pageColor: Color(0x33ffffff),),
           ),
         ],
-        startIndex: 0, // Starting index of the swipeable widgets
-        onPageChanges: (dragDistance, pagesLength, currentIndex, slideDirection) {
-          // Callback for page change
-          print('Drag Distance: $dragDistance');
-          print('Pages Length: $pagesLength');
-          print('Current Index: $currentIndex');
-          print('Slide Direction: $slideDirection');
-        },
-        /*buildHeader: (context, dragDistance, pagesLength, currentIndex, setIndex, slideDirection) {
-          // Build a header that will display at all times
-          return Container(
-            alignment: Alignment.centerLeft,
-            padding: EdgeInsets.symmetric(vertical: 16.0, horizontal: 20.0),
-            child: Text(
-              'Onboarding Header',
-              style: TextStyle(fontSize: 18.0, fontWeight: FontWeight.bold),
-            ),
-          );
-        },*/
-        buildFooter: (context, dragDistance, pagesLength, currentIndex, setIndex, slideDirection) {
-          // Build a footer that will display at all times
-          return Container(
-            padding: EdgeInsets.symmetric(vertical: 16.0, horizontal: 20.0),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Indicator<LinePainter>(
-                  painter: LinePainter(
-                    currentPageIndex: currentIndex,
-                    pagesLength: pagesLength,
-                    netDragPercent: dragDistance,
-                    lineWidth: 20,
-                    activePainter: Paint()
-                      ..color = Colors.black54
-                      ..strokeWidth = 4.0,
-                    inactivePainter: Paint()
-                      ..color = Colors.black12
-                      ..strokeWidth = 2.0,
-                    translate: false, slideDirection: slideDirection,
-                  ),
-                ),
-                TextButton(
-                  onPressed: currentIndex == 3 ? CompleteOnboarding : () => setIndex(currentIndex + 1),
-                  child: Text(
-                    currentIndex == 3 ?
-                    'Get Started' : 'Next',
-                    style: TextStyle(fontSize: 18.0, fontWeight: FontWeight.bold, color: Theme.of(context).primaryColor),
-                  ),
-                ),
-              ],
-            ),
-          );
-        },
-        animationInMilliseconds: 500, // Animation speed in milliseconds
+        showSkipButton: true,
+        skip: Text('Skip', style: TextStyle(fontSize: 18.0, fontWeight: FontWeight.bold, color: Colors.white)),
+        next: const Icon(Icons.arrow_forward, color: Colors.white),
+        done: Text("Get Started", style: TextStyle(fontSize: 18.0, fontWeight: FontWeight.bold, color: Colors.white)),
+        onDone: () => _completeOnboarding(),
+        onSkip: () => _introKey.currentState?.skipToEnd(),
+        curve: Curves.fastLinearToSlowEaseIn,
+        controlsMargin: EdgeInsets.zero,
+        dotsDecorator: const DotsDecorator(
+          size: Size(10.0, 10.0),
+          color: Colors.white,
+          activeSize: Size(22.0, 10.0),
+          activeShape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.all(Radius.circular(25.0)),
+          ),
+          activeColor: Color(0xff70dad3)
+        ),
+        /*dotsContainerDecorator: const ShapeDecoration(
+          color: Colors.black87,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.all(Radius.circular(8.0)),
+          ),
+        ),*/
+        globalBackgroundColor: Theme.of(context).primaryColor,
+        scrollPhysics: ClampingScrollPhysics(),
+        //next: Icon(Icons.arrow_forward, color: Colors.white),
+        //doneButtonPersist: true, // Persist done button across pages
+        //animationDuration: 500, // Animation speed in milliseconds
       ),
     );
   }
