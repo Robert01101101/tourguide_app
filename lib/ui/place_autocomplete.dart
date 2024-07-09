@@ -49,83 +49,91 @@ class _PlaceAutocompleteState extends State<PlaceAutocomplete> {
 
   @override
   Widget build(BuildContext context) {
-    // Get the LocationProvider from the context
     LocationProvider locationProvider = Provider.of<LocationProvider>(context);
 
-    return Autocomplete<AutocompletePrediction>(
-      optionsBuilder: (TextEditingValue textEditingValue) async {
-        setState(() {
-          _networkError = false; //reset
-          _isValidSelection = false;
-        });
-        final Iterable<AutocompletePrediction>? options =
-        await _debouncedSearch(textEditingValue.text);
-        if (options == null) {
-          return _lastOptions;
-        }
-        _lastOptions = options;
-        return options;
-      },
-      displayStringForOption: (AutocompletePrediction option) => option.fullText!,
-      fieldViewBuilder: (BuildContext context, TextEditingController fieldTextEditingController, FocusNode fieldFocusNode, VoidCallback onFieldSubmitted) {
-        return TextFormField(
-          controller: fieldTextEditingController,
-          focusNode: fieldFocusNode,
-          decoration: widget.decoration?.copyWith(
-            labelText: widget.restrictToCities ? 'City' : 'Place',
-            errorText: _networkError ? 'Network error, please try again.' : null,
-          ) ?? InputDecoration(
-            labelText: widget.restrictToCities ? 'City' : 'Place',
-            errorText: _networkError ? 'Network error, please try again.' : null,
-          ),
-          validator: (String? value) {
-            if (value == null || value.isEmpty) {
-              return 'Please enter a city';
+    return LayoutBuilder( //LayoutBuilder is needed to match the list width to text input width
+      builder: (BuildContext context, BoxConstraints constraints) {
+        return Autocomplete<AutocompletePrediction>(
+          optionsBuilder: (TextEditingValue textEditingValue) async {
+            setState(() {
+              _networkError = false; //reset
+              _isValidSelection = false;
+            });
+            final Iterable<AutocompletePrediction>? options =
+            await _debouncedSearch(textEditingValue.text);
+            if (options == null) {
+              return _lastOptions;
             }
-            if (!_isValidSelection) {
-              return 'Select a city from the dropdown';
-            }
-            return null;
+            _lastOptions = options;
+            return options;
           },
-          enabled: !widget.isFormSubmitted,
-        );
-      },
-      optionsViewBuilder: (BuildContext context, AutocompleteOnSelected<AutocompletePrediction> onSelected, Iterable<AutocompletePrediction> options) {
-        return Align(
-          alignment: Alignment.topLeft,
-          child: Material(
-            elevation: 4.0,
-            child: Container(
-              width: MediaQuery.of(context).size.width,
-              child: ListView.builder(
-                padding: EdgeInsets.all(8.0),
-                itemCount: options.length,
-                shrinkWrap: true,
-                itemBuilder: (BuildContext context, int index) {
-                  final AutocompletePrediction option = options.elementAt(index);
-                  return ListTile(
-                    title: Text(option.fullText!),
-                    onTap: () async {
-                      onSelected(option);
-                      widget.onItemSelected(option);
-                      setState(() {
-                        _isValidSelection = true;
-                      });
-                      if (widget.onPlaceInfoFetched != null) {
-                        Place? place = await locationProvider.getLocationDetailsFromPlaceId(option.placeId!);
-                        widget.onPlaceInfoFetched!(place);
-                      }
-                    },
-                  );
-                },
+          displayStringForOption: (AutocompletePrediction option) => option.fullText!,
+          fieldViewBuilder: (BuildContext context, TextEditingController fieldTextEditingController, FocusNode fieldFocusNode, VoidCallback onFieldSubmitted) {
+            return TextFormField(
+              controller: fieldTextEditingController,
+              focusNode: fieldFocusNode,
+              decoration: widget.decoration?.copyWith(
+                labelText: widget.restrictToCities ? 'City' : 'Place',
+                errorText: _networkError ? 'Network error, please try again.' : null,
+              ) ?? InputDecoration(
+                labelText: widget.restrictToCities ? 'City' : 'Place',
+                errorText: _networkError ? 'Network error, please try again.' : null,
               ),
-            ),
-          ),
+              validator: (String? value) {
+                if (value == null || value.isEmpty) {
+                  return 'Please enter a city';
+                }
+                if (!_isValidSelection) {
+                  return 'Select a city from the dropdown';
+                }
+                return null;
+              },
+              onEditingComplete: () {
+                if (!_isValidSelection) {
+                  setState(() {});
+                }
+              },
+              enabled: !widget.isFormSubmitted,
+            );
+          },
+          optionsViewBuilder: (BuildContext context, AutocompleteOnSelected<AutocompletePrediction> onSelected, Iterable<AutocompletePrediction> options) {
+            return Align(
+              alignment: Alignment.topLeft,
+              child: Material(
+                elevation: 4.0,
+                child: Container(
+                  width: constraints.maxWidth, // Match width to the text field
+                  child: ListView.builder(
+                    padding: EdgeInsets.all(8.0),
+                    itemCount: options.length,
+                    shrinkWrap: true,
+                    itemBuilder: (BuildContext context, int index) {
+                      final AutocompletePrediction option = options.elementAt(index);
+                      return ListTile(
+                        title: Text(option.fullText!),
+                        onTap: () async {
+                          onSelected(option);
+                          widget.onItemSelected(option);
+                          setState(() {
+                            _isValidSelection = true;
+                          });
+                          if (widget.onPlaceInfoFetched != null) {
+                            Place? place = await locationProvider.getLocationDetailsFromPlaceId(option.placeId!);
+                            widget.onPlaceInfoFetched!(place);
+                          }
+                        },
+                      );
+                    },
+                  ),
+                ),
+              ),
+            );
+          },
+          onSelected: (AutocompletePrediction selection) {
+            widget.textEditingController.text = selection.fullText!;
+            widget.textEditingController.selection = TextSelection.fromPosition(TextPosition(offset: selection.fullText!.length));
+          },
         );
-      },
-      onSelected: (AutocompletePrediction selection) {
-        widget.textEditingController.text = selection.fullText!;
-        widget.textEditingController.selection = TextSelection.fromPosition(TextPosition(offset: selection.fullText!.length));
       },
     );
   }

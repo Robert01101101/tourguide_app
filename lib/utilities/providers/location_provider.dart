@@ -137,12 +137,14 @@ class LocationProvider with ChangeNotifier {
     }
   }
 
-  Future<Place?> getLocationDetailsFromPlaceId(String placeId) async {
+  Future<Place?> getLocationDetailsFromPlaceId(String placeId, {bool setAsCurrentPlace = false}) async {
     try {
       final placeDetails = await _places.fetchPlace(
         placeId,
         fields: [ //Option to add more! Or remove if not needed to save cost
+          PlaceField.Id,
           PlaceField.Address,
+          PlaceField.AddressComponents,
           PlaceField.Location,
           PlaceField.PhoneNumber,
           PlaceField.Name,
@@ -153,11 +155,31 @@ class LocationProvider with ChangeNotifier {
         ],
       );
 
+      if (setAsCurrentPlace){
+        _currentCity = placeDetails.place!.addressComponents!.firstWhere((element) => element.types!.contains("locality")).name!;
+        _currentState = placeDetails.place!.addressComponents!.firstWhere((element) => element.types!.contains("administrative_area_level_1")).name!;
+        _currentCountry = placeDetails.place!.addressComponents!.firstWhere((element) => element.types!.contains("country")).name!;
+        _placeId = placeId;
+        fetchPlacePhoto();
+        notifyListeners();
+        logger.t("LocationProvider.getLocationDetailsFromPlaceId() - setAsCurrentPlace - _currentCity=${_currentCity}");
+      }
+
       return placeDetails.place;
     } catch (e) {
       logger.e("Error fetching place details: $e");
       return null;
     }
+  }
+
+  void setCurrentPlace(Place place){
+    _currentCity = place.addressComponents!.firstWhere((element) => element.types!.contains("locality")).name!;
+    _currentState = place.addressComponents!.firstWhere((element) => element.types!.contains("administrative_area_level_1")).name!;
+    _currentCountry = place.addressComponents!.firstWhere((element) => element.types!.contains("country")).name!;
+    _placeId = place.id!;
+    fetchPlacePhoto();
+    notifyListeners();
+    logger.t("LocationProvider.setCurrentPlace() - _currentCity=${_currentCity}");
   }
 
   Future<List<AutocompletePrediction>?> getAutocompleteSuggestions(String query, {bool restrictToCities = true}) async {

@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter_google_places_sdk/flutter_google_places_sdk.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:google_sign_in/google_sign_in.dart';
@@ -113,25 +114,14 @@ class ExploreState extends State<Explore> {
     });
   }
 
-  final TextEditingController _cityEditController = TextEditingController();
   void _showOptionsDialog(BuildContext context) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text('Change Location'),
-          content: SingleChildScrollView(
-            child: PlaceAutocomplete(
-              textEditingController: _cityEditController,
-              isFormSubmitted: false,
-              onItemSelected: (AutocompletePrediction ) {  },),
-          ),
-        );
+        return OptionsDialog();
       },
     );
   }
-
-
 
   List<TileData> tiles = [
   TileData(
@@ -401,7 +391,7 @@ class ExploreState extends State<Explore> {
                       padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 0),
                       child: IconButton(
                           onPressed: (){
-                            logger.t("City options pressed");
+                            _showOptionsDialog(context);
                           },
                           icon: const Icon(Icons.more_vert),
                           color: Color(0xeeF2F8F8)),
@@ -434,6 +424,70 @@ class GradientText extends StatelessWidget {
         Rect.fromLTWH(0, 0, bounds.width, bounds.height),
       ),
       child: richText,
+    );
+  }
+}
+
+class OptionsDialog extends StatefulWidget {
+  @override
+  _OptionsDialogState createState() => _OptionsDialogState();
+}
+
+class _OptionsDialogState extends State<OptionsDialog> {
+  final TextEditingController _cityEditController = TextEditingController();
+  final _formKey = GlobalKey<FormState>();
+  bool _showConfirm = false;
+  Place? newPlace;
+
+  @override
+  Widget build(BuildContext context) {
+    LocationProvider locationProvider = Provider.of<LocationProvider>(context);
+
+    return AlertDialog(
+      title: Text('Change Location'),
+      content: Form(
+        key: _formKey,
+        child: SingleChildScrollView(
+          child: Container(
+            width: double.maxFinite,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                PlaceAutocomplete(
+                  textEditingController: _cityEditController,
+                  isFormSubmitted: false,
+                  onItemSelected: (AutocompletePrediction prediction) {
+                    // Handle item selection
+                    logger.i('Selected place: ${prediction.fullText}');
+                  },
+                  onPlaceInfoFetched: (Place? place) {
+                    // Handle place info fetched
+                    setState(() {
+                      logger.i('onPlaceInfoFetched: ${place}');
+                      newPlace = place;
+                      _showConfirm = true; // Show the Confirm button
+                    });
+                  },
+                ),
+                if (_showConfirm)
+                  SizedBox(height: 32), // Add spacing between the dropdown and the button
+                if (_showConfirm)
+                  ElevatedButton(
+                    onPressed: () {
+                      // Validate form
+                      if (_formKey.currentState!.validate()) {
+                        locationProvider.setCurrentPlace(newPlace!);
+                        // Handle the confirm action here
+                        Navigator.of(context).pop();
+                      }
+                    },
+                    child: Text('Confirm'),
+                  ),
+              ],
+            ),
+          ),
+        ),
+      ),
     );
   }
 }
