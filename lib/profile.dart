@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:tourguide_app/ui/my_layouts.dart';
 import 'package:tourguide_app/utilities/custom_import.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:tourguide_app/utilities/providers/auth_provider.dart' as myAuth;
@@ -164,17 +165,15 @@ class _ProfileState extends State<Profile> {
       appBar: AppBar(
         title: const Text('Profile'),
       ),
-      body: Center(
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      body: SingleChildScrollView(
+        child: Column(
+          children: [
+            StandardLayout(
               children: [
-                Column(
+                StandardLayout(
+                  enableHorizontalPadding: false,
+                  enableVerticalPadding: false,
                   children: [
-                    ElevatedButton(onPressed: (){
-                      launchUrl(Uri.parse("https://tourguide.rmichels.com/privacyPolicy.html"));
-                    }, child: Text("Privacy Policy")),
                     ListTile(
                       leading: GoogleUserCircleAvatar(
                         identity: authProvider.user!,
@@ -182,12 +181,13 @@ class _ProfileState extends State<Profile> {
                       title: Text(authProvider.user!.displayName ?? ''),
                       subtitle: Text(authProvider.user!.email),
                     ),
+                    SizedBox(height: 16,),
                     Text("Your userdata:", style: Theme.of(context).textTheme.headlineSmall),
-                    SizedBox(height: 10,),
+                    SizedBox(height: 8,),
                     Text("Google Auth data", style: Theme.of(context).textTheme.bodyLarge),
-                    SizedBox(height: 6,),
+                    SizedBox(height: 8,),
                     Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      mainAxisAlignment: MainAxisAlignment.start,
                       children: [
                         const Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -200,6 +200,7 @@ class _ProfileState extends State<Profile> {
                             Text("phoneNumber: "),
                           ],
                         ),
+                        SizedBox(width: 32,),
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
@@ -213,15 +214,9 @@ class _ProfileState extends State<Profile> {
                         ),
                       ],
                     ),
-                    SizedBox(height: 12,),
+                    SizedBox(height: 16,),
                     Text("Firestore profile data", style: Theme.of(context).textTheme.bodyLarge),
-                    SizedBox(height: 6,),
-                    ElevatedButton(onPressed: () {
-                      setState(() {
-                        _profileDataFuture = _firestoreGetUserProfileData();
-                      });
-                    }, child: const Text("Update Firestore profile data (get)")),
-                    SizedBox(height: 6,),
+                    SizedBox(height: 8,),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceAround,
                       children: [
@@ -270,10 +265,103 @@ class _ProfileState extends State<Profile> {
                     }, child: const Text("Save")),
                   ],
                 ),
+                SizedBox(height: 32,),
               ],
             ),
-          )
+            Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                ProfileListButton(
+                  label: 'Privacy Policy',
+                  leftIcon: Icons.privacy_tip_outlined,
+                  rightIcon: Icons.arrow_forward_ios,
+                  onPressed: () {
+                    launchUrl(Uri.parse("https://tourguide.rmichels.com/privacyPolicy.html"));
+                  },
+                ),
+                ProfileListButton(
+                  label: 'Update Firestore profile data (get)',
+                  leftIcon: Icons.data_object,
+                  onPressed: () {
+                    setState(() {
+                      _profileDataFuture = _firestoreGetUserProfileData();
+                    });
+                  },
+                ),
+                ProfileListButton(
+                  label: 'Sign out',
+                  leftIcon: Icons.logout,
+                  onPressed: () {
+                    authProvider.signOut();
+                  },
+                  isLastItem: true,
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
+    );
+  }
+}
+
+class ProfileListButton extends StatelessWidget {
+  final String label;
+  final IconData leftIcon;
+  final IconData? rightIcon;
+  final VoidCallback onPressed;
+  final bool? isLastItem;
+
+  const ProfileListButton({
+    required this.label,
+    required this.leftIcon,
+    this.rightIcon,
+    required this.onPressed,
+    this.isLastItem,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16.0),
+          child: Divider(height: 1, color: Colors.grey),
+        ),
+        TextButton(
+          onPressed: onPressed,
+          style: TextButton.styleFrom(
+            padding: EdgeInsets.all(16.0),
+            alignment: Alignment.centerLeft,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(0), // Set to 0 for sharp corners
+            ),
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(leftIcon), // Left icon
+                  SizedBox(width: 16), // Adjust spacing between icon and text as needed
+                  Text(
+                    label,
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                ],
+              ),
+              if (rightIcon != null) Icon(rightIcon, size: 20,), // Right icon if provided
+            ],
+          ),
+        ),
+        if (isLastItem ?? false)
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0),
+            child: Divider(height: 1, color: Colors.grey),
+          ),
+      ],
     );
   }
 }

@@ -347,7 +347,7 @@ class _GeminiChatState extends State<GeminiChat> with WidgetsBindingObserver {
                   color: Colors.white,
                   size: 24.0,
                 ),
-                child,
+                IgnorePointer(child: child,),//IgnorePointer ensures clicks pass through to button behind it
               ],
             ),
           ),
