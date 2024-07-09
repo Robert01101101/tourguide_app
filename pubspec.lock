@@ -1176,14 +1176,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.0.0"
-  onboarding:
-    dependency: "direct main"
-    description:
-      name: onboarding
-      sha256: bda49643bea9cb05a5da79f3314a2042f454ca76a61235c35e8fa0b7d6ec56e8
-      url: "https://pub.dev"
-    source: hosted
-    version: "4.0.2"
   path:
     dependency: transitive
     description:

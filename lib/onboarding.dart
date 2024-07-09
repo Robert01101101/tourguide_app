@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:introduction_screen/introduction_screen.dart';
-import 'package:onboarding/onboarding.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tourguide_app/signIn.dart';
 import 'package:tourguide_app/utilities/tourguide_navigation.dart';
