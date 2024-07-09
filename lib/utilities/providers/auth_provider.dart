@@ -77,7 +77,6 @@ class AuthProvider with ChangeNotifier {
 
 //#region REGION: Sign in / out methods
   void signInSilently() async {
-    logger.t('AuthProvider.signInSilently()');
     GoogleSignInAccount? silentlySignedInUser = await googleSignIn.signInSilently();
     logger.t('AuthProvider.signInSilently() - silentlySignedInUser=$silentlySignedInUser');
     if (silentlySignedInUser == null) {
@@ -142,7 +141,7 @@ class AuthProvider with ChangeNotifier {
         notifyListeners();
       }
     } catch (error) {
-      logger.t(error);
+      logger.e(error);
     }
   }
 
@@ -179,7 +178,7 @@ class AuthProvider with ChangeNotifier {
       SnackBarService.showSnackBar(content: 'You\'re signed out!');
       isLoggingOut = false;
     } catch (e){
-      logger.t(e);
+      logger.e(e);
       isLoggingOut = false;
     }
 

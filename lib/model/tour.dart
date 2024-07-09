@@ -154,12 +154,12 @@ class TourService {
               String fullUrl = tour.imageUrl;
               Uri uri = Uri.parse(fullUrl);
               String path = uri.path.replaceFirst('/v0/b/tourguide-firebase.appspot.com/o/', '').replaceAll('%2F', '/');
-              logger.t(path);
+              //logger.t(path);
 
               String imageUrl = await storage.ref(path).getDownloadURL();
               tour = tour.copyWith(imageUrl: imageUrl); // Update Tour object with image URL
             } catch (e) {
-              logger.t('Error fetching image: $e');
+              logger.e('Error fetching image: $e');
             }
           }
 
@@ -167,7 +167,7 @@ class TourService {
         }
       }
     } catch (e) {
-      logger.t('Error fetching tours: $e');
+      logger.e('Error fetching tours: $e');
     }
 
     return tours;

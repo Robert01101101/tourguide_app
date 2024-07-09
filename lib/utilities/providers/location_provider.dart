@@ -26,12 +26,14 @@ class LocationProvider with ChangeNotifier {
   String _currentCountry = '';
   String _placeId = '';
   late FlutterGooglePlacesSdk _places;
+  GooglePlacesImg? _currentPlaceImg;
 
   Position? get currentPosition => _currentPosition;
   String get currentCity => _currentCity;
   String get currentState => _currentState;
   String get currentCountry => _currentCountry;
   String get placeId => _placeId;
+  GooglePlacesImg? get currentPlaceImg => _currentPlaceImg;
 
   Map<String, GooglePlacesImg> _imageCache = {};
 
@@ -44,12 +46,13 @@ class LocationProvider with ChangeNotifier {
     // Wait for remoteConfig to fetch and activate
     await remoteConfig.fetchAndActivate();
 
-    logger.t("LocationProvider()");
+    //logger.t("LocationProvider()");
     _places = FlutterGooglePlacesSdk(remoteConfig.getString('google_api_key')!);
     _loadSavedLocation();
   }
 
   Future<void> getCurrentLocation() async {
+    logger.t("LocationProvider.getCurrentLocation()");
     bool serviceEnabled;
     LocationPermission permission;
 
@@ -81,9 +84,6 @@ class LocationProvider with ChangeNotifier {
           'Location permissions are permanently denied, we cannot request permissions.');
     }
 
-
-
-    logger.t("LocationProvider.getCurrentLocation()");
     try {
       Position position = await Geolocator.getCurrentPosition(
         desiredAccuracy: LocationAccuracy.high,
@@ -104,14 +104,15 @@ class LocationProvider with ChangeNotifier {
 
       await _getLocationDetailsFromCoordinates(position);
       await _saveLocation();
+      notifyListeners();
     } catch (e) {
-      logger.t(e);
+      logger.e(e);
     }
   }
 
   Future<void> _getLocationDetailsFromCoordinates(Position position) async {
     try {
-      logger.t("LocationProvider._getLocationDetailsFromCoordinates()");
+      //logger.t("LocationProvider._getLocationDetailsFromCoordinates()");
       List<Placemark> placemarks = await placemarkFromCoordinates(
         position.latitude,
         position.longitude,
@@ -133,7 +134,7 @@ class LocationProvider with ChangeNotifier {
       }
 
     } catch (e) {
-      logger.t(e);
+      logger.e(e);
     }
   }
 
@@ -172,14 +173,18 @@ class LocationProvider with ChangeNotifier {
     }
   }
 
-  void setCurrentPlace(Place place){
-    _currentCity = place.addressComponents!.firstWhere((element) => element.types!.contains("locality")).name!;
-    _currentState = place.addressComponents!.firstWhere((element) => element.types!.contains("administrative_area_level_1")).name!;
-    _currentCountry = place.addressComponents!.firstWhere((element) => element.types!.contains("country")).name!;
-    _placeId = place.id!;
-    fetchPlacePhoto();
-    notifyListeners();
-    logger.t("LocationProvider.setCurrentPlace() - _currentCity=${_currentCity}");
+  void setCurrentPlace(Place place) async {
+    try {
+      _currentCity = place.addressComponents!.firstWhere((element) => element.types!.contains("locality")).name!;
+      _currentState = place.addressComponents!.firstWhere((element) => element.types!.contains("administrative_area_level_1")).name!;
+      _currentCountry = place.addressComponents!.firstWhere((element) => element.types!.contains("country")).name!;
+      _placeId = place.id!;
+      _currentPlaceImg = await fetchPlacePhoto();
+      notifyListeners();
+      logger.t("LocationProvider.setCurrentPlace() - _currentCity=${_currentCity}");
+    } catch (e) {
+      logger.e(e);
+    }
   }
 
   Future<List<AutocompletePrediction>?> getAutocompleteSuggestions(String query, {bool restrictToCities = true}) async {
@@ -199,8 +204,7 @@ class LocationProvider with ChangeNotifier {
       List<AutocompletePrediction> resultSorted = List.from(result.predictions);
 
       resultSorted.sort((a, b) => a.distanceMeters!.compareTo(b.distanceMeters!));
-      logger.t(resultSorted.toString());
-      logger.t("LocationProvider.getAutocompleteSuggestions() - result.predictions.first.placeId=${resultSorted.first.placeId}");
+      logger.t("resultSorted.toString()=${resultSorted.toString()},   result.predictions.first.placeId=${resultSorted.first.placeId}");
 
       return resultSorted;
     } catch (e){
@@ -271,7 +275,7 @@ class LocationProvider with ChangeNotifier {
 
 
   //from https://pub.dev/packages/flutter_google_places_sdk/example, with modifications for simplification & integration to location_provider
-  Future<GooglePlacesImg?> fetchPlacePhoto() async {
+  Future<GooglePlacesImg?> fetchPlacePhoto({bool setAsCurrentImage = true}) async {
     //Ensure id is loaded
     //TODO: Fix bad code for waiting for placeId, improve approach to caching
     int attempts = 0;
@@ -315,6 +319,10 @@ class LocationProvider with ChangeNotifier {
       // Cache the image in memory
       _imageCache[_placeId!] = googlePlacesImg;
 
+      if (setAsCurrentImage){
+        _currentPlaceImg = googlePlacesImg;
+        notifyListeners();
+      }
       return googlePlacesImg;
     }
 
@@ -365,7 +373,7 @@ class LocationProvider with ChangeNotifier {
         return null;
       }
     } catch (err) {
-      logger.t("locationProvider._fetchPlacePhoto() - Exception occured: $err");
+      logger.e("locationProvider._fetchPlacePhoto() - Exception occured: $err");
       return null;
     }
   }

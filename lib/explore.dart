@@ -48,6 +48,7 @@ class ExploreState extends State<Explore> {
   GoogleSignInAccount? _currentUser;
   bool downloadingTours = false;
   List<Tour>? tours;
+  Future<GooglePlacesImg?>? _fetchPhotoFuture;
 
   @override
   void initState() {
@@ -70,6 +71,8 @@ class ExploreState extends State<Explore> {
     });
 
     super.initState();
+
+    _fetchPhotoFuture = context.read<LocationProvider>().fetchPlacePhoto();
 
     //for parallax
     _scrollController.addListener(() {
@@ -103,6 +106,7 @@ class ExploreState extends State<Explore> {
     setState((){
       tours = toursFetched;
 
+      downloadingTours = false;
       tiles = toursFetched.take(4).map((tour) {
         return TileData(
           tourId: tour.id,
@@ -160,66 +164,69 @@ class ExploreState extends State<Explore> {
     myAuth.AuthProvider authProvider = Provider.of(context);
     LocationProvider locationProvider = Provider.of<LocationProvider>(context);
 
+    Future<void> _refresh() async {
+      if (!downloadingTours){
+        downloadingTours = true;
+        downloadTours();
+      }
+    }
+
     return Scaffold(
-      body: SingleChildScrollView(
-        controller: _scrollController,
-        child: Shimmer(
-          linearGradient: MyGlobals.shimmerGradient,
-          child: Stack(
-            children: [
-              Consumer<LocationProvider>(
-                builder: (context, locationProvider, child) {
-                  return FutureBuilder<GooglePlacesImg?>(
-                    future: locationProvider.fetchPlacePhoto(),
-                    builder: (context, snapshot) {
-                      if (snapshot.connectionState == ConnectionState.waiting && !(snapshot.hasData && snapshot.data != null)) {
-                        return Stack(
-                          children: [
-                            Container(
-                              height: 300,
-                              width: double.infinity,
-                              decoration: const BoxDecoration(
-                                gradient: LinearGradient(
-                                  colors: [Color(0xffebebf4), Color(0xff7b7b80)], // Define the gradient colors
-                                  begin: Alignment.topCenter,
-                                  end: Alignment.bottomCenter,
-                                ),
-                              ),
-                            ),
-                            const Positioned.fill(
-                              child: Center(
-                                child: CircularProgressIndicator(
-                                  color: Color(0xffebebf4),
-                                ),
-                              ),
-                            ),
-                          ],
-                        );
-                      } else if (snapshot.hasError) {
-                        return Text('Error: ${snapshot.error}');
-                      } else if (snapshot.hasData && snapshot.data != null) {
-                        final googlePlacesImg = snapshot.data!;
-                        //return googlePlacesImg;
-                        return Transform.translate(
-                          offset: Offset(0, _scrollOffset * 0.5), // Adjust the multiplier for the parallax effect
-                          child: ShaderMask( //Image gradient
-                            shaderCallback: (rect) {
-                              return const LinearGradient(
+      body: RefreshIndicator(
+        onRefresh: _refresh,
+        child: SingleChildScrollView(
+          controller: _scrollController,
+          child: Shimmer(
+            linearGradient: MyGlobals.shimmerGradient,
+            child: Stack(
+              children: [
+                Selector<LocationProvider, GooglePlacesImg?>(
+                  selector: (context, locationProvider) => locationProvider.currentPlaceImg,
+                  builder: (context, currentPlaceImg, child) {
+                    if (currentPlaceImg == null) {
+                      return Stack(
+                        children: [
+                          Container(
+                            height: 300,
+                            width: double.infinity,
+                            decoration: const BoxDecoration(
+                              gradient: LinearGradient(
+                                colors: [Color(0xffebebf4), Color(0xff7b7b80)],
                                 begin: Alignment.topCenter,
                                 end: Alignment.bottomCenter,
-                                colors: [Colors.white, Colors.black45],
-                              ).createShader(Rect.fromLTRB(0, 0, rect.width, rect.height));
-                            },
-                            blendMode: BlendMode.multiply,
-                            child: LayoutBuilder( //Overflow to fit varying image sizes to area
-                              builder: (context, constraints) {
+                              ),
+                            ),
+                          ),
+                          const Positioned.fill(
+                            child: Center(
+                              child: CircularProgressIndicator(
+                                color: Color(0xffebebf4),
+                              ),
+                            ),
+                          ),
+                        ],
+                      );
+                    } else {
+                      return Transform.translate(
+                        offset: Offset(0, _scrollOffset * 0.5),
+                        child: ShaderMask(
+                          shaderCallback: (rect) {
+                            return const LinearGradient(
+                              begin: Alignment.topCenter,
+                              end: Alignment.bottomCenter,
+                              colors: [Colors.white, Colors.black45],
+                            ).createShader(Rect.fromLTRB(0, 0, rect.width, rect.height));
+                          },
+                          blendMode: BlendMode.multiply,
+                          child: LayoutBuilder(
+                            builder: (context, constraints) {
                               return SizedBox(
                                 width: constraints.maxWidth,
-                                height:300,
+                                height: 300,
                                 child: FittedBox(
                                   fit: BoxFit.cover,
                                   alignment: Alignment.center,
-                                  child: googlePlacesImg.placePhotoResponse.when( //Display smoothly without flicker on scroll
+                                  child: currentPlaceImg.placePhotoResponse.when(
                                     image: (image) => Image(
                                       image: image.image,
                                       gaplessPlayback: true,
@@ -231,119 +238,77 @@ class ExploreState extends State<Explore> {
                                   ),
                                 ),
                               );
-                              }
-                            )
+                            },
                           ),
-                        );
-                      } else {
-                        return const Text('No photo available');
-                      }
-                    },
-                  );
-                },
-              ),
-              Stack( //helps with the parallax effect by providing a spacer + white bg to cover the google img on scroll
-                children: [
-                  Column(
-                    children: [
-                      Container(
-                        height: 300,  //should match google image (TODO: ensure it's never under 300)
-                        color: Colors.transparent,
-                      ),
-                      Container(
-                        color: Colors.white,
-                        height: 800,  //BAD! Hardcoded, but it's fine for now since it only needs to be enough to cover the google img on scroll
-                      )
-                    ],
-                  ),
-                  StandardLayout(
+                        ),
+                      );
+                    }
+                  },
+                ),
+                Stack( //helps with the parallax effect by providing a spacer + white bg to cover the google img on scroll
+                  children: [
+                    Column(
                       children: [
-                        FutureBuilder(
-                        future: _handleSignIn(),
-                        builder: (context, snapshot) {
-                          //Assemble welcome string
-                          String displayName = authProvider.user!.displayName!;
+                        Container(
+                          height: 300,  //should match google image (TODO: ensure it's never under 300)
+                          color: Colors.transparent,
+                        ),
+                        Container(
+                          color: Colors.white,
+                          height: 800,  //BAD! Hardcoded, but it's fine for now since it only needs to be enough to cover the google img on scroll
+                        )
+                      ],
+                    ),
+                    StandardLayout(
+                        children: [
+                          FutureBuilder(
+                          future: _handleSignIn(),
+                          builder: (context, snapshot) {
+                            //Assemble welcome string
+                            String displayName = authProvider.user!.displayName!;
 
-                          // Stylized Welcome Banner text
-                          return SizedBox(
-                            height: 300,
-                            child: Padding(
-                              padding: const EdgeInsets.symmetric(vertical: 30, horizontal: 0),
-                              child: Align(
-                                alignment: Alignment.bottomCenter,
-                                child: GradientText(
-                                  gradient: const LinearGradient(colors: [
-                                    Color(0xeeF2F8F8),
-                                    Color(0xeeE4F0EF),
-                                  ]),
-                                  richText: RichText(
-                                    text: TextSpan(
-                                      style: Theme.of(context).textTheme.displayMedium,
-                                      children: <TextSpan>[
-                                        const TextSpan(text: 'Welcome'),
-                                        if (locationProvider.currentCity != null)
-                                          const TextSpan(text: ' to \r',),
-                                        if (locationProvider.currentCity != null)
-                                          TextSpan(
-                                            text: locationProvider.currentCity,
-                                            style: GoogleFonts.vollkorn(  //need to explicitly specify font for weight setting to work for some reason
-                                              textStyle: Theme.of(context).textTheme.displayMedium,
-                                              fontWeight: FontWeight.w600,
-                                              fontStyle: FontStyle.italic,
+                            // Stylized Welcome Banner text
+                            return SizedBox(
+                              height: 300,
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(vertical: 30, horizontal: 0),
+                                child: Align(
+                                  alignment: Alignment.bottomCenter,
+                                  child: GradientText(
+                                    gradient: const LinearGradient(colors: [
+                                      Color(0xeeF2F8F8),
+                                      Color(0xeeE4F0EF),
+                                    ]),
+                                    richText: RichText(
+                                      text: TextSpan(
+                                        style: Theme.of(context).textTheme.displayMedium,
+                                        children: <TextSpan>[
+                                          const TextSpan(text: 'Welcome'),
+                                          if (locationProvider.currentCity != null)
+                                            const TextSpan(text: ' to \r',),
+                                          if (locationProvider.currentCity != null)
+                                            TextSpan(
+                                              text: locationProvider.currentCity,
+                                              style: GoogleFonts.vollkorn(  //need to explicitly specify font for weight setting to work for some reason
+                                                textStyle: Theme.of(context).textTheme.displayMedium,
+                                                fontWeight: FontWeight.w600,
+                                                fontStyle: FontStyle.italic,
+                                              ),
                                             ),
-                                          ),
-                                        if (displayName != null && displayName.isNotEmpty) TextSpan(text: ', ${displayName.split(' ').first}'),
-                                      ],
+                                          if (displayName != null && displayName.isNotEmpty) TextSpan(text: ', ${displayName.split(' ').first}'),
+                                        ],
+                                      ),
                                     ),
                                   ),
                                 ),
                               ),
-                            ),
-                          );
-                        }
-                      ),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text("Explore local tours", style: Theme.of(context).textTheme.headlineSmall),
-                          IconButton(onPressed: (){
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(builder: (context) => const CreateTour()),
                             );
-                          }, icon: const Icon(Icons.add_circle_outline_sharp))
-                        ],
-                      ),
-                      StandardLayoutChild(
-                        fullWidth: true,
-                        child: SizedBox(
-                          height: 200.0, // Set a fixed height for the horizontal scroller
-                          child: HorizontalScroller(tiles: tiles),
-                        ),
-                      ),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text("Local activities", style: Theme.of(context).textTheme.headlineSmall),
-                            IconButton(onPressed: (){
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(builder: (context) => const CreateTour()),
-                              );
-                            }, icon: const Icon(Icons.add_circle_outline_sharp))
-                          ],
-                        ),
-                      StandardLayoutChild(
-                          fullWidth: true,
-                          child: SizedBox(
-                            height: 200.0, // Set a fixed height for the horizontal scroller
-                            child: HorizontalScroller(tiles: tiles),
-                          ),
+                          }
                         ),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Text("Tours in your province", style: Theme.of(context).textTheme.headlineSmall),
+                            Text("Explore local tours", style: Theme.of(context).textTheme.headlineSmall),
                             IconButton(onPressed: (){
                               Navigator.push(
                                 context,
@@ -359,47 +324,86 @@ class ExploreState extends State<Explore> {
                             child: HorizontalScroller(tiles: tiles),
                           ),
                         ),
-                      Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text("Local activities", style: Theme.of(context).textTheme.headlineSmall),
+                              IconButton(onPressed: (){
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(builder: (context) => const CreateTour()),
+                                );
+                              }, icon: const Icon(Icons.add_circle_outline_sharp))
+                            ],
+                          ),
+                        StandardLayoutChild(
+                            fullWidth: true,
+                            child: SizedBox(
+                              height: 200.0, // Set a fixed height for the horizontal scroller
+                              child: HorizontalScroller(tiles: tiles),
+                            ),
+                          ),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text("Tours in your province", style: Theme.of(context).textTheme.headlineSmall),
+                              IconButton(onPressed: (){
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(builder: (context) => const CreateTour()),
+                                );
+                              }, icon: const Icon(Icons.add_circle_outline_sharp))
+                            ],
+                          ),
+                          StandardLayoutChild(
+                            fullWidth: true,
+                            child: SizedBox(
+                              height: 200.0, // Set a fixed height for the horizontal scroller
+                              child: HorizontalScroller(tiles: tiles),
+                            ),
+                          ),
+                        Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text("Tours in your province", style: Theme.of(context).textTheme.headlineSmall),
+                            ],
+                          ),
+                        Row(
                           children: [
-                            Text("Tours in your province", style: Theme.of(context).textTheme.headlineSmall),
+                            ElevatedButton(
+                              onPressed: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(builder: (context) => const DebugScreen()),
+                                );
+                              },
+                              child: const Text('Debug Screen'),
+                            ),
+                            ElevatedButton(
+                              onPressed: authProvider.signOut,
+                              child: const Text('Sign Out'),
+                            ),
                           ],
                         ),
-                      Row(
-                        children: [
-                          ElevatedButton(
-                            onPressed: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(builder: (context) => const DebugScreen()),
-                              );
-                            },
-                            child: const Text('Debug Screen'),
-                          ),
-                          ElevatedButton(
-                            onPressed: authProvider.signOut,
-                            child: const Text('Sign Out'),
-                          ),
-                        ],
-                      ),
-                      //Text('User is signed in!!  :)\n\nUsername: ${FirebaseAuth.instance.currentUser!.displayName}\nEmail: ${FirebaseAuth.instance.currentUser!.email}'),
-                    ]
-                  ),
-                  Align(
-                    alignment: Alignment.topRight,
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 0),
-                      child: IconButton(
-                          onPressed: (){
-                            _showOptionsDialog(context);
-                          },
-                          icon: const Icon(Icons.more_vert),
-                          color: Color(0xeeF2F8F8)),
+                        //Text('User is signed in!!  :)\n\nUsername: ${FirebaseAuth.instance.currentUser!.displayName}\nEmail: ${FirebaseAuth.instance.currentUser!.email}'),
+                      ]
                     ),
-                  ),
-                ],
-              ),
-            ],
+                    Align(
+                      alignment: Alignment.topRight,
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 0),
+                        child: IconButton(
+                            onPressed: (){
+                              _showOptionsDialog(context);
+                            },
+                            icon: const Icon(Icons.more_vert),
+                            color: Color(0xeeF2F8F8)),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
         ),
       ),
