@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:tourguide_app/main.dart';
 import 'package:tourguide_app/model/tourguide_place.dart';
+import 'package:tourguide_app/utilities/providers/location_provider.dart';
 
 class Tour {
   final String id;
@@ -18,7 +19,11 @@ class Tour {
   final String placeId;
   final String authorName;
   final String authorId;
-  final List<TourguidePlace> tourguidePlaces; // New field
+  final List<TourguidePlace> tourguidePlaces;
+  int upvotes;  //mutable
+  int downvotes;  //mutable
+  ///////   LOCAL ONLY
+  int? thisUsersRating; // Track user's rating
 
   Tour({
     required this.id,
@@ -34,8 +39,32 @@ class Tour {
     required this.placeId,
     required this.authorName,
     required this.authorId,
-    required this.tourguidePlaces, // Initialize with an empty list or from constructor
+    required this.tourguidePlaces,
+    required this.upvotes,
+    required this.downvotes,
+    this.thisUsersRating,
   });
+
+  factory Tour.empty() {
+    return Tour(
+      id: '',
+      name: '',
+      description: '',
+      city: '',
+      uid: '',
+      visibility: '',
+      imageUrl: '',
+      createdDateTime: null,
+      latitude: 0.0,
+      longitude: 0.0,
+      placeId: '',
+      authorName: '',
+      authorId: '',
+      tourguidePlaces: [],
+      upvotes: 0,
+      downvotes: 0,
+    );
+  }
 
   factory Tour.fromFirestore(DocumentSnapshot doc) {
     Map<String, dynamic>? data = doc.data() as Map<String, dynamic>?;
@@ -49,10 +78,9 @@ class Tour {
       Timestamp timestamp = data['createdDateTime'] as Timestamp;
       createdDateTime = timestamp.toDate();
     } else {
-      createdDateTime = null; // Default value or handle as needed
+      createdDateTime = null;
     }
 
-    // Extract tourguide places from data
     List<TourguidePlace> tourguidePlaces = [];
     if (data['tourguidePlaces'] != null) {
       List<dynamic> places = data['tourguidePlaces'];
@@ -83,10 +111,15 @@ class Tour {
       authorName: data['authorName'] ?? '',
       authorId: data['authorId'] ?? '',
       tourguidePlaces: tourguidePlaces,
+      upvotes: data['upvotes'] ?? 0,
+      downvotes: data['downvotes'] ?? 0,
     );
   }
 
   Tour copyWith({
+    String? name,
+    String? description,
+    String? city,
     String? imageUrl,
     double? latitude,
     double? longitude,
@@ -94,12 +127,14 @@ class Tour {
     String? authorName,
     String? authorId,
     List<TourguidePlace>? tourguidePlaces,
+    int? upvotes,
+    int? downvotes,
   }) {
     return Tour(
       id: this.id,
-      name: this.name,
-      description: this.description,
-      city: this.city,
+      name: name ?? this.name,
+      description: name ?? this.description,
+      city: name ?? this.city,
       uid: this.uid,
       visibility: this.visibility,
       imageUrl: imageUrl ?? this.imageUrl,
@@ -110,14 +145,18 @@ class Tour {
       authorName: authorName ?? this.authorName,
       authorId: authorId ?? this.authorId,
       tourguidePlaces: tourguidePlaces ?? this.tourguidePlaces,
+      upvotes: upvotes ?? this.upvotes,
+      downvotes: downvotes ?? this.downvotes,
     );
   }
 
   @override
   String toString() {
-    return 'Tour{id: $id, name: $name, description: $description, city: $city, uid: $uid, visibility: $visibility, imageUrl: $imageUrl, createdDateTime: $createdDateTime, latitude: $latitude, longitude: $longitude, placeId: $placeId, authorName: $authorName, authorId: $authorId, tourguidePlaces: ${tourguidePlaces.toString()}}';
+    return 'Tour{id: $id, name: $name, description: $description, city: $city, uid: $uid, visibility: $visibility, imageUrl: $imageUrl, createdDateTime: $createdDateTime, latitude: $latitude, longitude: $longitude, placeId: $placeId, authorName: $authorName, authorId: $authorId, tourguidePlaces: ${tourguidePlaces.toString()}, upvotes: ${upvotes}, downvotes: $downvotes}';
   }
 }
+
+
 
 
 class TourService {
@@ -129,13 +168,11 @@ class TourService {
     List<Tour> tours = [];
 
     try {
-      // Ensure user is signed in
       User? user = auth.currentUser;
       if (user == null) {
         throw Exception('User not signed in');
       }
 
-      // Query Firestore for public tours or user's own tours
       QuerySnapshot querySnapshot = await db.collection('tours')
           .where('visibility', isEqualTo: 'public')
           .get();
@@ -143,21 +180,17 @@ class TourService {
       for (QueryDocumentSnapshot doc in querySnapshot.docs) {
         Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
 
-        // Ensure the user can read this tour based on security rules
         if (data['visibility'] == 'public' || data['uid'] == user.uid) {
           Tour tour = Tour.fromFirestore(doc);
 
-          // Fetch image URL from Firebase Storage if imageUrl is not empty
           if (tour.imageUrl.isNotEmpty) {
             try {
-              // Extract the path from the full URL
               String fullUrl = tour.imageUrl;
               Uri uri = Uri.parse(fullUrl);
               String path = uri.path.replaceFirst('/v0/b/tourguide-firebase.appspot.com/o/', '').replaceAll('%2F', '/');
-              //logger.t(path);
 
               String imageUrl = await storage.ref(path).getDownloadURL();
-              tour = tour.copyWith(imageUrl: imageUrl); // Update Tour object with image URL
+              tour = tour.copyWith(imageUrl: imageUrl);
             } catch (e) {
               logger.e('Error fetching image: $e');
             }
@@ -173,23 +206,205 @@ class TourService {
     return tours;
   }
 
+  static Future<List<Tour>> checkUserRatings(List<Tour> tours, String userId) async {
+    FirebaseFirestore db = FirebaseFirestore.instance;
+    for (Tour tour in tours) {
+      CollectionReference ratings = db.collection('tours').doc(tour.id).collection('ratings');
+      QuerySnapshot querySnapshot = await ratings.where('userId', isEqualTo: userId).get();
+
+      if (querySnapshot.docs.isNotEmpty) {
+        DocumentSnapshot ratingDoc = querySnapshot.docs.first;
+        Rating rating = Rating.fromMap(ratingDoc.data() as Map<String, dynamic>);
+        tour.thisUsersRating = rating.value;
+      } else {
+        tour.thisUsersRating = 0; // User hasn't rated
+      }
+    }
+    return tours;
+  }
+
   static Future<List<Tour>> fetchAndSortToursByDateTime() async {
     List<Tour> tours = await fetchAllTours();
 
-    // Sort tours by createdDateTime in descending order (most recent first),
-    // treating null values as older dates (moving them to the end)
     tours.sort((a, b) {
       if (a.createdDateTime == null && b.createdDateTime == null) {
         return 0;
       } else if (a.createdDateTime == null) {
-        return 1; // Move null date to the end
+        return 1;
       } else if (b.createdDateTime == null) {
-        return -1; // Move null date to the end
+        return -1;
       } else {
         return b.createdDateTime!.compareTo(a.createdDateTime!);
       }
     });
 
     return tours;
+  }
+
+  ////////// Filters
+  static List<Tour> popularToursNearYou(List<Tour> tours, double userLatitude, double userLongitude) {
+    return tours.where((tour) {
+      double distance = LocationProvider.calculateDistance(userLatitude, userLongitude, tour.latitude, tour.longitude);
+      double upvoteRatio = tour.downvotes == 0 ? tour.upvotes.toDouble()*2 : tour.upvotes / tour.downvotes;
+      return distance <= 30 &&
+          tour.upvotes > 0 &&
+          upvoteRatio >= 2.0;
+    }).toList();
+  }
+
+  static List<Tour> localTours(List<Tour> tours, double userLatitude, double userLongitude) {
+    List<Tour> nearbyTours = tours.where((tour) {
+      double distance = LocationProvider.calculateDistance(userLatitude, userLongitude, tour.latitude, tour.longitude);
+      return distance <= 15;
+    }).toList();
+
+    // Sort nearby tours by distance
+    nearbyTours.sort((a, b) {
+      double distanceA = LocationProvider.calculateDistance(userLatitude, userLongitude, a.latitude, a.longitude);
+      double distanceB = LocationProvider.calculateDistance(userLatitude, userLongitude, b.latitude, b.longitude);
+      return distanceA.compareTo(distanceB);
+    });
+
+    return nearbyTours;
+  }
+
+  static List<Tour> popularToursAroundTheWorld(List<Tour> tours) {
+    tours.sort((a, b) => (b.upvotes - b.downvotes).compareTo(a.upvotes - a.downvotes));
+    return tours.take(10).toList();
+  }
+
+  static Future<void> addComment(String tourId, Comment comment) async {
+    FirebaseFirestore db = FirebaseFirestore.instance;
+    CollectionReference comments = db.collection('tours').doc(tourId).collection('comments');
+
+    await comments.add({
+      'text': comment.text,
+      'userId': comment.userId,
+      'userName': comment.userName,
+      'timestamp': comment.timestamp,
+    });
+  }
+
+  //TODO
+  static Future<List<Comment>> fetchComments(String tourId) async {
+    FirebaseFirestore db = FirebaseFirestore.instance;
+    CollectionReference comments = db.collection('tours').doc(tourId).collection('comments');
+
+    QuerySnapshot querySnapshot = await comments.orderBy('timestamp', descending: true).get();
+
+    return querySnapshot.docs.map((doc) => Comment.fromFirestore(doc)).toList();
+  }
+
+  static Future<void> addOrUpdateRating(String tourId, int value, String userId) async {
+    FirebaseFirestore db = FirebaseFirestore.instance;
+    CollectionReference ratings = db.collection('tours').doc(tourId).collection('ratings');
+    DocumentReference tourRef = db.collection('tours').doc(tourId);
+
+    try {
+      // Create or update the rating
+      QuerySnapshot querySnapshot = await ratings.where('userId', isEqualTo: userId).get();
+      if (querySnapshot.docs.isEmpty) {
+        // User has not rated yet, add a new rating
+        await ratings.add(Rating(userId: userId, value: value).toMap());
+      } else {
+        // User has already rated, update the existing rating
+        DocumentReference docRef = querySnapshot.docs.first.reference;
+        await docRef.update({'value': value});
+      }
+
+      // Update tour's upvotes and downvotes
+      Map<String, int> ratingsCount = await getRatings(tourId);
+      await tourRef.update({
+        'upvotes': ratingsCount['upvotes'],
+        'downvotes': ratingsCount['downvotes'],
+      });
+    } catch (e) {
+      logger.e('Error adding or updating rating: $e');
+      throw Exception('Failed to add or update rating');
+    }
+  }
+
+  static Future<Map<String, int>> getRatings(String tourId) async {
+    FirebaseFirestore db = FirebaseFirestore.instance;
+    CollectionReference ratings = db.collection('tours').doc(tourId).collection('ratings');
+
+    QuerySnapshot querySnapshot = await ratings.get();
+    int upvotes = 0;
+    int downvotes = 0;
+
+    for (QueryDocumentSnapshot doc in querySnapshot.docs) {
+      Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
+      Rating rating = Rating.fromMap(data);
+      if (rating.value == 1) {
+        upvotes++;
+      } else if (rating.value == -1) {
+        downvotes++;
+      }
+    }
+
+    return {'upvotes': upvotes, 'downvotes': downvotes};
+  }
+}
+
+
+
+//TODO: Implement Comments
+class Comment {
+  final String id;
+  final String text;
+  final String userId;
+  final String userName;
+  final DateTime timestamp;
+
+  Comment({
+    required this.id,
+    required this.text,
+    required this.userId,
+    required this.userName,
+    required this.timestamp,
+  });
+
+  factory Comment.fromFirestore(DocumentSnapshot doc) {
+    Map<String, dynamic>? data = doc.data() as Map<String, dynamic>?;
+
+    if (data == null) {
+      throw Exception('Document data was null');
+    }
+
+    Timestamp timestamp = data['timestamp'] as Timestamp;
+
+    return Comment(
+      id: doc.id,
+      text: data['text'] ?? '',
+      userId: data['userId'] ?? '',
+      userName: data['userName'] ?? '',
+      timestamp: timestamp.toDate(),
+    );
+  }
+}
+
+
+
+class Rating {
+  final String userId;
+  final int value; // 1 for thumb up, -1 for thumb down
+
+  Rating({
+    required this.userId,
+    required this.value,
+  });
+
+  Map<String, dynamic> toMap() {
+    return {
+      'userId': userId,
+      'value': value,
+    };
+  }
+
+  factory Rating.fromMap(Map<String, dynamic> data) {
+    return Rating(
+      userId: data['userId'],
+      value: data['value'],
+    );
   }
 }

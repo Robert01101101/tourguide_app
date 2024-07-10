@@ -1,24 +1,18 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:tourguide_app/model/tour.dart';
 import 'package:tourguide_app/tour/tour_details.dart';
 import 'package:tourguide_app/ui/shimmer_loading.dart';
 import 'package:tourguide_app/utilities/providers/tour_provider.dart';
+import 'package:tourguide_app/utilities/providers/auth_provider.dart' as myAuth;
 
 import '../main.dart';
 
-class TileData {
-  final String tourId;
-  final String imageUrl;
-  final String title;
-  final String description;
-
-  TileData({required this.tourId, required this.imageUrl, required this.title, required this.description});
-}
-
 class RoundedTile extends StatefulWidget {
-  final TileData tile;
+  final Tour tour;
 
-  const RoundedTile({super.key, required this.tile});
+  const RoundedTile({super.key, required this.tour});
 
   @override
   _RoundedTileState createState() => _RoundedTileState();
@@ -31,16 +25,16 @@ class _RoundedTileState extends State<RoundedTile> {
   @override
   void initState() {
     super.initState();
-    imageUrl = widget.tile.imageUrl;
+    imageUrl = widget.tour.imageUrl;
   }
 
   @override
   void didUpdateWidget(covariant RoundedTile oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.tile.imageUrl != widget.tile.imageUrl) {
+    if (oldWidget.tour.imageUrl != widget.tour.imageUrl) {
       setState(() {
         bool imageUrlReady = imageUrl == null || imageUrl == "";
-        imageUrl = widget.tile.imageUrl;
+        imageUrl = widget.tour.imageUrl;
         if (imageUrlReady) _loadImage();
       });
     }
@@ -80,7 +74,7 @@ class _RoundedTileState extends State<RoundedTile> {
           width: MediaQuery.of(context).size.width, // Full width
           height: desiredHeight,
           padding: EdgeInsets.all(8.0),
-          child: ExpandedTileOverlay(tile: widget.tile),
+          child: ExpandedTileOverlay(tour: widget.tour),
         );
       },
     );
@@ -88,7 +82,7 @@ class _RoundedTileState extends State<RoundedTile> {
 
   @override
   Widget build(BuildContext context) {
-    bool textDataReady = widget.tile.title != null && widget.tile.title != "";
+    bool textDataReady = widget.tour.name != null && widget.tour.name != "";
 
     return GestureDetector(
       onTap: () => _showOverlay(context),
@@ -132,7 +126,7 @@ class _RoundedTileState extends State<RoundedTile> {
                 isLoading: !textDataReady,
                 child: textDataReady ?
                 Text(
-                  widget.tile.title,
+                  widget.tour.name,
                   style: Theme.of(context).textTheme.titleMedium,
                   overflow: TextOverflow.ellipsis,
                   maxLines: 1,
@@ -149,7 +143,7 @@ class _RoundedTileState extends State<RoundedTile> {
                 isLoading: !textDataReady,
                 child: textDataReady ?
                  Text(
-                  widget.tile.description,
+                  widget.tour.description,
                    style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Colors.grey[600]),
                    overflow: TextOverflow.ellipsis,
                    maxLines: 2,
@@ -169,38 +163,71 @@ class _RoundedTileState extends State<RoundedTile> {
 
 
 class ExpandedTileOverlay extends StatefulWidget {
-  final TileData tile;
+  final Tour tour;
 
-  const ExpandedTileOverlay({Key? key, required this.tile}) : super(key: key);
+  const ExpandedTileOverlay({Key? key, required this.tour}) : super(key: key);
 
   @override
   _ExpandedTileOverlayState createState() => _ExpandedTileOverlayState();
 }
 
 class _ExpandedTileOverlayState extends State<ExpandedTileOverlay> {
-  int thumbsUpCount = 0;
-  int thumbsDownCount = 0;
+  int thisUsersRating = 0;
 
-  void incrementThumbsUp() {
+  @override
+  void initState() {
+    thisUsersRating = widget.tour.thisUsersRating ?? 0;
+    super.initState();
+  }
+
+  void toggleThumbsUp() {
+    myAuth.AuthProvider authProvider = Provider.of(context, listen: false);
+
     setState(() {
-      thumbsUpCount++;
+      if (thisUsersRating == 1) {
+        // Cancel upvote
+        thisUsersRating = 0;
+        widget.tour.upvotes--; // Decrease upvotes
+      } else {
+        // Upvote
+        if (thisUsersRating == -1) {
+          widget.tour.downvotes--; // Cancel downvote if any
+        }
+        thisUsersRating = 1;
+        widget.tour.upvotes++; // Increase upvotes
+      }
+      TourService.addOrUpdateRating(widget.tour.id, thisUsersRating, authProvider.user!.id);
     });
   }
 
-  void incrementThumbsDown() {
+  void toggleThumbsDown() {
+    myAuth.AuthProvider authProvider = Provider.of(context, listen: false);
+
     setState(() {
-      thumbsDownCount++;
+      if (thisUsersRating == -1) {
+        // Cancel downvote
+        thisUsersRating = 0;
+        widget.tour.downvotes--; // Decrease downvotes
+      } else {
+        // Downvote
+        if (thisUsersRating == 1) {
+          widget.tour.upvotes--; // Cancel upvote if any
+        }
+        thisUsersRating = -1;
+        widget.tour.downvotes++; // Increase downvotes
+      }
+      TourService.addOrUpdateRating(widget.tour.id, thisUsersRating, authProvider.user!.id);
     });
   }
 
   void tourDetails() {
     TourProvider tourProvider = Provider.of<TourProvider>(context, listen: false);
-    tourProvider.selectTourById(widget.tile.tourId);
+    tourProvider.selectTourById(widget.tour.id);
     // Navigate to the fullscreen tour page
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => FullscreenTourPage(tile: widget.tile),
+        builder: (context) => FullscreenTourPage(tour: widget.tour),
       ),
     );
   }
@@ -218,7 +245,7 @@ class _ExpandedTileOverlayState extends State<ExpandedTileOverlay> {
               Container(
                 padding: EdgeInsets.fromLTRB(16, 0, 0, 0),
                 child: Text(
-                  widget.tile.title,
+                  widget.tour.name,
                   style: Theme.of(context).textTheme.headlineSmall,
                   overflow: TextOverflow.ellipsis,
                   maxLines: 1,
@@ -238,16 +265,16 @@ class _ExpandedTileOverlayState extends State<ExpandedTileOverlay> {
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    if (widget.tile.imageUrl != null && widget.tile.imageUrl.isNotEmpty)
+                    if (widget.tour.imageUrl != null && widget.tour.imageUrl.isNotEmpty)
                       Image.network(
-                        widget.tile.imageUrl,
+                        widget.tour.imageUrl,
                         width: MediaQuery.of(context).size.width,
                         height: 200.0,
                         fit: BoxFit.cover,
                       ),
                     SizedBox(height: 16.0),
                     Text(
-                      widget.tile.description,
+                      widget.tour.description,
                       style: Theme.of(context).textTheme.bodyLarge,
                     ),
                     SizedBox(height: 16.0),
@@ -282,14 +309,14 @@ class _ExpandedTileOverlayState extends State<ExpandedTileOverlay> {
                           width: 30,
                           height: 30,
                           child: IconButton(
-                            onPressed: incrementThumbsUp,
-                            icon: Icon(Icons.thumb_up),
+                            onPressed: toggleThumbsUp,
+                            icon: Icon(Icons.thumb_up, color: thisUsersRating == 1 ? Theme.of(context).primaryColor : Colors.grey),
                             iconSize: 18,
                             padding: EdgeInsets.all(6),
                             constraints: BoxConstraints(),
                           ),
                         ),
-                        Text(thumbsUpCount.toString(), style: Theme.of(context).textTheme.labelSmall),
+                        Text(widget.tour.upvotes.toString(), style: Theme.of(context).textTheme.labelSmall),
                       ],
                     ),
                     SizedBox(width: 2),
@@ -299,14 +326,14 @@ class _ExpandedTileOverlayState extends State<ExpandedTileOverlay> {
                           width: 30,
                           height: 30,
                           child: IconButton(
-                            onPressed: incrementThumbsDown,
-                            icon: Icon(Icons.thumb_down),
+                            onPressed: toggleThumbsDown,
+                            icon: Icon(Icons.thumb_down, color: thisUsersRating == -1 ? Theme.of(context).primaryColor : Colors.grey),
                             iconSize: 18,
                             padding: EdgeInsets.all(6),
                             constraints: BoxConstraints(),
                           ),
                         ),
-                        Text(thumbsDownCount.toString(), style: Theme.of(context).textTheme.labelSmall),
+                        Text(widget.tour.downvotes.toString(), style: Theme.of(context).textTheme.labelSmall),
                       ],
                     ),
                   ],

@@ -411,4 +411,38 @@ class LocationProvider with ChangeNotifier {
     return completer.future;
   }
 
+
+
+
+
+
+
+
+
+  ///// Distance Calculation - static, not rly sure if it makes sense to leave here or put in a separate static utility class
+  static double calculateDistance(double lat1, double lon1, double lat2, double lon2) {
+    // Implementation of distance calculation method
+    // Example using Haversine formula:
+    return haversine(lat1, lon1, lat2, lon2);
+  }
+
+  static double haversine(double lat1, double lon1, double lat2, double lon2) {
+    const double R = 6371; // Radius of the Earth in kilometers
+
+    double dLat = _degreesToRadians(lat2 - lat1);
+    double dLon = _degreesToRadians(lon2 - lon1);
+
+    double a = math.sin(dLat / 2) * math.sin(dLat / 2) +
+        math.cos(_degreesToRadians(lat1)) * math.cos(_degreesToRadians(lat2)) *
+            math.sin(dLon / 2) * math.sin(dLon / 2);
+
+    double c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a));
+
+    double distance = R * c; // Distance in kilometers
+    return distance;
+  }
+
+  static double _degreesToRadians(double degrees) {
+    return degrees * math.pi / 180.0;
+  }
 }

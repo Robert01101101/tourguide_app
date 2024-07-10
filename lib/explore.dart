@@ -47,7 +47,9 @@ class Explore extends StatefulWidget {
 class ExploreState extends State<Explore> {
   GoogleSignInAccount? _currentUser;
   bool downloadingTours = false;
-  List<Tour>? tours;
+  List<Tour> popularTours = List.generate(4, (index) => Tour.empty());
+  List<Tour> localTours = List.generate(4, (index) => Tour.empty());
+  List<Tour> globalTours = List.generate(4, (index) => Tour.empty());
   Future<GooglePlacesImg?>? _fetchPhotoFuture;
 
   @override
@@ -101,20 +103,37 @@ class ExploreState extends State<Explore> {
     logger.t('downloadTours');
 
     final tourProvider = Provider.of<TourProvider>(context, listen: false);
+    final locationProvider = Provider.of<LocationProvider>(context, listen: false);
     await tourProvider.fetchAndSetTours();
     List<Tour> toursFetched = tourProvider.tours;
     setState((){
-      tours = toursFetched;
+      popularTours = TourService.popularToursNearYou(toursFetched, locationProvider.currentPosition!.latitude, locationProvider.currentPosition!.longitude);
+      localTours = TourService.localTours(toursFetched, locationProvider.currentPosition!.latitude, locationProvider.currentPosition!.longitude);
+      globalTours = TourService.popularToursAroundTheWorld(toursFetched);
 
       downloadingTours = false;
-      tiles = toursFetched.take(4).map((tour) {
+      /*tiles = toursFetched.take(4).map((tour) {
         return TileData(
           tourId: tour.id,
           imageUrl: tour.imageUrl,
           title: tour.name,
           description: tour.description,
         );
-      }).toList();
+      }).toList();*/
+    });
+    getTourRatings();
+  }
+
+  Future<void> getTourRatings() async {
+    logger.t('getTourRatings');
+    final myAuth.AuthProvider authProvider = Provider.of(context, listen: false);
+    List<Tour> newPopularTours = await TourService.checkUserRatings(popularTours, authProvider.user!.id);
+    List<Tour> newLocalTours = await TourService.checkUserRatings(localTours, authProvider.user!.id);
+    List<Tour> newGlobalTours = await TourService.checkUserRatings(globalTours, authProvider.user!.id);
+    setState((){
+      popularTours = newPopularTours;
+      localTours = newLocalTours;
+      globalTours = newGlobalTours;
     });
   }
 
@@ -126,34 +145,6 @@ class ExploreState extends State<Explore> {
       },
     );
   }
-
-  List<TileData> tiles = [
-  TileData(
-    tourId: "",
-    imageUrl: "",
-    title: "",
-    description: "",
-  ),
-  TileData(
-    tourId: "",
-    imageUrl: "",
-    title: "",
-    description: "",
-  ),
-  TileData(
-    tourId: "",
-    imageUrl: "",
-    title: "",
-    description: "",
-  ),
-  TileData(
-    tourId: "",
-    imageUrl: "",
-    title: "",
-    description: "",
-  ),
-  // Add more tiles as needed
-  ];
 
   final ScrollController _scrollController = ScrollController(); //for bg parallax effect
   double _scrollOffset = 0;
@@ -305,69 +296,31 @@ class ExploreState extends State<Explore> {
                             );
                           }
                         ),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text("Explore local tours", style: Theme.of(context).textTheme.headlineSmall),
-                            IconButton(onPressed: (){
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(builder: (context) => const CreateTour()),
-                              );
-                            }, icon: const Icon(Icons.add_circle_outline_sharp))
-                          ],
-                        ),
+                        Text("Popular tours near you", style: Theme.of(context).textTheme.headlineSmall),
                         StandardLayoutChild(
                           fullWidth: true,
                           child: SizedBox(
                             height: 200.0, // Set a fixed height for the horizontal scroller
-                            child: HorizontalScroller(tiles: tiles),
+                            child: HorizontalScroller(tours: popularTours!),
                           ),
                         ),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text("Local activities", style: Theme.of(context).textTheme.headlineSmall),
-                              IconButton(onPressed: (){
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(builder: (context) => const CreateTour()),
-                                );
-                              }, icon: const Icon(Icons.add_circle_outline_sharp))
-                            ],
-                          ),
+                        Text("Local tours", style: Theme.of(context).textTheme.headlineSmall),
                         StandardLayoutChild(
-                            fullWidth: true,
-                            child: SizedBox(
-                              height: 200.0, // Set a fixed height for the horizontal scroller
-                              child: HorizontalScroller(tiles: tiles),
-                            ),
+                          fullWidth: true,
+                          child: SizedBox(
+                            height: 200.0, // Set a fixed height for the horizontal scroller
+                            child: HorizontalScroller(tours: localTours!),
                           ),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text("Tours in your province", style: Theme.of(context).textTheme.headlineSmall),
-                              IconButton(onPressed: (){
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(builder: (context) => const CreateTour()),
-                                );
-                              }, icon: const Icon(Icons.add_circle_outline_sharp))
-                            ],
+                        ),
+                        Text("Tours around the world", style: Theme.of(context).textTheme.headlineSmall),
+                        StandardLayoutChild(
+                          fullWidth: true,
+                          child: SizedBox(
+                            height: 200.0, // Set a fixed height for the horizontal scroller
+                            child: HorizontalScroller(tours: globalTours!),
                           ),
-                          StandardLayoutChild(
-                            fullWidth: true,
-                            child: SizedBox(
-                              height: 200.0, // Set a fixed height for the horizontal scroller
-                              child: HorizontalScroller(tiles: tiles),
-                            ),
-                          ),
-                        Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text("Tours in your province", style: Theme.of(context).textTheme.headlineSmall),
-                            ],
-                          ),
+                        ),
+                        Text("Debug", style: Theme.of(context).textTheme.headlineSmall),
                         Row(
                           children: [
                             ElevatedButton(
@@ -378,10 +331,6 @@ class ExploreState extends State<Explore> {
                                 );
                               },
                               child: const Text('Debug Screen'),
-                            ),
-                            ElevatedButton(
-                              onPressed: authProvider.signOut,
-                              child: const Text('Sign Out'),
                             ),
                           ],
                         ),

@@ -2,14 +2,15 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:tourguide_app/model/tour.dart';
 import 'package:tourguide_app/utilities/providers/tour_provider.dart';
 import '../utilities/custom_import.dart';
 import 'rounded_tile.dart'; // Ensure this imports your TileData model
 
 class FullscreenTourPage extends StatefulWidget {
-  final TileData tile;
+  final Tour tour;
 
-  const FullscreenTourPage({Key? key, required this.tile}) : super(key: key);
+  const FullscreenTourPage({Key? key, required this.tour}) : super(key: key);
 
   @override
   State<FullscreenTourPage> createState() => _FullscreenTourPageState();
@@ -31,7 +32,7 @@ class _FullscreenTourPageState extends State<FullscreenTourPage> {
 
     if (tour == null) {
       return Scaffold(
-        appBar: AppBar(title: Text(widget.tile.title)),
+        appBar: AppBar(title: Text(widget.tour.name)),
         body: Center(child: Text('No tour selected')),
       );
     }
@@ -46,7 +47,7 @@ class _FullscreenTourPageState extends State<FullscreenTourPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.tile.title),
+        title: Text(widget.tour.name),
         leading: _isFullScreen
             ? IconButton(
           icon: Icon(Icons.arrow_back),
@@ -79,12 +80,12 @@ class _FullscreenTourPageState extends State<FullscreenTourPage> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        if (widget.tile.imageUrl != null && widget.tile.imageUrl.isNotEmpty)
+                        if (widget.tour.imageUrl != null && widget.tour.imageUrl.isNotEmpty)
                           Container(
                             height: 250,
                             child: ClipRRect(
                               child: Image.network(
-                                widget.tile.imageUrl,
+                                widget.tour.imageUrl,
                                 width: MediaQuery.of(context).size.width,
                                 height: 300.0, // Adjust height as needed
                                 fit: BoxFit.cover,
@@ -93,7 +94,7 @@ class _FullscreenTourPageState extends State<FullscreenTourPage> {
                           ),
                         const SizedBox(height: 16.0),
                         Text(
-                          widget.tile.description,
+                          widget.tour.description,
                           style: const TextStyle(fontSize: 18.0),
                         ),
                         const SizedBox(height: 16.0),
