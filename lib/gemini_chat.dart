@@ -303,9 +303,18 @@ class _GeminiChatState extends State<GeminiChat> with WidgetsBindingObserver {
           onSendPressed: _handleSendPressed,
           user: _user!,
           theme: const DefaultChatTheme(
-            primaryColor: Color(0xffec8c6f),
+            primaryColor: Color(0xff596f6d),
+            inputBackgroundColor: Color(0xff434949),
+            //border radius 5 up 20 down
+            inputBorderRadius: const BorderRadius.only(
+              topLeft: Radius.circular(20),
+              topRight: Radius.circular(20),
+              bottomLeft: Radius.circular(20),
+              bottomRight: Radius.circular(5),
+            ),
           ),
           bubbleBuilder: _customBubbleBuilder,
+          textMessageBuilder: _textMessageBuilder,
           scrollController: MyGlobals.scrollController,
         ),
       ),
@@ -330,7 +339,7 @@ class _GeminiChatState extends State<GeminiChat> with WidgetsBindingObserver {
         child: Container(
         decoration: const BoxDecoration(
           borderRadius: BorderRadius.all(Radius.circular(36)),
-          color: Color(0xffC9ABA2),
+          color: Color(0xff95a9a8),
         ),
         child: Padding(
           padding: const EdgeInsets.all(10.0),
@@ -338,13 +347,11 @@ class _GeminiChatState extends State<GeminiChat> with WidgetsBindingObserver {
             onPressed: (){
               _handleSendPrompt("What's a nice scenic local tour I can take?");
             },
-            style: ElevatedButton.styleFrom(backgroundColor: Color(0xffAB8D84), foregroundColor: Color(0xffec8c6f)),
             child: Wrap(
               crossAxisAlignment: WrapCrossAlignment.center,
               children: <Widget>[
                 const Icon(
                   Icons.lightbulb,
-                  color: Colors.white,
                   size: 24.0,
                 ),
                 IgnorePointer(child: child,),//IgnorePointer ensures clicks pass through to button behind it
@@ -366,10 +373,31 @@ class _GeminiChatState extends State<GeminiChat> with WidgetsBindingObserver {
             bottomRight: radiusMessage,
           ),
           color: isUser ?
-          const Color(0xffec8c6f) :
+          const Color(0xff596f6d) :
           const Color(0xfff5f5f7),
         ),
         child: child
+    );
+  }
+
+  Widget _textMessageBuilder(
+      types.TextMessage textMessage, {
+        required int messageWidth,
+        required bool showName,
+      }) {
+
+    bool isAiCustomPrompt = textMessage.metadata != null && textMessage.metadata!.isNotEmpty && textMessage.metadata!.containsKey("aiCustomPrompt");
+
+    return Container(
+      padding: isAiCustomPrompt? EdgeInsets.all(16) : EdgeInsets.symmetric(vertical: 18, horizontal: 20),
+      child: Text(
+        textMessage.text,
+        //set text black and large body
+        style: TextStyle(
+          color: isAiCustomPrompt ? Color(0xff006a65) : textMessage.author.id == _user!.id ? Colors.white : Colors.black,
+          fontSize: 16,
+        ),
+      ),
     );
   }
 

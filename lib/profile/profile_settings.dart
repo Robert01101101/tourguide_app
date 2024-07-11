@@ -1,22 +1,19 @@
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:go_router/go_router.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import 'package:tourguide_app/profile/profile_settings.dart';
-import 'package:tourguide_app/profile/to_tour_list.dart';
 import 'package:tourguide_app/ui/my_layouts.dart';
 import 'package:tourguide_app/utilities/custom_import.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:tourguide_app/utilities/providers/auth_provider.dart' as myAuth;
 import 'package:url_launcher/url_launcher.dart';
 
-class Profile extends StatefulWidget {
-  const Profile({super.key});
+class ProfileSettings extends StatefulWidget {
+  const ProfileSettings({super.key});
 
   @override
-  State<Profile> createState() => _ProfileState();
+  State<ProfileSettings> createState() => _ProfileSettingsState();
 }
 
-class _ProfileState extends State<Profile> {
+class _ProfileSettingsState extends State<ProfileSettings> {
 
   final TextEditingController _usernameController = TextEditingController();
   late Future<DocumentSnapshot> _profileDataFuture;
@@ -43,20 +40,6 @@ class _ProfileState extends State<Profile> {
       "username": "Robeat",
     };
 
-    // Add a new document with the userid
-    /*
-    db.collection("profiles").doc(uid).set(profile).then((_) =>
-        logger.t('DocumentSnapshot added with ID: ${uid}'));*/
-
-    /*
-    final tourPrivate = <String, dynamic>{
-      "name": "Robert Tour Two",
-      "visibility": "private"
-    };
-
-    // Add a new document with a generated ID
-    db.collection("tours").add(tourPrivate).then((DocumentReference doc) =>
-        logger.t('DocumentSnapshot added with ID: ${doc.id}'));*/
 
     //get
     logger.t('GET -------');
@@ -70,46 +53,6 @@ class _ProfileState extends State<Profile> {
       logger.t('Profile not found');
     }
 
-
-
-    /*
-    https://firebase.google.com/dohttps://firebase.google.com/docs/firestore/quickstartcs/firestore/quickstart
-
-    //Cloud Firestore stores data in Documents, which are stored in Collections. Cloud Firestore creates collections and documents
-    // implicitly the first time you add data to the document. You do not need to explicitly create collections or documents.
-    // Create a new user with a first and last name
-    final user = <String, dynamic>{
-      "first": "Ada",
-      "last": "Lovelace",
-      "born": 1815
-    };
-
-    // Add a new document with a generated ID
-    db.collection("users").add(user).then((DocumentReference doc) =>
-        logger.t('DocumentSnapshot added with ID: ${doc.id}'));
-
-    //Now add another document to the users collection. Notice that this document includes a key-value pair (middle name) that does not
-    // appear in the first document. Documents in a collection can contain different sets of information.
-    // Create a new user with a first and last name
-    final userAlt = <String, dynamic>{
-      "first": "Alan",
-      "middle": "Mathison",
-      "last": "Turing",
-      "born": 1912
-    };
-
-    // Add a new document with a generated ID
-    db.collection("users").add(userAlt).then((DocumentReference doc) =>
-        logger.t('DocumentSnapshot added with ID: ${doc.id}'));
-
-    //Use the data viewer in the Firebase console to quickly verify that you've added data to Cloud Firestore.
-    // You can also use the "get" method to retrieve the entire collection.
-    await db.collection("users").get().then((event) {
-      for (var doc in event.docs) {
-        logger.t("${doc.id} => ${doc.data()}");
-      }
-    });
-    */
   }
 
 
@@ -166,7 +109,7 @@ class _ProfileState extends State<Profile> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Profile'),
+        title: const Text('Profile Settings'),
       ),
       body: SingleChildScrollView(
         child: Column(
@@ -255,7 +198,6 @@ class _ProfileState extends State<Profile> {
                   subtitle: Text(authProvider.user!.email),
                 ),
                 SizedBox(height: 8,),
-                /*
                 Row(
                   children: [
                     Expanded(
@@ -272,56 +214,12 @@ class _ProfileState extends State<Profile> {
                     }, child: const Text("Save")),
                   ],
                 ),
-                SizedBox(height: 32,),*/
+                SizedBox(height: 32,),
               ],
             ),
             Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                ProfileListButton(
-                  label: 'Saved Tours',
-                  leftIcon: Icons.bookmark_outline_rounded,
-                  rightIcon: Icons.arrow_forward_ios,
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      SlideTransitionRoute(
-                        page: ToTourList(),
-                        beginOffset: Offset(1.0, 0.0), // Slide in from right
-                      ),
-                    );
-                  },
-                ),
-                ProfileListButton(
-                  label: 'Profile Settings',
-                  leftIcon: Icons.person_outline,
-                  rightIcon: Icons.arrow_forward_ios,
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      SlideTransitionRoute(
-                        page: ProfileSettings(),
-                        beginOffset: Offset(1.0, 0.0), // Slide in from right
-                      ),
-                    );
-                  },
-                ),
-                ProfileListButton(
-                  label: 'App Settings',
-                  leftIcon: Icons.settings_outlined,
-                  rightIcon: Icons.arrow_forward_ios,
-                  onPressed: () {
-
-                  },
-                ),
-                ProfileListButton(
-                  label: 'Privacy Policy',
-                  leftIcon: Icons.privacy_tip_outlined,
-                  onPressed: () {
-                    launchUrl(Uri.parse("https://tourguide.rmichels.com/privacyPolicy.html"));
-                  },
-                ),
-                /*
                 ProfileListButton(
                   label: 'Update Firestore profile data (get)',
                   leftIcon: Icons.data_object,
@@ -330,14 +228,21 @@ class _ProfileState extends State<Profile> {
                       _profileDataFuture = _firestoreGetUserProfileData();
                     });
                   },
-                ),*/
+                ),
                 ProfileListButton(
-                  label: 'Sign out',
-                  leftIcon: Icons.logout,
-                  onPressed: () {
-                    authProvider.signOut();
-                  },
+                  label: 'Delete Account',
+                  leftIcon: Icons.delete_outline,
+                  rightIcon: Icons.arrow_forward_ios,
                   isLastItem: true,
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      SlideTransitionRoute(
+                        page: ProfileSettingsDeleteAccount(),
+                        beginOffset: Offset(1.0, 0.0), // Slide in from right
+                      ),
+                    );
+                  },
                 ),
               ],
             ),
@@ -348,63 +253,98 @@ class _ProfileState extends State<Profile> {
   }
 }
 
-class ProfileListButton extends StatelessWidget {
-  final String label;
-  final IconData leftIcon;
-  final IconData? rightIcon;
-  final VoidCallback onPressed;
-  final bool? isLastItem;
 
-  const ProfileListButton({
-    required this.label,
-    required this.leftIcon,
-    this.rightIcon,
-    required this.onPressed,
-    this.isLastItem,
-  });
+
+
+class ProfileSettingsDeleteAccount extends StatefulWidget {
+  const ProfileSettingsDeleteAccount({super.key});
+
+  @override
+  State<ProfileSettingsDeleteAccount> createState() => _ProfileSettingsDeleteAccountState();
+}
+
+class _ProfileSettingsDeleteAccountState extends State<ProfileSettingsDeleteAccount> {
+  final TextEditingController _confirmFieldController = TextEditingController();
+  bool _isDeleteEnabled = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _confirmFieldController.addListener(_checkDeleteText);
+  }
+
+  @override
+  void dispose() {
+    _confirmFieldController.removeListener(_checkDeleteText);
+    _confirmFieldController.dispose();
+    super.dispose();
+  }
+
+  void _checkDeleteText() {
+    setState(() {
+      _isDeleteEnabled = _confirmFieldController.text == "DELETE";
+    });
+  }
+
+  void _deleteAccount(){
+    logger.w("Delete account confirmed and pressed");
+  }
+
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16.0),
-          child: Divider(height: 1, color: Colors.grey),
-        ),
-        TextButton(
-          onPressed: onPressed,
-          style: TextButton.styleFrom(
-            padding: EdgeInsets.all(16.0),
-            alignment: Alignment.centerLeft,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(0), // Set to 0 for sharp corners
-            ),
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(leftIcon), // Left icon
-                  SizedBox(width: 16), // Adjust spacing between icon and text as needed
-                  Text(
-                    label,
-                    style: TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                ],
+    logger.t('FirebaseAuth.instance.currentUser=${FirebaseAuth.instance.currentUser}');
+    myAuth.AuthProvider authProvider = Provider.of(context);
+
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Delete Account'),
+      ),
+      body: SingleChildScrollView(
+        child: StandardLayout(
+          children: [
+            SizedBox(height: 0,),
+            Text("Confirm Account Deletion", style: Theme.of(context).textTheme.headlineSmall),
+            Text("Hey there!"
+                "\n\n"
+                'Before you go ahead and delete your account, just a heads-up: this action is permanent and cannot be undone. Deleting your account means all your personal information and contributions, like the tours you\'ve created and the ratings you\'ve left, will be permanently removed.'
+                '\n\n'
+                'We\'d hate to see you go, but if you\'re sure, hit that delete button. Just remember, once it\'s gone, it\'s gone for good!'
+                '\n\n'
+                'Keep exploring the world,'
+                '\n'
+                'Your Tourguide Team', style: Theme.of(context).textTheme.bodyLarge),
+            SizedBox(height: 16,),
+            TextFormField(
+              controller: _confirmFieldController,
+              decoration: InputDecoration(
+                labelText: 'Type "DELETE" to confirm',
+                labelStyle: TextStyle(color: Theme.of(context).colorScheme.error,),
+                focusedBorder: UnderlineInputBorder(
+                  borderSide: BorderSide(color: Theme.of(context).colorScheme.error),
+                ),
               ),
-              if (rightIcon != null) Icon(rightIcon, size: 20,), // Right icon if provided
-            ],
-          ),
-        ),
-        if (isLastItem ?? false)
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0),
-            child: Divider(height: 1, color: Colors.grey),
-          ),
-      ],
+              validator: (String? value) {
+                if (value == null || value.isEmpty) {
+                  return 'Please enter a name for your tour';
+                }
+                return null;
+              },
+              //enabled: !_isFormSubmitted,
+            ),
+            Center(
+              child: ElevatedButton(
+                  onPressed: _isDeleteEnabled ? _deleteAccount : null,
+                  style: ElevatedButton.styleFrom(
+                      backgroundColor: Theme.of(context).colorScheme.error,
+                      foregroundColor: Colors.white,
+                      textStyle: TextStyle(
+                          fontWeight: FontWeight.bold,)),
+                  child: const Text("Permanently Delete Account and Contributions")),
+            ),
+          ],
+        )
+      ),
     );
   }
 }

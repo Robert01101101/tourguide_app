@@ -257,9 +257,9 @@ class ExploreState extends State<Explore> {
 
                             // Stylized Welcome Banner text
                             return SizedBox(
-                              height: 300,
+                              height: 290,
                               child: Padding(
-                                padding: const EdgeInsets.symmetric(vertical: 30, horizontal: 0),
+                                padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 0),
                                 child: Align(
                                   alignment: Alignment.bottomCenter,
                                   child: GradientText(
@@ -293,7 +293,15 @@ class ExploreState extends State<Explore> {
                             );
                           }
                         ),
-                        Text("Popular tours near you", style: Theme.of(context).textTheme.headlineSmall),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text("Popular tours near you", style: Theme.of(context).textTheme.headlineSmall),
+                            IconButton(onPressed: (){
+
+                            }, icon: Icon(Icons.map))
+                          ],
+                        ),
                         StandardLayoutChild(
                           fullWidth: true,
                           child: SizedBox(

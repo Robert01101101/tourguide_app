@@ -1,5 +1,6 @@
 import 'package:scroll_to_hide/scroll_to_hide.dart';
 import 'package:tourguide_app/onboarding.dart';
+import 'package:tourguide_app/profile/profile_settings.dart';
 import 'package:tourguide_app/signIn.dart';
 import 'package:tourguide_app/gemini_chat.dart';
 import 'package:tourguide_app/utilities/custom_import.dart';
@@ -18,6 +19,14 @@ import 'package:shared_preferences/shared_preferences.dart';
 // TourguideNavigation.router.go(
 //     TourguideNavigation.signInPath,
 // );
+//Usage with push pop sideways:
+//Navigator.push(
+//  context,
+//  SlideTransitionRoute(
+//    page: ProfileSettings(),
+//    beginOffset: Offset(1.0, 0.0), // Slide in from right
+//  ),
+//);
 class TourguideNavigation {
   static final TourguideNavigation _instance =
   TourguideNavigation._internal();
@@ -213,7 +222,7 @@ class TourguideNavigation {
             state: state,
           );
         },
-      )
+      ),
       /* //TODO figure out what this was used for
       GoRoute(
         parentNavigatorKey: parentNavigatorKey,
@@ -229,7 +238,7 @@ class TourguideNavigation {
 
     router = GoRouter(
       navigatorKey: parentNavigatorKey,
-      initialLocation: onboardingPath,//isFirstTime ? onboardingPath : signInPath,
+      initialLocation: isFirstTime ? onboardingPath : signInPath,
       routes: routes,
     );
   }
@@ -254,6 +263,29 @@ class TourguideNavigation {
   }
 
 }
+
+
+class SlideTransitionRoute extends PageRouteBuilder {
+  final Widget page;
+  final Offset beginOffset;
+
+  SlideTransitionRoute({required this.page, required this.beginOffset})
+      : super(
+    pageBuilder: (context, animation, secondaryAnimation) => page,
+    transitionsBuilder: (context, animation, secondaryAnimation, child) {
+      var tween = Tween(begin: beginOffset, end: Offset.zero)
+          .chain(CurveTween(curve: Curves.easeInOut));
+      var offsetAnimation = animation.drive(tween);
+
+      return SlideTransition(
+        position: offsetAnimation,
+        child: child,
+      );
+    },
+  );
+}
+
+
 
 
 //______________________________________________________________________________________________ BottomNavigationPage
