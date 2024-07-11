@@ -13,6 +13,7 @@ class PlaceAutocomplete extends StatefulWidget {
   final Function(Place?)? onPlaceInfoFetched;
   final bool restrictToCities;
   final InputDecoration? decoration;
+  final bool customLabel;
 
   PlaceAutocomplete({
     required this.textEditingController,
@@ -21,6 +22,7 @@ class PlaceAutocomplete extends StatefulWidget {
     this.onPlaceInfoFetched,
     this.restrictToCities = true, //default true
     this.decoration,
+    this.customLabel = false,
   });
 
   @override
@@ -73,10 +75,10 @@ class _PlaceAutocompleteState extends State<PlaceAutocomplete> {
               controller: fieldTextEditingController,
               focusNode: fieldFocusNode,
               decoration: widget.decoration?.copyWith(
-                labelText: widget.restrictToCities ? 'City' : 'Place',
+                labelText: widget.customLabel ? widget.decoration!.labelText : widget.restrictToCities ? 'City' : 'Place',
                 errorText: _networkError ? 'Network error, please try again.' : null,
               ) ?? InputDecoration(
-                labelText: widget.restrictToCities ? 'City' : 'Place',
+                labelText: widget.customLabel ? widget.decoration!.labelText : widget.restrictToCities ? 'City' : 'Place',
                 errorText: _networkError ? 'Network error, please try again.' : null,
               ),
               validator: (String? value) {

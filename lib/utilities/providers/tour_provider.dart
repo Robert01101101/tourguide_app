@@ -7,7 +7,7 @@ class TourProvider with ChangeNotifier {
   List<Tour> _popularTours = List.generate(4, (index) => Tour.empty());
   List<Tour> _localTours = List.generate(4, (index) => Tour.empty());
   List<Tour> _globalTours = List.generate(4, (index) => Tour.empty());
-  List<Tour> _userCreatedTours = List.generate(4, (index) => Tour.empty());
+  List<Tour> _userCreatedTours = List.generate(1, (index) => Tour.isAddTourTile());
   List<Tour> _allTours = List.generate(4, (index) => Tour.empty());
   Tour? _selectedTour;
 

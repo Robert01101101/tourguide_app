@@ -138,7 +138,7 @@ class _RoundedTileState extends State<RoundedTile> {
                 children: [
                   ShimmerLoading(
                     isLoading: isLoading,
-                    child: !isLoading ?
+                    child: !isLoading && widget.tour.imageUrl.isNotEmpty ?
                     Image.network(
                       widget.tour.imageUrl,
                       width: 150.0,
