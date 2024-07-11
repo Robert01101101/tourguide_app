@@ -229,7 +229,7 @@ class TourguideNavigation {
 
     router = GoRouter(
       navigatorKey: parentNavigatorKey,
-      initialLocation: isFirstTime ? onboardingPath : signInPath,
+      initialLocation: onboardingPath,//isFirstTime ? onboardingPath : signInPath,
       routes: routes,
     );
   }

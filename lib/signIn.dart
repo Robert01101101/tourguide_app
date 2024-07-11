@@ -12,6 +12,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:http/http.dart' as http;
+import 'package:tourguide_app/utilities/providers/location_provider.dart';
+import 'package:tourguide_app/utilities/providers/tour_provider.dart';
 import 'ui/sign_in_button.dart';
 import 'package:tourguide_app/utilities/custom_import.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -37,8 +39,12 @@ class _SignInState extends State<SignIn> {
   void initState() {
     super.initState();
 
+    // Init providers
+    my_auth.AuthProvider authProvider = Provider.of(context, listen: false);
+    LocationProvider locationProvider = Provider.of(context, listen: false);
+    TourProvider tourProvider = Provider.of(context, listen: false);
+
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-      my_auth.AuthProvider authProvider = Provider.of(context, listen: false);
       authProvider.addListener(() {
         if (authProvider.user != null && authProvider.isAuthorized && !navigatedAwayFromSignIn) {
           logger.t("signIn.initState().authProviderListener -> user is no longer null");
@@ -52,7 +58,7 @@ class _SignInState extends State<SignIn> {
           FlutterNativeSplash.remove();
         }
       });
-      authProvider.signInSilently();
+      //authProvider.signInSilently();
     });
   }
 

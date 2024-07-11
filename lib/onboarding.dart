@@ -2,9 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:introduction_screen/introduction_screen.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tourguide_app/signIn.dart';
+import 'package:tourguide_app/utilities/providers/location_provider.dart';
+import 'package:tourguide_app/utilities/providers/tour_provider.dart';
 import 'package:tourguide_app/utilities/tourguide_navigation.dart';
+import 'package:tourguide_app/utilities/providers/auth_provider.dart' as my_auth;
+
+import 'main.dart';
 
 
 class TourguideOnboard extends StatefulWidget {
@@ -16,18 +22,33 @@ class TourguideOnboard extends StatefulWidget {
 
 class _TourguideOnboardState extends State<TourguideOnboard> {
   final _introKey = GlobalKey<IntroductionScreenState>();
+  String pathToGoToNext = TourguideNavigation.signInPath;
 
   @override
   void initState() {
     FlutterNativeSplash.remove();
     super.initState();
+
+    // Init providers
+    my_auth.AuthProvider authProvider = Provider.of(context, listen: false);
+    LocationProvider locationProvider = Provider.of(context, listen: false);
+    TourProvider tourProvider = Provider.of(context, listen: false);
+
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+      authProvider.addListener(() {
+        if (authProvider.user != null && authProvider.isAuthorized) {
+          logger.t("signIn.initState().authProviderListener -> user is no longer null, will skip signIn page");
+          pathToGoToNext = TourguideNavigation.explorePath;
+        }
+      });
+    });
   }
 
   void _completeOnboarding() async {
     var _prefs = await SharedPreferences.getInstance();
     _prefs.setBool('firstTimeUser', false);
     TourguideNavigation.router.go(
-      TourguideNavigation.signInPath,
+      pathToGoToNext,
     );
   }
 

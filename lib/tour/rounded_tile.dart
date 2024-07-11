@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:tourguide_app/model/tour.dart';
+import 'package:tourguide_app/tour/tour_creation.dart';
 import 'package:tourguide_app/tour/tour_details.dart';
 import 'package:tourguide_app/ui/shimmer_loading.dart';
 import 'package:tourguide_app/utilities/providers/tour_provider.dart';
@@ -26,18 +27,23 @@ class _RoundedTileState extends State<RoundedTile> {
   void initState() {
     super.initState();
     imageUrl = widget.tour.imageUrl;
+    startImageLoad();
   }
 
   @override
   void didUpdateWidget(covariant RoundedTile oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.tour.imageUrl != widget.tour.imageUrl) {
+    if (oldWidget.tour.imageUrl != widget.tour.imageUrl || (imageUrl != null && imageUrl != "")) {
       setState(() {
-        bool imageUrlReady = imageUrl == null || imageUrl == "";
-        imageUrl = widget.tour.imageUrl;
-        if (imageUrlReady) _loadImage();
+        startImageLoad();
       });
     }
+  }
+
+  void startImageLoad(){
+    imageUrl = widget.tour.imageUrl;
+    bool imageUrlReady = imageUrl != null && imageUrl != "";
+    if (imageUrlReady) _loadImage();
   }
 
   Future<void> _loadImage() async {
@@ -80,17 +86,25 @@ class _RoundedTileState extends State<RoundedTile> {
     );
   }
 
+  void _createTour(){
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const CreateTour()),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     bool textDataReady = widget.tour.name != null && widget.tour.name != "";
 
     return GestureDetector(
-      onTap: () => _showOverlay(context),
+      onTap: () => widget.tour.isAddTourTile ? _createTour() : _showOverlay(context),
       child: Container(
         width: 150.0,
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(16.0),
+          border: widget.tour.isAddTourTile ? Border.all(color: Colors.grey, width: 2.0) : Border.all(color: Colors.transparent, width: 0), // Adjust the width as needed
           boxShadow: const [
             BoxShadow(
               color: Colors.black26,
@@ -99,7 +113,23 @@ class _RoundedTileState extends State<RoundedTile> {
             ),
           ],
         ),
-        child: Column(
+        child: widget.tour.isAddTourTile
+          ? Center(
+              child: Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.add_circle_outline_sharp, color: Colors.grey),
+                    SizedBox(height: 16),
+                    Text(
+                      "Add Tour",
+                      style: Theme.of(context).textTheme.titleMedium,
+                    ),
+                  ],
+                ),
+              ),
+            )
+          : Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             ClipRRect(
@@ -110,7 +140,7 @@ class _RoundedTileState extends State<RoundedTile> {
                     isLoading: isLoading,
                     child: !isLoading ?
                     Image.network(
-                      imageUrl,
+                      widget.tour.imageUrl,
                       width: 150.0,
                       height: 100.0,
                       fit: BoxFit.cover,

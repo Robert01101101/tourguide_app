@@ -13,6 +13,7 @@ import 'package:tourguide_app/ui/place_autocomplete.dart';
 import 'package:tourguide_app/ui/my_layouts.dart';
 import 'package:tourguide_app/utilities/custom_import.dart';
 import 'package:flutter_google_places_sdk/flutter_google_places_sdk.dart';
+import 'package:tourguide_app/utilities/providers/auth_provider.dart' as myAuth;
 
 import 'package:tourguide_app/main.dart';
 import 'package:tourguide_app/utilities/providers/location_provider.dart';
@@ -68,10 +69,10 @@ class _CreateTourState extends State<CreateTour> {
       // Validation passed, proceed with tour creation
       FirebaseFirestore db = FirebaseFirestore.instance;
       FirebaseAuth auth = FirebaseAuth.instance;
-      LocationProvider locationProvider =
-      Provider.of<LocationProvider>(context, listen: false);
+      LocationProvider locationProvider = Provider.of<LocationProvider>(context, listen: false);
+      final myAuth.AuthProvider authProvider = Provider.of(context, listen: false);
       final User user = auth.currentUser!;
-      final uid = user.uid;
+      final uid = authProvider.user!.id;
       final filter = ProfanityFilter();
 
 

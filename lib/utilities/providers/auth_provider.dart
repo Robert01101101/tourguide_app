@@ -33,6 +33,12 @@ class AuthProvider with ChangeNotifier {
 
   ////// CONSTRUCTOR /////
   AuthProvider() {
+    _init();
+  }
+
+  // Initialization method
+  Future<void> _init() async {
+    logger.t("AuthProvider._init()");
     userAuthSub = googleSignIn.onCurrentUserChanged
         .listen((GoogleSignInAccount? account) async {
       // Check Scopes: In mobile, being authenticated means being authorized...
@@ -60,6 +66,7 @@ class AuthProvider with ChangeNotifier {
         handleAuthorizeScopes();
       }
     });
+    signInSilently();
   }
 
   @override

@@ -1,8 +1,13 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:tourguide_app/model/tour.dart';
 import 'package:tourguide_app/tour/tour_creation.dart';
+import 'package:tourguide_app/ui/horizontal_scroller.dart';
+import 'package:tourguide_app/ui/my_layouts.dart';
+import 'package:tourguide_app/ui/shimmer_loading.dart';
 import 'package:tourguide_app/utilities/custom_import.dart';
+import 'package:tourguide_app/utilities/providers/tour_provider.dart';
 
 import 'main.dart';
 
@@ -18,31 +23,39 @@ class _ContributeState extends State<Contribute> {
 
   @override
   Widget build(BuildContext context) {
+    TourProvider tourProvider = Provider.of<TourProvider>(context);
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Contribute'),
       ),
-      body: Padding(
-        padding: const EdgeInsets.symmetric(
-          vertical: 32.0, // Vertical padding
-          horizontal: 16.0, // Horizontal padding
-        ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+      body: Shimmer(
+        linearGradient: MyGlobals.shimmerGradient,
+        child: StandardLayout(
           children: [
-            Text("Create a new tour", style: Theme.of(context).textTheme.headlineSmall),
-            const SizedBox(height: 16),
-            ElevatedButton(onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const CreateTour()),
-              );
-            }, child: const Text("Create a tour")),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text("Tours you created", style: Theme.of(context).textTheme.headlineSmall),
+                IconButton(onPressed: (){
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const CreateTour()),
+                  );
+                }, icon: Icon(Icons.add_circle_outline_sharp),),
+              ],
+            ),
+            StandardLayoutChild(
+              fullWidth: true,
+              child: SizedBox(
+                height: 200.0, // Set a fixed height for the horizontal scroller
+                child: HorizontalScroller(tours: tourProvider.userCreatedTours),
+              ),
+            ),
             const SizedBox(height: 64),
             Text("View existing tours", style: Theme.of(context).textTheme.headlineSmall),
-            const SizedBox(height: 16),
             Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              mainAxisAlignment: MainAxisAlignment.start,
               children: [
                 ElevatedButton(onPressed: () {
                   Navigator.push(
@@ -50,6 +63,7 @@ class _ContributeState extends State<Contribute> {
                     MaterialPageRoute(builder: (context) => const PublicTours(isPublic: true)),
                   );
                 }, child: const Text("Public tours")),
+                SizedBox(width: 16,),
                 ElevatedButton(onPressed: () {
                   Navigator.push(
                     context,

@@ -22,6 +22,7 @@ class Tour {
   final List<TourguidePlace> tourguidePlaces;
   int upvotes;  //mutable
   int downvotes;  //mutable
+  bool isAddTourTile;  //mutable
   ///////   LOCAL ONLY
   int? thisUsersRating; // Track user's rating
 
@@ -42,6 +43,7 @@ class Tour {
     required this.tourguidePlaces,
     required this.upvotes,
     required this.downvotes,
+    required this.isAddTourTile,
     this.thisUsersRating,
   });
 
@@ -63,7 +65,14 @@ class Tour {
       tourguidePlaces: [],
       upvotes: 0,
       downvotes: 0,
+      isAddTourTile: false,
     );
+  }
+
+  factory Tour.isAddTourTile() {
+    Tour addTourTile = Tour.empty();
+    addTourTile.isAddTourTile = true;
+    return addTourTile;
   }
 
   factory Tour.fromFirestore(DocumentSnapshot doc) {
@@ -113,6 +122,7 @@ class Tour {
       tourguidePlaces: tourguidePlaces,
       upvotes: data['upvotes'] ?? 0,
       downvotes: data['downvotes'] ?? 0,
+      isAddTourTile: false,
     );
   }
 
@@ -147,6 +157,7 @@ class Tour {
       tourguidePlaces: tourguidePlaces ?? this.tourguidePlaces,
       upvotes: upvotes ?? this.upvotes,
       downvotes: downvotes ?? this.downvotes,
+      isAddTourTile: this.isAddTourTile,
     );
   }
 
@@ -267,6 +278,14 @@ class TourService {
 
     return nearbyTours;
   }
+
+  static List<Tour> userCreatedTours(List<Tour> tours, String userId) {
+    List<Tour> userCreatedTours = tours.where((tour) => tour.uid == userId).toList();
+    //log length
+    logger.t('userCreatedTours length: ${userCreatedTours.length}, userId=$userId');
+    return userCreatedTours;
+  }
+
 
   static List<Tour> popularToursAroundTheWorld(List<Tour> tours) {
     tours.sort((a, b) => (b.upvotes - b.downvotes).compareTo(a.upvotes - a.downvotes));

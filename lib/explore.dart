@@ -47,9 +47,6 @@ class Explore extends StatefulWidget {
 class ExploreState extends State<Explore> {
   GoogleSignInAccount? _currentUser;
   bool downloadingTours = false;
-  List<Tour> popularTours = List.generate(4, (index) => Tour.empty());
-  List<Tour> localTours = List.generate(4, (index) => Tour.empty());
-  List<Tour> globalTours = List.generate(4, (index) => Tour.empty());
   Future<GooglePlacesImg?>? _fetchPhotoFuture;
 
   @override
@@ -104,37 +101,36 @@ class ExploreState extends State<Explore> {
 
     final tourProvider = Provider.of<TourProvider>(context, listen: false);
     final locationProvider = Provider.of<LocationProvider>(context, listen: false);
-    await tourProvider.fetchAndSetTours();
-    List<Tour> toursFetched = tourProvider.tours;
-    setState((){
-      popularTours = TourService.popularToursNearYou(toursFetched, locationProvider.currentPosition!.latitude, locationProvider.currentPosition!.longitude);
-      localTours = TourService.localTours(toursFetched, locationProvider.currentPosition!.latitude, locationProvider.currentPosition!.longitude);
-      globalTours = TourService.popularToursAroundTheWorld(toursFetched);
-
-      downloadingTours = false;
-      /*tiles = toursFetched.take(4).map((tour) {
-        return TileData(
-          tourId: tour.id,
-          imageUrl: tour.imageUrl,
-          title: tour.name,
-          description: tour.description,
-        );
-      }).toList();*/
-    });
-    getTourRatings();
-  }
-
-  Future<void> getTourRatings() async {
-    logger.t('getTourRatings');
     final myAuth.AuthProvider authProvider = Provider.of(context, listen: false);
-    List<Tour> newPopularTours = await TourService.checkUserRatings(popularTours, authProvider.user!.id);
-    List<Tour> newLocalTours = await TourService.checkUserRatings(localTours, authProvider.user!.id);
-    List<Tour> newGlobalTours = await TourService.checkUserRatings(globalTours, authProvider.user!.id);
-    setState((){
-      popularTours = newPopularTours;
-      localTours = newLocalTours;
-      globalTours = newGlobalTours;
-    });
+
+    try {
+      await Future.doWhile(() async {
+        // Check if the currentPosition is null
+        if (locationProvider.currentPosition == null) {
+          // Wait for a short duration before checking again
+          await Future.delayed(Duration(milliseconds: 100));
+          return true; // Continue looping
+        }
+        return false; // Exit loop if currentPosition is not null
+      }).timeout(Duration(seconds: 2));
+    } catch (e) {
+      // Handle timeout
+      logger.e('Timeout waiting for location');
+      // You might want to handle this situation differently
+      return;
+    }
+
+    // Ensure currentPosition is not null before proceeding
+    if (locationProvider.currentPosition != null) {
+      await tourProvider.fetchAndSetTours(
+        locationProvider.currentPosition!.latitude,
+        locationProvider.currentPosition!.longitude,
+        authProvider.user!.id,
+      );
+    } else {
+      // Handle the case where currentPosition is still null after timeout
+      logger.e('Current position is still null after timeout');
+    }
   }
 
   void _showOptionsDialog(BuildContext context) {
@@ -154,6 +150,7 @@ class ExploreState extends State<Explore> {
   Widget build(BuildContext context) {
     myAuth.AuthProvider authProvider = Provider.of(context);
     LocationProvider locationProvider = Provider.of<LocationProvider>(context);
+    TourProvider tourProvider = Provider.of<TourProvider>(context);
 
     Future<void> _refresh() async {
       if (!downloadingTours){
@@ -301,7 +298,7 @@ class ExploreState extends State<Explore> {
                           fullWidth: true,
                           child: SizedBox(
                             height: 200.0, // Set a fixed height for the horizontal scroller
-                            child: HorizontalScroller(tours: popularTours!),
+                            child: HorizontalScroller(tours: tourProvider.popularTours),
                           ),
                         ),
                         Text("Local tours", style: Theme.of(context).textTheme.headlineSmall),
@@ -309,7 +306,7 @@ class ExploreState extends State<Explore> {
                           fullWidth: true,
                           child: SizedBox(
                             height: 200.0, // Set a fixed height for the horizontal scroller
-                            child: HorizontalScroller(tours: localTours!),
+                            child: HorizontalScroller(tours: tourProvider.localTours),
                           ),
                         ),
                         Text("Tours around the world", style: Theme.of(context).textTheme.headlineSmall),
@@ -317,7 +314,7 @@ class ExploreState extends State<Explore> {
                           fullWidth: true,
                           child: SizedBox(
                             height: 200.0, // Set a fixed height for the horizontal scroller
-                            child: HorizontalScroller(tours: globalTours!),
+                            child: HorizontalScroller(tours: tourProvider.globalTours),
                           ),
                         ),
                         Text("Debug", style: Theme.of(context).textTheme.headlineSmall),
@@ -360,6 +357,7 @@ class ExploreState extends State<Explore> {
   }
 }
 
+//TODO - get rid of this?
 class GradientText extends StatelessWidget {
   const GradientText({
     required this.richText,

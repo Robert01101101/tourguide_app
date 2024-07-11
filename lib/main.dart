@@ -19,7 +19,13 @@ var logger = Logger();
 final FirebaseRemoteConfig remoteConfig = FirebaseRemoteConfig.instance;
 
 Future<void> main() async {
-  await WidgetsFlutterBinding.ensureInitialized();
+  WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
+
+  //FIREBASE INIT
+  //https://stackoverflow.com/a/63537567/7907510
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
 
   //LOAD ENVIRONMENT (SECURE VARS)
   await fetchConfig();
@@ -29,13 +35,6 @@ Future<void> main() async {
 
   //ROUTING
   await TourguideNavigation.instance.initialize();
-
-  //FIREBASE INIT
-  //https://stackoverflow.com/a/63537567/7907510
-  WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
 
   //CRASHLYTICS
   // Pass all uncaught "fatal" errors from the framework to Crashlytics
@@ -49,7 +48,6 @@ Future<void> main() async {
   };
 
   //Splash
-  WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
   FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
 
   runApp(const MyApp());
@@ -114,7 +112,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => AuthProvider()),
-        ChangeNotifierProvider(create: (_) => LocationProvider()..getCurrentLocation()),
+        ChangeNotifierProvider(create: (_) => LocationProvider()),
         ChangeNotifierProvider(create: (_) => TourProvider()),
       ],
       child: MaterialApp.router(
@@ -180,3 +178,4 @@ class SnackBarService {
     scaffoldKey.currentState?.showSnackBar(SnackBar(content: Text(content)));
   }
 }
+
