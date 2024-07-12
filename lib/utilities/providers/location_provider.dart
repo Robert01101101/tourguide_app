@@ -215,7 +215,7 @@ class LocationProvider with ChangeNotifier {
 
       List<AutocompletePrediction> resultSorted = List.from(result.predictions);
 
-      resultSorted.sort((a, b) => a.distanceMeters!.compareTo(b.distanceMeters!));
+      resultSorted.sort((a, b) => (a.distanceMeters ?? 0).compareTo(b.distanceMeters ?? 0));
       logger.t("resultSorted.toString()=${resultSorted.toString()},   result.predictions.first.placeId=${resultSorted.first.placeId}");
 
       return resultSorted;

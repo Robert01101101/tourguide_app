@@ -70,6 +70,7 @@ dependencies:
   firebase_remote_config: ^5.0.2
   introduction_screen: ^3.1.14
   profanity_filter: ^2.0.0
+  http: ^1.2.1
 
 
 dev_dependencies:

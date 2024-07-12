@@ -1,10 +1,12 @@
 import 'dart:async';
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:tourguide_app/model/tour.dart';
 import 'package:tourguide_app/utilities/providers/tour_provider.dart';
 import '../utilities/custom_import.dart';
+import 'package:http/http.dart' as http;
 import 'rounded_tile.dart'; // Ensure this imports your TileData model
 
 class FullscreenTourPage extends StatefulWidget {
@@ -24,6 +26,155 @@ class _FullscreenTourPageState extends State<FullscreenTourPage> {
     target: LatLng(0, 0),
     zoom: 14.0,
   );
+  Set<Marker> _markers = Set<Marker>();
+  Set<Polyline> _polylines = Set<Polyline>();
+
+
+  @override
+  void initState() {
+    super.initState();
+    _addMarkers();
+  }
+
+
+
+  void _addMarkers() {
+    // Add tour city marker
+    /*
+    _markers.add(
+      Marker(
+        markerId: MarkerId(widget.tour.id),
+        position: LatLng(widget.tour.latitude, widget.tour.longitude),
+        infoWindow: InfoWindow(
+          title: widget.tour.name,
+          snippet: widget.tour.description,
+        ),
+      ),
+    );*/
+
+    //add tourguidePlace markers
+    for (var tourguidePlace in widget.tour.tourguidePlaces) {
+      _markers.add(
+        Marker(
+          markerId: MarkerId(tourguidePlace.googleMapPlaceId),
+          position: LatLng(tourguidePlace.latitude, tourguidePlace.longitude),
+          infoWindow: InfoWindow(
+            title: tourguidePlace.title,
+            snippet: tourguidePlace.description,
+          ),
+        ),
+      );
+    }
+
+    setState(() {
+      _markers = _markers;
+    });
+
+    // Fetch directions and draw polyline
+    _fetchDirections();
+  }
+
+  Future<void> _fetchDirections() async {
+    // Replace with your Google Maps API key
+    String apiKey = remoteConfig.getString('google_api_key');
+
+    // Prepare waypoints for directions API request
+    //List<LatLng> waypoints = [];
+    List<String> waypoints = [];
+    for (var tourguidePlace in widget.tour.tourguidePlaces) {
+      //waypoints.add(LatLng(tourguidePlace.latitude, tourguidePlace.longitude));
+      waypoints.add(tourguidePlace.googleMapPlaceId);
+    }
+
+    //TODO: Address higher rate billing for 10+ waypoints
+    // Create waypoints string for API request
+    String waypointsString = "";
+    if (waypoints.length > 2){
+      /*waypointsString = waypoints.sublist(1, waypoints.length - 1)
+          .map((point) => 'via:${point.latitude},${point.longitude}')
+          .join('|');*/
+      waypointsString = waypoints.sublist(1, waypoints.length - 1)
+          .map((point) => 'via:place_id:${point}')
+          .join('|');
+    }
+
+    //TODO: Sometimes placeId works better, sometimes lat long, with placeIds it seems walking mode can be tricky -> address
+
+    // Construct directions API URL
+    String url = 'https://maps.googleapis.com/maps/api/directions/json?'
+        //'origin=${waypoints.first.latitude},${waypoints.last.longitude}&'
+        //'destination=${waypoints.last.latitude},${waypoints.last.longitude}&'
+        'origin=place_id:${waypoints.first}&'
+        'destination=place_id:${waypoints.last}&'
+        '${waypointsString.isNotEmpty ? 'waypoints=$waypointsString&' : waypointsString}'
+        'mode=walking&'
+        'key=$apiKey';
+
+    logger.i(url);
+
+    final response = await http.get(Uri.parse(url));
+
+    logger.i(response.body);
+
+    if (response.statusCode == 200) {
+      Map<String, dynamic> data = jsonDecode(response.body);
+      List<LatLng> points = _decodePolyline(data['routes'][0]['overview_polyline']['points']);
+      _addPolyline(points);
+    } else {
+      throw Exception('Failed to load directions');
+    }
+  }
+
+  List<LatLng> _decodePolyline(String encoded) {
+    List<LatLng> points = [];
+    int index = 0;
+    int len = encoded.length;
+    int lat = 0, lng = 0;
+
+    while (index < len) {
+      int b, shift = 0, result = 0;
+      do {
+        b = encoded.codeUnitAt(index++) - 63;
+        result |= (b & 0x1f) << shift;
+        shift += 5;
+      } while (b >= 0x20);
+      int dlat = ((result & 1) != 0 ? ~(result >> 1) : (result >> 1));
+      lat += dlat;
+
+      shift = 0;
+      result = 0;
+      do {
+        b = encoded.codeUnitAt(index++) - 63;
+        result |= (b & 0x1f) << shift;
+        shift += 5;
+      } while (b >= 0x20);
+      int dlng = ((result & 1) != 0 ? ~(result >> 1) : (result >> 1));
+      lng += dlng;
+
+      double latitude = lat / 1E5;
+      double longitude = lng / 1E5;
+      points.add(LatLng(latitude, longitude));
+    }
+    return points;
+  }
+
+  void _addPolyline(List<LatLng> polylineCoordinates) {
+    _polylines.add(
+      Polyline(
+        polylineId: PolylineId('Route'),
+        color: Colors.blue,
+        width: 5,
+        points: polylineCoordinates,
+      ),
+    );
+
+    setState(() {
+      _polylines = _polylines;
+    });
+  }
+
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -109,16 +260,8 @@ class _FullscreenTourPageState extends State<FullscreenTourPage> {
                           GoogleMap(
                             mapType: MapType.normal,
                             initialCameraPosition: _currentCameraPosition,
-                            markers: {
-                              Marker(
-                                markerId: MarkerId(tour.id),
-                                position: LatLng(tour.latitude, tour.longitude),
-                                infoWindow: InfoWindow(
-                                  title: tour.name,
-                                  snippet: tour.description,
-                                ),
-                              ),
-                            },
+                            markers: _markers,
+                            polylines: _polylines,
                             onMapCreated: (GoogleMapController controller) async {
                               if (!_controller.isCompleted) {
                                 _controller.complete(controller);
@@ -189,16 +332,8 @@ class _FullscreenTourPageState extends State<FullscreenTourPage> {
                     GoogleMap(
                       mapType: MapType.normal,
                       initialCameraPosition: _currentCameraPosition,
-                      markers: {
-                        Marker(
-                          markerId: MarkerId(tour.id),
-                          position: LatLng(tour.latitude, tour.longitude),
-                          infoWindow: InfoWindow(
-                            title: tour.name,
-                            snippet: tour.description,
-                          ),
-                        ),
-                      },
+                      markers: _markers,
+                      polylines: _polylines,
                       onMapCreated: (GoogleMapController controller) async {
                         if (!_controller.isCompleted) {
                           _controller.complete(controller);
