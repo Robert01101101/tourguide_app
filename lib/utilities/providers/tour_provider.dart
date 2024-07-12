@@ -84,4 +84,14 @@ class TourProvider with ChangeNotifier {
       logger.e('Tour not found: $e');
     }
   }
+
+  void addTourToAllTours(Tour tour) {
+    _allTours.add(tour);
+    notifyListeners();
+  }
+
+  void removeTourFromAllTours(Tour tour) {
+    _allTours.remove(tour);
+    notifyListeners();
+  }
 }

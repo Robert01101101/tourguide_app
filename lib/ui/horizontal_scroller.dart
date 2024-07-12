@@ -4,14 +4,15 @@ import 'package:tourguide_app/tour/rounded_tile.dart';
 
 class HorizontalScroller extends StatelessWidget {
   final List<Tour> tours;
+  final bool leftPadding;
 
-  const HorizontalScroller({super.key, required this.tours});
+  const HorizontalScroller({super.key, required this.tours, this.leftPadding = false});
 
   @override
   Widget build(BuildContext context) {
     return ListView.builder(
       scrollDirection: Axis.horizontal,
-      padding: const EdgeInsets.fromLTRB(16, 2, 16, 8),
+      padding: EdgeInsets.fromLTRB(leftPadding ? 16 : 0, 2, 16, 8),
       itemCount: tours.length,
       itemBuilder: (context, index) {
         return Padding(

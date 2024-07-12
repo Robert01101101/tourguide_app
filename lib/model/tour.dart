@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
@@ -21,9 +23,10 @@ class Tour {
   final List<TourguidePlace> tourguidePlaces;
   int upvotes;  //mutable
   int downvotes;  //mutable
-  bool isAddTourTile;  //mutable
-  ///////   LOCAL ONLY
+  bool isAddTourTile;  //mutable, indicates add tour button (dirty)
+  bool isOfflineCreatedTour;  //mutable, indicates this is an offline tour about to be uploaded
   int? thisUsersRating; // Track user's rating
+  File? imageToUpload;   // New field
 
   Tour({
     required this.id,
@@ -42,7 +45,9 @@ class Tour {
     required this.upvotes,
     required this.downvotes,
     required this.isAddTourTile,
+    required this.isOfflineCreatedTour,
     this.thisUsersRating,
+    this.imageToUpload,
   });
 
   factory Tour.empty() {
@@ -63,12 +68,20 @@ class Tour {
       upvotes: 0,
       downvotes: 0,
       isAddTourTile: false,
+      isOfflineCreatedTour: false,
+      imageToUpload: null,
     );
   }
 
   factory Tour.isAddTourTile() {
     Tour addTourTile = Tour.empty();
     addTourTile.isAddTourTile = true;
+    return addTourTile;
+  }
+
+  factory Tour.isOfflineCreatedTour() {
+    Tour addTourTile = Tour.empty();
+    addTourTile.isOfflineCreatedTour = true;
     return addTourTile;
   }
 
@@ -119,6 +132,8 @@ class Tour {
       upvotes: data['upvotes'] ?? 0,
       downvotes: data['downvotes'] ?? 0,
       isAddTourTile: false,
+      isOfflineCreatedTour: false,
+      imageToUpload: null,
     );
   }
 
@@ -140,7 +155,9 @@ class Tour {
     int? upvotes,
     int? downvotes,
     bool? isAddTourTile,
+    bool? isOfflineCreatedTour,
     int? thisUsersRating,
+    File? imageToUpload,
   }) {
     return Tour(
       id: id ?? this.id,
@@ -159,7 +176,9 @@ class Tour {
       upvotes: upvotes ?? this.upvotes,
       downvotes: downvotes ?? this.downvotes,
       isAddTourTile: isAddTourTile ?? this.isAddTourTile,
+      isOfflineCreatedTour: isOfflineCreatedTour ?? this.isOfflineCreatedTour,
       thisUsersRating: thisUsersRating ?? this.thisUsersRating,
+      imageToUpload: imageToUpload ?? this.imageToUpload,
     );
   }
 
@@ -178,16 +197,12 @@ class Tour {
       'authorName': authorName,
       'authorId': authorId,
       'tourguidePlaces': tourguidePlaces.map((place) => place.toMap()).toList(),
-      'upvotes': upvotes,
-      'downvotes': downvotes,
-      'isAddTourTile': isAddTourTile,
-      'thisUsersRating': thisUsersRating,
     };
   }
 
   @override
   String toString() {
-    return 'Tour{id: $id, name: $name, description: $description, city: $city, visibility: $visibility, imageUrl: $imageUrl, createdDateTime: $createdDateTime, latitude: $latitude, longitude: $longitude, placeId: $placeId, authorName: $authorName, authorId: $authorId, tourguidePlaces: ${tourguidePlaces.toString()}, upvotes: ${upvotes}, downvotes: $downvotes}';
+    return 'Tour{id: $id, name: $name, description: $description, city: $city, visibility: $visibility, imageUrl: $imageUrl, createdDateTime: $createdDateTime, latitude: $latitude, longitude: $longitude, placeId: $placeId, authorName: $authorName, authorId: $authorId, tourguidePlaces: ${tourguidePlaces.toString()}, upvotes: ${upvotes}, downvotes: $downvotes}, isAddTourTile: $isAddTourTile, isOfflineCreatedTour: $isOfflineCreatedTour, imageToUpload: $imageToUpload}}';
   }
 }
 

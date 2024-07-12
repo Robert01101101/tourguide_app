@@ -158,6 +158,8 @@ class LocationProvider with ChangeNotifier {
         ],
       );
 
+      logger.t("LocationProvider.getLocationDetailsFromPlaceId()");
+
       if (setAsCurrentPlace){
         _currentCity = placeDetails.place!.addressComponents!.firstWhere((element) => element.types!.contains("locality")).name!;
         _currentState = placeDetails.place!.addressComponents!.firstWhere((element) => element.types!.contains("administrative_area_level_1")).name!;
@@ -190,8 +192,16 @@ class LocationProvider with ChangeNotifier {
   }
 
   Future<List<AutocompletePrediction>?> getAutocompleteSuggestions(String query, {bool restrictToCities = true}) async {
-    if (query == null || query.isEmpty) return null;
+    if (query == null || query.isEmpty) {
+      logger.w("Query is null or empty: $query");
+      return null;
+    }
     try {
+      if (_currentPosition == null) {
+        logger.w("_currentPosition is null");
+        return null;
+      }
+
       // Get the Place ID using FlutterGooglePlacesSdk
       LatLng location = LatLng(lat: _currentPosition!.latitude, lng: _currentPosition!.longitude);
       LatLngBounds locationBias = _createBounds(location, 50);

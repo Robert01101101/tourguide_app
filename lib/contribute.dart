@@ -101,7 +101,7 @@ class _ContributeState extends State<Contribute> {
                   fullWidth: true,
                   child: SizedBox(
                     height: 200.0, // Set a fixed height for the horizontal scroller
-                    child: HorizontalScroller(tours: tourProvider.userCreatedTours),
+                    child: HorizontalScroller(tours: tourProvider.userCreatedTours, leftPadding: true),
                   ),
                 ),
                 const SizedBox(height: 64),

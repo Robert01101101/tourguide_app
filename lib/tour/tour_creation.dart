@@ -8,9 +8,11 @@ import 'package:google_places_autocomplete_text_field/google_places_autocomplete
 import 'package:image_picker/image_picker.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:tourguide_app/model/tourguide_place.dart';
+import 'package:tourguide_app/tour/rounded_tile.dart';
 import 'package:tourguide_app/ui/add_image_tile.dart';
 import 'package:tourguide_app/ui/place_autocomplete.dart';
 import 'package:tourguide_app/ui/my_layouts.dart';
+import 'package:tourguide_app/ui/shimmer_loading.dart';
 import 'package:tourguide_app/utilities/custom_import.dart';
 import 'package:flutter_google_places_sdk/flutter_google_places_sdk.dart';
 import 'package:tourguide_app/utilities/providers/auth_provider.dart' as myAuth;
@@ -20,6 +22,7 @@ import 'package:tourguide_app/utilities/providers/location_provider.dart';
 import 'package:profanity_filter/profanity_filter.dart';
 
 import '../model/tour.dart';
+import '../utilities/providers/tour_provider.dart';
 
 class CreateTour extends StatefulWidget {
   const CreateTour({super.key});
@@ -40,7 +43,7 @@ class _CreateTourState extends State<CreateTour> {
   AutovalidateMode _formDetailsValidateMode = AutovalidateMode.disabled;
   final List<TextEditingController> _placeControllers = [];
 
-  Tour _tour = Tour.empty();
+  Tour _tour = Tour.isOfflineCreatedTour();
   bool _tourIsPublic = true; // Initial boolean value
   bool _isFormSubmitted = false;
   final int _descriptionMaxChars = 150;
@@ -136,9 +139,12 @@ class _CreateTourState extends State<CreateTour> {
 
   /// Try to go to the step, but first validate and update the tour if data is valid
   void _tryToGoToStep(int step){
+    final tourProvider = Provider.of<TourProvider>(context, listen: false);
+
     if (step == _validationStepIndex+1) {
       setState(() {
         _isFormSubmitted = true;
+        tourProvider.addTourToAllTours(_tour);
       });
       _firestoreCreateTour();
       return;
@@ -146,6 +152,7 @@ class _CreateTourState extends State<CreateTour> {
 
     final filter = ProfanityFilter();
     bool isValid = false;
+
 
     if (step < _currentStep) {
       isValid = true;
@@ -155,29 +162,44 @@ class _CreateTourState extends State<CreateTour> {
         case 0:
           isValid = _formKey.currentState!.validate();
           if (isValid){
-            _tour = _tour.copyWith(
-              name: filter.censor(_nameController.text),
-              description: filter.censor(_descriptionController.text),
-              city: _cityController.text,
-              latitude: _city!.latLng!.lat,
-              longitude: _city!.latLng!.lng,
-              placeId: _city!.id);
+            setState(() {
+                _tour = _tour.copyWith(
+                  name: filter.censor(_nameController.text),
+                  description: filter.censor(_descriptionController.text),
+                  city: _cityController.text,
+                  latitude: _city!.latLng!.lat,
+                  longitude: _city!.latLng!.lng,
+                  placeId: _city!.id);
+            });
           }
           break;
         case 1:
           isValid = _formKeyPlaces.currentState!.validate();
           if (isValid){
-            _tour = _tour.copyWith(
-                tourguidePlaces: _places);
+            setState(() {
+              _tour = _tour.copyWith(
+                  tourguidePlaces: _places);
+            });
           }
           break;
         case 2:
           isValid = _formKeyDetails.currentState!.validate();
           //_image is set directly so nothing to do here for now
+          setState(() {
+            _tour = _tour.copyWith(
+              imageToUpload: _image,
+            );
+          });
+          logger.i("Reviewing tour: ${_tour.toString()}");
           break;
         default:
           break;
       }
+    }
+    if (step == _validationStepIndex){
+      tourProvider.addTourToAllTours(_tour);
+    } else {
+      tourProvider.removeTourFromAllTours(_tour);
     }
 
     logger.t("_currentStep: $_currentStep, step: $step, isValid: $isValid");
@@ -211,6 +233,24 @@ class _CreateTourState extends State<CreateTour> {
       default:
         break;
     }
+  }
+
+
+
+  Future <void> _updateTourguidePlaceDetails(int index, AutocompletePrediction placePrediction) async{
+    LocationProvider locationProvider = Provider.of(context, listen: false);
+    Place? googlePlaceWithDetails = await locationProvider.getLocationDetailsFromPlaceId(placePrediction.placeId);
+    TourguidePlace newTourguidePlace = TourguidePlace(
+      latitude: googlePlaceWithDetails!.latLng!.lat,
+      longitude: googlePlaceWithDetails!.latLng!.lng,
+      googleMapPlaceId: googlePlaceWithDetails!.id!,
+      title: placePrediction.primaryText,
+      description: '',
+      photoUrls: [],
+    );
+    setState(() {
+      _places[index] = newTourguidePlace;
+    });
   }
 
 
@@ -403,17 +443,7 @@ class _CreateTourState extends State<CreateTour> {
                                         ),
                                         customLabel: true,
                                         onItemSelected: (AutocompletePrediction prediction) {
-                                          setState(() {
-                                            place = TourguidePlace(
-                                              latitude: place.latitude,
-                                              longitude: place.longitude,
-                                              googleMapPlaceId: place.googleMapPlaceId,
-                                              title: prediction.primaryText,
-                                              description: place.description,
-                                              photoUrls: place.photoUrls,
-                                            );
-                                            // You might need to fetch more details about the place here
-                                          });
+                                            _updateTourguidePlaceDetails(index, prediction);
                                         },
                                       ),
                                     ),
@@ -482,22 +512,23 @@ class _CreateTourState extends State<CreateTour> {
             title: const Text('Review'),
             isActive: _currentStep >= 3,
             state: _currentStep > 3 ? StepState.complete : StepState.indexed,
-            content: Column(
-              children: [
-                TextFormField(
-                  controller: _nameController,
-                  decoration: const InputDecoration(
-                    labelText: 'Name',
+            content: Container(
+              width: double.infinity,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Padding(
+                    padding: EdgeInsets.only(bottom: 16.0),
+                    // small body text
+                    child: Text('Here\'s what your tour will look like', style: Theme.of(context).textTheme.bodyMedium),
                   ),
-                  validator: (String? value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please enter a name for your tour';
-                    }
-                    return null;
-                  },
-                  enabled: !_isFormSubmitted,
-                ),
-              ],
+                  Shimmer(
+                      linearGradient: MyGlobals.shimmerGradient,
+                      child: RoundedTile(tour: _tour)
+                  ),
+                  SizedBox(height: 32,),
+                ],
+              ),
             ),
           ),
         ],

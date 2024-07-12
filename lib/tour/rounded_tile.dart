@@ -137,14 +137,23 @@ class _RoundedTileState extends State<RoundedTile> {
               child: Stack(
                 children: [
                   ShimmerLoading(
-                    isLoading: isLoading,
-                    child: !isLoading && widget.tour.imageUrl.isNotEmpty ?
+                    isLoading: widget.tour.isOfflineCreatedTour ? false : isLoading,
+                    child: widget.tour.isOfflineCreatedTour && widget.tour.imageToUpload != null
+                        ?
+                    Image.file(widget.tour.imageToUpload!,
+                        width: 150.0,
+                        height: 100.0,
+                        fit: BoxFit.cover)
+                        :
+                    !isLoading && widget.tour.imageUrl.isNotEmpty  || widget.tour.isOfflineCreatedTour && widget.tour.imageToUpload != null
+                        ?
                     Image.network(
                       widget.tour.imageUrl,
                       width: 150.0,
                       height: 100.0,
                       fit: BoxFit.cover,
-                    ) :
+                    )
+                        :
                     Container(width: 150, height: 100, color: Colors.white,),
                   ),
                 ],
@@ -211,6 +220,8 @@ class _ExpandedTileOverlayState extends State<ExpandedTileOverlay> {
   }
 
   void toggleThumbsUp() {
+    if (widget.tour.isOfflineCreatedTour) return; // Tour creation tile should not have rating
+
     myAuth.AuthProvider authProvider = Provider.of(context, listen: false);
 
     setState(() {
@@ -231,6 +242,8 @@ class _ExpandedTileOverlayState extends State<ExpandedTileOverlay> {
   }
 
   void toggleThumbsDown() {
+    if (widget.tour.isOfflineCreatedTour) return; // Tour creation tile should not have rating
+
     myAuth.AuthProvider authProvider = Provider.of(context, listen: false);
 
     setState(() {
@@ -295,7 +308,13 @@ class _ExpandedTileOverlayState extends State<ExpandedTileOverlay> {
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    if (widget.tour.imageUrl != null && widget.tour.imageUrl.isNotEmpty)
+                    widget.tour.isOfflineCreatedTour && widget.tour.imageToUpload != null  //add null safety for img to upload
+                        ?
+                    Image.file(widget.tour.imageToUpload!,
+                        width: MediaQuery.of(context).size.width,
+                        height: 200.0,
+                        fit: BoxFit.cover)
+                        :
                       Image.network(
                         widget.tour.imageUrl,
                         width: MediaQuery.of(context).size.width,
