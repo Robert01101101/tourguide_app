@@ -63,6 +63,7 @@ class _CreateTourState extends State<CreateTour> {
   }
 
   void _removePlace(int index) {
+    logger.t('Removing place at index $index');
     setState(() {
       _places.removeAt(index);
       _placeControllers[index].dispose();
@@ -71,7 +72,7 @@ class _CreateTourState extends State<CreateTour> {
   }
 
   Future<void> _firestoreCreateTour() async {
-    if (_formKey.currentState!.validate() && _formKeyPlaces.currentState!.validate()) {
+    if (_formKey.currentState!.validate() && _formKeyPlaces.currentState!.validate() && _formKeyDetails.currentState!.validate()){
       // Validation passed, proceed with tour creation
       FirebaseFirestore db = FirebaseFirestore.instance;
       FirebaseAuth auth = FirebaseAuth.instance;
@@ -169,6 +170,8 @@ class _CreateTourState extends State<CreateTour> {
           break;
       }
     }
+
+    logger.t("_currentStep: $_currentStep, step: $step, isValid: $isValid");
 
     _setAutoValidate(isValid);
 
@@ -334,76 +337,92 @@ class _CreateTourState extends State<CreateTour> {
             content: Form(
               autovalidateMode: _formPlacesValidateMode,
               key: _formKeyPlaces,
-              child: ListView(
-                shrinkWrap: true,
-                children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+              child: FormField(
+                validator: (value) {
+                  if (_places.length < 2) {
+                    return 'Please add at least two places.';
+                  }
+                  return null;
+                },
+                builder: (FormFieldState<dynamic> state) {
+                  return ListView(
+                    shrinkWrap: true,
                     children: [
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Padding(
-                            padding: EdgeInsets.symmetric(vertical: 8.0),
-                            child: Text('Add your waypoints by searching for places', style: TextStyle(fontSize: 16.0)),
-                          ),
-                          ..._places.asMap().entries.map((entry) {
-                            int index = entry.key;
-                            TourguidePlace place = entry.value;
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Padding(
+                                padding: EdgeInsets.only(bottom: 8.0),
+                                // small body text
+                                child: Text('Add your waypoints by searching for places', style: Theme.of(context).textTheme.bodyMedium),
+                              ),
+                              ..._places.asMap().entries.map((entry) {
+                                int index = entry.key;
+                                TourguidePlace place = entry.value;
 
-                            // Initialize controller text if it hasn't been set
-                            if (_placeControllers[index].text.isEmpty) {
-                              _placeControllers[index].text = place.title;
-                            }
-                            return Row(
-                              key: ValueKey(_placeControllers[index]), // Add a unique key
-                              children: [
-                                Expanded(
-                                  child: PlaceAutocomplete(
-                                    textEditingController: _placeControllers[index],
-                                    restrictToCities: false,
-                                    isFormSubmitted: _isFormSubmitted,
-                                    decoration: InputDecoration(
-                                      labelText: 'Place ${index + 1}',
-                                      border: const UnderlineInputBorder(),
-                                      suffixIcon: IconButton(
-                                        icon: const Icon(Icons.remove_circle_outline),
-                                        onPressed: () {
-                                          _removePlace(index);
+                                // Initialize controller text if it hasn't been set
+                                if (_placeControllers[index].text.isEmpty) {
+                                  _placeControllers[index].text = place.title;
+                                }
+                                return Row(
+                                  key: ValueKey(_placeControllers[index]), // Add a unique key
+                                  children: [
+                                    Expanded(
+                                      child: PlaceAutocomplete(
+                                        textEditingController: _placeControllers[index],
+                                        restrictToCities: false,
+                                        isFormSubmitted: _isFormSubmitted,
+                                        decoration: InputDecoration(
+                                          labelText: 'Place ${index + 1}',
+                                          border: const UnderlineInputBorder(),
+                                          suffixIcon: IconButton(
+                                            icon: const Icon(Icons.remove_circle_outline),
+                                            onPressed: () {
+                                              _removePlace(index);
+                                            },
+                                          ),
+                                        ),
+                                        customLabel: true,
+                                        onItemSelected: (AutocompletePrediction prediction) {
+                                          setState(() {
+                                            place = TourguidePlace(
+                                              latitude: place.latitude,
+                                              longitude: place.longitude,
+                                              googleMapPlaceId: place.googleMapPlaceId,
+                                              title: prediction.primaryText,
+                                              description: place.description,
+                                              photoUrls: place.photoUrls,
+                                            );
+                                            // You might need to fetch more details about the place here
+                                          });
                                         },
                                       ),
                                     ),
-                                    customLabel: true,
-                                    onItemSelected: (AutocompletePrediction prediction) {
-                                      setState(() {
-                                        place = TourguidePlace(
-                                          latitude: place.latitude,
-                                          longitude: place.longitude,
-                                          googleMapPlaceId: place.googleMapPlaceId,
-                                          title: prediction.primaryText,
-                                          description: place.description,
-                                          photoUrls: place.photoUrls,
-                                        );
-                                        // You might need to fetch more details about the place here
-                                      });
-                                    },
-                                  ),
-                                ),
-                              ],
-                            );
-                          }).toList(),
-                          SizedBox(height: 16,),
-                          ElevatedButton.icon(
-                            onPressed: _addPlace,
-                            icon: Icon(Icons.add),
-                            label: const Text('Add Place'),
+                                  ],
+                                );
+                              }).toList(),
+                              SizedBox(height: 16,),
+                              ElevatedButton.icon(
+                                onPressed: _addPlace,
+                                icon: Icon(Icons.add),
+                                label: const Text('Add Place'),
+                              ),
+                              SizedBox(height: 16,),
+                            ],
                           ),
-                          SizedBox(height: 16,),
                         ],
                       ),
+                      if (state.hasError)
+                        Text(
+                          state.errorText ?? '',
+                          style: TextStyle(color: Theme.of(context).colorScheme.error),
+                        ),
                     ],
-                  ),
-                ],
+                  );
+                },
               ),
             ),
           ),
