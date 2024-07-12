@@ -15,6 +15,17 @@ class TourguidePlace {
     required this.photoUrls,
   });
 
+  Map<String, dynamic> toMap() {
+    return {
+      'latitude': latitude,
+      'longitude': longitude,
+      'googleMapPlaceId': googleMapPlaceId,
+      'title': title,
+      'description': description,
+      'photoUrls': photoUrls,
+    };
+  }
+
   @override
   String toString() {
     return 'TourguidePlace{latitude: $latitude, longitude: $longitude, googleMapPlaceId: $googleMapPlaceId, title: $title, description: $description, photoUrls: $photoUrls}';

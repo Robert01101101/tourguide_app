@@ -10,12 +10,14 @@ class TourProvider with ChangeNotifier {
   List<Tour> _userCreatedTours = List.generate(1, (index) => Tour.isAddTourTile());
   List<Tour> _allTours = List.generate(4, (index) => Tour.empty());
   Tour? _selectedTour;
+  bool _isLoadingTours = false;
 
   List<Tour> get popularTours => _popularTours;
   List<Tour> get localTours => _localTours;
   List<Tour> get globalTours => _globalTours;
   List<Tour> get userCreatedTours => _userCreatedTours;
   Tour? get selectedTour => _selectedTour;
+  bool get isLoadingTours => _isLoadingTours;
 
   TourProvider() {
     _init();
@@ -31,6 +33,7 @@ class TourProvider with ChangeNotifier {
   Future<void> fetchAndSetTours(double userLatitude, double userLongitude, String userId) async {
     try {
       logger.t("fetchAndSetTours");
+      _isLoadingTours = true;
       _allTours = await TourService.fetchAndSortToursByDateTime();
       _popularTours = TourService.popularToursNearYou(_allTours, userLatitude, userLongitude);
       _localTours = TourService.localTours(_allTours, userLatitude, userLongitude);
@@ -58,6 +61,7 @@ class TourProvider with ChangeNotifier {
     _popularTours = await TourService.checkUserRatings(popularTours, userId);
     _localTours = await TourService.checkUserRatings(localTours, userId);
     _globalTours = await TourService.checkUserRatings(globalTours, userId);
+    _isLoadingTours = false;
     notifyListeners();
   }
 

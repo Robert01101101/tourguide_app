@@ -10,7 +10,6 @@ class Tour {
   final String name;
   final String description;
   final String city;
-  final String uid;
   final String visibility;
   final String imageUrl;
   final DateTime? createdDateTime;
@@ -31,7 +30,6 @@ class Tour {
     required this.name,
     required this.description,
     required this.city,
-    required this.uid,
     required this.visibility,
     required this.imageUrl,
     required this.createdDateTime,
@@ -53,7 +51,6 @@ class Tour {
       name: '',
       description: '',
       city: '',
-      uid: '',
       visibility: '',
       imageUrl: '',
       createdDateTime: null,
@@ -110,7 +107,6 @@ class Tour {
       name: data['name'] ?? '',
       description: data['description'] ?? '',
       city: data['city'] ?? '',
-      uid: data['uid'] ?? '',
       visibility: data['visibility'] ?? '',
       imageUrl: data['imageUrl'] ?? '',
       createdDateTime: createdDateTime,
@@ -127,10 +123,14 @@ class Tour {
   }
 
   Tour copyWith({
+    String? id,
     String? name,
     String? description,
     String? city,
+    String? uid,
+    String? visibility,
     String? imageUrl,
+    DateTime? createdDateTime,
     double? latitude,
     double? longitude,
     String? placeId,
@@ -139,16 +139,17 @@ class Tour {
     List<TourguidePlace>? tourguidePlaces,
     int? upvotes,
     int? downvotes,
+    bool? isAddTourTile,
+    int? thisUsersRating,
   }) {
     return Tour(
-      id: this.id,
+      id: id ?? this.id,
       name: name ?? this.name,
-      description: name ?? this.description,
-      city: name ?? this.city,
-      uid: this.uid,
-      visibility: this.visibility,
+      description: description ?? this.description,
+      city: city ?? this.city,
+      visibility: visibility ?? this.visibility,
       imageUrl: imageUrl ?? this.imageUrl,
-      createdDateTime: this.createdDateTime,
+      createdDateTime: createdDateTime ?? this.createdDateTime,
       latitude: latitude ?? this.latitude,
       longitude: longitude ?? this.longitude,
       placeId: placeId ?? this.placeId,
@@ -157,13 +158,36 @@ class Tour {
       tourguidePlaces: tourguidePlaces ?? this.tourguidePlaces,
       upvotes: upvotes ?? this.upvotes,
       downvotes: downvotes ?? this.downvotes,
-      isAddTourTile: this.isAddTourTile,
+      isAddTourTile: isAddTourTile ?? this.isAddTourTile,
+      thisUsersRating: thisUsersRating ?? this.thisUsersRating,
     );
+  }
+
+  Map<String, dynamic> toMap() {
+    return {
+      'id': id,
+      'name': name,
+      'description': description,
+      'city': city,
+      'visibility': visibility,
+      'imageUrl': imageUrl,
+      'createdDateTime': createdDateTime,
+      'latitude': latitude,
+      'longitude': longitude,
+      'placeId': placeId,
+      'authorName': authorName,
+      'authorId': authorId,
+      'tourguidePlaces': tourguidePlaces.map((place) => place.toMap()).toList(),
+      'upvotes': upvotes,
+      'downvotes': downvotes,
+      'isAddTourTile': isAddTourTile,
+      'thisUsersRating': thisUsersRating,
+    };
   }
 
   @override
   String toString() {
-    return 'Tour{id: $id, name: $name, description: $description, city: $city, uid: $uid, visibility: $visibility, imageUrl: $imageUrl, createdDateTime: $createdDateTime, latitude: $latitude, longitude: $longitude, placeId: $placeId, authorName: $authorName, authorId: $authorId, tourguidePlaces: ${tourguidePlaces.toString()}, upvotes: ${upvotes}, downvotes: $downvotes}';
+    return 'Tour{id: $id, name: $name, description: $description, city: $city, visibility: $visibility, imageUrl: $imageUrl, createdDateTime: $createdDateTime, latitude: $latitude, longitude: $longitude, placeId: $placeId, authorName: $authorName, authorId: $authorId, tourguidePlaces: ${tourguidePlaces.toString()}, upvotes: ${upvotes}, downvotes: $downvotes}';
   }
 }
 
@@ -280,7 +304,9 @@ class TourService {
   }
 
   static List<Tour> userCreatedTours(List<Tour> tours, String userId) {
-    List<Tour> userCreatedTours = tours.where((tour) => tour.uid == userId).toList();
+    List<Tour> userCreatedTours = tours.where((tour) => tour.authorId == userId).toList();
+    // Sort tours by createdDateTime in descending order (most recent first)
+    userCreatedTours.sort((a, b) => b.createdDateTime!.compareTo(a.createdDateTime!));
     //log length
     logger.t('userCreatedTours length: ${userCreatedTours.length}, userId=$userId');
     return userCreatedTours;

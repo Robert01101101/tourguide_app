@@ -19,6 +19,8 @@ import 'package:tourguide_app/main.dart';
 import 'package:tourguide_app/utilities/providers/location_provider.dart';
 import 'package:profanity_filter/profanity_filter.dart';
 
+import '../model/tour.dart';
+
 class CreateTour extends StatefulWidget {
   const CreateTour({super.key});
 
@@ -38,6 +40,7 @@ class _CreateTourState extends State<CreateTour> {
   AutovalidateMode _formDetailsValidateMode = AutovalidateMode.disabled;
   final List<TextEditingController> _placeControllers = [];
 
+  Tour _tour = Tour.empty();
   bool _tourIsPublic = true; // Initial boolean value
   bool _isFormSubmitted = false;
   final int _descriptionMaxChars = 150;
@@ -72,57 +75,45 @@ class _CreateTourState extends State<CreateTour> {
   }
 
   Future<void> _firestoreCreateTour() async {
-    if (_formKey.currentState!.validate() && _formKeyPlaces.currentState!.validate() && _formKeyDetails.currentState!.validate()){
-      // Validation passed, proceed with tour creation
-      FirebaseFirestore db = FirebaseFirestore.instance;
-      FirebaseAuth auth = FirebaseAuth.instance;
-      LocationProvider locationProvider = Provider.of<LocationProvider>(context, listen: false);
-      final myAuth.AuthProvider authProvider = Provider.of(context, listen: false);
-      final User user = auth.currentUser!;
-      final uid = authProvider.user!.id;
-      final filter = ProfanityFilter();
+    try {
+      if (_formKey.currentState!.validate() && _formKeyPlaces.currentState!.validate() && _formKeyDetails.currentState!.validate()){
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Uploading tour...')),
+        );
+        // Validation passed, proceed with tour creation
+        FirebaseFirestore db = FirebaseFirestore.instance;
+        FirebaseAuth auth = FirebaseAuth.instance;
+        final myAuth.AuthProvider authProvider = Provider.of(context, listen: false);
+        final User user = auth.currentUser!;
+        final uid = authProvider.user!.id;
 
-      final tourData = {
-        "name": filter.censor(_nameController.text),
-        "description": filter.censor(_descriptionController.text),
-        "city": _cityController.text,
-        "uid": uid,
-        "visibility": _tourIsPublic ? "public" : "private",
-        "imageUrl": "", // Placeholder for image URL
-        "createdDateTime": DateTime.now(),
-        "latitude": _city!.latLng!.lat,
-        "longitude": _city!.latLng!.lng,
-        "placeId": _city!.id,
-        "authorName": user.displayName,
-        "authorId": uid,
-        "tourguidePlaces": _places.map((place) => {
-          "latitude": place.latitude,
-          "longitude": place.longitude,
-          "googleMapPlaceId": place.googleMapPlaceId,
-          "title": place.title,
-          "description": place.description,
-          "photoUrls": place.photoUrls,
-        }).toList(),
-      };
-
-      // Upload image if available
-      if (_image != null) {
+        // Upload image
         String imageUrl = await _uploadImage(_image!);
-        tourData["imageUrl"] = imageUrl;
-      }
 
-      try {
-        await db.collection("tours").add(tourData);
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Successfully created tour!')),
+        //Final update to tour data
+        _tour = _tour.copyWith(
+          visibility: _tourIsPublic ? "public" : "private", //always true for now
+          createdDateTime: DateTime.now(),
+          authorId: uid,
+          authorName: user.displayName,
+          imageUrl: imageUrl,
         );
-        Navigator.pop(context); // Navigate back after successful creation
-      } catch (e) {
-        logger.t('Error creating tour: $e');
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Failed to create tour. Please try again.')),
-        );
+
+        try {
+          await db.collection("tours").add(_tour.toMap());
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Successfully created tour!')),
+          );
+          Navigator.pop(context); // Navigate back after successful creation
+        } catch (e) {
+          logger.t('Error creating tour: $e');
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Failed to create tour. Please try again.')),
+          );
+        }
       }
+    } catch (e) {
+      logger.e('Error creating tour: $e');
     }
   }
 
@@ -143,13 +134,17 @@ class _CreateTourState extends State<CreateTour> {
     return imageUrl;
   }
 
+  /// Try to go to the step, but first validate and update the tour if data is valid
   void _tryToGoToStep(int step){
     if (step == _validationStepIndex+1) {
-      _isFormSubmitted = true;
+      setState(() {
+        _isFormSubmitted = true;
+      });
       _firestoreCreateTour();
       return;
     }
 
+    final filter = ProfanityFilter();
     bool isValid = false;
 
     if (step < _currentStep) {
@@ -159,12 +154,26 @@ class _CreateTourState extends State<CreateTour> {
       switch (_currentStep) {
         case 0:
           isValid = _formKey.currentState!.validate();
+          if (isValid){
+            _tour = _tour.copyWith(
+              name: filter.censor(_nameController.text),
+              description: filter.censor(_descriptionController.text),
+              city: _cityController.text,
+              latitude: _city!.latLng!.lat,
+              longitude: _city!.latLng!.lng,
+              placeId: _city!.id);
+          }
           break;
         case 1:
           isValid = _formKeyPlaces.currentState!.validate();
+          if (isValid){
+            _tour = _tour.copyWith(
+                tourguidePlaces: _places);
+          }
           break;
         case 2:
           isValid = _formKeyDetails.currentState!.validate();
+          //_image is set directly so nothing to do here for now
           break;
         default:
           break;
@@ -224,7 +233,8 @@ class _CreateTourState extends State<CreateTour> {
             child: Row(
               children: <Widget>[
                 if (_currentStep > 0)
-                  ElevatedButton(
+                  const SizedBox(width: 8),
+                  TextButton(
                     onPressed: controlsDetails.onStepCancel,
                     style: ElevatedButton.styleFrom(
                       elevation: 0,
@@ -237,9 +247,9 @@ class _CreateTourState extends State<CreateTour> {
                     ),
                     child: const Text('Back'),
                   ),
-                const SizedBox(width: 8), // Add spacing between buttons if needed
+                const SizedBox(width: 24), // Add spacing between buttons if needed
                 TextButton(
-                  onPressed: controlsDetails.onStepContinue,
+                  onPressed: _isFormSubmitted ? null : controlsDetails.onStepContinue,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Theme.of(context).colorScheme.primary,
                     foregroundColor: Colors.white,
@@ -250,6 +260,12 @@ class _CreateTourState extends State<CreateTour> {
                   ),
                   child: _currentStep < 3 ? const Text('Next') : const Text('Create Tour'),
                 ),
+                Spacer(),
+                if (_currentStep == 1)
+                  IconButton(
+                      padding: EdgeInsets.all(10),
+                      onPressed: (){},
+                      icon: Icon(Icons.map))
               ],
             ),
           );
@@ -405,10 +421,13 @@ class _CreateTourState extends State<CreateTour> {
                                 );
                               }).toList(),
                               SizedBox(height: 16,),
-                              ElevatedButton.icon(
-                                onPressed: _addPlace,
-                                icon: Icon(Icons.add),
-                                label: const Text('Add Place'),
+                              SizedBox(
+                                width: double.infinity,
+                                child: ElevatedButton.icon(
+                                  onPressed: _addPlace,
+                                  icon: Icon(Icons.add),
+                                  label: const Text('Add Place'),
+                                ),
                               ),
                               SizedBox(height: 16,),
                             ],

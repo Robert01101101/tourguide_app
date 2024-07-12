@@ -46,7 +46,6 @@ class Explore extends StatefulWidget {
 
 class ExploreState extends State<Explore> {
   GoogleSignInAccount? _currentUser;
-  bool downloadingTours = false;
   Future<GooglePlacesImg?>? _fetchPhotoFuture;
 
   @override
@@ -57,12 +56,12 @@ class ExploreState extends State<Explore> {
     FirebaseAuth.instance
         .userChanges()
         .listen((User? user) {
+      final tourProvider = Provider.of<TourProvider>(context, listen: false);
       if (user == null) {
         logger.t('ExploreState.initState() - FirabaseAuth listen - FIREBASE AUTH (EXPLORE) - User is currently signed out!');
       } else {
         logger.t('ExploreState.initState() - FirabaseAuth listen - FIREBASE AUTH (EXPLORE) - User is signed in!');
-        if (!downloadingTours){
-          downloadingTours = true;
+        if (!tourProvider.isLoadingTours){
           downloadTours();
         }
         FlutterNativeSplash.remove();
@@ -142,7 +141,7 @@ class ExploreState extends State<Explore> {
     );
   }
 
-  final ScrollController _scrollController = ScrollController(); //for bg parallax effect
+  final ScrollController _scrollController = ScrollController(); //for bg parallax effect and refresh
   double _scrollOffset = 0;
 
 
@@ -152,16 +151,15 @@ class ExploreState extends State<Explore> {
     LocationProvider locationProvider = Provider.of<LocationProvider>(context);
     TourProvider tourProvider = Provider.of<TourProvider>(context);
 
-    Future<void> _refresh() async {
-      if (!downloadingTours){
-        downloadingTours = true;
-        downloadTours();
+    Future<void> refresh() async {
+      if (!tourProvider.isLoadingTours){
+        await downloadTours();
       }
     }
 
     return Scaffold(
       body: RefreshIndicator(
-        onRefresh: _refresh,
+        onRefresh: refresh,
         child: SingleChildScrollView(
           controller: _scrollController,
           child: Shimmer(
@@ -293,37 +291,41 @@ class ExploreState extends State<Explore> {
                             );
                           }
                         ),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        Column(
                           children: [
-                            Text("Popular tours near you", style: Theme.of(context).textTheme.headlineSmall),
-                            IconButton(onPressed: (){
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text("Popular tours near you", style: Theme.of(context).textTheme.headlineSmall),
+                                IconButton(onPressed: (){
 
-                            }, icon: Icon(Icons.map))
+                                }, icon: Icon(Icons.map))
+                              ],
+                            ),
+                            StandardLayoutChild(
+                              fullWidth: true,
+                              child: SizedBox(
+                                height: 200.0, // Set a fixed height for the horizontal scroller
+                                child: HorizontalScroller(tours: tourProvider.popularTours),
+                              ),
+                            ),
+                            Text("Local tours", style: Theme.of(context).textTheme.headlineSmall),
+                            StandardLayoutChild(
+                              fullWidth: true,
+                              child: SizedBox(
+                                height: 200.0, // Set a fixed height for the horizontal scroller
+                                child: HorizontalScroller(tours: tourProvider.localTours),
+                              ),
+                            ),
+                            Text("Tours around the world", style: Theme.of(context).textTheme.headlineSmall),
+                            StandardLayoutChild(
+                              fullWidth: true,
+                              child: SizedBox(
+                                height: 200.0, // Set a fixed height for the horizontal scroller
+                                child: HorizontalScroller(tours: tourProvider.globalTours),
+                              ),
+                            ),
                           ],
-                        ),
-                        StandardLayoutChild(
-                          fullWidth: true,
-                          child: SizedBox(
-                            height: 200.0, // Set a fixed height for the horizontal scroller
-                            child: HorizontalScroller(tours: tourProvider.popularTours),
-                          ),
-                        ),
-                        Text("Local tours", style: Theme.of(context).textTheme.headlineSmall),
-                        StandardLayoutChild(
-                          fullWidth: true,
-                          child: SizedBox(
-                            height: 200.0, // Set a fixed height for the horizontal scroller
-                            child: HorizontalScroller(tours: tourProvider.localTours),
-                          ),
-                        ),
-                        Text("Tours around the world", style: Theme.of(context).textTheme.headlineSmall),
-                        StandardLayoutChild(
-                          fullWidth: true,
-                          child: SizedBox(
-                            height: 200.0, // Set a fixed height for the horizontal scroller
-                            child: HorizontalScroller(tours: tourProvider.globalTours),
-                          ),
                         ),
                         Text("Debug", style: Theme.of(context).textTheme.headlineSmall),
                         Row(
