@@ -4,9 +4,10 @@ import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:introduction_screen/introduction_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:tourguide_app/signIn.dart';
+import 'package:tourguide_app/sign_in.dart';
 import 'package:tourguide_app/utilities/providers/location_provider.dart';
 import 'package:tourguide_app/utilities/providers/tour_provider.dart';
+import 'package:tourguide_app/utilities/providers/tourguide_user_provider.dart';
 import 'package:tourguide_app/utilities/tourguide_navigation.dart';
 import 'package:tourguide_app/utilities/providers/auth_provider.dart' as my_auth;
 
@@ -33,6 +34,7 @@ class _TourguideOnboardState extends State<TourguideOnboard> {
     my_auth.AuthProvider authProvider = Provider.of(context, listen: false);
     LocationProvider locationProvider = Provider.of(context, listen: false);
     TourProvider tourProvider = Provider.of(context, listen: false);
+    TourguideUserProvider tourguideUserProvider = Provider.of(context, listen: false);
 
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
       authProvider.addListener(() {

@@ -1,7 +1,7 @@
 import 'package:scroll_to_hide/scroll_to_hide.dart';
 import 'package:tourguide_app/onboarding.dart';
 import 'package:tourguide_app/profile/profile_settings.dart';
-import 'package:tourguide_app/signIn.dart';
+import 'package:tourguide_app/sign_in.dart';
 import 'package:tourguide_app/gemini_chat.dart';
 import 'package:tourguide_app/utilities/custom_import.dart';
 import 'package:go_router/go_router.dart';

@@ -7,31 +7,35 @@ import 'package:tourguide_app/main.dart';
 import 'package:tourguide_app/utilities/tourguide_navigation.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
-const List<String> scopes = <String>[
-  'email',
-];
-
-GoogleSignIn googleSignIn = GoogleSignIn(
-  scopes: scopes,
-);
+const List<String> scopes = <String>['email',];
+GoogleSignIn googleSignIn = GoogleSignIn(scopes: scopes,);
 
 // AuthProvider handles login / logout, user auth state, and uses the provider
 // package and change notifier to share information with the widget tree
 //
 // Written with help from https://medium.com/@JigneshWorld/how-to-implement-an-authentication-feature-using-a-provider-in-flutter-1f351447d09d
+//
+/// Uses Firebase Auth, which supports multiple auth providers including Google Sign In, the only one supported for now.
+/// The User Id used is the Firebase Auth Id.
+/// Google Sign In user is used for name, picture, profile purposes.
 class AuthProvider with ChangeNotifier {
 //#region REGION: AuthProvider fields and constructor
-  ////// PUBLIC /////
-  GoogleSignInAccount? user; //(formerly _currentUser)
-  late StreamSubscription userAuthSub;
-  bool isAuthorized = false; // has granted permissions?
-  bool isLoggingOut = false;
-  bool silentSignInFailed = false;
-
-  ////// PRIVATE /////
+  User? _user;
+  GoogleSignInAccount? _googleSignInUser;
+  late StreamSubscription _userAuthSub;
+  bool _isAuthorized = false;
+  bool _isLoggingOut = false;
+  bool _silentSignInFailed = false;
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
-  ////// CONSTRUCTOR /////
+  ////// PUBLIC /////
+  User? get user => _user;
+  GoogleSignInAccount? get googleSignInUser => _googleSignInUser;
+  bool get isAuthorized => _isAuthorized;
+  bool get isLoggingOut => _isLoggingOut;
+  bool get silentSignInFailed => _silentSignInFailed;
+
+
   AuthProvider() {
     _init();
   }
@@ -39,7 +43,7 @@ class AuthProvider with ChangeNotifier {
   // Initialization method
   Future<void> _init() async {
     logger.t("AuthProvider._init()");
-    userAuthSub = googleSignIn.onCurrentUserChanged
+    _userAuthSub = googleSignIn.onCurrentUserChanged
         .listen((GoogleSignInAccount? account) async {
       // Check Scopes: In mobile, being authenticated means being authorized...
       bool newIsAuthorized = account != null;
@@ -50,8 +54,8 @@ class AuthProvider with ChangeNotifier {
       }
 
       logger.t('AuthProvider.AuthProvider() - _googleSignIn.onCurrentUserChanged (web) setState() - newIsAuthorized=${newIsAuthorized}');
-      user = account;
-      isAuthorized = newIsAuthorized;
+      _googleSignInUser = account;
+      _isAuthorized = newIsAuthorized;
       notifyListeners();
 
       // Now that we know that the user can access the required scopes, the app  can call the REST API.
@@ -71,14 +75,14 @@ class AuthProvider with ChangeNotifier {
 
   @override
   void dispose() {
-    if (userAuthSub != null) {
-      userAuthSub.cancel();
+    if (_userAuthSub != null) {
+      _userAuthSub.cancel();
     }
     super.dispose();
   }
 
   bool get isAuthenticated {
-    return user != null;
+    return _googleSignInUser != null;
   }
 //#endregion
 
@@ -87,7 +91,7 @@ class AuthProvider with ChangeNotifier {
     GoogleSignInAccount? silentlySignedInUser = await googleSignIn.signInSilently();
     logger.t('AuthProvider.signInSilently() - silentlySignedInUser=$silentlySignedInUser');
     if (silentlySignedInUser == null) {
-      silentSignInFailed = true;
+      _silentSignInFailed = true;
       notifyListeners();
     }
   }
@@ -104,8 +108,9 @@ class AuthProvider with ChangeNotifier {
       UserCredential authResult = await _auth.signInWithCredential(credential);
 
       // Access the logged-in user using FirebaseAuth.instance.currentUser
-      User? firebaseUser = authResult.user;
-      logger.t('AuthProvider.signInWithFirebase() - Firebase User Info: ${firebaseUser?.displayName}, ${firebaseUser?.email}');
+      _user = authResult.user;
+      notifyListeners();
+      logger.t('AuthProvider.signInWithFirebase() - Firebase User Info: ${_user?.displayName}, ${_user?.email}');
     } catch (error) {
       logger.e('AuthProvider.signInWithFirebase() - Error signing in with Firebase: $error');
     }
@@ -138,11 +143,11 @@ class AuthProvider with ChangeNotifier {
 
         logger.t('AuthProvider.handleSignIn() - 5 access');
         // Access the logged-in user using FirebaseAuth.instance.currentUser
-        User? firebaseUser = authResult.user;
-        logger.t('AuthProvider.handleSignIn() -- SUCCESS! -- Firebase User Info: ${firebaseUser?.displayName}, ${firebaseUser?.email}');
+        _user = authResult.user;
+        logger.t('AuthProvider.handleSignIn() -- SUCCESS! -- Firebase User Info: ${_user?.displayName}, ${_user?.email}');
 
-        user = googleSignInAccount;
-        isAuthorized = true;
+        _googleSignInUser = googleSignInAccount;
+        _isAuthorized = true;
         //Show success message
         SnackBarService.showSnackBar(content: 'You\'re signed in!');
         notifyListeners();
@@ -162,19 +167,19 @@ class AuthProvider with ChangeNotifier {
   Future<void> handleAuthorizeScopes() async {
     logger.t('AuthProvider.handleAuthorizeScopes()');
     final bool newIsAuthorized = await googleSignIn.requestScopes(scopes);
-    isAuthorized = newIsAuthorized;
+    _isAuthorized = newIsAuthorized;
     notifyListeners();
 
 
     if (newIsAuthorized) {
-      await signInWithFirebase(user!); //from chatgpt
+      await signInWithFirebase(_googleSignInUser!); //from chatgpt
     }
   }
 
   // Sign user out and go back to login page
   void signOut() async {
     try {
-      isLoggingOut = true;
+      _isLoggingOut = true;
       logger.t('AuthProvider.signOut()');
       //Go to login page
       TourguideNavigation.router.go(
@@ -183,10 +188,10 @@ class AuthProvider with ChangeNotifier {
       await FirebaseAuth.instance.signOut();
       await googleSignIn.disconnect();
       SnackBarService.showSnackBar(content: 'You\'re signed out!');
-      isLoggingOut = false;
+      _isLoggingOut = false;
     } catch (e){
       logger.e(e);
-      isLoggingOut = false;
+      _isLoggingOut = false;
     }
 
   }

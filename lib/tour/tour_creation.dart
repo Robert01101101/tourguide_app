@@ -88,7 +88,7 @@ class _CreateTourState extends State<CreateTour> {
         FirebaseAuth auth = FirebaseAuth.instance;
         final myAuth.AuthProvider authProvider = Provider.of(context, listen: false);
         final User user = auth.currentUser!;
-        final uid = authProvider.user!.id;
+        final uid = authProvider.user!.uid;
 
         // Upload image
         String imageUrl = await _uploadImage(_image!);
@@ -105,7 +105,7 @@ class _CreateTourState extends State<CreateTour> {
         try {
           await db.collection("tours").add(_tour.toMap());
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Successfully created tour!')),
+            const SnackBar(content: Text('Successfully created tour. Thanks for contributing!')),
           );
           Navigator.pop(context); // Navigate back after successful creation
         } catch (e) {
@@ -142,6 +142,7 @@ class _CreateTourState extends State<CreateTour> {
     final tourProvider = Provider.of<TourProvider>(context, listen: false);
 
     if (step == _validationStepIndex+1) {
+      // Final step (Review), create the tour
       setState(() {
         _isFormSubmitted = true;
         tourProvider.addTourToAllTours(_tour);
@@ -159,7 +160,7 @@ class _CreateTourState extends State<CreateTour> {
     } else {
       // Determine which form key to validate based on the step
       switch (_currentStep) {
-        case 0:
+        case 0: // Basic Info
           isValid = _formKey.currentState!.validate();
           if (isValid){
             setState(() {
@@ -173,16 +174,18 @@ class _CreateTourState extends State<CreateTour> {
             });
           }
           break;
-        case 1:
+        case 1: // Places
           isValid = _formKeyPlaces.currentState!.validate();
           if (isValid){
             setState(() {
               _tour = _tour.copyWith(
+                  latitude: _places.first.latitude,
+                  longitude: _places.first.longitude,
                   tourguidePlaces: _places);
             });
           }
           break;
-        case 2:
+        case 2: // Details
           isValid = _formKeyDetails.currentState!.validate();
           //_image is set directly so nothing to do here for now
           setState(() {

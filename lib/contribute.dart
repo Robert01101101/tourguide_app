@@ -54,7 +54,7 @@ class _ContributeState extends State<Contribute> {
       await tourProvider.fetchAndSetTours(
         locationProvider.currentPosition!.latitude,
         locationProvider.currentPosition!.longitude,
-        authProvider.user!.id,
+        authProvider.user!.uid,
       );
     } else {
       // Handle the case where currentPosition is still null after timeout

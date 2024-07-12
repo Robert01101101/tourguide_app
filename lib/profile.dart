@@ -19,142 +19,11 @@ class Profile extends StatefulWidget {
 class _ProfileState extends State<Profile> {
 
   final TextEditingController _usernameController = TextEditingController();
-  late Future<DocumentSnapshot> _profileDataFuture;
 
 
   @override
   void initState() {
-    //_firebaseCloudFirestoreTest();
-    _profileDataFuture = _firestoreGetUserProfileData();
-
     super.initState();
-  }
-
-  _firebaseCloudFirestoreTest() async {
-    FirebaseFirestore db = FirebaseFirestore.instance;
-    FirebaseAuth auth = FirebaseAuth.instance;
-
-    //get userid
-    final User user = auth.currentUser!; //assuming we're logged in here
-    final uid = user.uid;
-
-
-    final profile = <String, dynamic>{
-      "username": "Robeat",
-    };
-
-    // Add a new document with the userid
-    /*
-    db.collection("profiles").doc(uid).set(profile).then((_) =>
-        logger.t('DocumentSnapshot added with ID: ${uid}'));*/
-
-    /*
-    final tourPrivate = <String, dynamic>{
-      "name": "Robert Tour Two",
-      "visibility": "private"
-    };
-
-    // Add a new document with a generated ID
-    db.collection("tours").add(tourPrivate).then((DocumentReference doc) =>
-        logger.t('DocumentSnapshot added with ID: ${doc.id}'));*/
-
-    //get
-    logger.t('GET -------');
-    DocumentSnapshot profileSnapshot = await db.collection("profiles").doc(uid).get();
-    if (profileSnapshot.exists) {
-      // Profile exists, you can access the data
-      var profileData = profileSnapshot.data();
-      logger.t('Profile data: $profileData');
-    } else {
-      // Profile doesn't exist
-      logger.t('Profile not found');
-    }
-
-
-
-    /*
-    https://firebase.google.com/dohttps://firebase.google.com/docs/firestore/quickstartcs/firestore/quickstart
-
-    //Cloud Firestore stores data in Documents, which are stored in Collections. Cloud Firestore creates collections and documents
-    // implicitly the first time you add data to the document. You do not need to explicitly create collections or documents.
-    // Create a new user with a first and last name
-    final user = <String, dynamic>{
-      "first": "Ada",
-      "last": "Lovelace",
-      "born": 1815
-    };
-
-    // Add a new document with a generated ID
-    db.collection("users").add(user).then((DocumentReference doc) =>
-        logger.t('DocumentSnapshot added with ID: ${doc.id}'));
-
-    //Now add another document to the users collection. Notice that this document includes a key-value pair (middle name) that does not
-    // appear in the first document. Documents in a collection can contain different sets of information.
-    // Create a new user with a first and last name
-    final userAlt = <String, dynamic>{
-      "first": "Alan",
-      "middle": "Mathison",
-      "last": "Turing",
-      "born": 1912
-    };
-
-    // Add a new document with a generated ID
-    db.collection("users").add(userAlt).then((DocumentReference doc) =>
-        logger.t('DocumentSnapshot added with ID: ${doc.id}'));
-
-    //Use the data viewer in the Firebase console to quickly verify that you've added data to Cloud Firestore.
-    // You can also use the "get" method to retrieve the entire collection.
-    await db.collection("users").get().then((event) {
-      for (var doc in event.docs) {
-        logger.t("${doc.id} => ${doc.data()}");
-      }
-    });
-    */
-  }
-
-
-  Future<DocumentSnapshot> _firestoreGetUserProfileData() async {
-    logger.t('-- _firestoreGetUserProfileData()');
-    FirebaseFirestore db = FirebaseFirestore.instance;
-    FirebaseAuth auth = FirebaseAuth.instance;
-
-    //get userid
-    final User user = auth.currentUser!; //assuming we're logged in here
-    final uid = user.uid;
-
-    //get
-    logger.t('GET -------');
-    DocumentSnapshot profileSnapshot = await db.collection("profiles").doc(uid).get();
-    if (profileSnapshot.exists) {
-      // Profile exists, you can access the data
-      var profileData = profileSnapshot.data();
-      logger.t('Profile data: $profileData');
-    } else {
-      // Profile doesn't exist
-      logger.t('Profile not found');
-    }
-
-
-
-    return profileSnapshot;
-  }
-
-  _firestoreSetUserProfileData() async {
-    logger.t('-- _firestoreSetUserProfileData()');
-    FirebaseFirestore db = FirebaseFirestore.instance;
-    FirebaseAuth auth = FirebaseAuth.instance;
-
-    //get userid
-    final User user = auth.currentUser!; //assuming we're logged in here
-    final uid = user.uid;
-
-
-    final profile = <String, dynamic>{
-      "username": _usernameController.text,
-    };
-
-    db.collection("profiles").doc(uid).set(profile).then((_) =>
-        logger.t('DocumentSnapshot added with ID: ${uid}'));
   }
 
 
@@ -249,10 +118,10 @@ class _ProfileState extends State<Profile> {
                 SizedBox(height: 0,),
                 ListTile(
                   leading: GoogleUserCircleAvatar(
-                    identity: authProvider.user!,
+                    identity: authProvider.googleSignInUser!,
                   ),
-                  title: Text(authProvider.user!.displayName ?? ''),
-                  subtitle: Text(authProvider.user!.email),
+                  title: Text(authProvider.googleSignInUser!.displayName ?? ''),
+                  subtitle: Text(authProvider.googleSignInUser!.email),
                 ),
                 SizedBox(height: 8,),
                 /*

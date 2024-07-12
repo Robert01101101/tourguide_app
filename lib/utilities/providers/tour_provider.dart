@@ -8,6 +8,7 @@ class TourProvider with ChangeNotifier {
   List<Tour> _localTours = List.generate(4, (index) => Tour.empty());
   List<Tour> _globalTours = List.generate(4, (index) => Tour.empty());
   List<Tour> _userCreatedTours = List.generate(1, (index) => Tour.isAddTourTile());
+  List<Tour> _userSavedTours = List.empty();
   List<Tour> _allTours = List.generate(4, (index) => Tour.empty());
   Tour? _selectedTour;
   bool _isLoadingTours = false;
@@ -32,13 +33,14 @@ class TourProvider with ChangeNotifier {
 
   Future<void> fetchAndSetTours(double userLatitude, double userLongitude, String userId) async {
     try {
-      logger.t("fetchAndSetTours");
+      logger.t("fetchAndSetTours ${getFormattedTime()}");
       _isLoadingTours = true;
       _allTours = await TourService.fetchAndSortToursByDateTime();
       _popularTours = TourService.popularToursNearYou(_allTours, userLatitude, userLongitude);
       _localTours = TourService.localTours(_allTours, userLatitude, userLongitude);
       _globalTours = TourService.popularToursAroundTheWorld(_allTours);
       _userCreatedTours = TourService.userCreatedTours(_allTours, userId);
+      _userSavedTours = TourService.userSavedTours(_allTours, userId);
 
       //add empty tour if no tours
       if (_popularTours.isEmpty) _popularTours = List.generate(1, (index) => Tour.isAddTourTile());
@@ -57,7 +59,7 @@ class TourProvider with ChangeNotifier {
   }
 
   Future<void> _getTourRatings(String userId) async {
-    logger.t('getTourRatings');
+    logger.t('getTourRatings ${getFormattedTime()}');
     _popularTours = await TourService.checkUserRatings(popularTours, userId);
     _localTours = await TourService.checkUserRatings(localTours, userId);
     _globalTours = await TourService.checkUserRatings(globalTours, userId);

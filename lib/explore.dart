@@ -5,7 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:tourguide_app/model/tour.dart';
 import 'package:tourguide_app/testing/debug_screen.dart';
-import 'package:tourguide_app/signIn.dart';
+import 'package:tourguide_app/sign_in.dart';
 import 'package:tourguide_app/tour/tour_creation.dart';
 import 'package:tourguide_app/ui/google_places_image.dart';
 import 'package:tourguide_app/ui/my_layouts.dart';
@@ -124,7 +124,7 @@ class ExploreState extends State<Explore> {
       await tourProvider.fetchAndSetTours(
         locationProvider.currentPosition!.latitude,
         locationProvider.currentPosition!.longitude,
-        authProvider.user!.id,
+        authProvider.user!.uid,
       );
     } else {
       // Handle the case where currentPosition is still null after timeout
@@ -251,7 +251,7 @@ class ExploreState extends State<Explore> {
                           future: _handleSignIn(),
                           builder: (context, snapshot) {
                             //Assemble welcome string
-                            String displayName = authProvider.user!.displayName!;
+                            String displayName = authProvider.googleSignInUser!.displayName!;
 
                             // Stylized Welcome Banner text
                             return SizedBox(

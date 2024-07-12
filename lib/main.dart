@@ -2,6 +2,7 @@ import 'dart:ui';
 
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:firebase_remote_config/firebase_remote_config.dart';
+import 'package:intl/intl.dart';
 import 'package:logger/logger.dart';
 import 'package:provider/provider.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
@@ -11,6 +12,7 @@ import 'package:tourguide_app/utilities/custom_import.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:tourguide_app/utilities/providers/location_provider.dart';
 import 'package:tourguide_app/utilities/providers/tour_provider.dart';
+import 'package:tourguide_app/utilities/providers/tourguide_user_provider.dart';
 import 'firebase_options.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -69,6 +71,11 @@ Future<void> fetchConfig() async {
   }
 }
 
+String getFormattedTime(){
+  DateTime now = DateTime.now();
+  return " - at ${DateFormat('HH:mm:ss.SSS').format(now)}";
+}
+
 
 
 
@@ -114,6 +121,10 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
         ChangeNotifierProvider(create: (_) => AuthProvider()),
         ChangeNotifierProvider(create: (_) => LocationProvider()),
         ChangeNotifierProvider(create: (_) => TourProvider()),
+        ChangeNotifierProxyProvider<AuthProvider, TourguideUserProvider>(
+          create: (_) => TourguideUserProvider(), // Provide TourguideUserProvider with access to AuthProvider
+          update: (_, authProvider, userProvider) => userProvider!..setAuthProvider(authProvider),
+        ),
       ],
       child: MaterialApp.router(
         scaffoldMessengerKey: SnackBarService.scaffoldKey,

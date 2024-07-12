@@ -237,7 +237,7 @@ class _ExpandedTileOverlayState extends State<ExpandedTileOverlay> {
         thisUsersRating = 1;
         widget.tour.upvotes++; // Increase upvotes
       }
-      TourService.addOrUpdateRating(widget.tour.id, thisUsersRating, authProvider.user!.id);
+      TourService.addOrUpdateRating(widget.tour.id, thisUsersRating, authProvider.user!.uid);
     });
   }
 
@@ -259,7 +259,7 @@ class _ExpandedTileOverlayState extends State<ExpandedTileOverlay> {
         thisUsersRating = -1;
         widget.tour.downvotes++; // Increase downvotes
       }
-      TourService.addOrUpdateRating(widget.tour.id, thisUsersRating, authProvider.user!.id);
+      TourService.addOrUpdateRating(widget.tour.id, thisUsersRating, authProvider.user!.uid);
     });
   }
 

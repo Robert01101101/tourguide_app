@@ -223,6 +223,7 @@ class TourService {
         throw Exception('User not signed in');
       }
 
+      logger.t('fetchAllTours() all requirements ready, fetching ${getFormattedTime()}');
       QuerySnapshot querySnapshot = await db.collection('tours')
           .where('visibility', isEqualTo: 'public')
           .get();
@@ -249,6 +250,7 @@ class TourService {
           tours.add(tour);
         }
       }
+      logger.t('fetchAllTours() finished getting all tours ${getFormattedTime()}');
     } catch (e) {
       logger.e('Error fetching tours: $e');
     }
@@ -325,6 +327,10 @@ class TourService {
     //log length
     logger.t('userCreatedTours length: ${userCreatedTours.length}, userId=$userId');
     return userCreatedTours;
+  }
+
+  static List<Tour> userSavedTours(List<Tour> tours, String userId) {
+    return List.generate(4, (index) => Tour.empty());
   }
 
 

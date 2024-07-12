@@ -14,6 +14,7 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:http/http.dart' as http;
 import 'package:tourguide_app/utilities/providers/location_provider.dart';
 import 'package:tourguide_app/utilities/providers/tour_provider.dart';
+import 'package:tourguide_app/utilities/providers/tourguide_user_provider.dart';
 import 'ui/sign_in_button.dart';
 import 'package:tourguide_app/utilities/custom_import.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -43,17 +44,18 @@ class _SignInState extends State<SignIn> {
     my_auth.AuthProvider authProvider = Provider.of(context, listen: false);
     LocationProvider locationProvider = Provider.of(context, listen: false);
     TourProvider tourProvider = Provider.of(context, listen: false);
+    TourguideUserProvider tourguideUserProvider = Provider.of(context, listen: false);
 
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
       authProvider.addListener(() {
-        if (authProvider.user != null && authProvider.isAuthorized && !navigatedAwayFromSignIn) {
+        if (authProvider.googleSignInUser != null && authProvider.user != null && authProvider.isAuthorized && !navigatedAwayFromSignIn) {
           logger.t("signIn.initState().authProviderListener -> user is no longer null");
           navigatedAwayFromSignIn = true;
           // Navigate to the new screen once login is complete
           TourguideNavigation.router.go(
             TourguideNavigation.explorePath,
           );
-        } else if (authProvider.user == null || authProvider.silentSignInFailed){
+        } else if (authProvider.googleSignInUser == null || authProvider.silentSignInFailed){
           logger.t("signIn.initState().authProviderListener -> user is null or silentSignInFailed");
           FlutterNativeSplash.remove();
         }
@@ -64,7 +66,6 @@ class _SignInState extends State<SignIn> {
 
   Widget _buildProcessingBody() {
     my_auth.AuthProvider authProvider = Provider.of(context);
-    final GoogleSignInAccount? user = authProvider.user;
 
     return Center(
       child: SizedBox(
@@ -92,7 +93,7 @@ class _SignInState extends State<SignIn> {
 
   Widget _buildButtonBody() {
     my_auth.AuthProvider authProvider = Provider.of(context);
-    final GoogleSignInAccount? user = authProvider.user;
+    final GoogleSignInAccount? user = authProvider.googleSignInUser;
     if (user != null) {
       // The user is Authenticated
       return Center(
@@ -132,7 +133,7 @@ class _SignInState extends State<SignIn> {
   @override
   Widget build(BuildContext context) {
     my_auth.AuthProvider authProvider = Provider.of(context);
-    final GoogleSignInAccount? user = authProvider.user;
+    final GoogleSignInAccount? user = authProvider.googleSignInUser;
 
     return Scaffold(
         appBar: AppBar(

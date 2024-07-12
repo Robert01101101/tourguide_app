@@ -1,9 +1,11 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:profanity_filter/profanity_filter.dart';
 import 'package:tourguide_app/ui/my_layouts.dart';
 import 'package:tourguide_app/utilities/custom_import.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:tourguide_app/utilities/providers/auth_provider.dart' as myAuth;
+import 'package:tourguide_app/utilities/providers/tourguide_user_provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class ProfileSettings extends StatefulWidget {
@@ -14,98 +16,74 @@ class ProfileSettings extends StatefulWidget {
 }
 
 class _ProfileSettingsState extends State<ProfileSettings> {
-
-  final TextEditingController _usernameController = TextEditingController();
-  late Future<DocumentSnapshot> _profileDataFuture;
-
+  late TextEditingController _usernameController;
+  bool _updatingUsername = false;
+  String _newUsername = '';
+  bool _isUsernameAvailable = true;
+  bool _profanityDetected = false;
+  final _filter = ProfanityFilter();
 
   @override
   void initState() {
-    //_firebaseCloudFirestoreTest();
-    _profileDataFuture = _firestoreGetUserProfileData();
-
     super.initState();
+    TourguideUserProvider userProvider = Provider.of(context, listen: false);
+    _usernameController = TextEditingController(text: userProvider.user!.username);
+    _newUsername = userProvider.user!.username;
+    _usernameController.addListener(_onUsernameChanged);
   }
 
-  _firebaseCloudFirestoreTest() async {
-    FirebaseFirestore db = FirebaseFirestore.instance;
-    FirebaseAuth auth = FirebaseAuth.instance;
+  @override
+  void dispose() {
+    // Clean up the controller when the widget is disposed
+    _usernameController.dispose();
+    super.dispose();
+  }
 
-    //get userid
-    final User user = auth.currentUser!; //assuming we're logged in here
-    final uid = user.uid;
+  void _onUsernameChanged() {
+    setState(() {
+      _newUsername = _usernameController.text;
+      List<String> profanityDetectableWords = _newUsername.split(RegExp(r'[A-Z]|_|-|\.')); // Split camel case
+      for (String word in profanityDetectableWords) {
+        _profanityDetected = _filter.hasProfanity(word);
+        if (_profanityDetected) {
+          break;
+        }
+      }
+    });
+  }
 
-
-    final profile = <String, dynamic>{
-      "username": "Robeat",
-    };
-
-
-    //get
-    logger.t('GET -------');
-    DocumentSnapshot profileSnapshot = await db.collection("profiles").doc(uid).get();
-    if (profileSnapshot.exists) {
-      // Profile exists, you can access the data
-      var profileData = profileSnapshot.data();
-      logger.t('Profile data: $profileData');
+  Future<void> _setUsername () async {
+    logger.t('Setting username');
+    if (_updatingUsername) return;
+    setState(() {
+      _updatingUsername = true;
+    });
+    TourguideUserProvider userProvider = Provider.of(context, listen: false);
+    if (await userProvider.checkUsernameAvailability(_newUsername)){
+      setState(() {
+        _isUsernameAvailable = true;
+      });
     } else {
-      // Profile doesn't exist
-      logger.t('Profile not found');
+      setState(() {
+        _isUsernameAvailable = false;
+        _updatingUsername = false;
+      });
+      return;
     }
-
+    await userProvider.updateUser(userProvider.user!.copyWith(username: _newUsername));
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Updated username to ${userProvider.user!.username}')),
+    );
+    setState(() {
+      _updatingUsername = false;
+    });
   }
 
 
-  Future<DocumentSnapshot> _firestoreGetUserProfileData() async {
-    logger.t('-- _firestoreGetUserProfileData()');
-    FirebaseFirestore db = FirebaseFirestore.instance;
-    FirebaseAuth auth = FirebaseAuth.instance;
-
-    //get userid
-    final User user = auth.currentUser!; //assuming we're logged in here
-    final uid = user.uid;
-
-    //get
-    logger.t('GET -------');
-    DocumentSnapshot profileSnapshot = await db.collection("profiles").doc(uid).get();
-    if (profileSnapshot.exists) {
-      // Profile exists, you can access the data
-      var profileData = profileSnapshot.data();
-      logger.t('Profile data: $profileData');
-    } else {
-      // Profile doesn't exist
-      logger.t('Profile not found');
-    }
-
-
-
-    return profileSnapshot;
-  }
-
-  _firestoreSetUserProfileData() async {
-    logger.t('-- _firestoreSetUserProfileData()');
-    FirebaseFirestore db = FirebaseFirestore.instance;
-    FirebaseAuth auth = FirebaseAuth.instance;
-
-    //get userid
-    final User user = auth.currentUser!; //assuming we're logged in here
-    final uid = user.uid;
-
-
-    final profile = <String, dynamic>{
-      "username": _usernameController.text,
-    };
-
-    db.collection("profiles").doc(uid).set(profile).then((_) =>
-        logger.t('DocumentSnapshot added with ID: ${uid}'));
-  }
-
-
-  //db = FirebaseFirestore.instance;
   @override
   Widget build(BuildContext context) {
-    logger.t('FirebaseAuth.instance.currentUser=${FirebaseAuth.instance.currentUser}');
     myAuth.AuthProvider authProvider = Provider.of(context);
+    TourguideUserProvider userProvider = Provider.of(context);
 
     return Scaffold(
       appBar: AppBar(
@@ -192,10 +170,10 @@ class _ProfileSettingsState extends State<ProfileSettings> {
                 SizedBox(height: 0,),
                 ListTile(
                   leading: GoogleUserCircleAvatar(
-                    identity: authProvider.user!,
+                    identity: authProvider.googleSignInUser!,
                   ),
-                  title: Text(authProvider.user!.displayName ?? ''),
-                  subtitle: Text(authProvider.user!.email),
+                  title: Text(authProvider.googleSignInUser!.displayName ?? ''),
+                  subtitle: Text(authProvider.googleSignInUser!.email),
                 ),
                 SizedBox(height: 8,),
                 Row(
@@ -203,15 +181,17 @@ class _ProfileSettingsState extends State<ProfileSettings> {
                     Expanded(
                       child: TextField(
                         controller: _usernameController,
-                        decoration: const InputDecoration(
+                        maxLength: 25,
+                        decoration: InputDecoration(
                           hintText: 'Enter your new username',
+                          labelText: 'Username',
+                          errorText: _profanityDetected ? 'No profanity please' : !_isUsernameAvailable ? 'Username is already taken' : null,
                         ),
                       ),
                     ),
                     SizedBox(width: 32,),
-                    ElevatedButton(onPressed: () {
-                      _firestoreSetUserProfileData();
-                    }, child: const Text("Save")),
+                    ElevatedButton(onPressed: (_profanityDetected || _updatingUsername || _newUsername == userProvider.user!.username) ? null : () => _setUsername(),
+                        child: _updatingUsername ? const Text("Saving") : const Text("Save")),
                   ],
                 ),
                 SizedBox(height: 32,),
@@ -220,6 +200,7 @@ class _ProfileSettingsState extends State<ProfileSettings> {
             Column(
               mainAxisSize: MainAxisSize.min,
               children: [
+                /*
                 ProfileListButton(
                   label: 'Update Firestore profile data (get)',
                   leftIcon: Icons.data_object,
@@ -228,7 +209,7 @@ class _ProfileSettingsState extends State<ProfileSettings> {
                       _profileDataFuture = _firestoreGetUserProfileData();
                     });
                   },
-                ),
+                ),*/
                 ProfileListButton(
                   label: 'Delete Account',
                   leftIcon: Icons.delete_outline,
