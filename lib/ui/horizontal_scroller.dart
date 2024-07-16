@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:tourguide_app/model/tour.dart';
-import 'package:tourguide_app/tour/rounded_tile.dart';
+import 'package:tourguide_app/tour/tour_tile.dart';
 
 class HorizontalScroller extends StatelessWidget {
   final List<Tour> tours;
@@ -17,7 +17,7 @@ class HorizontalScroller extends StatelessWidget {
       itemBuilder: (context, index) {
         return Padding(
           padding: const EdgeInsets.fromLTRB(0, 0, 16.0, 0),
-          child: RoundedTile(tour: tours[index]),
+          child: TourTile(tour: tours[index]),
         );
       },
     );

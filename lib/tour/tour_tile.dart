@@ -10,16 +10,16 @@ import 'package:tourguide_app/utilities/providers/auth_provider.dart' as myAuth;
 
 import '../main.dart';
 
-class RoundedTile extends StatefulWidget {
+class TourTile extends StatefulWidget {
   final Tour tour;
 
-  const RoundedTile({super.key, required this.tour});
+  const TourTile({super.key, required this.tour});
 
   @override
-  _RoundedTileState createState() => _RoundedTileState();
+  _TourTileState createState() => _TourTileState();
 }
 
-class _RoundedTileState extends State<RoundedTile> {
+class _TourTileState extends State<TourTile> {
   late String imageUrl;
   bool isLoading = true;
 
@@ -31,7 +31,7 @@ class _RoundedTileState extends State<RoundedTile> {
   }
 
   @override
-  void didUpdateWidget(covariant RoundedTile oldWidget) {
+  void didUpdateWidget(covariant TourTile oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.tour.imageUrl != widget.tour.imageUrl || (imageUrl != null && imageUrl != "")) {
       setState(() {
@@ -74,13 +74,13 @@ class _RoundedTileState extends State<RoundedTile> {
       builder: (BuildContext context) {
         // Adjust the height based on screen size
         final double screenHeight = MediaQuery.of(context).size.height;
-        final double desiredHeight = screenHeight * 11 / 20;
+        final double desiredHeight = screenHeight * 0.6;
 
         return Container(
           width: MediaQuery.of(context).size.width, // Full width
           height: desiredHeight,
           padding: EdgeInsets.all(8.0),
-          child: ExpandedTileOverlay(tour: widget.tour),
+          child: ExpandedTourTileOverlay(tour: widget.tour),
         );
       },
     );
@@ -201,16 +201,16 @@ class _RoundedTileState extends State<RoundedTile> {
 }
 
 
-class ExpandedTileOverlay extends StatefulWidget {
+class ExpandedTourTileOverlay extends StatefulWidget {
   final Tour tour;
 
-  const ExpandedTileOverlay({Key? key, required this.tour}) : super(key: key);
+  const ExpandedTourTileOverlay({Key? key, required this.tour}) : super(key: key);
 
   @override
-  _ExpandedTileOverlayState createState() => _ExpandedTileOverlayState();
+  _ExpandedTourTileOverlayState createState() => _ExpandedTourTileOverlayState();
 }
 
-class _ExpandedTileOverlayState extends State<ExpandedTileOverlay> {
+class _ExpandedTourTileOverlayState extends State<ExpandedTourTileOverlay> {
   int thisUsersRating = 0;
 
   @override
@@ -284,14 +284,17 @@ class _ExpandedTileOverlayState extends State<ExpandedTileOverlay> {
         children: [
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Container(
-                padding: EdgeInsets.fromLTRB(16, 0, 0, 0),
-                child: Text(
-                  widget.tour.name,
-                  style: Theme.of(context).textTheme.headlineSmall,
-                  overflow: TextOverflow.ellipsis,
-                  maxLines: 1,
+              Expanded(
+                child: Container(
+                  padding: EdgeInsets.fromLTRB(16, 0, 0, 0),
+                  child: Text(
+                    widget.tour.name,
+                    style: Theme.of(context).textTheme.headlineSmall,
+                    overflow: TextOverflow.ellipsis,
+                    maxLines: 2,
+                  ),
                 ),
               ),
               IconButton(
@@ -340,7 +343,7 @@ class _ExpandedTileOverlayState extends State<ExpandedTileOverlay> {
                 Row(
                   children: [
                     ElevatedButton(
-                      onPressed: () {},
+                      onPressed: widget.tour.isOfflineCreatedTour ? null : () {},
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Theme.of(context).primaryColor, // background
                         foregroundColor: Colors.white, // foreground

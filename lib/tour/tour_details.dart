@@ -4,10 +4,11 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:tourguide_app/model/tour.dart';
+import 'package:tourguide_app/ui/my_layouts.dart';
 import 'package:tourguide_app/utilities/providers/tour_provider.dart';
 import '../utilities/custom_import.dart';
 import 'package:http/http.dart' as http;
-import 'rounded_tile.dart'; // Ensure this imports your TileData model
+import 'tour_tile.dart'; // Ensure this imports your TileData model
 
 class FullscreenTourPage extends StatefulWidget {
   final Tour tour;
@@ -19,7 +20,7 @@ class FullscreenTourPage extends StatefulWidget {
 }
 
 class _FullscreenTourPageState extends State<FullscreenTourPage> {
-  final Completer<GoogleMapController> _controller = Completer<GoogleMapController>();
+  final Completer<GoogleMapController> _mapControllerCompleter = Completer<GoogleMapController>();
   bool _isFullScreen = false;
   bool _isLoading = true, _isLoadingFullscreen = true;
   CameraPosition _currentCameraPosition = CameraPosition(
@@ -38,7 +39,7 @@ class _FullscreenTourPageState extends State<FullscreenTourPage> {
 
 
 
-  void _addMarkers() {
+  Future<void> _addMarkers() async {
     // Add tour city marker
     /*
     _markers.add(
@@ -69,6 +70,11 @@ class _FullscreenTourPageState extends State<FullscreenTourPage> {
     setState(() {
       _markers = _markers;
     });
+
+    //set zoom
+    LatLngBounds bounds = _createLatLngBounds(widget.tour.tourguidePlaces.map((place) => LatLng(place.latitude, place.longitude)).toList());
+    final GoogleMapController controller = await _mapControllerCompleter.future;
+    controller.moveCamera(CameraUpdate.newLatLngBounds(bounds, 50));
 
     // Fetch directions and draw polyline
     _fetchDirections();
@@ -173,6 +179,25 @@ class _FullscreenTourPageState extends State<FullscreenTourPage> {
     });
   }
 
+  LatLngBounds _createLatLngBounds(List<LatLng> points) {
+    double south = points.first.latitude;
+    double north = points.first.latitude;
+    double west = points.first.longitude;
+    double east = points.first.longitude;
+
+    for (LatLng point in points) {
+      if (point.latitude < south) south = point.latitude;
+      if (point.latitude > north) north = point.latitude;
+      if (point.longitude < west) west = point.longitude;
+      if (point.longitude > east) east = point.longitude;
+    }
+
+    return LatLngBounds(
+      southwest: LatLng(south, west),
+      northeast: LatLng(north, east),
+    );
+  }
+
 
 
 
@@ -221,108 +246,117 @@ class _FullscreenTourPageState extends State<FullscreenTourPage> {
         },
         child: Stack(
           children: [
-            Container(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Expanded(
-                    child: Column(
+            Scrollbar(
+              thumbVisibility: true,
+              child: SingleChildScrollView(
+                child: StandardLayout(
+                  children: [
+                    Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         if (widget.tour.imageUrl != null && widget.tour.imageUrl.isNotEmpty)
                           Container(
-                            height: 250,
+                            height: 230,
                             child: ClipRRect(
                               child: Image.network(
                                 widget.tour.imageUrl,
                                 width: MediaQuery.of(context).size.width,
-                                height: 300.0, // Adjust height as needed
+                                height: 230.0, // Adjust height as needed
                                 fit: BoxFit.cover,
                               ),
                             ),
                           ),
                         const SizedBox(height: 16.0),
-                        Text(
-                          widget.tour.description,
-                          style: const TextStyle(fontSize: 18.0),
+                        Container(
+                          height: 105,
+                          child: Text(
+                            widget.tour.description,
+                            style: Theme.of(context).textTheme.bodyMedium,
+                          ),
                         ),
-                        const SizedBox(height: 16.0),
                       ],
                     ),
-                  ),
-                  if (showMap)
-                    Container(
-                      height: 300.0, // Adjust height as needed
-                      child: Stack(
-                        children: [
-                          GoogleMap(
-                            mapType: MapType.normal,
-                            initialCameraPosition: _currentCameraPosition,
-                            markers: _markers,
-                            polylines: _polylines,
-                            onMapCreated: (GoogleMapController controller) async {
-                              if (!_controller.isCompleted) {
-                                _controller.complete(controller);
-                              } else {
-                                final GoogleMapController mapController = await _controller.future;
-                                mapController.moveCamera(CameraUpdate.newCameraPosition(_currentCameraPosition));
-                              }
-                              await Future.delayed(const Duration(milliseconds: 200)); //avoid flicker
-                              setState(() {
-                                _isLoading = false;
-                              });
-                            },
-                            onCameraMove: (CameraPosition position) {
-                              _currentCameraPosition = position;
-                            },
-                          ),
-                          if (_isLoading)
-                            Container(
-                              color: Color(0xffe8eaed),
-                              child: Center(
-                                child: CircularProgressIndicator(),
-                              ),
+                    if (showMap)
+                      Container(
+                        height: 260.0, // Adjust height as needed
+                        child: Stack(
+                          children: [
+                            GoogleMap(
+                              mapType: MapType.normal,
+                              initialCameraPosition: _currentCameraPosition,
+                              markers: _markers,
+                              polylines: _polylines,
+                              onMapCreated: (GoogleMapController controller) async {
+                                if (!_mapControllerCompleter.isCompleted) {
+                                  _mapControllerCompleter.complete(controller);
+                                } else {
+                                  final GoogleMapController mapController = await _mapControllerCompleter.future;
+                                  mapController.moveCamera(CameraUpdate.newCameraPosition(_currentCameraPosition));
+                                }
+                                await Future.delayed(const Duration(milliseconds: 200)); //avoid flicker
+                                setState(() {
+                                  _isLoading = false;
+                                });
+                              },
+                              onCameraMove: (CameraPosition position) {
+                                _currentCameraPosition = position;
+                              },
                             ),
-                          if (!_isLoading)
-                          Positioned(
-                            bottom: 120,
-                            right: 10,
-                            child: SizedBox(
-                              width: 42,
-                              height: 42,
-                              child: RawMaterialButton(
-                                onPressed: () async {
-                                  final controller = await _controller.future;
-                                  setState(() {
-                                    _isFullScreen = !_isFullScreen;
-                                    _isLoadingFullscreen = true;
-                                  });
-                                  controller.moveCamera(
-                                    CameraUpdate.newCameraPosition(_currentCameraPosition),
-                                  );
-                                },
-                                elevation: 1.0,
-                                fillColor: Colors.white.withOpacity(0.9),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(8.0), // Adjust the radius as needed
+                            if (_isLoading)
+                              Container(
+                                color: Color(0xffe8eaed),
+                                child: Center(
+                                  child: CircularProgressIndicator(),
                                 ),
-                                child: Padding(
-                                  padding: const EdgeInsets.all(1.0), // Adjust inner padding as needed
-                                  child: Icon(
-                                    _isFullScreen ? Icons.fullscreen_exit : Icons.fullscreen,
-                                    color: const Color(0xff666666),
-                                    size: 32.0, // Adjust the size of the icon as needed
+                              ),
+                            if (!_isLoading)
+                            Positioned(
+                              bottom: 120,
+                              right: 10,
+                              child: SizedBox(
+                                width: 42,
+                                height: 42,
+                                child: RawMaterialButton(
+                                  onPressed: () async {
+                                    final controller = await _mapControllerCompleter.future;
+                                    setState(() {
+                                      _isFullScreen = !_isFullScreen;
+                                      _isLoadingFullscreen = true;
+                                    });
+                                    controller.moveCamera(
+                                      CameraUpdate.newCameraPosition(_currentCameraPosition),
+                                    );
+                                  },
+                                  elevation: 1.0,
+                                  fillColor: Colors.white.withOpacity(0.9),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(8.0), // Adjust the radius as needed
+                                  ),
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(1.0), // Adjust inner padding as needed
+                                    child: Icon(
+                                      _isFullScreen ? Icons.fullscreen_exit : Icons.fullscreen,
+                                      color: const Color(0xff666666),
+                                      size: 32.0, // Adjust the size of the icon as needed
+                                    ),
                                   ),
                                 ),
                               ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
+                    Text(
+                      'Places you\'ll visit',
+                      style: Theme.of(context).textTheme.titleLarge
                     ),
-                ],
+                    if (widget.tour.tourguidePlaces.isNotEmpty)
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: widget.tour.tourguidePlaces.map((place) => Text(place.title)).toList(),
+                      ),
+                  ],
+                ),
               ),
             ),
             if (_isFullScreen)
@@ -335,10 +369,10 @@ class _FullscreenTourPageState extends State<FullscreenTourPage> {
                       markers: _markers,
                       polylines: _polylines,
                       onMapCreated: (GoogleMapController controller) async {
-                        if (!_controller.isCompleted) {
-                          _controller.complete(controller);
+                        if (!_mapControllerCompleter.isCompleted) {
+                          _mapControllerCompleter.complete(controller);
                         } else {
-                          final GoogleMapController mapController = await _controller.future;
+                          final GoogleMapController mapController = await _mapControllerCompleter.future;
                           mapController.moveCamera(CameraUpdate.newCameraPosition(_currentCameraPosition));
                         }
                         await Future.delayed(const Duration(milliseconds: 300)); //avoid flicker
@@ -366,7 +400,7 @@ class _FullscreenTourPageState extends State<FullscreenTourPage> {
                         height: 42,
                         child: RawMaterialButton(
                           onPressed: () async {
-                            final controller = await _controller.future;
+                            final controller = await _mapControllerCompleter.future;
                             setState(() {
                               _isFullScreen = !_isFullScreen;
                             });

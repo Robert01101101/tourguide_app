@@ -8,7 +8,7 @@ import 'package:google_places_autocomplete_text_field/google_places_autocomplete
 import 'package:image_picker/image_picker.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:tourguide_app/model/tourguide_place.dart';
-import 'package:tourguide_app/tour/rounded_tile.dart';
+import 'package:tourguide_app/tour/tour_tile.dart';
 import 'package:tourguide_app/ui/add_image_tile.dart';
 import 'package:tourguide_app/ui/place_autocomplete.dart';
 import 'package:tourguide_app/ui/my_layouts.dart';
@@ -46,7 +46,7 @@ class _CreateTourState extends State<CreateTour> {
   Tour _tour = Tour.isOfflineCreatedTour();
   bool _tourIsPublic = true; // Initial boolean value
   bool _isFormSubmitted = false;
-  final int _descriptionMaxChars = 150;
+  final int _descriptionMaxChars = 250;
   final int _validationStepIndex = 3;
   File? _image;
   List<TourguidePlace> _places = []; // List to hold TourguidePlace instances
@@ -77,6 +77,7 @@ class _CreateTourState extends State<CreateTour> {
     });
   }
 
+  // TODO: ensure city matches the city of the places
   Future<void> _firestoreCreateTour() async {
     try {
       if (_formKey.currentState!.validate() && _formKeyPlaces.currentState!.validate() && _formKeyDetails.currentState!.validate()){
@@ -118,6 +119,25 @@ class _CreateTourState extends State<CreateTour> {
     } catch (e) {
       logger.e('Error creating tour: $e');
     }
+  }
+
+  LatLng _calculateCenterPoint(List<LatLng> points) {
+    if (points.isEmpty) {
+      throw ArgumentError('The list of points cannot be empty');
+    }
+
+    double totalLatitude = 0;
+    double totalLongitude = 0;
+
+    for (var point in points) {
+      totalLatitude += point.lat;
+      totalLongitude += point.lng;
+    }
+
+    double centerLatitude = totalLatitude / points.length;
+    double centerLongitude = totalLongitude / points.length;
+
+    return LatLng(lat: centerLatitude, lng: centerLongitude);
   }
 
   // Function to upload image to Firebase Storage
@@ -178,9 +198,10 @@ class _CreateTourState extends State<CreateTour> {
           isValid = _formKeyPlaces.currentState!.validate();
           if (isValid){
             setState(() {
+              LatLng centerPoint = _calculateCenterPoint(_places.map((p) => LatLng(lat: p.latitude, lng: p.longitude)).toList());
               _tour = _tour.copyWith(
-                  latitude: _places.first.latitude,
-                  longitude: _places.first.longitude,
+                  latitude: centerPoint.lat,
+                  longitude: centerPoint.lng,
                   tourguidePlaces: _places);
             });
           }
@@ -527,7 +548,7 @@ class _CreateTourState extends State<CreateTour> {
                   ),
                   Shimmer(
                       linearGradient: MyGlobals.shimmerGradient,
-                      child: RoundedTile(tour: _tour)
+                      child: TourTile(tour: _tour)
                   ),
                   SizedBox(height: 32,),
                 ],

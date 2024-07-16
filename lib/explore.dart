@@ -10,7 +10,7 @@ import 'package:tourguide_app/tour/tour_creation.dart';
 import 'package:tourguide_app/ui/google_places_image.dart';
 import 'package:tourguide_app/ui/my_layouts.dart';
 import 'package:tourguide_app/ui/horizontal_scroller.dart';
-import 'package:tourguide_app/tour/rounded_tile.dart';
+import 'package:tourguide_app/tour/tour_tile.dart';
 import 'package:tourguide_app/ui/place_autocomplete.dart';
 import 'package:tourguide_app/ui/shimmer_loading.dart';
 import 'package:tourguide_app/utilities/custom_import.dart';
