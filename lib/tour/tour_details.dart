@@ -107,28 +107,54 @@ class _FullscreenTourPageState extends State<FullscreenTourPage> {
     //TODO: Sometimes placeId works better, sometimes lat long, with placeIds it seems walking mode can be tricky -> address
 
     // Construct directions API URL
-    String url = 'https://maps.googleapis.com/maps/api/directions/json?'
+    int attempt = 0;
+    while (attempt < 2) {
+      try {
+        attempt++;
+        String url = 'https://maps.googleapis.com/maps/api/directions/json?'
         //'origin=${waypoints.first.latitude},${waypoints.last.longitude}&'
         //'destination=${waypoints.last.latitude},${waypoints.last.longitude}&'
-        'origin=place_id:${waypoints.first}&'
-        'destination=place_id:${waypoints.last}&'
-        '${waypointsString.isNotEmpty ? 'waypoints=$waypointsString&' : waypointsString}'
-        'mode=walking&'
-        'key=$apiKey';
+            'origin=place_id:${waypoints.first}&'
+            'destination=place_id:${waypoints.last}&'
+            '${waypointsString.isNotEmpty ? 'waypoints=$waypointsString&' : waypointsString}'
+            'mode=${attempt == 1 ? 'walking&' : 'driving&'}'
+            'key=$apiKey';
 
-    logger.i(url);
+        logger.i(url);
 
-    final response = await http.get(Uri.parse(url));
+        final response = await http.get(Uri.parse(url));
 
-    logger.i(response.body);
+        logger.i(response.body);
 
-    if (response.statusCode == 200) {
-      Map<String, dynamic> data = jsonDecode(response.body);
-      List<LatLng> points = _decodePolyline(data['routes'][0]['overview_polyline']['points']);
-      _addPolyline(points);
-    } else {
-      throw Exception('Failed to load directions');
+        if (response.statusCode == 200) {
+          Map<String, dynamic> data = jsonDecode(response.body);
+
+          // Check the status field
+          String status = data['status'];
+
+          if (status == 'ZERO_RESULTS') {
+            // Handle case where no results were found
+            logger.w('No results found for the given waypoints. Trying again with driving directions.');
+            continue;
+          }
+          List<LatLng> points = _decodePolyline(data['routes'][0]['overview_polyline']['points']);
+          _addPolyline(points);
+          break;
+        } else {
+          throw Exception('Failed to load directions');
+        }
+      } catch (e) {
+        logger.e('Failed to get directions: $e');
+        attempt++;
+      }
     }
+
+
+
+
+
+
+
   }
 
   List<LatLng> _decodePolyline(String encoded) {

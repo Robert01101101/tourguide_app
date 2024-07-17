@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:ui';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -78,6 +79,8 @@ class _CreateTourState extends State<CreateTour> {
   }
 
   // TODO: ensure city matches the city of the places
+  // TODO: move to provider
+  // TODO; don't use context in async!!
   Future<void> _firestoreCreateTour() async {
     try {
       if (_formKey.currentState!.validate() && _formKeyPlaces.currentState!.validate() && _formKeyDetails.currentState!.validate()){
@@ -103,21 +106,34 @@ class _CreateTourState extends State<CreateTour> {
           imageUrl: imageUrl,
         );
 
-        try {
-          await db.collection("tours").add(_tour.toMap());
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Successfully created tour. Thanks for contributing!')),
-          );
-          Navigator.pop(context); // Navigate back after successful creation
-        } catch (e) {
-          logger.t('Error creating tour: $e');
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Failed to create tour. Please try again.')),
-          );
-        }
+        // Step 1: Add tour document to 'tours' collection
+        DocumentReference tourDocRef = await db.collection("tours").add(_tour.toMap());
+        String tourId = tourDocRef.id; // Retrieve the auto-generated ID
+
+        // Update the local Tour object's ID field
+        _tour = _tour.copyWith(id: tourId);
+        await db.collection("tours").doc(tourId).update({
+          'id': _tour.id, // Update the 'id' field with the new tourId
+        });
+
+        //add empty rating for user
+        TourService.addOrUpdateRating(_tour.id, 0, authProvider.user!.uid);
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Successfully created tour. Thanks for contributing!')),
+        );
+        Navigator.pop(context);
+
       }
     } catch (e) {
       logger.e('Error creating tour: $e');
+      ScaffoldMessenger.of(context).hideCurrentSnackBar();
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Failed to create tour. Please try again.')),
+      );
+      setState(() {
+        _isFormSubmitted = false;
+      });
     }
   }
 
@@ -372,7 +388,7 @@ class _CreateTourState extends State<CreateTour> {
                   TextFormField(
                     controller: _descriptionController,
                     keyboardType: TextInputType.multiline,
-                    maxLines: 3,
+                    maxLines: 8,
                     maxLength: _descriptionMaxChars,
                     decoration: InputDecoration(
                       labelText: 'Description',
@@ -381,7 +397,7 @@ class _CreateTourState extends State<CreateTour> {
                       if (value == null || value.isEmpty) {
                         return 'Please enter a description for your tour';
                       }
-                      if (value != null && value.length > _descriptionMaxChars) {
+                      if (value != null && value.characters.length > _descriptionMaxChars) {
                         return 'Please enter a maximum of $_descriptionMaxChars characters';
                       }
                       return null;
@@ -425,69 +441,87 @@ class _CreateTourState extends State<CreateTour> {
                   return null;
                 },
                 builder: (FormFieldState<dynamic> state) {
-                  return ListView(
-                    shrinkWrap: true,
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Padding(
-                                padding: EdgeInsets.only(bottom: 8.0),
-                                // small body text
-                                child: Text('Add your waypoints by searching for places', style: Theme.of(context).textTheme.bodyMedium),
-                              ),
-                              ..._places.asMap().entries.map((entry) {
-                                int index = entry.key;
-                                TourguidePlace place = entry.value;
+                      ReorderableListView(
+                        buildDefaultDragHandles: false,
+                        physics: ClampingScrollPhysics(),
+                        shrinkWrap: true,
+                        proxyDecorator: (child, index, animation) {
+                          return AnimatedBuilder(
+                            animation: animation,
+                            builder: (BuildContext context, Widget? child) {
+                              final double animValue = Curves.easeInOut.transform(animation.value);
+                              final double scale = lerpDouble(1, 1.05, animValue)!;
+                              return Transform.scale(
+                                scale: scale,
+                                child: Material(
+                                  color: Colors.white,
+                                  elevation: 8,
+                                  child: child,
+                                ),
+                              );
+                            },
+                            child: child,
+                          );
+                        },
+                        onReorder: (int oldIndex, int newIndex) {
+                          setState(() {
+                            if (newIndex > oldIndex) {
+                              newIndex -= 1;
+                            }
+                            final TourguidePlace place = _places.removeAt(oldIndex);
+                            _places.insert(newIndex, place);
 
-                                // Initialize controller text if it hasn't been set
-                                if (_placeControllers[index].text.isEmpty) {
-                                  _placeControllers[index].text = place.title;
-                                }
-                                return Row(
-                                  key: ValueKey(_placeControllers[index]), // Add a unique key
-                                  children: [
-                                    Expanded(
-                                      child: PlaceAutocomplete(
-                                        textEditingController: _placeControllers[index],
-                                        restrictToCities: false,
-                                        isFormSubmitted: _isFormSubmitted,
-                                        decoration: InputDecoration(
-                                          labelText: 'Place ${index + 1}',
-                                          border: const UnderlineInputBorder(),
-                                          suffixIcon: IconButton(
-                                            icon: const Icon(Icons.remove_circle_outline),
-                                            onPressed: () {
-                                              _removePlace(index);
-                                            },
-                                          ),
-                                        ),
-                                        customLabel: true,
-                                        onItemSelected: (AutocompletePrediction prediction) {
-                                            _updateTourguidePlaceDetails(index, prediction);
-                                        },
-                                      ),
+                            final TextEditingController controller = _placeControllers.removeAt(oldIndex);
+                            _placeControllers.insert(newIndex, controller);
+                          });
+                        },
+                        children: [
+                          for (int index = 0; index < _places.length; index++)
+                            Container(
+                              key: ValueKey(_placeControllers[index]),
+                              width: double.infinity,
+                              child: ListTile(
+                                contentPadding: EdgeInsets.symmetric(vertical: 0.0, horizontal: 0),
+                                leading: ReorderableDragStartListener(
+                                  index: index,
+                                  child: Icon(Icons.drag_handle),
+                                ),
+                                title: PlaceAutocomplete(
+                                  textEditingController: _placeControllers[index],
+                                  restrictToCities: false,
+                                  isFormSubmitted: _isFormSubmitted,
+                                  decoration: InputDecoration(
+                                    labelText: 'Place ${index + 1}',
+                                    border: const UnderlineInputBorder(),
+                                    suffixIcon: IconButton(
+                                      icon: const Icon(Icons.remove_circle_outline),
+                                      onPressed: () {
+                                        _removePlace(index);
+                                      },
                                     ),
-                                  ],
-                                );
-                              }).toList(),
-                              SizedBox(height: 16,),
-                              SizedBox(
-                                width: double.infinity,
-                                child: ElevatedButton.icon(
-                                  onPressed: _addPlace,
-                                  icon: Icon(Icons.add),
-                                  label: const Text('Add Place'),
+                                  ),
+                                  customLabel: true,
+                                  onItemSelected: (AutocompletePrediction prediction) {
+                                    _updateTourguidePlaceDetails(index, prediction);
+                                  },
                                 ),
                               ),
-                              SizedBox(height: 16,),
-                            ],
-                          ),
+                            ),
                         ],
                       ),
+                      SizedBox(height: 16,),
+                      SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton.icon(
+                          onPressed: _addPlace,
+                          icon: Icon(Icons.add),
+                          label: const Text('Add Place'),
+                        ),
+                      ),
+                      SizedBox(height: 16,),
                       if (state.hasError)
                         Text(
                           state.errorText ?? '',

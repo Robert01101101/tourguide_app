@@ -292,6 +292,7 @@ class ExploreState extends State<Explore> {
                           }
                         ),
                         Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -305,7 +306,7 @@ class ExploreState extends State<Explore> {
                             StandardLayoutChild(
                               fullWidth: true,
                               child: SizedBox(
-                                height: 200.0, // Set a fixed height for the horizontal scroller
+                                height: 220.0, // Set a fixed height for the horizontal scroller
                                 child: HorizontalScroller(tours: tourProvider.popularTours),
                               ),
                             ),
@@ -313,7 +314,7 @@ class ExploreState extends State<Explore> {
                             StandardLayoutChild(
                               fullWidth: true,
                               child: SizedBox(
-                                height: 200.0, // Set a fixed height for the horizontal scroller
+                                height: 220.0, // Set a fixed height for the horizontal scroller
                                 child: HorizontalScroller(tours: tourProvider.localTours),
                               ),
                             ),
@@ -321,7 +322,7 @@ class ExploreState extends State<Explore> {
                             StandardLayoutChild(
                               fullWidth: true,
                               child: SizedBox(
-                                height: 200.0, // Set a fixed height for the horizontal scroller
+                                height: 220.0, // Set a fixed height for the horizontal scroller
                                 child: HorizontalScroller(tours: tourProvider.globalTours),
                               ),
                             ),

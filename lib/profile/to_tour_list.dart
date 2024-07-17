@@ -36,7 +36,7 @@ class _ToTourListState extends State<ToTourList> {
             StandardLayoutChild(
               fullWidth: true,
               child: SizedBox(
-                height: 200.0, // Set a fixed height for the horizontal scroller
+                height: 220.0, // Set a fixed height for the horizontal scroller
                 child: HorizontalScroller(
                     leftPadding: true,
                     tours: tourProvider.userCreatedTours),

@@ -250,7 +250,7 @@ class TourService {
           tours.add(tour);
         }
       }
-      logger.t('fetchAllTours() finished getting all tours ${getFormattedTime()}');
+      logger.t('fetchAllTours() finished getting all tours ${getFormattedTime()}, total tours: ${tours.length}');
     } catch (e) {
       logger.e('Error fetching tours: $e');
     }

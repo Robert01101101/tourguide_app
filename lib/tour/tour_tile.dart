@@ -100,7 +100,7 @@ class _TourTileState extends State<TourTile> {
     return GestureDetector(
       onTap: () => widget.tour.isAddTourTile ? _createTour() : _showOverlay(context),
       child: Container(
-        width: 150.0,
+        width: 180.0,
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(16.0),
@@ -141,7 +141,7 @@ class _TourTileState extends State<TourTile> {
                     child: widget.tour.isOfflineCreatedTour && widget.tour.imageToUpload != null
                         ?
                     Image.file(widget.tour.imageToUpload!,
-                        width: 150.0,
+                        width: 180.0,
                         height: 100.0,
                         fit: BoxFit.cover)
                         :
@@ -149,48 +149,55 @@ class _TourTileState extends State<TourTile> {
                         ?
                     Image.network(
                       widget.tour.imageUrl,
-                      width: 150.0,
+                      width: 180.0,
                       height: 100.0,
                       fit: BoxFit.cover,
                     )
                         :
-                    Container(width: 150, height: 100, color: Colors.white,),
+                    Container(width: 180, height: 100, color: Colors.white,),
                   ),
                 ],
               ),
             ),
             Padding(
-              padding: const EdgeInsets.all(8.0),
+              padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 5),
               child: ShimmerLoading(
                 isLoading: !textDataReady,
                 child: textDataReady ?
                 Text(
                   widget.tour.name,
-                  style: Theme.of(context).textTheme.titleMedium,
+                  style: Theme.of(context).textTheme.titleSmall,
                   overflow: TextOverflow.ellipsis,
-                  maxLines: 1,
+                  maxLines: 2,
                 ) :
-                Container(width: 100, height: 23,  decoration: BoxDecoration(
+                Container(width: 120, height: 23,  decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(10), // Adjust the value to your preference
                 ),),
               ),
             ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8.0),
-              child: ShimmerLoading(
-                isLoading: !textDataReady,
-                child: textDataReady ?
-                 Text(
-                  widget.tour.description,
-                   style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Colors.grey[600]),
-                   overflow: TextOverflow.ellipsis,
-                   maxLines: 2,
-                ) :
-                Container(width: 100, height: 23,  decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(10), // Adjust the value to your preference
-                ),),
+            Container(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 3),
+                child: ShimmerLoading(
+                  isLoading: !textDataReady,
+                  child: textDataReady ?
+                   Container(
+                     child: Align(
+                       alignment: Alignment.topCenter,
+                       child: Text(
+                        widget.tour.description,
+                         style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Colors.grey[600]),
+                         overflow: TextOverflow.ellipsis,
+                         maxLines: 3,
+                       ),
+                     ),
+                   ) :
+                  Container(width: 100, height: 23,  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(10), // Adjust the value to your preference
+                  ),),
+                ),
               ),
             ),
           ],
@@ -327,9 +334,8 @@ class _ExpandedTourTileOverlayState extends State<ExpandedTourTileOverlay> {
                     SizedBox(height: 16.0),
                     Text(
                       widget.tour.description,
-                      style: Theme.of(context).textTheme.bodyLarge,
+                      style: Theme.of(context).textTheme.bodyMedium,
                     ),
-                    SizedBox(height: 16.0),
                   ],
                 ),
               ),

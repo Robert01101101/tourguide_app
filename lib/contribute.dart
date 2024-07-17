@@ -100,7 +100,7 @@ class _ContributeState extends State<Contribute> {
                 StandardLayoutChild(
                   fullWidth: true,
                   child: SizedBox(
-                    height: 200.0, // Set a fixed height for the horizontal scroller
+                    height: 220.0, // Set a fixed height for the horizontal scroller
                     child: HorizontalScroller(tours: tourProvider.userCreatedTours, leftPadding: true),
                   ),
                 ),

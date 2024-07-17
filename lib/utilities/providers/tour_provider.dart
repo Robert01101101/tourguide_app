@@ -42,15 +42,6 @@ class TourProvider with ChangeNotifier {
       _userCreatedTours = TourService.userCreatedTours(_allTours, userId);
       _userSavedTours = TourService.userSavedTours(_allTours, userId);
 
-      //add empty tour if no tours
-      if (_popularTours.isEmpty) _popularTours = List.generate(1, (index) => Tour.isAddTourTile());
-      if (_localTours.isEmpty) _localTours = List.generate(1, (index) => Tour.isAddTourTile());
-      if (_globalTours.isEmpty) _globalTours = List.generate(1, (index) => Tour.isAddTourTile());
-      if (_userCreatedTours.isEmpty) {
-        _userCreatedTours = List.generate(1, (index) => Tour.isAddTourTile());
-      } else {
-        _userCreatedTours.insert(0,Tour.isAddTourTile());
-      }
       notifyListeners();
       _getTourRatings(userId);
     } catch (error) {
@@ -58,11 +49,28 @@ class TourProvider with ChangeNotifier {
     }
   }
 
+  // TODO: make more efficient, only call once per tour
   Future<void> _getTourRatings(String userId) async {
     logger.t('getTourRatings ${getFormattedTime()}');
-    _popularTours = await TourService.checkUserRatings(popularTours, userId);
-    _localTours = await TourService.checkUserRatings(localTours, userId);
-    _globalTours = await TourService.checkUserRatings(globalTours, userId);
+    bool getPopularTourRatings = _popularTours.isNotEmpty;
+    bool getLocalTourRatings = _localTours.isNotEmpty;
+    bool getGlobalTourRatings = _globalTours.isNotEmpty;
+    bool getUserCreatedTourRatings = _userCreatedTours.isNotEmpty;
+    //add empty tour if no tours
+    if (!getPopularTourRatings) _popularTours = List.generate(1, (index) => Tour.isAddTourTile());
+    if (!getLocalTourRatings) _localTours = List.generate(1, (index) => Tour.isAddTourTile());
+    if (!getGlobalTourRatings) _globalTours = List.generate(1, (index) => Tour.isAddTourTile());
+    if (!getUserCreatedTourRatings) {
+      _userCreatedTours = List.generate(1, (index) => Tour.isAddTourTile());
+    } else {
+      _userCreatedTours.insert(0,Tour.isAddTourTile());
+    }
+    notifyListeners();
+
+    if (getPopularTourRatings) _popularTours = await TourService.checkUserRatings(popularTours, userId);
+    if (getLocalTourRatings) _localTours = await TourService.checkUserRatings(localTours, userId);
+    if (getGlobalTourRatings) _globalTours = await TourService.checkUserRatings(globalTours, userId);
+    if (getUserCreatedTourRatings) _userCreatedTours = await TourService.checkUserRatings(globalTours, userId);
     _isLoadingTours = false;
     notifyListeners();
   }
