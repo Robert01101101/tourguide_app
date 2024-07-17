@@ -52,8 +52,10 @@ class _ProfileSettingsState extends State<ProfileSettings> {
     });
   }
 
+  // TODO: fix access to context -> don't do in async
   Future<void> _setUsername () async {
     logger.t('Setting username');
+    myAuth.AuthProvider authProvider = Provider.of(context);
     if (_updatingUsername) return;
     setState(() {
       _updatingUsername = true;
@@ -70,7 +72,9 @@ class _ProfileSettingsState extends State<ProfileSettings> {
       });
       return;
     }
-    await userProvider.updateUser(userProvider.user!.copyWith(username: _newUsername));
+    await userProvider.updateUser(userProvider.user!.copyWith(
+        username: _newUsername,
+        displayName: authProvider.googleSignInUser!.displayName!));
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text('Updated username to ${userProvider.user!.username}')),
     );

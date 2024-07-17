@@ -62,15 +62,16 @@ class TourProvider with ChangeNotifier {
     if (!getGlobalTourRatings) _globalTours = List.generate(1, (index) => Tour.isAddTourTile());
     if (!getUserCreatedTourRatings) {
       _userCreatedTours = List.generate(1, (index) => Tour.isAddTourTile());
-    } else {
-      _userCreatedTours.insert(0,Tour.isAddTourTile());
     }
     notifyListeners();
 
     if (getPopularTourRatings) _popularTours = await TourService.checkUserRatings(popularTours, userId);
     if (getLocalTourRatings) _localTours = await TourService.checkUserRatings(localTours, userId);
     if (getGlobalTourRatings) _globalTours = await TourService.checkUserRatings(globalTours, userId);
-    if (getUserCreatedTourRatings) _userCreatedTours = await TourService.checkUserRatings(globalTours, userId);
+    if (getUserCreatedTourRatings) {
+      _userCreatedTours = await TourService.checkUserRatings(globalTours, userId);
+      _userCreatedTours.insert(0,Tour.isAddTourTile());
+    }
     _isLoadingTours = false;
     notifyListeners();
   }

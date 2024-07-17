@@ -2,12 +2,14 @@ class TourguideUser {
   String firebaseAuthId;
   String? googleSignInId;
   String username;
+  String? displayName;
   List<String> savedTourIds;
 
   TourguideUser({
     required this.firebaseAuthId,
     this.googleSignInId,
     required this.username,
+    this.displayName,
     required this.savedTourIds,
   });
 
@@ -17,6 +19,7 @@ class TourguideUser {
       'firebaseAuthId': firebaseAuthId,
       'googleSignInId': googleSignInId,
       'username': username,
+      'displayName': displayName,
       'savedTourIds': savedTourIds,
     };
   }
@@ -27,6 +30,7 @@ class TourguideUser {
       firebaseAuthId: map['firebaseAuthId'],
       googleSignInId: map['googleSignInId'],
       username: map['username'],
+      displayName: map['displayName'],
       savedTourIds: List<String>.from(map['savedTourIds']),
     );
   }
@@ -35,12 +39,14 @@ class TourguideUser {
     String? firebaseAuthId,
     String? googleSignInId,
     String? username,
+    String? displayName,
     List<String>? savedTourIds,
   }) {
     return TourguideUser(
       firebaseAuthId: firebaseAuthId ?? this.firebaseAuthId,
       googleSignInId: googleSignInId ?? this.googleSignInId,
       username: username ?? this.username,
+      displayName: displayName ?? this.displayName,
       savedTourIds: savedTourIds ?? this.savedTourIds,
     );
   }

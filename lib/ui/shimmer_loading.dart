@@ -59,21 +59,39 @@ class _ShimmerLoadingState extends State<ShimmerLoading> {
     }
     final shimmerSize = shimmer.size;
     final gradient = shimmer.gradient;
-    final offsetWithinShimmer = shimmer.getDescendantOffset(
-      descendant: context.findRenderObject() as RenderBox,
-    );
+    // Ensure the RenderBox is available.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final renderObject = context.findRenderObject();
+      if (renderObject is RenderBox) {
+        final offsetWithinShimmer = shimmer.getDescendantOffset(
+          descendant: renderObject,
+        );
+
+        setState(() {
+          // Use the offsetWithinShimmer here if needed
+        });
+      }
+    });
+
 
     return ShaderMask(
       blendMode: BlendMode.srcATop,
       shaderCallback: (bounds) {
-        return gradient.createShader(
-          Rect.fromLTWH(
-            -offsetWithinShimmer.dx,
-            -offsetWithinShimmer.dy,
-            shimmerSize.width,
-            shimmerSize.height,
-          ),
-        );
+        final renderObject = context.findRenderObject();
+        if (renderObject is RenderBox) {
+          final offsetWithinShimmer = shimmer.getDescendantOffset(
+            descendant: renderObject,
+          );
+          return gradient.createShader(
+            Rect.fromLTWH(
+              -offsetWithinShimmer.dx,
+              -offsetWithinShimmer.dy,
+              shimmerSize.width,
+              shimmerSize.height,
+            ),
+          );
+        }
+        return gradient.createShader(bounds);
       },
       child: widget.child,
     );

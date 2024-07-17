@@ -120,11 +120,11 @@ class _FullscreenTourPageState extends State<FullscreenTourPage> {
             'mode=${attempt == 1 ? 'walking&' : 'driving&'}'
             'key=$apiKey';
 
-        logger.i(url);
+        //logger.i(url);
 
         final response = await http.get(Uri.parse(url));
 
-        logger.i(response.body);
+        //logger.i(response.body);
 
         if (response.statusCode == 200) {
           Map<String, dynamic> data = jsonDecode(response.body);
@@ -280,15 +280,20 @@ class _FullscreenTourPageState extends State<FullscreenTourPage> {
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        if (widget.tour.imageUrl != null && widget.tour.imageUrl.isNotEmpty)
+                        if (widget.tour.imageUrl != null && widget.tour.imageUrl.isNotEmpty || widget.tour.isOfflineCreatedTour && widget.tour.imageToUpload != null)
                           Container(
                             height: 230,
                             child: ClipRRect(
-                              child: Image.network(
-                                widget.tour.imageUrl,
-                                width: MediaQuery.of(context).size.width,
-                                height: 230.0, // Adjust height as needed
-                                fit: BoxFit.cover,
+                              child: widget.tour.isOfflineCreatedTour && widget.tour.imageToUpload != null  //add null safety for img to upload
+                              ? Image.file(widget.tour.imageToUpload!,
+                                  width: MediaQuery.of(context).size.width,
+                                  height: 200.0,
+                                  fit: BoxFit.cover)
+                              : Image.network(
+                                  widget.tour.imageUrl,
+                                  width: MediaQuery.of(context).size.width,
+                                  height: 230.0, // Adjust height as needed
+                                  fit: BoxFit.cover,
                               ),
                             ),
                           ),
@@ -379,7 +384,24 @@ class _FullscreenTourPageState extends State<FullscreenTourPage> {
                     if (widget.tour.tourguidePlaces.isNotEmpty)
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
-                        children: widget.tour.tourguidePlaces.map((place) => Text(place.title)).toList(),
+                        children: widget.tour.tourguidePlaces.map((place) {
+                          return Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 8.0),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  place.title,
+                                  style: Theme.of(context).textTheme.titleMedium,
+                                ),
+                                Text(
+                                  place.description, // Assuming each place has a 'description' field
+                                  style: Theme.of(context).textTheme.bodyMedium,
+                                ),
+                              ],
+                            ),
+                          );
+                        }).toList(),
                       ),
                   ],
                 ),

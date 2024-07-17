@@ -47,8 +47,9 @@ class TourguideUserProvider with ChangeNotifier {
     final auth.User? firebaseUser = _firebaseAuth.currentUser;
     _user = TourguideUser(
       firebaseAuthId: firebaseUser!.uid,
-      googleSignInId: _authProvider!.googleSignInUser?.id,
+      googleSignInId: _authProvider!.googleSignInUser!.id,
       username: firebaseUser.displayName ?? 'Anonymous',
+      displayName: _authProvider!.googleSignInUser!.displayName!,
       savedTourIds: [],
     );
     notifyListeners();

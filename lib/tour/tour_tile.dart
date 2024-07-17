@@ -21,7 +21,7 @@ class TourTile extends StatefulWidget {
 
 class _TourTileState extends State<TourTile> {
   late String imageUrl;
-  bool isLoading = true;
+  bool isLoadingImage = true;
 
   @override
   void initState() {
@@ -51,13 +51,13 @@ class _TourTileState extends State<TourTile> {
     final ImageStreamListener listener = ImageStreamListener((ImageInfo info, bool synchronousCall) {
       if (mounted) {
         setState(() {
-          isLoading = false;
+          isLoadingImage = false;
         });
       }
     }, onError: (dynamic exception, StackTrace? stackTrace) {
       if (mounted) {
         setState(() {
-          isLoading = false;
+          isLoadingImage = false;
         });
       }
     });
@@ -137,7 +137,7 @@ class _TourTileState extends State<TourTile> {
               child: Stack(
                 children: [
                   ShimmerLoading(
-                    isLoading: widget.tour.isOfflineCreatedTour ? false : isLoading,
+                    isLoading: widget.tour.isOfflineCreatedTour ? false : isLoadingImage,
                     child: widget.tour.isOfflineCreatedTour && widget.tour.imageToUpload != null
                         ?
                     Image.file(widget.tour.imageToUpload!,
@@ -145,7 +145,7 @@ class _TourTileState extends State<TourTile> {
                         height: 100.0,
                         fit: BoxFit.cover)
                         :
-                    !isLoading && widget.tour.imageUrl.isNotEmpty  || widget.tour.isOfflineCreatedTour && widget.tour.imageToUpload != null
+                    !isLoadingImage && widget.tour.imageUrl.isNotEmpty  || widget.tour.isOfflineCreatedTour && widget.tour.imageToUpload != null
                         ?
                     Image.network(
                       widget.tour.imageUrl,
@@ -170,10 +170,13 @@ class _TourTileState extends State<TourTile> {
                   overflow: TextOverflow.ellipsis,
                   maxLines: 2,
                 ) :
-                Container(width: 120, height: 23,  decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(10), // Adjust the value to your preference
-                ),),
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 4.0),
+                  child: Container(width: 140, height: 30,  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(10), // Adjust the value to your preference
+                  ),),
+                ),
               ),
             ),
             Container(
@@ -193,10 +196,13 @@ class _TourTileState extends State<TourTile> {
                        ),
                      ),
                    ) :
-                  Container(width: 100, height: 23,  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(10), // Adjust the value to your preference
-                  ),),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 2.0),
+                    child: Container(width: 100, height: 23,  decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(10), // Adjust the value to your preference
+                    ),),
+                  ),
                 ),
               ),
             ),

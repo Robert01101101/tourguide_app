@@ -38,9 +38,11 @@ class _CreateTourState extends State<CreateTour> {
   final TextEditingController _cityController = TextEditingController();
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final GlobalKey<FormState> _formKeyPlaces = GlobalKey<FormState>();
+  final GlobalKey<FormState> _formKeyPlacesDetails = GlobalKey<FormState>();
   final GlobalKey<FormState> _formKeyDetails = GlobalKey<FormState>();
   AutovalidateMode _formValidateMode = AutovalidateMode.disabled;
   AutovalidateMode _formPlacesValidateMode = AutovalidateMode.disabled;
+  AutovalidateMode _formPlacesDetailsValidateMode = AutovalidateMode.disabled;
   AutovalidateMode _formDetailsValidateMode = AutovalidateMode.disabled;
   final List<TextEditingController> _placeControllers = [];
 
@@ -48,7 +50,7 @@ class _CreateTourState extends State<CreateTour> {
   bool _tourIsPublic = true; // Initial boolean value
   bool _isFormSubmitted = false;
   final int _descriptionMaxChars = 250;
-  final int _validationStepIndex = 3;
+  final int _validationStepIndex = 4;
   File? _image;
   List<TourguidePlace> _places = []; // List to hold TourguidePlace instances
   Place? _city;
@@ -83,7 +85,7 @@ class _CreateTourState extends State<CreateTour> {
   // TODO; don't use context in async!!
   Future<void> _firestoreCreateTour() async {
     try {
-      if (_formKey.currentState!.validate() && _formKeyPlaces.currentState!.validate() && _formKeyDetails.currentState!.validate()){
+      if (_formKey.currentState!.validate() && _formKeyPlaces.currentState!.validate() && _formKeyPlacesDetails.currentState!.validate() && _formKeyDetails.currentState!.validate()){
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Uploading tour...')),
         );
@@ -115,6 +117,8 @@ class _CreateTourState extends State<CreateTour> {
         await db.collection("tours").doc(tourId).update({
           'id': _tour.id, // Update the 'id' field with the new tourId
         });
+
+        logger.i('Successfully created tour: ${_tour.toString()}');
 
         //add empty rating for user
         TourService.addOrUpdateRating(_tour.id, 0, authProvider.user!.uid);
@@ -222,7 +226,17 @@ class _CreateTourState extends State<CreateTour> {
             });
           }
           break;
-        case 2: // Details
+        case 2: // Place Details
+          isValid = _formKeyPlacesDetails.currentState!.validate();
+          //Set the description of the places using the controller
+          setState(() {
+            for (int i = 0; i < _places.length; i++) {
+              String description = _places[i].descriptionEditingController!.text;
+              _places[i] = _places[i].copyWith(description: filter.censor(description));
+            }
+          });
+          break;
+        case 3: // Tour Details
           isValid = _formKeyDetails.currentState!.validate();
           //_image is set directly so nothing to do here for now
           setState(() {
@@ -287,6 +301,7 @@ class _CreateTourState extends State<CreateTour> {
       title: placePrediction.primaryText,
       description: '',
       photoUrls: [],
+      descriptionEditingController: TextEditingController(),
     );
     setState(() {
       _places[index] = newTourguidePlace;
@@ -388,6 +403,7 @@ class _CreateTourState extends State<CreateTour> {
                   TextFormField(
                     controller: _descriptionController,
                     keyboardType: TextInputType.multiline,
+                    minLines: 4,
                     maxLines: 8,
                     maxLength: _descriptionMaxChars,
                     decoration: InputDecoration(
@@ -534,9 +550,54 @@ class _CreateTourState extends State<CreateTour> {
             ),
           ),
           Step(
-            title: const Text('Details'),
+            title: const Text('Places Details'),
             isActive: _currentStep >= 2,
             state: _currentStep > 2 ? StepState.complete : StepState.indexed,
+            content: Form(
+              autovalidateMode: _formPlacesDetailsValidateMode,
+              key: _formKeyPlacesDetails,
+              child: ListView.builder(
+                physics: ClampingScrollPhysics(),
+                shrinkWrap: true,
+                itemCount: _places.length,
+                itemBuilder: (BuildContext context, int index) {
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 8.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          (index+1).toString() + ")  " + _places[index].title, // Assuming _places[index] has a 'name' field
+                          style: Theme.of(context).textTheme.titleMedium,
+                        ),
+                        SizedBox(height: 2,),
+                        TextFormField(
+                          controller: _places[index].descriptionEditingController, // Assuming each place has a description controller
+                          decoration: InputDecoration(
+                            labelText: 'Description',
+                          ),
+                          minLines: 4,
+                          maxLines: 20,
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Please enter a description';
+                            }
+                            return null;
+                          },
+                        ),
+                        if (index < _places.length - 1)
+                          SizedBox(height: 20,),
+                      ],
+                    ),
+                  );
+                },
+              ),
+            ),
+          ),
+          Step(
+            title: const Text('Details'),
+            isActive: _currentStep >= 3,
+            state: _currentStep > 3 ? StepState.complete : StepState.indexed,
             content: Form(
               autovalidateMode: _formDetailsValidateMode,
               key: _formKeyDetails,
@@ -568,8 +629,8 @@ class _CreateTourState extends State<CreateTour> {
           ),
           Step(
             title: const Text('Review'),
-            isActive: _currentStep >= 3,
-            state: _currentStep > 3 ? StepState.complete : StepState.indexed,
+            isActive: _currentStep >= 4,
+            state: _currentStep > 4 ? StepState.complete : StepState.indexed,
             content: Container(
               width: double.infinity,
               child: Column(
@@ -580,9 +641,12 @@ class _CreateTourState extends State<CreateTour> {
                     // small body text
                     child: Text('Here\'s what your tour will look like', style: Theme.of(context).textTheme.bodyMedium),
                   ),
-                  Shimmer(
-                      linearGradient: MyGlobals.shimmerGradient,
-                      child: TourTile(tour: _tour)
+                  SizedBox(
+                    height: 220,
+                    child: Shimmer(
+                        linearGradient: MyGlobals.shimmerGradient,
+                        child: TourTile(tour: _tour)
+                    ),
                   ),
                   SizedBox(height: 32,),
                 ],
