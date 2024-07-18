@@ -8,6 +8,7 @@ import 'package:tourguide_app/ui/my_layouts.dart';
 import 'package:tourguide_app/utilities/providers/tour_provider.dart';
 import '../utilities/custom_import.dart';
 import 'package:http/http.dart' as http;
+import '../utilities/singletons/tts_service.dart';
 import 'tour_tile.dart'; // Ensure this imports your TileData model
 
 class FullscreenTourPage extends StatefulWidget {
@@ -29,6 +30,7 @@ class _FullscreenTourPageState extends State<FullscreenTourPage> {
   );
   Set<Marker> _markers = Set<Marker>();
   Set<Polyline> _polylines = Set<Polyline>();
+  final TtsService _ttsService = TtsService();
 
 
   @override
@@ -387,17 +389,26 @@ class _FullscreenTourPageState extends State<FullscreenTourPage> {
                         children: widget.tour.tourguidePlaces.map((place) {
                           return Padding(
                             padding: const EdgeInsets.symmetric(vertical: 8.0),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                Text(
-                                  place.title,
-                                  style: Theme.of(context).textTheme.titleMedium,
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      place.title,
+                                      style: Theme.of(context).textTheme.titleMedium,
+                                    ),
+                                    Text(
+                                      place.description, // Assuming each place has a 'description' field
+                                      style: Theme.of(context).textTheme.bodyMedium,
+                                    ),
+                                  ],
                                 ),
-                                Text(
-                                  place.description, // Assuming each place has a 'description' field
-                                  style: Theme.of(context).textTheme.bodyMedium,
-                                ),
+                                IconButton(
+                                    onPressed: () => _ttsService.speak(place.description),
+                                    icon: Icon(Icons.play_circle),
+                                )
                               ],
                             ),
                           );
