@@ -70,7 +70,6 @@ class __AddImageTileContentState extends State<_AddImageTileContent> {
       ignoring: !widget.enabled,
       child: Container(
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(20.0),
           border: Border.all(
             color: !widget.state.hasError
                 ? widget.enabled ? Theme.of(context).primaryColor : Colors.grey
@@ -79,14 +78,13 @@ class __AddImageTileContentState extends State<_AddImageTileContent> {
           ),
           color: Colors.transparent,
         ),
-        height: 200,
-        width: 200,
+        height: 146,
+        width: 146,
         child: Stack(
           fit: StackFit.expand,
           children: [
             if (_imageFile != null)
               ClipRRect(
-                borderRadius: BorderRadius.circular(18.0),
                 child: Image.file(
                   _imageFile!,
                   fit: BoxFit.cover,
@@ -95,7 +93,6 @@ class __AddImageTileContentState extends State<_AddImageTileContent> {
             if (_imageFile != null)
               Container(
                 decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(18.0),
                   gradient: LinearGradient(
                     begin: Alignment.topCenter,
                     end: Alignment.bottomCenter,

@@ -11,6 +11,7 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:tourguide_app/model/tourguide_place.dart';
 import 'package:tourguide_app/tour/tour_tile.dart';
 import 'package:tourguide_app/ui/add_image_tile.dart';
+import 'package:tourguide_app/ui/google_places_image.dart';
 import 'package:tourguide_app/ui/place_autocomplete.dart';
 import 'package:tourguide_app/ui/my_layouts.dart';
 import 'package:tourguide_app/ui/shimmer_loading.dart';
@@ -50,11 +51,11 @@ class _CreateTourState extends State<CreateTour> {
   bool _tourIsPublic = true; // Initial boolean value
   bool _isFormSubmitted = false;
   final int _descriptionMaxChars = 250;
-  final int _validationStepIndex = 4;
+  final int _reviewStepIndex = 4;
   File? _image;
   List<TourguidePlace> _places = []; // List to hold TourguidePlace instances
   Place? _city;
-
+  int _selectedImgIndex = 0;
   int _currentStep = 0;
 
   void _addPlace() {
@@ -65,7 +66,7 @@ class _CreateTourState extends State<CreateTour> {
         googleMapPlaceId: '',
         title: '',
         description: '',
-        photoUrls: [],
+        photoUrl: '',
       ));
       _placeControllers.add(TextEditingController());
     });
@@ -85,52 +86,62 @@ class _CreateTourState extends State<CreateTour> {
   // TODO; don't use context in async!!
   Future<void> _firestoreCreateTour() async {
     try {
-      if (_formKey.currentState!.validate() && _formKeyPlaces.currentState!.validate() && _formKeyPlacesDetails.currentState!.validate() && _formKeyDetails.currentState!.validate()){
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Uploading tour...')),
-        );
-        // Validation passed, proceed with tour creation
-        FirebaseFirestore db = FirebaseFirestore.instance;
-        FirebaseAuth auth = FirebaseAuth.instance;
-        final myAuth.AuthProvider authProvider = Provider.of(context, listen: false);
-        final User user = auth.currentUser!;
-        final uid = authProvider.user!.uid;
-
-        // Upload image
-        String imageUrl = await _uploadImage(_image!);
-
-        //Final update to tour data
-        _tour = _tour.copyWith(
-          visibility: _tourIsPublic ? "public" : "private", //always true for now
-          createdDateTime: DateTime.now(),
-          authorId: uid,
-          authorName: user.displayName,
-          imageUrl: imageUrl,
-        );
-
-        // Step 1: Add tour document to 'tours' collection
-        DocumentReference tourDocRef = await db.collection("tours").add(_tour.toMap());
-        String tourId = tourDocRef.id; // Retrieve the auto-generated ID
-
-        // Update the local Tour object's ID field
-        _tour = _tour.copyWith(id: tourId);
-        await db.collection("tours").doc(tourId).update({
-          'id': _tour.id, // Update the 'id' field with the new tourId
-        });
-
-        logger.i('Successfully created tour: ${_tour.toString()}');
-
-        //add empty rating for user
-        TourService.addOrUpdateRating(_tour.id, 0, authProvider.user!.uid);
-
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Successfully created tour. Thanks for contributing!')),
-        );
-        Navigator.pop(context);
-
+      if (!(_formKey.currentState!.validate() && _formKeyPlaces.currentState!.validate() && _formKeyPlacesDetails.currentState!.validate() && _formKeyDetails.currentState!.validate())){
+        //log the form that failed
+        if (!(_formKey.currentState!.validate())) logger.e('Error creating tour: Basic Info form validation failed');
+        if (!(_formKeyPlaces.currentState!.validate())) logger.e('Error creating tour: Places form validation failed');
+        if (!(_formKeyPlacesDetails.currentState!.validate())) logger.e('Error creating tour: Places Details form validation failed');
+        if (!(_formKeyDetails.currentState!.validate())) logger.e('Error creating tour: Details form validation failed');
+        return;
       }
-    } catch (e) {
-      logger.e('Error creating tour: $e');
+      final tourProvider = Provider.of<TourProvider>(context, listen: false);
+      setState(() {
+        _isFormSubmitted = true;
+        tourProvider.addTourToAllTours(_tour);
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Uploading tour...')),
+      );
+      // Validation passed, proceed with tour creation
+      FirebaseFirestore db = FirebaseFirestore.instance;
+      FirebaseAuth auth = FirebaseAuth.instance;
+      final myAuth.AuthProvider authProvider = Provider.of(context, listen: false);
+      final User user = auth.currentUser!;
+      final uid = authProvider.user!.uid;
+
+      // Upload image
+      String imageUrl = await _uploadImage(_tour.imageToUpload!);
+
+      //Final update to tour data
+      _tour = _tour.copyWith(
+        visibility: _tourIsPublic ? "public" : "private", //always true for now
+        createdDateTime: DateTime.now(),
+        authorId: uid,
+        authorName: user.displayName,
+        imageUrl: imageUrl,
+      );
+
+      // Step 1: Add tour document to 'tours' collection
+      DocumentReference tourDocRef = await db.collection("tours").add(_tour.toMap());
+      String tourId = tourDocRef.id; // Retrieve the auto-generated ID
+
+      // Update the local Tour object's ID field
+      _tour = _tour.copyWith(id: tourId);
+      await db.collection("tours").doc(tourId).update({
+        'id': _tour.id, // Update the 'id' field with the new tourId
+      });
+
+      logger.i('Successfully created tour: ${_tour.toString()}');
+
+      //add empty rating for user
+      TourService.addOrUpdateRating(_tour.id, 0, authProvider.user!.uid);
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Successfully created tour. Thanks for contributing!')),
+      );
+      Navigator.pop(context);
+    } catch (e, stackTrace) {
+      logger.e('Error creating tour: $e \n stackTrace: $stackTrace');
       ScaffoldMessenger.of(context).hideCurrentSnackBar();
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Failed to create tour. Please try again.')),
@@ -181,12 +192,9 @@ class _CreateTourState extends State<CreateTour> {
   void _tryToGoToStep(int step){
     final tourProvider = Provider.of<TourProvider>(context, listen: false);
 
-    if (step == _validationStepIndex+1) {
+    if (step == _reviewStepIndex+1) {
       // Final step (Review), create the tour
-      setState(() {
-        _isFormSubmitted = true;
-        tourProvider.addTourToAllTours(_tour);
-      });
+      logger.t("_currentStep: $_currentStep, step: $step -> Creating tour...");
       _firestoreCreateTour();
       return;
     }
@@ -238,19 +246,14 @@ class _CreateTourState extends State<CreateTour> {
           break;
         case 3: // Tour Details
           isValid = _formKeyDetails.currentState!.validate();
-          //_image is set directly so nothing to do here for now
-          setState(() {
-            _tour = _tour.copyWith(
-              imageToUpload: _image,
-            );
-          });
+          _tour = _tour.copyWith(imageToUpload: _selectedImgIndex == -1 ? _image : _places[_selectedImgIndex!].imageFile);
           logger.i("Reviewing tour: ${_tour.toString()}");
           break;
         default:
           break;
       }
     }
-    if (step == _validationStepIndex){
+    if (step == _reviewStepIndex){
       tourProvider.addTourToAllTours(_tour);
     } else {
       tourProvider.removeTourFromAllTours(_tour);
@@ -294,17 +297,42 @@ class _CreateTourState extends State<CreateTour> {
   Future <void> _updateTourguidePlaceDetails(int index, AutocompletePrediction placePrediction) async{
     LocationProvider locationProvider = Provider.of(context, listen: false);
     Place? googlePlaceWithDetails = await locationProvider.getLocationDetailsFromPlaceId(placePrediction.placeId);
+    TourguidePlaceImg? tourguidePlaceImg = await locationProvider.fetchPlacePhoto(placeId: placePrediction.placeId, setAsCurrentImage: false);
+    String? photoUrl;
+    Image? photo;
+    tourguidePlaceImg!.googlePlacesImg!.placePhotoResponse?.maybeWhen(
+      image: (image) {
+        photo = image;
+        logger.i("_updateTourguidePlaceDetails() - googlePlacesImg!.placePhotoResponse?.maybeWhen -> returned image");
+      },
+      imageUrl: (imageUrl) {
+        photoUrl = imageUrl;
+        logger.i("_updateTourguidePlaceDetails() - googlePlacesImg!.placePhotoResponse?.maybeWhen -> returned imagUrl=${imageUrl}");
+      },
+      orElse: () {
+        logger.w("_updateTourguidePlaceDetails() - googlePlacesImg!.placePhotoResponse?.maybeWhen -> returned orElse");
+      },
+    );
     TourguidePlace newTourguidePlace = TourguidePlace(
       latitude: googlePlaceWithDetails!.latLng!.lat,
       longitude: googlePlaceWithDetails!.latLng!.lng,
       googleMapPlaceId: googlePlaceWithDetails!.id!,
       title: placePrediction.primaryText,
       description: '',
-      photoUrls: [],
+      photoUrl: photoUrl ?? '',
+      image: photo,
+      imageFile: tourguidePlaceImg.file,
       descriptionEditingController: TextEditingController(),
     );
+    logger.i("_updateTourguidePlaceDetails() - created updated TourguidePlace: $newTourguidePlace");
     setState(() {
       _places[index] = newTourguidePlace;
+    });
+  }
+
+  void _setTourImageSelection(int newIndex){
+    setState(() {
+      _selectedImgIndex = newIndex;
     });
   }
 
@@ -353,7 +381,7 @@ class _CreateTourState extends State<CreateTour> {
                       borderRadius: BorderRadius.circular(3.0), // Custom radius
                     ),
                   ),
-                  child: _currentStep < 3 ? const Text('Next') : const Text('Create Tour'),
+                  child: _currentStep != _reviewStepIndex ? const Text('Next') : const Text('Create Tour'),
                 ),
                 Spacer(),
                 if (_currentStep == 1)
@@ -570,23 +598,41 @@ class _CreateTourState extends State<CreateTour> {
                           (index+1).toString() + ")  " + _places[index].title, // Assuming _places[index] has a 'name' field
                           style: Theme.of(context).textTheme.titleMedium,
                         ),
-                        SizedBox(height: 2,),
-                        TextFormField(
-                          controller: _places[index].descriptionEditingController, // Assuming each place has a description controller
-                          decoration: InputDecoration(
-                            labelText: 'Description',
+                        Padding(
+                          padding: const EdgeInsets.only(left: 20.0, top: 8.0),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              if (_places[index].image != null)
+                                Container(
+                                  height: 100, // Set the desired height here
+                                  width: double.infinity, // Make it fill the width of its parent
+                                  child: FittedBox(
+                                    fit: BoxFit.cover,
+                                    clipBehavior: Clip.hardEdge,
+                                    child: _places[index].image!,
+                                  ),
+                                ),
+                              SizedBox(height: 2,),
+                              TextFormField(
+                                controller: _places[index].descriptionEditingController, // Assuming each place has a description controller
+                                decoration: InputDecoration(
+                                  labelText: 'Description',
+                                ),
+                                minLines: 3,
+                                maxLines: 20,
+                                validator: (value) {
+                                  if (value == null || value.isEmpty) {
+                                    return 'Please enter a description';
+                                  }
+                                  return null;
+                                },
+                              ),
+                              if (index < _places.length - 1)
+                                SizedBox(height: 30,),
+                            ],
                           ),
-                          minLines: 4,
-                          maxLines: 20,
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return 'Please enter a description';
-                            }
-                            return null;
-                          },
                         ),
-                        if (index < _places.length - 1)
-                          SizedBox(height: 20,),
                       ],
                     ),
                   );
@@ -602,25 +648,96 @@ class _CreateTourState extends State<CreateTour> {
               autovalidateMode: _formDetailsValidateMode,
               key: _formKeyDetails,
               child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Center(
-                    child: AddImageTile(
-                      initialValue: _image,
-                      validator: (value) {
-                        if (value == null) {
-                          return 'Please add an image';
-                        }
-                        return null;
-                      },
-                      onSaved: (value) {
-                        _image = value;
-                      },
-                      onChanged: (value) {
-                        setState(() {
-                          _image = value;
-                        });
-                      },
-                      enabled: !_isFormSubmitted,
+                  Text('Select an image for your tour', style: Theme.of(context).textTheme.titleMedium),
+                  SizedBox(height: 16,),
+                  SizedBox(
+                    height: ((_places.length+1)/2).ceil() * 164,
+                    child: GridView.count(
+                      crossAxisCount: 2,
+                      physics: NeverScrollableScrollPhysics(),
+                      crossAxisSpacing: 8.0,
+                      mainAxisSpacing: 8.0,
+                      childAspectRatio: 1.0, // Adjust as needed
+                      children: [
+                        for (int i = 0; i < _places.length; i++)
+                          if (_places[i].image != null)
+                            GestureDetector(
+                              onTap: () {
+                                _setTourImageSelection(i);
+                              },
+                              child: Stack(
+                                fit: StackFit.expand,
+                                children: [
+                                  Container(
+                                    height: 146, // Set the desired height here
+                                    width: 146, // Make it fill the width of its parent
+                                    child: FittedBox(
+                                      fit: BoxFit.cover,
+                                      clipBehavior: Clip.hardEdge,
+                                      child: _places[i].image!,
+                                    ),
+                                  ),
+                                  if (_selectedImgIndex == i)
+                                    Container(
+                                      color: Colors.white.withOpacity(0.3), // Adjust the opacity to make it darker or lighter
+                                    ),
+                                  if (_selectedImgIndex == i)
+                                    Positioned(
+                                      top: 4,
+                                      right: 4,
+                                      child: Icon(
+                                        Icons.check_circle,
+                                        color: Theme.of(context).colorScheme.primary,
+                                        size: 24,
+                                      ),
+                                    ),
+                                ],
+                              ),
+                            ),
+                        GestureDetector(
+                          onTap: () {
+                            if (_image != null) {
+                              _setTourImageSelection(-1);
+                            }
+                          },
+                          child: Stack(
+                            fit: StackFit.expand,
+                            children: [
+                              AddImageTile(
+                                initialValue: _image,
+                                onSaved: (value) {
+                                  _image = value;
+                                },
+                                onChanged: (value) {
+                                  setState(() {
+                                    _image = value;
+                                  });
+                                  _setTourImageSelection(-1);
+                                },
+                                enabled: !_isFormSubmitted,
+                              ),
+                              if (_selectedImgIndex == -1)
+                                IgnorePointer(
+                                  child: Container(
+                                    color: Colors.white.withOpacity(0.1), // Adjust the opacity to make it darker or lighter
+                                  ),
+                                ),
+                              if (_selectedImgIndex == -1)
+                                Positioned(
+                                  top: 4,
+                                  right: 4,
+                                  child: Icon(
+                                    Icons.check_circle,
+                                    color: Theme.of(context).colorScheme.primary,
+                                    size: 24,
+                                  ),
+                                ),
+                            ],
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ],

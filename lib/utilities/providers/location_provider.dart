@@ -26,16 +26,16 @@ class LocationProvider with ChangeNotifier {
   String _currentCountry = '';
   String _placeId = '';
   late FlutterGooglePlacesSdk _places;
-  GooglePlacesImg? _currentPlaceImg;
+  TourguidePlaceImg? _currentPlaceImg;
 
   Position? get currentPosition => _currentPosition;
   String get currentCity => _currentCity;
   String get currentState => _currentState;
   String get currentCountry => _currentCountry;
   String get placeId => _placeId;
-  GooglePlacesImg? get currentPlaceImg => _currentPlaceImg;
+  TourguidePlaceImg? get currentPlaceImg => _currentPlaceImg;
 
-  Map<String, GooglePlacesImg> _imageCache = {};
+  Map<String, TourguidePlaceImg> _imageCache = {};
 
   LocationProvider() {
     _init();
@@ -286,71 +286,86 @@ class LocationProvider with ChangeNotifier {
 
 
 
+
   //from https://pub.dev/packages/flutter_google_places_sdk/example, with modifications for simplification & integration to location_provider
-  Future<GooglePlacesImg?> fetchPlacePhoto({bool setAsCurrentImage = true}) async {
-    //Ensure id is loaded
-    //TODO: Fix bad code for waiting for placeId, improve approach to caching
-    int attempts = 0;
-    while (_placeId == null || _placeId == "") {
-      await Future.delayed(Duration(milliseconds: 100));
-      attempts++;
-      if (attempts > 100) return null;
-    }
-
-    // Check if the image is already cached in memory
-    if (_imageCache.containsKey(_placeId!)) {
-      logger.t("locationProvider._fetchPlacePhoto() - found photo in cache for $_placeId");
-      return _imageCache[_placeId!];
-    }
-
-    // Get the directory to store the image and metadata
-    final directory = await getApplicationDocumentsDirectory();
-    final filePath = '${directory.path}/$_placeId.jpg';
-    final metadataPath = '${directory.path}/$_placeId.json';
-
-    // Check if the file exists in local storage
-    final file = File(filePath);
-    final metadataFile = File(metadataPath);
-    if (await file.exists() && await metadataFile.exists()) {
-      logger.t("locationProvider._fetchPlacePhoto() - found photo and metadata through placeid in local storage, loading");
-      // Load the image and metadata from local storage
-      final bytes = await file.readAsBytes();
-      final metadataJson = await metadataFile.readAsString();
-      final metadataMap = json.decode(metadataJson);
-      final metadata = PhotoMetadata(
-        photoReference: metadataMap['photoReference'],
-        width: metadataMap['width'],
-        height: metadataMap['height'],
-        attributions: metadataMap['attributions'],
-      );
-      final googlePlacesImg = GooglePlacesImg(
-        photoMetadata: metadata,
-        placePhotoResponse: FetchPlacePhotoResponse.image(Image.memory(bytes)),
-      );
-
-      // Cache the image in memory
-      _imageCache[_placeId!] = googlePlacesImg;
-
-      if (setAsCurrentImage){
-        _currentPlaceImg = googlePlacesImg;
-        notifyListeners();
-      }
-      return googlePlacesImg;
-    }
-
-    logger.t("locationProvider._fetchPlacePhoto() - placeId=$_placeId");
-
-    final result = await _places.fetchPlace(
-      _placeId,
-      fields: [PlaceField.PhotoMetadatas],
-    );
-    final place = result.place;
-
-    if ((place?.photoMetadatas?.length ?? 0) == 0) {
-      logger.t("locationProvider._fetchPlacePhoto() - place or place.photoMetadatas is null");
-    }
-
+  Future<TourguidePlaceImg?> fetchPlacePhoto({String? placeId, bool setAsCurrentImage = true}) async {
     try {
+      if (placeId == null) {
+        //Ensure id is loaded
+        //TODO: Fix bad code for waiting for placeId, improve approach to caching
+        int attempts = 0;
+        while (_placeId == null || _placeId == "") {
+          await Future.delayed(const Duration(milliseconds: 100));
+          attempts++;
+          if (attempts > 100) {
+            throw Exception("Timed out waiting for _placeId to load");
+          }
+        }
+        placeId = _placeId;
+      }
+
+
+      // Check if the image is already cached in memory
+      if (_imageCache.containsKey(placeId!)) {
+        logger.t("locationProvider._fetchPlacePhoto() - found photo in cache for $placeId");
+        return _imageCache[placeId!];
+      }
+
+      // Get the directory to store the image and metadata
+      final directory = await getApplicationDocumentsDirectory();
+      final filePath = '${directory.path}/$placeId.jpg';
+      final metadataPath = '${directory.path}/$placeId.json';
+
+      // Check if the file exists in local storage
+      final file = File(filePath);
+      final metadataFile = File(metadataPath);
+      if (await file.exists() && await metadataFile.exists()) {
+        logger.t("locationProvider._fetchPlacePhoto() - found photo and metadata through placeid in local storage, loading");
+        // Load the image and metadata from local storage
+        final bytes = await file.readAsBytes();
+        final metadataJson = await metadataFile.readAsString();
+        final metadataMap = json.decode(metadataJson);
+        final metadata = PhotoMetadata(
+          photoReference: metadataMap['photoReference'],
+          width: metadataMap['width'],
+          height: metadataMap['height'],
+          attributions: metadataMap['attributions'],
+        );
+        final googlePlacesImg = GooglePlacesImg(
+          photoMetadata: metadata,
+          placePhotoResponse: FetchPlacePhotoResponse.image(Image.memory(bytes)),
+        );
+
+        final tourguidePlaceImg = TourguidePlaceImg(
+          googlePlacesImg: googlePlacesImg,
+          file: file,
+        );
+
+        // Cache the image in memory
+        _imageCache[placeId!] = tourguidePlaceImg;
+
+        if (setAsCurrentImage){
+          _currentPlaceImg = tourguidePlaceImg;
+          notifyListeners();
+        }
+        return tourguidePlaceImg;
+      }
+
+      logger.t("locationProvider._fetchPlacePhoto() - placeId=$placeId");
+
+      final result = await _places.fetchPlace(
+        placeId,
+        fields: [PlaceField.PhotoMetadatas],
+      );
+      final place = result.place;
+
+      if ((place?.photoMetadatas?.length ?? 0) == 0) {
+        logger.t("locationProvider._fetchPlacePhoto() - place or place.photoMetadatas is null");
+      }
+
+      if (place?.photoMetadatas == null) {
+        throw Exception("place or place.photoMetadatas is null");
+      }
       final metadata = place?.photoMetadatas![0];
       final response = await _places.fetchPlacePhoto(metadata!);
 
@@ -378,19 +393,22 @@ class LocationProvider with ChangeNotifier {
           photoMetadata: metadata,
           placePhotoResponse: FetchPlacePhotoResponse.image(Image.memory(imageBytes)),
         );
-        _imageCache[_placeId!] = googlePlacesImg;
+        final tourguidePlaceImg = TourguidePlaceImg(
+          googlePlacesImg: googlePlacesImg,
+          file: file,
+        );
+        _imageCache[placeId!] = tourguidePlaceImg;
 
-        return googlePlacesImg;
+        return tourguidePlaceImg;
       } else {
         return null;
       }
     } catch (err) {
-      logger.e("locationProvider._fetchPlacePhoto() - Exception occured: $err");
+      logger.e("locationProvider._fetchPlacePhoto() - Exception occured: $err, placeId=$placeId, setAsCurrentImage=$setAsCurrentImage");
       return null;
     }
   }
 
-  //from chatgpt
   Future<Uint8List> _fetchImageBytesFromUrl(String imageUrl) async {
     // Fetch image bytes from imageUrl (e.g., using http package)
     // Replace this with your actual implementation to fetch image bytes from URL
@@ -457,4 +475,11 @@ class LocationProvider with ChangeNotifier {
   static double _degreesToRadians(double degrees) {
     return degrees * math.pi / 180.0;
   }
+}
+
+class TourguidePlaceImg {
+  final GooglePlacesImg? googlePlacesImg;
+  final File? file;
+
+  TourguidePlaceImg({required this.googlePlacesImg, required this.file});
 }

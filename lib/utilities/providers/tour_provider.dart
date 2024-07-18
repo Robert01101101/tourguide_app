@@ -65,11 +65,11 @@ class TourProvider with ChangeNotifier {
     }
     notifyListeners();
 
-    if (getPopularTourRatings) _popularTours = await TourService.checkUserRatings(popularTours, userId);
-    if (getLocalTourRatings) _localTours = await TourService.checkUserRatings(localTours, userId);
-    if (getGlobalTourRatings) _globalTours = await TourService.checkUserRatings(globalTours, userId);
+    if (getPopularTourRatings) _popularTours = await TourService.checkUserRatings(_popularTours, userId);
+    if (getLocalTourRatings) _localTours = await TourService.checkUserRatings(_localTours, userId);
+    if (getGlobalTourRatings) _globalTours = await TourService.checkUserRatings(_globalTours, userId);
     if (getUserCreatedTourRatings) {
-      _userCreatedTours = await TourService.checkUserRatings(globalTours, userId);
+      _userCreatedTours = await TourService.checkUserRatings(_userCreatedTours, userId);
       _userCreatedTours.insert(0,Tour.isAddTourTile());
     }
     _isLoadingTours = false;
@@ -97,11 +97,13 @@ class TourProvider with ChangeNotifier {
   }
 
   void addTourToAllTours(Tour tour) {
+    logger.t('addTourToAllTours: ${tour.name}');
     _allTours.add(tour);
     notifyListeners();
   }
 
   void removeTourFromAllTours(Tour tour) {
+    logger.t('removeTourFromAllTours: ${tour.name}');
     _allTours.remove(tour);
     notifyListeners();
   }

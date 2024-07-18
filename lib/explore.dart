@@ -46,7 +46,7 @@ class Explore extends StatefulWidget {
 
 class ExploreState extends State<Explore> {
   GoogleSignInAccount? _currentUser;
-  Future<GooglePlacesImg?>? _fetchPhotoFuture;
+  Future<TourguidePlaceImg?>? _fetchPhotoFuture;
 
   @override
   void initState() {
@@ -166,7 +166,7 @@ class ExploreState extends State<Explore> {
             linearGradient: MyGlobals.shimmerGradient,
             child: Stack(
               children: [
-                Selector<LocationProvider, GooglePlacesImg?>(
+                Selector<LocationProvider, TourguidePlaceImg?>(
                   selector: (context, locationProvider) => locationProvider.currentPlaceImg,
                   builder: (context, currentPlaceImg, child) {
                     if (currentPlaceImg == null) {
@@ -212,7 +212,7 @@ class ExploreState extends State<Explore> {
                                 child: FittedBox(
                                   fit: BoxFit.cover,
                                   alignment: Alignment.center,
-                                  child: currentPlaceImg.placePhotoResponse.when(
+                                  child: currentPlaceImg.googlePlacesImg!.placePhotoResponse.when(
                                     image: (image) => Image(
                                       image: image.image,
                                       gaplessPlayback: true,

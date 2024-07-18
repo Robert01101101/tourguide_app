@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 
 class TourguidePlace {
@@ -6,8 +8,10 @@ class TourguidePlace {
   final String googleMapPlaceId;
   final String title;
   final String description;
-  final List<String> photoUrls;
+  final String photoUrl;
   TextEditingController? descriptionEditingController;  //mutable
+  Image? image; //mutable
+  File? imageFile; //mutable
 
   TourguidePlace({
     required this.latitude,
@@ -15,8 +19,10 @@ class TourguidePlace {
     required this.googleMapPlaceId,
     required this.title,
     required this.description,
-    required this.photoUrls,
+    required this.photoUrl,
     this.descriptionEditingController,
+    this.image,
+    this.imageFile,
   });
 
   Map<String, dynamic> toMap() {
@@ -26,7 +32,7 @@ class TourguidePlace {
       'googleMapPlaceId': googleMapPlaceId,
       'title': title,
       'description': description,
-      'photoUrls': photoUrls,
+      'photoUrl': photoUrl,
     };
   }
 
@@ -36,8 +42,10 @@ class TourguidePlace {
     String? googleMapPlaceId,
     String? title,
     String? description,
-    List<String>? photoUrls,
+    String? photoUrls,
     TextEditingController? descriptionEditingController,
+    Image? image,
+    File? imageFile,
   }) {
     return TourguidePlace(
       latitude: latitude ?? this.latitude,
@@ -45,13 +53,15 @@ class TourguidePlace {
       googleMapPlaceId: googleMapPlaceId ?? this.googleMapPlaceId,
       title: title ?? this.title,
       description: description ?? this.description,
-      photoUrls: photoUrls ?? this.photoUrls,
+      photoUrl: photoUrls ?? this.photoUrl,
       descriptionEditingController: descriptionEditingController ?? this.descriptionEditingController,
+      image: image ?? this.image,
+      imageFile: imageFile ?? this.imageFile,
     );
   }
 
   @override
   String toString() {
-    return 'TourguidePlace{latitude: $latitude, longitude: $longitude, googleMapPlaceId: $googleMapPlaceId, title: $title, description: $description, photoUrls: $photoUrls}';
+    return 'TourguidePlace{latitude: $latitude, longitude: $longitude, googleMapPlaceId: $googleMapPlaceId, title: $title, description: $description, photoUrl: $photoUrl, image: $image, descriptionEditingController: $descriptionEditingController}';
   }
 }

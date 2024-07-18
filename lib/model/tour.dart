@@ -110,7 +110,7 @@ class Tour {
           googleMapPlaceId: place['googleMapPlaceId'] ?? '',
           title: place['title'] ?? '',
           description: place['description'] ?? '',
-          photoUrls: List<String>.from(place['photoUrls'] ?? []),
+          photoUrl: place['photoUrl'] ?? '',
         );
       }).toList();
     }
@@ -202,7 +202,7 @@ class Tour {
 
   @override
   String toString() {
-    return 'Tour{id: $id, name: $name, description: $description, city: $city, visibility: $visibility, imageUrl: $imageUrl, createdDateTime: $createdDateTime, latitude: $latitude, longitude: $longitude, placeId: $placeId, authorName: $authorName, authorId: $authorId, tourguidePlaces: ${tourguidePlaces.toString()}, upvotes: ${upvotes}, downvotes: $downvotes}, isAddTourTile: $isAddTourTile, isOfflineCreatedTour: $isOfflineCreatedTour, imageToUpload: $imageToUpload}}';
+    return 'Tour{id: $id, name: $name, description: $description, city: $city, visibility: $visibility, imageUrl: $imageUrl, createdDateTime: $createdDateTime, latitude: $latitude, longitude: $longitude, placeId: $placeId, authorName: $authorName, authorId: $authorId, upvotes: ${upvotes}, downvotes: $downvotes}, isAddTourTile: $isAddTourTile, isOfflineCreatedTour: $isOfflineCreatedTour, imageToUpload: $imageToUpload}, \ntourguidePlaces: ${tourguidePlaces.toString()}';
   }
 }
 
@@ -336,6 +336,7 @@ class TourService {
 
   static List<Tour> popularToursAroundTheWorld(List<Tour> tours) {
     tours.sort((a, b) => (b.upvotes - b.downvotes).compareTo(a.upvotes - a.downvotes));
+    logger.t('popularToursAroundTheWorld length: ${tours.length}');
     return tours.take(10).toList();
   }
 
