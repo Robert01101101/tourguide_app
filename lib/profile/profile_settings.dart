@@ -219,6 +219,7 @@ class _ProfileSettingsState extends State<ProfileSettings> {
                   leftIcon: Icons.delete_outline,
                   rightIcon: Icons.arrow_forward_ios,
                   isLastItem: true,
+                  color: Theme.of(context).colorScheme.error,
                   onPressed: () {
                     Navigator.push(
                       context,

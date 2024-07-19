@@ -1,4 +1,5 @@
 import 'package:scroll_to_hide/scroll_to_hide.dart';
+import 'package:scroll_to_index/scroll_to_index.dart';
 import 'package:tourguide_app/onboarding.dart';
 import 'package:tourguide_app/profile/profile_settings.dart';
 import 'package:tourguide_app/sign_in.dart';
@@ -304,13 +305,25 @@ class BottomNavigationPage extends StatefulWidget {
 class _BottomNavigationPageState extends State<BottomNavigationPage> {
 
   @override
+  void initState() {
+    super.initState();
+    MyGlobals.scrollController = AutoScrollController();
+  }
+
+  @override
+  void dispose() {
+    if (MyGlobals.scrollController != null) MyGlobals.scrollController!.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: SafeArea(
         child: widget.child,
       ),
       bottomNavigationBar: ScrollToHide (
-        scrollController: MyGlobals.scrollController,
+        scrollController: MyGlobals.scrollController!,
         hideDirection: Axis.vertical,
         height: 80,
         duration: const Duration(milliseconds: 300),

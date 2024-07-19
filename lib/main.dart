@@ -170,7 +170,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
 
 
 class MyGlobals {
-  static final AutoScrollController scrollController = AutoScrollController();
+  static AutoScrollController? scrollController;
   static const shimmerGradient = LinearGradient(
     colors: [
       Color(0xFFEBEBF4),

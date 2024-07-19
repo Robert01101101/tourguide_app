@@ -290,39 +290,48 @@ class _CreateEditTourState extends State<CreateEditTour> {
 
 
   Future <void> _updateTourguidePlaceDetails(int index, AutocompletePrediction placePrediction) async{
-    LocationProvider locationProvider = Provider.of(context, listen: false);
-    Place? googlePlaceWithDetails = await locationProvider.getLocationDetailsFromPlaceId(placePrediction.placeId);
-    TourguidePlaceImg? tourguidePlaceImg = await locationProvider.fetchPlacePhoto(placeId: placePrediction.placeId, setAsCurrentImage: false);
-    String? photoUrl;
-    Image? photo;
-    tourguidePlaceImg!.googlePlacesImg!.placePhotoResponse?.maybeWhen(
-      image: (image) {
-        photo = image;
-        logger.i("_updateTourguidePlaceDetails() - googlePlacesImg!.placePhotoResponse?.maybeWhen -> returned image");
-      },
-      imageUrl: (imageUrl) {
-        photoUrl = imageUrl;
-        logger.i("_updateTourguidePlaceDetails() - googlePlacesImg!.placePhotoResponse?.maybeWhen -> returned imagUrl=${imageUrl}");
-      },
-      orElse: () {
-        logger.w("_updateTourguidePlaceDetails() - googlePlacesImg!.placePhotoResponse?.maybeWhen -> returned orElse");
-      },
-    );
-    TourguidePlace newTourguidePlace = TourguidePlace(
-      latitude: googlePlaceWithDetails!.latLng!.lat,
-      longitude: googlePlaceWithDetails!.latLng!.lng,
-      googleMapPlaceId: googlePlaceWithDetails!.id!,
-      title: placePrediction.primaryText,
-      description: '',
-      photoUrl: photoUrl ?? '',
-      image: photo,
-      imageFile: tourguidePlaceImg.file,
-      descriptionEditingController: TextEditingController(),
-    );
-    logger.i("_updateTourguidePlaceDetails() - created updated TourguidePlace: $newTourguidePlace");
-    setState(() {
-      _places[index] = newTourguidePlace;
-    });
+    try {
+      LocationProvider locationProvider = Provider.of(context, listen: false);
+      Place? googlePlaceWithDetails = await locationProvider.getLocationDetailsFromPlaceId(placePrediction.placeId);
+      TourguidePlaceImg? tourguidePlaceImg = await locationProvider.fetchPlacePhoto(placeId: placePrediction.placeId, setAsCurrentImage: false);
+      String? photoUrl;
+      Image? photo;
+      if (tourguidePlaceImg == null) {
+        logger.w("_updateTourguidePlaceDetails() - tourguidePlaceImg is null");
+      } else {
+        tourguidePlaceImg!.googlePlacesImg!.placePhotoResponse?.maybeWhen(
+          image: (image) {
+            photo = image;
+            logger.i("_updateTourguidePlaceDetails() - googlePlacesImg!.placePhotoResponse?.maybeWhen -> returned image");
+          },
+          imageUrl: (imageUrl) {
+            photoUrl = imageUrl;
+            logger.i("_updateTourguidePlaceDetails() - googlePlacesImg!.placePhotoResponse?.maybeWhen -> returned imagUrl=${imageUrl}");
+          },
+          orElse: () {
+            logger.w("_updateTourguidePlaceDetails() - googlePlacesImg!.placePhotoResponse?.maybeWhen -> returned orElse");
+          },
+        );
+      }
+      TourguidePlace newTourguidePlace = TourguidePlace(
+        latitude: googlePlaceWithDetails!.latLng!.lat,
+        longitude: googlePlaceWithDetails!.latLng!.lng,
+        googleMapPlaceId: googlePlaceWithDetails!.id!,
+        title: placePrediction.primaryText,
+        description: '',
+        photoUrl: photoUrl ?? '',
+        image: photo,
+        imageFile: tourguidePlaceImg != null ? tourguidePlaceImg.file : null,
+        descriptionEditingController: TextEditingController(),
+      );
+      logger.i("_updateTourguidePlaceDetails() - created updated TourguidePlace: $newTourguidePlace");
+      setState(() {
+        _places[index] = newTourguidePlace;
+      });
+    } catch (e, stack) {
+      logger.e("_updateTourguidePlaceDetails() - error: $e, stack: $stack");
+      return;
+    }
   }
 
   void _setTourImageSelection(int newIndex){

@@ -7,6 +7,7 @@ import 'package:tourguide_app/ui/my_layouts.dart';
 import 'package:tourguide_app/utilities/custom_import.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:tourguide_app/utilities/providers/auth_provider.dart' as myAuth;
+import 'package:tourguide_app/utilities/providers/tour_provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class Profile extends StatefulWidget {
@@ -32,6 +33,7 @@ class _ProfileState extends State<Profile> {
   Widget build(BuildContext context) {
     logger.t('FirebaseAuth.instance.currentUser=${FirebaseAuth.instance.currentUser}');
     myAuth.AuthProvider authProvider = Provider.of(context);
+    TourProvider tourProvider = Provider.of(context);
 
     return Scaffold(
       appBar: AppBar(
@@ -204,6 +206,7 @@ class _ProfileState extends State<Profile> {
                   label: 'Sign out',
                   leftIcon: Icons.logout,
                   onPressed: () {
+                    tourProvider.resetTourProvider();
                     authProvider.signOut();
                   },
                   isLastItem: true,
@@ -223,6 +226,7 @@ class ProfileListButton extends StatelessWidget {
   final IconData? rightIcon;
   final VoidCallback onPressed;
   final bool? isLastItem;
+  final Color? color;
 
   const ProfileListButton({
     required this.label,
@@ -230,10 +234,12 @@ class ProfileListButton extends StatelessWidget {
     this.rightIcon,
     required this.onPressed,
     this.isLastItem,
+    this.color
   });
 
   @override
   Widget build(BuildContext context) {
+
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -249,6 +255,7 @@ class ProfileListButton extends StatelessWidget {
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(0), // Set to 0 for sharp corners
             ),
+            foregroundColor: color != null ? color : Theme.of(context).colorScheme.primary,
           ),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,

@@ -124,4 +124,17 @@ class TourProvider with ChangeNotifier {
     _userCreatedTours.insert(1, tour);
     notifyListeners();
   }
+
+  /// for logout
+  void resetTourProvider(){
+    _selectedTour = null;
+    _isLoadingTours = false;
+    _allCachedTours = {};
+    _popularTours = List.generate(4, (index) => Tour.empty());
+    _localTours = List.generate(4, (index) => Tour.empty());
+    _globalTours = List.generate(4, (index) => Tour.empty());
+    _userCreatedTours = List.generate(1, (index) => Tour.isAddTourTile());
+    _userSavedTours = List.empty();
+    logger.t("TourProvider.resetTourProvider()");
+  }
 }
