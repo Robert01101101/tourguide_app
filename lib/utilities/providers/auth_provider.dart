@@ -16,7 +16,7 @@ GoogleSignIn googleSignIn = GoogleSignIn(scopes: scopes,);
 // Written with help from https://medium.com/@JigneshWorld/how-to-implement-an-authentication-feature-using-a-provider-in-flutter-1f351447d09d
 //
 /// Uses Firebase Auth, which supports multiple auth providers including Google Sign In, the only one supported for now.
-/// The User Id used is the Firebase Auth Id.
+/// The User Id used is the Firebase Auth Id (User is a Firebase Auth class).
 /// Google Sign In user is used for name, picture, profile purposes.
 class AuthProvider with ChangeNotifier {
 //#region REGION: AuthProvider fields and constructor

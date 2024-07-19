@@ -92,7 +92,7 @@ class _ContributeState extends State<Contribute> {
                     IconButton(onPressed: (){
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) => const CreateTour()),
+                        MaterialPageRoute(builder: (context) => const CreateEditTour()),
                       );
                     }, icon: Icon(Icons.add_circle_outline_sharp),),
                   ],

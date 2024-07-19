@@ -22,18 +22,23 @@ import 'package:tourguide_app/utilities/providers/auth_provider.dart' as myAuth;
 import 'package:tourguide_app/main.dart';
 import 'package:tourguide_app/utilities/providers/location_provider.dart';
 import 'package:profanity_filter/profanity_filter.dart';
+import 'package:tourguide_app/utilities/singletons/tour_service.dart';
 
 import '../model/tour.dart';
 import '../utilities/providers/tour_provider.dart';
 
-class CreateTour extends StatefulWidget {
-  const CreateTour({super.key});
+/// If isEditMode is true, tour is required. Edit mode is off by default.
+class CreateEditTour extends StatefulWidget {
+  final bool isEditMode;
+  final Tour? tour;
+
+  const CreateEditTour({super.key, this.isEditMode = false, this.tour});
 
   @override
-  State<CreateTour> createState() => _CreateTourState();
+  State<CreateEditTour> createState() => _CreateEditTourState();
 }
 
-class _CreateTourState extends State<CreateTour> {
+class _CreateEditTourState extends State<CreateEditTour> {
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
   final TextEditingController _cityController = TextEditingController();
@@ -57,6 +62,21 @@ class _CreateTourState extends State<CreateTour> {
   Place? _city;
   int _selectedImgIndex = 0;
   int _currentStep = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.isEditMode) {
+      _tour = widget.tour!;
+      _nameController.text = _tour.name;
+      _descriptionController.text = _tour.description;
+      _cityController.text = _tour.city;
+      _tour.tourguidePlaces.forEach((place) {
+        _places.add(place);
+        _placeControllers.add(TextEditingController());
+      });
+    }
+  }
 
   void _addPlace() {
     setState(() {
@@ -97,55 +117,35 @@ class _CreateTourState extends State<CreateTour> {
       final tourProvider = Provider.of<TourProvider>(context, listen: false);
       setState(() {
         _isFormSubmitted = true;
-        tourProvider.addTourToAllTours(_tour);
       });
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Uploading tour...')),
       );
-      // Validation passed, proceed with tour creation
-      FirebaseFirestore db = FirebaseFirestore.instance;
-      FirebaseAuth auth = FirebaseAuth.instance;
-      final myAuth.AuthProvider authProvider = Provider.of(context, listen: false);
-      final User user = auth.currentUser!;
-      final uid = authProvider.user!.uid;
-
-      // Upload image
-      String imageUrl = await _uploadImage(_tour.imageToUpload!);
-
       //Final update to tour data
+      final myAuth.AuthProvider authProvider = Provider.of(context, listen: false);
       _tour = _tour.copyWith(
         visibility: _tourIsPublic ? "public" : "private", //always true for now
         createdDateTime: DateTime.now(),
-        authorId: uid,
-        authorName: user.displayName,
-        imageUrl: imageUrl,
+        authorId: authProvider.user!.uid,
+        authorName: authProvider.user!.displayName,
       );
+      // Validation passed, proceed with tour creation
+      await tourProvider.uploadTour(_tour);
 
-      // Step 1: Add tour document to 'tours' collection
-      DocumentReference tourDocRef = await db.collection("tours").add(_tour.toMap());
-      String tourId = tourDocRef.id; // Retrieve the auto-generated ID
-
-      // Update the local Tour object's ID field
-      _tour = _tour.copyWith(id: tourId);
-      await db.collection("tours").doc(tourId).update({
-        'id': _tour.id, // Update the 'id' field with the new tourId
-      });
-
-      logger.i('Successfully created tour: ${_tour.toString()}');
-
-      //add empty rating for user
-      TourService.addOrUpdateRating(_tour.id, 0, authProvider.user!.uid);
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Successfully created tour. Thanks for contributing!')),
-      );
-      Navigator.pop(context);
+      if (mounted){
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Successfully created tour. Thanks for contributing!')),
+        );
+        Navigator.pop(context);
+      }
     } catch (e, stackTrace) {
       logger.e('Error creating tour: $e \n stackTrace: $stackTrace');
-      ScaffoldMessenger.of(context).hideCurrentSnackBar();
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Failed to create tour. Please try again.')),
-      );
+      if (mounted){
+        ScaffoldMessenger.of(context).hideCurrentSnackBar();
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Failed to create tour. Please try again.')),
+        );
+      }
       setState(() {
         _isFormSubmitted = false;
       });
@@ -253,11 +253,6 @@ class _CreateTourState extends State<CreateTour> {
           break;
       }
     }
-    if (step == _reviewStepIndex){
-      tourProvider.addTourToAllTours(_tour);
-    } else {
-      tourProvider.removeTourFromAllTours(_tour);
-    }
 
     logger.t("_currentStep: $_currentStep, step: $step, isValid: $isValid");
 
@@ -343,7 +338,7 @@ class _CreateTourState extends State<CreateTour> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Create a new tour'),
+        title: Text(widget.isEditMode ? 'Edit Tour' : 'Create a new Tour'),
       ),
       body: Stepper(
         currentStep: _currentStep,

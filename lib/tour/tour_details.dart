@@ -237,7 +237,7 @@ class _FullscreenTourPageState extends State<FullscreenTourPage> {
             Navigator.of(context).pop(); // Close the dialog
             Navigator.push(
                context,
-               MaterialPageRoute(builder: (context) => const CreateTour()),
+               MaterialPageRoute(builder: (context) => CreateEditTour(isEditMode: true,tour: widget.tour.copyWith(isOfflineCreatedTour: true))),
             );
           },
           onDeletePressed: () {
@@ -285,19 +285,11 @@ class _FullscreenTourPageState extends State<FullscreenTourPage> {
   @override
   Widget build(BuildContext context) {
     final tourProvider = Provider.of<TourProvider>(context);
-    final tour = tourProvider.selectedTour;
 
-    if (tour == null) {
-      return Scaffold(
-        appBar: AppBar(title: Text(widget.tour.name)),
-        body: Center(child: Text('No tour selected')),
-      );
-    }
-
-    bool showMap = tour.latitude != null && tour.latitude != 0 && tour.longitude != null && tour.longitude != 0;
+    bool showMap = widget.tour.latitude != null && widget.tour.latitude != 0 && widget.tour.longitude != null && widget.tour.longitude != 0;
     if (showMap && _currentCameraPosition.target == LatLng(0, 0)) {
       _currentCameraPosition = CameraPosition(
-        target: LatLng(tour.latitude, tour.longitude),
+        target: LatLng(widget.tour.latitude, widget.tour.longitude),
         zoom: 14.0,
       );
     }

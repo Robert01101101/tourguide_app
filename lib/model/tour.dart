@@ -1,12 +1,8 @@
 import 'dart:io';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_storage/firebase_storage.dart';
-import 'package:tourguide_app/main.dart';
 import 'package:tourguide_app/model/tourguide_place.dart';
-import 'package:tourguide_app/utilities/providers/location_provider.dart';
 
+/// Mutable properties: upvotes, downvotes, isAddTourTile, isOfflineCreatedTour, thisUsersRating, imageToUpload
 class Tour {
   final String id;
   final String name;
@@ -21,12 +17,18 @@ class Tour {
   final String authorName;
   final String authorId;
   final List<TourguidePlace> tourguidePlaces;
-  int upvotes;  //mutable
-  int downvotes;  //mutable
-  bool isAddTourTile;  //mutable, indicates add tour button (dirty)
-  bool isOfflineCreatedTour;  //mutable, indicates this is an offline tour about to be uploaded
-  int? thisUsersRating; // Track user's rating
-  File? imageToUpload;   // New field
+  /// mutable AND stored in Firestore
+  int upvotes;
+  /// mutable AND stored in Firestore
+  int downvotes;
+  /// mutable, NOT stored in Firestore, indicates add tour button (dirty)
+  bool isAddTourTile;
+  /// mutable, NOT stored in Firestore, indicates this is an offline tour about to be uploaded
+  bool isOfflineCreatedTour;
+  /// mutable, NOT stored in Firestore, Track this user's rating
+  int? thisUsersRating;
+  /// mutable, NOT stored in Firestore, Track this user's rating
+  File? imageToUpload;
 
   Tour({
     required this.id,
@@ -207,6 +209,8 @@ class Tour {
       'authorName': authorName,
       'authorId': authorId,
       'tourguidePlaces': tourguidePlaces.map((place) => place.toMap()).toList(),
+      'upvotes': upvotes,
+      'downvotes': downvotes,
     };
   }
 
@@ -216,224 +220,6 @@ class Tour {
   }
 }
 
-
-
-
-class TourService {
-  static Future<List<Tour>> fetchAllTours() async {
-    FirebaseFirestore db = FirebaseFirestore.instance;
-    FirebaseStorage storage = FirebaseStorage.instance;
-    FirebaseAuth auth = FirebaseAuth.instance;
-
-    List<Tour> tours = [];
-
-    try {
-      User? user = auth.currentUser;
-      if (user == null) {
-        throw Exception('User not signed in');
-      }
-
-      logger.t('fetchAllTours() all requirements ready, fetching ${getFormattedTime()}');
-      QuerySnapshot querySnapshot = await db.collection('tours')
-          .where('visibility', isEqualTo: 'public')
-          .get();
-
-      for (QueryDocumentSnapshot doc in querySnapshot.docs) {
-        Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
-
-        if (data['visibility'] == 'public' || data['uid'] == user.uid) {
-          Tour tour = Tour.fromFirestore(doc);
-
-          if (tour.imageUrl.isNotEmpty) {
-            try {
-              String fullUrl = tour.imageUrl;
-              Uri uri = Uri.parse(fullUrl);
-              String path = uri.path.replaceFirst('/v0/b/tourguide-firebase.appspot.com/o/', '').replaceAll('%2F', '/');
-
-              String imageUrl = await storage.ref(path).getDownloadURL();
-              tour = tour.copyWith(imageUrl: imageUrl);
-            } catch (e) {
-              logger.e('Error fetching image: $e');
-            }
-          }
-
-          tours.add(tour);
-        }
-      }
-      logger.t('fetchAllTours() finished getting all tours ${getFormattedTime()}, total tours: ${tours.length}');
-    } catch (e) {
-      logger.e('Error fetching tours: $e');
-    }
-
-    return tours;
-  }
-
-  static Future<void> deleteTour(Tour tour) async {
-    FirebaseFirestore db = FirebaseFirestore.instance;
-
-    try {
-      // Delete the tour document
-      await db.collection('tours').doc(tour.id).delete();
-      logger.t('Tour with ID ${tour.id} successfully deleted');
-    } catch (e) {
-      logger.e('Error deleting tour with ID  ${tour.id}: $e');
-    }
-  }
-
-  static Future<List<Tour>> checkUserRatings(List<Tour> tours, String userId) async {
-    FirebaseFirestore db = FirebaseFirestore.instance;
-    for (Tour tour in tours) {
-      CollectionReference ratings = db.collection('tours').doc(tour.id).collection('ratings');
-      QuerySnapshot querySnapshot = await ratings.where('userId', isEqualTo: userId).get();
-
-      if (querySnapshot.docs.isNotEmpty) {
-        DocumentSnapshot ratingDoc = querySnapshot.docs.first;
-        Rating rating = Rating.fromMap(ratingDoc.data() as Map<String, dynamic>);
-        tour.thisUsersRating = rating.value;
-      } else {
-        tour.thisUsersRating = 0; // User hasn't rated
-      }
-    }
-    return tours;
-  }
-
-  static Future<List<Tour>> fetchAndSortToursByDateTime() async {
-    List<Tour> tours = await fetchAllTours();
-
-    tours.sort((a, b) {
-      if (a.createdDateTime == null && b.createdDateTime == null) {
-        return 0;
-      } else if (a.createdDateTime == null) {
-        return 1;
-      } else if (b.createdDateTime == null) {
-        return -1;
-      } else {
-        return b.createdDateTime!.compareTo(a.createdDateTime!);
-      }
-    });
-
-    return tours;
-  }
-
-  ////////// Filters
-  static List<Tour> popularToursNearYou(List<Tour> tours, double userLatitude, double userLongitude) {
-    return tours.where((tour) {
-      double distance = LocationProvider.calculateDistance(userLatitude, userLongitude, tour.latitude, tour.longitude);
-      double upvoteRatio = tour.downvotes == 0 ? tour.upvotes.toDouble()*2 : tour.upvotes / tour.downvotes;
-      return distance <= 30 &&
-          tour.upvotes > 0 &&
-          upvoteRatio >= 2.0;
-    }).toList();
-  }
-
-  static List<Tour> localTours(List<Tour> tours, double userLatitude, double userLongitude) {
-    List<Tour> nearbyTours = tours.where((tour) {
-      double distance = LocationProvider.calculateDistance(userLatitude, userLongitude, tour.latitude, tour.longitude);
-      return distance <= 15;
-    }).toList();
-
-    // Sort nearby tours by distance
-    nearbyTours.sort((a, b) {
-      double distanceA = LocationProvider.calculateDistance(userLatitude, userLongitude, a.latitude, a.longitude);
-      double distanceB = LocationProvider.calculateDistance(userLatitude, userLongitude, b.latitude, b.longitude);
-      return distanceA.compareTo(distanceB);
-    });
-
-    return nearbyTours;
-  }
-
-  static List<Tour> userCreatedTours(List<Tour> tours, String userId) {
-    List<Tour> userCreatedTours = tours.where((tour) => tour.authorId == userId).toList();
-    // Sort tours by createdDateTime in descending order (most recent first)
-    userCreatedTours.sort((a, b) => b.createdDateTime!.compareTo(a.createdDateTime!));
-    //log length
-    logger.t('userCreatedTours length: ${userCreatedTours.length}, userId=$userId');
-    return userCreatedTours;
-  }
-
-  static List<Tour> userSavedTours(List<Tour> tours, String userId) {
-    return List.generate(4, (index) => Tour.empty());
-  }
-
-
-  static List<Tour> popularToursAroundTheWorld(List<Tour> tours) {
-    tours.sort((a, b) => (b.upvotes - b.downvotes).compareTo(a.upvotes - a.downvotes));
-    logger.t('popularToursAroundTheWorld length: ${tours.length}');
-    return tours.take(10).toList();
-  }
-
-  static Future<void> addComment(String tourId, Comment comment) async {
-    FirebaseFirestore db = FirebaseFirestore.instance;
-    CollectionReference comments = db.collection('tours').doc(tourId).collection('comments');
-
-    await comments.add({
-      'text': comment.text,
-      'userId': comment.userId,
-      'userName': comment.userName,
-      'timestamp': comment.timestamp,
-    });
-  }
-
-  //TODO
-  static Future<List<Comment>> fetchComments(String tourId) async {
-    FirebaseFirestore db = FirebaseFirestore.instance;
-    CollectionReference comments = db.collection('tours').doc(tourId).collection('comments');
-
-    QuerySnapshot querySnapshot = await comments.orderBy('timestamp', descending: true).get();
-
-    return querySnapshot.docs.map((doc) => Comment.fromFirestore(doc)).toList();
-  }
-
-  static Future<void> addOrUpdateRating(String tourId, int value, String userId) async {
-    FirebaseFirestore db = FirebaseFirestore.instance;
-    CollectionReference ratings = db.collection('tours').doc(tourId).collection('ratings');
-    DocumentReference tourRef = db.collection('tours').doc(tourId);
-
-    try {
-      // Create or update the rating
-      QuerySnapshot querySnapshot = await ratings.where('userId', isEqualTo: userId).get();
-      if (querySnapshot.docs.isEmpty) {
-        // User has not rated yet, add a new rating
-        await ratings.add(Rating(userId: userId, value: value).toMap());
-      } else {
-        // User has already rated, update the existing rating
-        DocumentReference docRef = querySnapshot.docs.first.reference;
-        await docRef.update({'value': value});
-      }
-
-      // Update tour's upvotes and downvotes
-      Map<String, int> ratingsCount = await getRatings(tourId);
-      await tourRef.update({
-        'upvotes': ratingsCount['upvotes'],
-        'downvotes': ratingsCount['downvotes'],
-      });
-    } catch (e) {
-      logger.e('Error adding or updating rating: $e');
-      throw Exception('Failed to add or update rating');
-    }
-  }
-
-  static Future<Map<String, int>> getRatings(String tourId) async {
-    FirebaseFirestore db = FirebaseFirestore.instance;
-    CollectionReference ratings = db.collection('tours').doc(tourId).collection('ratings');
-
-    QuerySnapshot querySnapshot = await ratings.get();
-    int upvotes = 0;
-    int downvotes = 0;
-
-    for (QueryDocumentSnapshot doc in querySnapshot.docs) {
-      Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
-      Rating rating = Rating.fromMap(data);
-      if (rating.value == 1) {
-        upvotes++;
-      } else if (rating.value == -1) {
-        downvotes++;
-      }
-    }
-
-    return {'upvotes': upvotes, 'downvotes': downvotes};
-  }
-}
 
 
 
@@ -473,7 +259,7 @@ class Comment {
 }
 
 
-
+/// Stored as a document in the Ratings subcollection of each tour
 class Rating {
   final String userId;
   final int value; // 1 for thumb up, -1 for thumb down
