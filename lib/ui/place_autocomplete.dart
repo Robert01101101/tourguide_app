@@ -6,6 +6,8 @@ import 'package:provider/provider.dart';
 import 'package:tourguide_app/utilities/providers/location_provider.dart';
 import 'package:flutter_google_places_sdk/flutter_google_places_sdk.dart';
 
+import '../main.dart';
+
 class PlaceAutocomplete extends StatefulWidget {
   final TextEditingController textEditingController;
   final bool isFormSubmitted;
@@ -42,6 +44,7 @@ class _PlaceAutocompleteState extends State<PlaceAutocomplete> {
 
   @override
   void initState() {
+    logger.i('PlaceAutocomplete.initState(), textEditingController.text=${widget.textEditingController.text}');
     super.initState();
     LocationProvider locationProvider = Provider.of<LocationProvider>(context, listen: false);
     _debouncedSearch = _debounce<Iterable<AutocompletePrediction>?, String>(
@@ -52,6 +55,7 @@ class _PlaceAutocompleteState extends State<PlaceAutocomplete> {
   @override
   Widget build(BuildContext context) {
     LocationProvider locationProvider = Provider.of<LocationProvider>(context);
+    //logger.i('PlaceAutocomplete.build()');
 
     return LayoutBuilder( //LayoutBuilder is needed to match the list width to text input width
       builder: (BuildContext context, BoxConstraints constraints) {
@@ -71,6 +75,16 @@ class _PlaceAutocompleteState extends State<PlaceAutocomplete> {
           },
           displayStringForOption: (AutocompletePrediction option) => option.fullText!,
           fieldViewBuilder: (BuildContext context, TextEditingController fieldTextEditingController, FocusNode fieldFocusNode, VoidCallback onFieldSubmitted) {
+            // TODO: better understand why the city field in tour creation sometimes resets to empty
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              if (widget.textEditingController.text.isNotEmpty && fieldTextEditingController.text.isEmpty) {
+                fieldTextEditingController.text = widget.textEditingController.text;
+                _isValidSelection = true;
+                logger.i('Updated text in fieldTextEditingController: ${fieldTextEditingController.text}, addresses bug where city field in tour creation sometimes resets to empty');
+              }
+            });
+
+
             return TextFormField(
               controller: fieldTextEditingController,
               focusNode: fieldFocusNode,
