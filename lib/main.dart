@@ -158,6 +158,11 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
         displayMedium: GoogleFonts.vollkorn(textStyle: textTheme.displayMedium, color: const Color(0xff3b4948), fontWeight: FontWeight.w400),
         displaySmall: GoogleFonts.vollkorn(textStyle: textTheme.displaySmall, color: const Color(0xff3b4948), fontWeight: FontWeight.w400),
       ),
+      elevatedButtonTheme: ElevatedButtonThemeData(
+        style: ElevatedButton.styleFrom(
+          textStyle: TextStyle(fontWeight: FontWeight.w500),
+        ),
+      ),
     );
   }
 }

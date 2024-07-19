@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:tourguide_app/model/tour.dart';
+import 'package:tourguide_app/tour/tour_creation.dart';
 import 'package:tourguide_app/ui/my_layouts.dart';
 import 'package:tourguide_app/utilities/providers/tour_provider.dart';
 import '../utilities/custom_import.dart';
@@ -226,6 +227,58 @@ class _FullscreenTourPageState extends State<FullscreenTourPage> {
     );
   }
 
+  void _showOptionsDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return TourDetailsOptions(
+          onEditPressed: () {
+            // Handle edit button press
+            Navigator.of(context).pop(); // Close the dialog
+            Navigator.push(
+               context,
+               MaterialPageRoute(builder: (context) => const CreateTour()),
+            );
+          },
+          onDeletePressed: () {
+            // Handle delete button press
+            Navigator.of(context).pop(); // Close the dialog
+            _deleteTour();
+          },
+        );
+      },
+    );
+  }
+
+  void _deleteTour() async {
+    try {
+      // Handle delete tour
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Deleting tour...')),
+      );
+      final tourProvider = Provider.of<TourProvider>(context, listen: false);
+      await tourProvider.deleteTour(widget.tour);
+      if (mounted){
+        Navigator.of(context).pop();
+        Navigator.of(context).pop();
+        ScaffoldMessenger.of(context).hideCurrentSnackBar();
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Successfully deleted tour.')),
+        );
+      }
+
+    } catch (e) {
+      logger.e('Failed to delete tour: $e');
+      if (mounted){
+        ScaffoldMessenger.of(context).hideCurrentSnackBar();
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Failed to delete tour due to an error.')),
+        );
+      }
+    }
+
+
+  }
 
 
 
@@ -252,6 +305,17 @@ class _FullscreenTourPageState extends State<FullscreenTourPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.tour.name),
+        actions:
+          [
+            if (tourProvider.isUserCreatedTour(widget.tour) && !widget.tour.isOfflineCreatedTour)
+              IconButton(
+              icon: Icon(Icons.more_vert),
+              onPressed: () {
+                  // Show options menu
+                  _showOptionsDialog(context);
+                },
+              ),
+          ],
         leading: _isFullScreen
             ? IconButton(
           icon: Icon(Icons.arrow_back),
@@ -486,6 +550,107 @@ class _FullscreenTourPageState extends State<FullscreenTourPage> {
                   ],
                 ),
               ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class TourDetailsOptions extends StatefulWidget {
+  final VoidCallback onEditPressed;
+  final VoidCallback onDeletePressed;
+
+
+  TourDetailsOptions({
+    required this.onEditPressed,
+    required this.onDeletePressed,
+  });
+
+  @override
+  State<TourDetailsOptions> createState() => _TourDetailsOptionsState();
+}
+
+class _TourDetailsOptionsState extends State<TourDetailsOptions> {
+  bool _isConfirmingDelete = false;
+  bool _isChecked = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: Text(!_isConfirmingDelete ? 'Author Options' : 'Delete Tour'),
+      content: SingleChildScrollView(
+        child: ListBody(
+          children: <Widget>[
+            Visibility(
+              visible: !_isConfirmingDelete,
+              child: Column(
+                children: [
+                  const Padding(
+                    padding: EdgeInsets.all(20.0),
+                    child: Center(child: Text("You\'re the author of this tour.")),
+                  ),
+                  ElevatedButton.icon(
+                    onPressed: widget.onEditPressed,
+                    icon: const Icon(Icons.edit),
+                    label: const Text("Edit Tour"),
+                  ),
+                  ElevatedButton.icon(
+                    onPressed: () {
+                      setState(() {
+                        _isConfirmingDelete = true;
+                      });
+                    },
+                    style: ElevatedButton.styleFrom(
+                      //backgroundColor: Theme.of(context).colorScheme.error, // Background color of the button
+                      foregroundColor: Theme.of(context).colorScheme.error, // Text color
+                      side: BorderSide(color: Theme.of(context).colorScheme.error, width: 2),
+                    ),
+                    icon: const Icon(Icons.delete),
+                    label: const Text("Delete Tour"),
+                  ),
+                ],
+              ),
+            ),
+            Visibility(
+              visible: _isConfirmingDelete,
+              child: Column(
+                children: [
+                  const Padding(
+                    padding: EdgeInsets.all(20.0),
+                    child: Center(child: Text("Are you sure you'd like to delete this tour? This action cannot be undone.")),
+                  ),
+                  CheckboxListTile(
+                    title: const Text("Confirm Delete"),
+                    value: _isChecked,
+                    onChanged: (bool? value) {
+                      setState(() {
+                        _isChecked = value ?? false;
+                      });
+                    },
+                  ),
+                  ElevatedButton.icon(
+                    onPressed: () {
+                      setState(() {
+                        _isChecked = false;
+                        _isConfirmingDelete = false;
+                      });
+                    },
+                    icon: const Icon(Icons.arrow_back),
+                    label: const Text("Cancel"),
+                  ),
+                  ElevatedButton.icon(
+                    onPressed: _isChecked ? widget.onDeletePressed : null,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Theme.of(context).colorScheme.error, // Background color of the button
+                      foregroundColor: Colors.white, // Text color
+                    ),
+                    icon: const Icon(Icons.delete),
+                    label: const Text("Delete Tour Permanently"),
+                  ),
+                ],
+              ),
+            ),
           ],
         ),
       ),

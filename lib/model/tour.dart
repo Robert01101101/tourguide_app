@@ -182,6 +182,16 @@ class Tour {
     );
   }
 
+  @override
+  bool operator ==(Object other) {  //compare tours by id (more performant)
+    if (identical(this, other)) return true;
+    if (runtimeType != other.runtimeType) return false;
+    return other is Tour && other.id == id;
+  }
+
+  @override
+  int get hashCode => id.hashCode;
+
   Map<String, dynamic> toMap() {
     return {
       'id': id,
@@ -256,6 +266,18 @@ class TourService {
     }
 
     return tours;
+  }
+
+  static Future<void> deleteTour(Tour tour) async {
+    FirebaseFirestore db = FirebaseFirestore.instance;
+
+    try {
+      // Delete the tour document
+      await db.collection('tours').doc(tour.id).delete();
+      logger.t('Tour with ID ${tour.id} successfully deleted');
+    } catch (e) {
+      logger.e('Error deleting tour with ID  ${tour.id}: $e');
+    }
   }
 
   static Future<List<Tour>> checkUserRatings(List<Tour> tours, String userId) async {

@@ -65,7 +65,7 @@ class _TourTileState extends State<TourTile> {
   }
 
   void _showOverlay(BuildContext context) {
-    showModalBottomSheet<void>(
+    showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       shape: RoundedRectangleBorder(
@@ -96,6 +96,7 @@ class _TourTileState extends State<TourTile> {
   @override
   Widget build(BuildContext context) {
     bool textDataReady = widget.tour.name != null && widget.tour.name != "";
+    TourProvider tourProvider = Provider.of<TourProvider>(context);
 
     return GestureDetector(
       onTap: () => widget.tour.isAddTourTile ? _createTour() : _showOverlay(context),
@@ -156,6 +157,15 @@ class _TourTileState extends State<TourTile> {
                         :
                     Container(width: 180, height: 100, color: Colors.white,),
                   ),
+                  if (tourProvider.isUserCreatedTour(widget.tour))
+                    const Align(
+                      alignment: Alignment.topRight,
+                      child: Padding(
+                        padding: EdgeInsets.all(8.0),
+                        child: Icon(
+                          Icons.attribution,
+                          color: Colors.white,),
+                      )),
                 ],
               ),
             ),
@@ -165,7 +175,7 @@ class _TourTileState extends State<TourTile> {
                 isLoading: !textDataReady,
                 child: textDataReady ?
                 Text(
-                  widget.tour.name,
+                  widget.tour.name + "\n", //trick to get min 2 lines in combo with maxLines:2
                   style: Theme.of(context).textTheme.titleSmall,
                   overflow: TextOverflow.ellipsis,
                   maxLines: 2,
@@ -181,13 +191,13 @@ class _TourTileState extends State<TourTile> {
             ),
             Container(
               child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 3),
+                padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 2),
                 child: ShimmerLoading(
                   isLoading: !textDataReady,
                   child: textDataReady ?
                    Container(
                      child: Align(
-                       alignment: Alignment.topCenter,
+                       alignment: Alignment.topLeft,
                        child: Text(
                         widget.tour.description,
                          style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Colors.grey[600]),

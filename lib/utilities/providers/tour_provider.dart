@@ -76,6 +76,16 @@ class TourProvider with ChangeNotifier {
     notifyListeners();
   }
 
+  Future<void> deleteTour(Tour tour) async{
+    await TourService.deleteTour(tour);
+    _allTours.remove(tour);
+    _popularTours.remove(tour);
+    _globalTours.remove(tour);
+    _localTours.remove(tour);
+    _userCreatedTours.remove(tour);
+    notifyListeners();
+  }
+
   void selectTour(Tour tour) {
     _selectedTour = tour;
     notifyListeners();
@@ -106,5 +116,9 @@ class TourProvider with ChangeNotifier {
     logger.t('removeTourFromAllTours: ${tour.name}');
     _allTours.remove(tour);
     notifyListeners();
+  }
+
+  bool isUserCreatedTour(Tour tour) {
+    return userCreatedTours.contains(tour);
   }
 }
