@@ -1,15 +1,19 @@
 class TourguideUser {
   String firebaseAuthId;
-  String? googleSignInId;
+  String googleSignInId;
   String username;
-  String? displayName;
+  String displayName;
+  String email;
+  bool emailSubscribed = false;
   List<String> savedTourIds;
 
   TourguideUser({
     required this.firebaseAuthId,
-    this.googleSignInId,
+    required this.googleSignInId,
     required this.username,
-    this.displayName,
+    required this.displayName,
+    required this.email,
+    required this.emailSubscribed,
     required this.savedTourIds,
   });
 
@@ -20,6 +24,8 @@ class TourguideUser {
       'googleSignInId': googleSignInId,
       'username': username,
       'displayName': displayName,
+      'email': email,
+      'emailSubscribed': emailSubscribed,
       'savedTourIds': savedTourIds,
     };
   }
@@ -31,6 +37,8 @@ class TourguideUser {
       googleSignInId: map['googleSignInId'],
       username: map['username'],
       displayName: map['displayName'],
+      email: map['email'],
+      emailSubscribed: map['emailSubscribed'],
       savedTourIds: List<String>.from(map['savedTourIds']),
     );
   }
@@ -40,6 +48,8 @@ class TourguideUser {
     String? googleSignInId,
     String? username,
     String? displayName,
+    String? email,
+    bool? emailSubscribed,
     List<String>? savedTourIds,
   }) {
     return TourguideUser(
@@ -47,6 +57,8 @@ class TourguideUser {
       googleSignInId: googleSignInId ?? this.googleSignInId,
       username: username ?? this.username,
       displayName: displayName ?? this.displayName,
+      email: email ?? this.email,
+      emailSubscribed: emailSubscribed ?? this.emailSubscribed,
       savedTourIds: savedTourIds ?? this.savedTourIds,
     );
   }

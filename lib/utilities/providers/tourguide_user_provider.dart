@@ -31,14 +31,34 @@ class TourguideUserProvider with ChangeNotifier {
 
   Future<void> _onAuthStateChanged(auth.User? firebaseUser) async {
     if (firebaseUser != null) {
-      await loadUser();
+      await _waitForRequiredData();
+      await _loadUser();
       if (_user == null) {
         // New user, create an entry in Firestore
         await _createUser();
       }
+      _sendWelcomeEmail(); //for now, ALWAYS send welcome email
     } else {
       _user = null;
       notifyListeners();
+    }
+  }
+
+  Future<void> _waitForRequiredData() async {
+    const maxWaitTime = Duration(seconds: 10);
+    const checkInterval = Duration(milliseconds: 100);
+    final startTime = DateTime.now();
+
+    // Loop to check for availability of firebaseUser and googleSignInUser
+    auth.User? firebaseUser;
+    while (DateTime.now().difference(startTime) < maxWaitTime) {
+      firebaseUser = auth.FirebaseAuth.instance.currentUser;
+      if (firebaseUser != null && _authProvider != null && _authProvider!.googleSignInUser != null) break;
+      await Future.delayed(checkInterval);
+    }
+
+    if (firebaseUser == null || _authProvider == null || _authProvider!.googleSignInUser == null) {
+      logger.e('Tourguide User Provider() might run into issues because firebaseUser or googleSignInUser is null');
     }
   }
 
@@ -48,24 +68,76 @@ class TourguideUserProvider with ChangeNotifier {
     _user = TourguideUser(
       firebaseAuthId: firebaseUser!.uid,
       googleSignInId: _authProvider!.googleSignInUser!.id,
-      username: firebaseUser.displayName ?? 'Anonymous',
+      username: '',
       displayName: _authProvider!.googleSignInUser!.displayName!,
+      email: _authProvider!.googleSignInUser!.email!,
+      emailSubscribed: true,
       savedTourIds: [],
     );
     notifyListeners();
     await FirebaseFirestore.instance.collection('users').doc(firebaseUser.uid).set(_user!.toMap());
   }
 
-  Future<void> loadUser() async {
+  Future<void> _sendWelcomeEmail () async {
+    logger.i("UserProvider._sendWelcomeEmail()");
+    if (_user!.emailSubscribed == false) {
+      logger.t("UserProvider._sendWelcomeEmail() - User is not subscribed to emails, skipping");
+      return;
+    }
+    Map<String, dynamic> emailData = {
+      'to': _authProvider!.googleSignInUser!.email,
+      'template': {
+        'name': 'welcome',
+        'data': {
+          'firstName': _authProvider!.googleSignInUser!.displayName!.split(' ').first,
+          'authId': _user!.firebaseAuthId,
+        }
+      },
+    };
+
+    await FirebaseFirestore.instance.collection('emails').add(emailData);
+  }
+
+  Future<void> _loadUser() async {
     logger.t("UserProvider.loadUser()");
     final auth.User? firebaseUser = auth.FirebaseAuth.instance.currentUser;
     if (firebaseUser != null) {
       DocumentSnapshot doc = await FirebaseFirestore.instance.collection('users').doc(firebaseUser.uid).get();
       if (doc.exists) {
-        _user = TourguideUser.fromMap(doc.data() as Map<String, dynamic>);
+        Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
+        if (data['googleSignInId'] == null
+            || data['username'] == null
+            || data['displayName'] == null
+            || data['email'] == null
+            || data['emailSubscribed'] == null){
+          logger.w("UserProvider.loadUser() - User data is incomplete, patching user");
+          _user = await _patchUser(data);
+        } else {
+          _user = TourguideUser.fromMap(doc.data() as Map<String, dynamic>);
+        }
         notifyListeners();
       }
     }
+  }
+
+  Future<TourguideUser> _patchUser(Map<String, dynamic> data)async {
+  logger.t("UserProvider._patchUser()");
+    final auth.User? firebaseUser = auth.FirebaseAuth.instance.currentUser;
+    TourguideUser patchedUser = TourguideUser(
+      firebaseAuthId: firebaseUser!.uid,
+      googleSignInId: data['googleSignInId'] ?? _authProvider!.googleSignInUser!.id,
+      username: data['username'] ?? '',
+      displayName: data['displayName'] ?? _authProvider!.googleSignInUser!.displayName!,
+      email: data['email'] ?? _authProvider!.googleSignInUser!.email!,
+      emailSubscribed: data['emailSubscribed'] ?? true,
+      savedTourIds: List<String>.from(data['savedTourIds'] ?? []),
+    );
+    //update in Firestore
+    await FirebaseFirestore.instance
+        .collection('users')
+        .doc(firebaseUser.uid)
+        .set(patchedUser.toMap(), SetOptions(merge: true));
+    return patchedUser;
   }
 
   Future<bool> checkUsernameAvailability(String newUsername) async {

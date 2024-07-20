@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:tourguide_app/profile/app_settings.dart';
 import 'package:tourguide_app/profile/profile_settings.dart';
 import 'package:tourguide_app/profile/to_tour_list.dart';
 import 'package:tourguide_app/ui/my_layouts.dart';
@@ -182,7 +183,13 @@ class _ProfileState extends State<Profile> {
                   leftIcon: Icons.settings_outlined,
                   rightIcon: Icons.arrow_forward_ios,
                   onPressed: () {
-
+                    Navigator.push(
+                      context,
+                      SlideTransitionRoute(
+                        page: AppSettings(),
+                        beginOffset: Offset(1.0, 0.0), // Slide in from right
+                      ),
+                    );
                   },
                 ),
                 ProfileListButton(
