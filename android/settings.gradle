@@ -4,6 +4,8 @@ pluginManagement {
         file("local.properties").withInputStream { properties.load(it) }
         def flutterSdkPath = properties.getProperty("flutter.sdk")
         assert flutterSdkPath != null, "flutter.sdk not set in local.properties"
+        // Normalize path for Unix-based systems (required for fastlane)
+        flutterSdkPath = flutterSdkPath.replace("\\", "/")
         return flutterSdkPath
     }()
 

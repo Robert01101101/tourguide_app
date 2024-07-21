@@ -13,17 +13,90 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
+      - name: Debug KEYSTORE_PASSWORD
+        run: echo "KEYSTORE_PASSWORD=${KEYSTORE_PASSWORD}"
+        env:
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2.16.0
+
+      - name: Clean build artifacts
+        run: flutter clean
+
+      - name: Set executable permissions for gradlew
+        run: chmod +x ./android/gradlew
+
+      - name: Install Flutter dependencies
+        run: flutter pub get
+
+      - name: Display pubspec version
+        run: |
+          grep 'version:' pubspec.yaml
+
+      - name: Setup Java JDK
+        uses: actions/setup-java@v4.2.1   
+        with:
+          distribution: 'temurin'
+          java-version: '17' 
+            
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1
         with:
           ruby-version: '3.3.4'
 
-      - name: Install dependencies
+      - name: Install Bundler
+        run: gem install bundler
+
+      - name: Install Ruby dependencies
+        run: bundle install
+
+      - name: Decode and write Google Play JSON key
+        run: echo "${{ secrets.GOOGLE_PLAY_JSON_KEY }}" | base64 --decode > android/app/google-play-key.json
+
+      - name: Decode and decrypt keystore
+        env:
+          ENCRYPTED_KEYSTORE: ${{ secrets.ENCRYPTED_KEYSTORE }}
+          ENCRYPTION_PASSWORD: ${{ secrets.ENCRYPTION_PASSWORD }}
         run: |
-          gem install fastlane
-          bundle install
+          echo "${{ secrets.ENCRYPTED_KEYSTORE }}" | base64 --decode > upload-keystore.jks.enc
+          openssl enc -aes-256-cbc -d -salt -iter 100000 -pbkdf2 -in upload-keystore.jks.enc -out android/app/upload-keystore.jks -k ${{ secrets.ENCRYPTION_PASSWORD }}
+
+      - name: Create key.properties
+        run: |
+          touch android/key.properties
+          echo "storeFile=upload-keystore.jks" >> android/key.properties
+          echo "storePassword=${KEYSTORE_PASSWORD}" >> android/key.properties
+          echo "keyAlias=${{ secrets.KEY_ALIAS }}" >> android/key.properties
+          echo "keyPassword=${{ secrets.KEY_PASSWORD }}" >> android/key.properties
+        env:
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+
+      - name: Log key.properties (masked)
+        run: |
+          cp android/key.properties android/key.properties.masked
+          sed -i 's/keyPassword=.*/keyPassword=***REDACTED***/' android/key.properties.masked
+          cat android/key.properties.masked
+
+      - name: Check decrypted keystore
+        run: |
+          file android/app/upload-keystore.jks
+
+      - name: List files in android/app
+        run: ls -la android/app
+
+      - name: Set Flutter SDK Path Environment Variable
+        run: echo "FLUTTER_SDK_PATH=${{ runner.workspace }}/flutter" >> $GITHUB_ENV
 
       - name: Build and deploy
-        run: fastlane android deploy
+        run: |
+          cd android
+          bundle exec fastlane deploy
         env:
           GOOGLE_PLAY_JSON_KEY: ${{ secrets.GOOGLE_PLAY_JSON_KEY }}
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+
+      - name: List files in build directory
+        run: ls -la build/app/outputs/bundle/release
