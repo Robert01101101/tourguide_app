@@ -1,0 +1,29 @@
+name: Build and Deploy to Google Play
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.3.4'
+
+      - name: Install dependencies
+        run: |
+          gem install fastlane
+          bundle install
+
+      - name: Build and deploy
+        run: fastlane android deploy
+        env:
+          GOOGLE_PLAY_JSON_KEY: ${{ secrets.GOOGLE_PLAY_JSON_KEY }}
