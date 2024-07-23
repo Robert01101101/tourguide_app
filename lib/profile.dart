@@ -45,79 +45,6 @@ class _ProfileState extends State<Profile> {
           children: [
             StandardLayout(
               children: [
-                /*  //debug view
-                StandardLayout(
-                  enableHorizontalPadding: false,
-                  enableVerticalPadding: false,
-                  children: [
-                    SizedBox(height: 16,),
-                    Text("Your userdata:", style: Theme.of(context).textTheme.headlineSmall),
-                    SizedBox(height: 8,),
-                    Text("Google Auth data", style: Theme.of(context).textTheme.bodyLarge),
-                    SizedBox(height: 8,),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      children: [
-                        const Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text("uid:"),
-                            Text("Display Name:"),
-                            Text("email:"),
-                            Text("email verified:"),
-                            Text("multiFactor:"),
-                            Text("phoneNumber: "),
-                          ],
-                        ),
-                        SizedBox(width: 32,),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text("${FirebaseAuth.instance.currentUser!.uid}"),
-                            Text("${FirebaseAuth.instance.currentUser!.displayName}"),
-                            Text("${FirebaseAuth.instance.currentUser!.email}"),
-                            Text("${FirebaseAuth.instance.currentUser!.emailVerified}"),
-                            Text("${FirebaseAuth.instance.currentUser!.multiFactor}"),
-                            Text("${FirebaseAuth.instance.currentUser!.phoneNumber}"),
-                          ],
-                        ),
-                      ],
-                    ),
-                    SizedBox(height: 16,),
-                    Text("Firestore profile data", style: Theme.of(context).textTheme.bodyLarge),
-                    SizedBox(height: 8,),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceAround,
-                      children: [
-                        const Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text("username:"),
-                          ],
-                        ),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            FutureBuilder<DocumentSnapshot>(
-                              future: _profileDataFuture,
-                        builder: (context, snapshot){
-                                if (snapshot.connectionState == ConnectionState.waiting) {
-                                  return CircularProgressIndicator();
-                                } else if (snapshot != null && snapshot.hasData && !snapshot.hasError && snapshot.data!.exists){
-                                  final username = snapshot.data!['username'];
-                                  return Text("${username}");
-                                } else {
-                                  return Text("Error: ${snapshot.error}");
-                                }
-                              },
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-
-                  ],
-                ),*/
                 SizedBox(height: 0,),
                 ListTile(
                   leading: GoogleUserCircleAvatar(
@@ -127,24 +54,6 @@ class _ProfileState extends State<Profile> {
                   subtitle: Text(authProvider.googleSignInUser!.email),
                 ),
                 SizedBox(height: 8,),
-                /*
-                Row(
-                  children: [
-                    Expanded(
-                      child: TextField(
-                        controller: _usernameController,
-                        decoration: const InputDecoration(
-                          hintText: 'Enter your new username',
-                        ),
-                      ),
-                    ),
-                    SizedBox(width: 32,),
-                    ElevatedButton(onPressed: () {
-                      _firestoreSetUserProfileData();
-                    }, child: const Text("Save")),
-                  ],
-                ),
-                SizedBox(height: 32,),*/
               ],
             ),
             Column(
@@ -193,22 +102,19 @@ class _ProfileState extends State<Profile> {
                   },
                 ),
                 ProfileListButton(
+                  label: 'Terms of Service',
+                  leftIcon: Icons.description_outlined,
+                  onPressed: () {
+                    launchUrl(Uri.parse("https://tourguide.rmichels.com/termsOfService.html"));
+                  },
+                ),
+                ProfileListButton(
                   label: 'Privacy Policy',
                   leftIcon: Icons.privacy_tip_outlined,
                   onPressed: () {
                     launchUrl(Uri.parse("https://tourguide.rmichels.com/privacyPolicy.html"));
                   },
                 ),
-                /*
-                ProfileListButton(
-                  label: 'Update Firestore profile data (get)',
-                  leftIcon: Icons.data_object,
-                  onPressed: () {
-                    setState(() {
-                      _profileDataFuture = _firestoreGetUserProfileData();
-                    });
-                  },
-                ),*/
                 ProfileListButton(
                   label: 'Sign out',
                   leftIcon: Icons.logout,

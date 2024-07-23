@@ -10,11 +10,13 @@ import 'dart:math';
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:http/http.dart' as http;
 import 'package:tourguide_app/utilities/providers/location_provider.dart';
 import 'package:tourguide_app/utilities/providers/tour_provider.dart';
 import 'package:tourguide_app/utilities/providers/tourguide_user_provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'ui/sign_in_button.dart';
 import 'package:tourguide_app/utilities/custom_import.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -136,12 +138,54 @@ class _SignInState extends State<SignIn> {
     final GoogleSignInAccount? user = authProvider.googleSignInUser;
 
     return Scaffold(
-        appBar: AppBar(
-          title: const Text('Tourguide'),
+      appBar: AppBar(
+        title: const Text('Tourguide'),
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(24.0),
+        child: Column(
+          children: [
+            Expanded(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints.expand(),
+                child: ((user != null && authProvider.isAuthorized) || authProvider.isLoggingOut)
+                    ? _buildProcessingBody()
+                    : _buildButtonBody(),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: RichText(
+                textAlign: TextAlign.center,
+                text: TextSpan(
+                  style: TextStyle(color: Colors.black54),
+                  children: [
+                    const TextSpan(text: 'By signing in, you agree to the \n'),
+                    TextSpan(
+                      text: 'Terms of Service',
+                      style: TextStyle(decoration: TextDecoration.underline, color: Theme.of(context).colorScheme.primary),
+                      recognizer: TapGestureRecognizer()
+                        ..onTap = () {
+                          launchUrl(Uri.parse("https://tourguide.rmichels.com/termsOfService.html"));
+                        },
+                    ),
+                    const TextSpan(text: ' and '),
+                    TextSpan(
+                      text: 'Privacy Policy',
+                      style: TextStyle(decoration: TextDecoration.underline, color: Theme.of(context).colorScheme.primary),
+                      recognizer: TapGestureRecognizer()
+                        ..onTap = () {
+                          launchUrl(Uri.parse("https://tourguide.rmichels.com/privacyPolicy.html"));
+                        },
+                    ),
+                    const TextSpan(text: '.'),
+                  ],
+                ),
+              ),
+            ),
+          ],
         ),
-        body: ConstrainedBox(
-          constraints: const BoxConstraints.expand(),
-          child: ((user != null && authProvider.isAuthorized) || authProvider.isLoggingOut) ? _buildProcessingBody() : _buildButtonBody(),
-        ));
+      ),
+    );
   }
 }
