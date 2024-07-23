@@ -13,11 +13,6 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Debug KEYSTORE_PASSWORD
-        run: echo "KEYSTORE_PASSWORD=${KEYSTORE_PASSWORD}"
-        env:
-          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
-
       - name: Set up Flutter
         uses: subosito/flutter-action@v2.16.0
 
@@ -29,10 +24,6 @@ jobs:
 
       - name: Install Flutter dependencies
         run: flutter pub get
-
-      - name: Display pubspec version
-        run: |
-          grep 'version:' pubspec.yaml
 
       - name: Setup Java JDK
         uses: actions/setup-java@v4.2.1   
@@ -72,19 +63,6 @@ jobs:
         env:
           KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
 
-      - name: Log key.properties (masked)
-        run: |
-          cp android/key.properties android/key.properties.masked
-          sed -i 's/keyPassword=.*/keyPassword=***REDACTED***/' android/key.properties.masked
-          cat android/key.properties.masked
-
-      - name: Check decrypted keystore
-        run: |
-          file android/app/upload-keystore.jks
-
-      - name: List files in android/app
-        run: ls -la android/app
-
       - name: Set Flutter SDK Path Environment Variable
         run: echo "FLUTTER_SDK_PATH=${{ runner.workspace }}/flutter" >> $GITHUB_ENV
 
@@ -97,6 +75,3 @@ jobs:
           KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
           KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
           KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
-
-      - name: List files in build directory
-        run: ls -la build/app/outputs/bundle/release
