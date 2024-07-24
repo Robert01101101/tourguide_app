@@ -52,11 +52,11 @@
                   <p
                     style="font-family: Helvetica, sans-serif; font-size: 16px; font-weight: bold; margin: 0; margin-bottom: 24px;"
                   >
-                  Hi there {{firstName}}, your tour {{tourName}} was reported for violations against the community guidelines.
+                  Hi there {{firstName}}, your tour <em>{{tourName}}</em> was reported for violations against the community guidelines.
                   </p>
                   <p
                     style="font-family: Helvetica, sans-serif; font-size: 16px; font-weight: normal; margin: 0; margin-bottom: 24px;">
-                    The provided reason for the report is: {{reportReason}}
+                    The provided reason for the report is: {{reportReason}}.
                   </p>
                   <p
                     style="font-family: Helvetica, sans-serif; font-size: 16px; font-weight: normal; margin: 0; margin-bottom: 24px;">
@@ -72,11 +72,11 @@
                   </p>
                   <p
                   style="font-family: Helvetica, sans-serif; font-size: 16px; font-weight: normal; margin: 0; margin-bottom: 24px;">
-                    If you have questions or concerns about this notification, or would like to dispute the report, you can reach out to <a href="mailto:feedback@tourguide.rmichels.com" style="color: #006a65; font-weight: bold;">contact@tourguide.rmichels.com</a>
+                    If you have questions or concerns about this notification, or would like to dispute the report, you can reach out to <br><a href="mailto:feedback@tourguide.rmichels.com" style="color: #006a65; font-weight: bold;">contact@tourguide.rmichels.com</a>.
                   </p>
                   <p
                   style="font-family: Helvetica, sans-serif; font-size: 16px; font-weight: normal; margin: 0; margin-bottom: 24px;">
-                    If you would like to provide any feedback for your experience with Tourguide, please share it with us at <a href="mailto:feedback@tourguide.rmichels.com" style="color: #006a65; font-weight: bold;">feedback@tourguide.rmichels.com</a>.
+                    If you would like to provide any feedback for your experience with Tourguide, please share it with us at <br><a href="mailto:feedback@tourguide.rmichels.com" style="color: #006a65; font-weight: bold;">feedback@tourguide.rmichels.com</a>.
                   </p>
                   <p
                   style="font-family: Helvetica, sans-serif; font-size: 16px; font-weight: normal; margin: 0; margin-bottom: 48px;">
@@ -84,7 +84,7 @@
                   </p>
                   <p
                   style="font-family: Helvetica, sans-serif; font-size: 14px; font-weight: normal; margin: 0;">
-                    <a href="https://us-central1-tourguide-firebase.cloudfunctions.net/unsubscribeUser?authId={{{authId}}}" style="color:#b3bdbc;">Unsubscribe</a>
+                    <a href="https://us-central1-tourguide-firebase.cloudfunctions.net/unsubscribeUser?authId={{{authId}}}&emailCategory=reports" style="color:#b3bdbc;">Unsubscribe</a>
                   </p>
                 </td>
               </tr>

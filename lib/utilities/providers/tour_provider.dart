@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:tourguide_app/main.dart';
 import 'package:tourguide_app/model/tour.dart';
 import 'package:tourguide_app/model/tourguide_report.dart';
+import 'package:tourguide_app/model/tourguide_user.dart';
 import 'package:tourguide_app/utilities/services/tour_service.dart';
 
 //TODO: optimize
@@ -147,15 +148,13 @@ class TourProvider with ChangeNotifier {
     return _allCachedTours[tour.id]!;
   }
 
-  Future<void> reportTour(Tour tour, TourguideReport report) async{
+  Future<void> reportTour(Tour tour, TourguideReport report, TourguideUser reportedTourAuthor) async{
     List<TourguideReport> newReports =  [...tour.reports, report];
     Tour reportedTour = tour.copyWith(reports: newReports);
 
     logger.i('Tour reported: ${tour.id}');
     _notifyAdminOfReportOrReviewRequest(tour.id, reportTitle: report.title, reportDetails: report.additionalDetails);
-    
-    //TODO: notify user of report
-    //_notifyUserOfReport();
+    _notifyUserOfReport(tour, report, reportedTourAuthor);
 
     await updateTour(reportedTour);
     removeTourFromCachedTours(reportedTour);
@@ -187,15 +186,20 @@ class TourProvider with ChangeNotifier {
     await FirebaseFirestore.instance.collection('emails').add(emailData);
   }
 
-  Future<void> _notifyUserOfReport (String tourId, {String? reportTitle, String? reportDetails}) async {
+  Future<void> _notifyUserOfReport (Tour tour, TourguideReport report, TourguideUser reportedTourAuthor) async {
+    if (reportedTourAuthor.emailSubscriptionsDisabled.contains('reports')) {
+      logger.t("UserProvider._notifyUserOfReport() - User is not subscribed to Report emails, skipping");
+      return;
+    }
     Map<String, dynamic> emailData = {
-      'to': 'contact@tourguide.rmichels.com',
+      'to': reportedTourAuthor.email,
       'template': {
-        'name': reportTitle != null ? 'report' : 'reportReviewRequest',
+        'name': 'userTourReported',
         'data': {
-          'tourId': tourId,
-          if (reportTitle != null) 'reportTitle': reportTitle,
-          if (reportDetails != null) 'reportDetails': reportDetails,
+          'firstName': reportedTourAuthor.displayName.split(' ').first,
+          'tourName': tour.name,
+          'reportReason': report.title,
+          'authId': reportedTourAuthor.firebaseAuthId,
         }
       },
     };

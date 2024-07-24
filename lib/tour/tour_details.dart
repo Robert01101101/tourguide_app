@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:tourguide_app/model/tour.dart';
 import 'package:tourguide_app/model/tourguide_report.dart';
+import 'package:tourguide_app/model/tourguide_user.dart';
 import 'package:tourguide_app/tour/tour_creation.dart';
 import 'package:tourguide_app/ui/my_layouts.dart';
 import 'package:tourguide_app/utilities/providers/tour_provider.dart';
@@ -608,6 +609,7 @@ class _TourDetailsOptionsState extends State<TourDetailsOptions> {
   bool _isRequestingReview = false;
   bool _isDeleteConfirmChecked = false;
   bool _isRequestReviewChecked = false;
+  bool _reportSubmitted = false;
   String _selectedReportOption = '';
   final TextEditingController _reportDetailsController = TextEditingController();
 
@@ -617,7 +619,9 @@ class _TourDetailsOptionsState extends State<TourDetailsOptions> {
     });
   }
 
-  void _submitReport() {
+  Future<void> _submitReport() async {
+    if (_reportSubmitted) return;
+    _reportSubmitted = true;
     String additionalDetails = _reportDetailsController.text;
     logger.t('Selected Option: $_selectedReportOption');
     logger.t('Additional Details: $additionalDetails');
@@ -628,9 +632,10 @@ class _TourDetailsOptionsState extends State<TourDetailsOptions> {
       additionalDetails: additionalDetails,
       reportAuthorId: tourguideUserProvider.user!.firebaseAuthId,
     );
+    final TourguideUser? reportAuthor = await tourguideUserProvider.getUserInfo(widget.tour.authorId);
     final tourProvider = Provider.of<TourProvider>(context, listen: false);
     setState(() {
-      tourProvider.reportTour(widget.tour, report);
+      tourProvider.reportTour(widget.tour, report, reportAuthor!);
     });
 
     Navigator.of(context).pop();

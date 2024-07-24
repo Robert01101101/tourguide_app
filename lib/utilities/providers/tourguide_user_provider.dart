@@ -75,7 +75,7 @@ class TourguideUserProvider with ChangeNotifier {
       username: '',
       displayName: _authProvider!.googleSignInUser!.displayName!,
       email: _authProvider!.googleSignInUser!.email!,
-      emailSubscribed: true,
+      emailSubscriptionsDisabled: [],
       savedTourIds: [],
       reports: [],
     );
@@ -85,8 +85,8 @@ class TourguideUserProvider with ChangeNotifier {
 
   Future<void> _sendWelcomeEmail () async {
     logger.i("UserProvider._sendWelcomeEmail()");
-    if (_user!.emailSubscribed == false) {
-      logger.t("UserProvider._sendWelcomeEmail() - User is not subscribed to emails, skipping");
+    if (_user!.emailSubscriptionsDisabled.contains('general')) {
+      logger.t("UserProvider._sendWelcomeEmail() - User is not subscribed to General emails, skipping");
       return;
     }
     Map<String, dynamic> emailData = {
@@ -145,7 +145,7 @@ class TourguideUserProvider with ChangeNotifier {
       username: data['username'] ?? '',
       displayName: data['displayName'] ?? _authProvider!.googleSignInUser!.displayName!,
       email: data['email'] ?? _authProvider!.googleSignInUser!.email!,
-      emailSubscribed: data['emailSubscribed'] ?? true,
+      emailSubscriptionsDisabled:List<String>.from(data['emailSubscriptionsDisabled'] ?? []),
       savedTourIds: List<String>.from(data['savedTourIds'] ?? []),
       reports: List<TourguideReport>.from(data['reports'] ?? []),
     );

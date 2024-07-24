@@ -16,7 +16,10 @@ class AppSettings extends StatefulWidget {
 }
 
 class _AppSettingsState extends State<AppSettings> {
-  bool _emailNotificationsEnabled = false; // State variable for checkbox
+  bool _emailGeneralNotificationsEnabled = true;
+  bool _emailReportsNotificationsEnabled = true;
+  late bool _emailGeneralNotificationsEnabledInitialState = true;
+  late bool _emailReportsNotificationsEnabledInitialState = true;
   bool _savingSettings = false;
 
   @override
@@ -28,7 +31,10 @@ class _AppSettingsState extends State<AppSettings> {
   Future<void> _loadSettings() async {
     TourguideUserProvider userProvider = Provider.of<TourguideUserProvider>(context, listen: false);
     setState(() {
-      _emailNotificationsEnabled = userProvider.user!.emailSubscribed;
+      _emailGeneralNotificationsEnabled = !(userProvider.user!.emailSubscriptionsDisabled.contains('general'));
+      _emailReportsNotificationsEnabled = !(userProvider.user!.emailSubscriptionsDisabled.contains('reports'));
+      _emailGeneralNotificationsEnabledInitialState = _emailGeneralNotificationsEnabled;
+      _emailReportsNotificationsEnabledInitialState = _emailReportsNotificationsEnabled;
     });
   }
 
@@ -37,7 +43,9 @@ class _AppSettingsState extends State<AppSettings> {
       _savingSettings = true;
     });
     TourguideUserProvider userProvider = Provider.of<TourguideUserProvider>(context, listen: false);
-    await userProvider.updateUser(userProvider.user!.copyWith(emailSubscribed: _emailNotificationsEnabled));
+    userProvider.user!.setEmailSubscriptionEnabled('general', !_emailGeneralNotificationsEnabled);
+    userProvider.user!.setEmailSubscriptionEnabled('reports', !_emailReportsNotificationsEnabled);
+    await userProvider.updateUser(userProvider.user!);
     setState(() {
       _savingSettings = false;
     });
@@ -64,23 +72,40 @@ class _AppSettingsState extends State<AppSettings> {
           Text("Notification Settings", style: Theme.of(context).textTheme.headlineSmall),
           ListTile(
             leading: Checkbox(
-              value: _emailNotificationsEnabled,
+              value: _emailGeneralNotificationsEnabled,
               onChanged: (bool? value) {
                 setState(() {
-                  _emailNotificationsEnabled = value ?? false;
+                  _emailGeneralNotificationsEnabled = value ?? false;
                 });
               },
             ),
-            title: const Text('Receive email notifications'),
+            title: const Text('Receive general email notifications'),
             onTap: () {
               setState(() {
-                _emailNotificationsEnabled = !_emailNotificationsEnabled;
+                _emailGeneralNotificationsEnabled = !_emailGeneralNotificationsEnabled;
+              });
+            },
+          ),
+          ListTile(
+            leading: Checkbox(
+              value: _emailReportsNotificationsEnabled,
+              onChanged: (bool? value) {
+                setState(() {
+                  _emailReportsNotificationsEnabled = value ?? false;
+                });
+              },
+            ),
+            title: const Text('Receive email notifications when users report your tours'),
+            onTap: () {
+              setState(() {
+                _emailReportsNotificationsEnabled = !_emailReportsNotificationsEnabled;
               });
             },
           ),
           const SizedBox(height: 20),
           ElevatedButton(
-            onPressed: userProvider.user!.emailSubscribed != _emailNotificationsEnabled ? _saveSettings : null,
+            onPressed: _emailGeneralNotificationsEnabledInitialState != _emailGeneralNotificationsEnabled ||
+                _emailReportsNotificationsEnabledInitialState != _emailReportsNotificationsEnabled ? _saveSettings : null,
             child: _savingSettings ? const Text('Saving Settings') : const Text('Save Settings'),
           ),
         ],

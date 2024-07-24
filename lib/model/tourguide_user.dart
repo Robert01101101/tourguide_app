@@ -6,7 +6,7 @@ class TourguideUser {
   String username;
   String displayName;
   String email;
-  bool emailSubscribed = false;
+  List<String> emailSubscriptionsDisabled;
   List<String> savedTourIds;
   List<TourguideReport> reports;
 
@@ -16,7 +16,7 @@ class TourguideUser {
     required this.username,
     required this.displayName,
     required this.email,
-    required this.emailSubscribed,
+    required this.emailSubscriptionsDisabled,
     required this.savedTourIds,
     required this.reports,
   });
@@ -29,9 +29,9 @@ class TourguideUser {
       'username': username,
       'displayName': displayName,
       'email': email,
-      'emailSubscribed': emailSubscribed,
-      'savedTourIds': savedTourIds,
-      'reports': reports.map((report) => report.toMap()).toList(),
+      'emailSubscriptionsDisabled': emailSubscriptionsDisabled ?? [],
+      'savedTourIds': savedTourIds ?? [],
+      'reports': reports.map((report) => report.toMap()).toList() ?? [],
     };
   }
 
@@ -51,7 +51,9 @@ class TourguideUser {
       username: map['username'],
       displayName: map['displayName'],
       email: map['email'],
-      emailSubscribed: map['emailSubscribed'],
+      emailSubscriptionsDisabled: map['emailSubscriptionsDisabled'] != null
+          ? List<String>.from(map['emailSubscriptionsDisabled'])
+          : [],
       savedTourIds: List<String>.from(map['savedTourIds']),
       reports: reports,
     );
@@ -63,7 +65,7 @@ class TourguideUser {
     String? username,
     String? displayName,
     String? email,
-    bool? emailSubscribed,
+    List<String>? emailSubscriptionsDisabled,
     List<String>? savedTourIds,
     List<TourguideReport>? reports,
   }) {
@@ -73,9 +75,19 @@ class TourguideUser {
       username: username ?? this.username,
       displayName: displayName ?? this.displayName,
       email: email ?? this.email,
-      emailSubscribed: emailSubscribed ?? this.emailSubscribed,
+      emailSubscriptionsDisabled: emailSubscriptionsDisabled ?? this.emailSubscriptionsDisabled,
       savedTourIds: savedTourIds ?? this.savedTourIds,
       reports: reports ?? this.reports,
     );
+  }
+
+  void setEmailSubscriptionEnabled(String type, bool enabled) {
+    if (enabled) {
+      if (!emailSubscriptionsDisabled.contains(type)) {
+        emailSubscriptionsDisabled.add(type);
+      }
+    } else {
+      emailSubscriptionsDisabled.remove(type);
+    }
   }
 }
