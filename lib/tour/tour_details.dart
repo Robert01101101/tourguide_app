@@ -653,13 +653,11 @@ class _TourDetailsOptionsState extends State<TourDetailsOptions> {
     );
   }
 
-  void _requestReview() {
+  Future<void> _requestReview() async {
     logger.i('_requestReview()');
 
     final tourProvider = Provider.of<TourProvider>(context, listen: false);
-    setState(() {
-      tourProvider.requestReviewOfTour(widget.tour);
-    });
+    tourProvider.requestReviewOfTour(widget.tour);
 
     Navigator.of(context).pop();
     showDialog(

@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:tourguide_app/main.dart';
 import 'package:tourguide_app/model/tour.dart';
@@ -97,7 +98,12 @@ class TourProvider with ChangeNotifier {
 
   Future<void> deleteTour(Tour tour) async{
     await TourService.deleteTour(tour);
-    _allCachedTours.remove(tour);
+    removeTourFromCachedTours(tour);
+    notifyListeners();
+  }
+
+  void removeTourFromCachedTours(Tour tour) async{
+    _allCachedTours.remove(tour.id);
     _popularTours.remove(tour);
     _globalTours.remove(tour);
     _localTours.remove(tour);
@@ -134,10 +140,11 @@ class TourProvider with ChangeNotifier {
   }
 
   /// Updates the tour data in cache and firestore (for edits, reporting, etc)
-  Future<void> updateTour(Tour tour) async{
+  Future<Tour> updateTour(Tour tour) async{
     tour = await TourService.updateTour(tour);
     _allCachedTours[tour.id] = tour;
     notifyListeners();
+    return _allCachedTours[tour.id]!;
   }
 
   Future<void> reportTour(Tour tour, TourguideReport report) async{
@@ -145,18 +152,55 @@ class TourProvider with ChangeNotifier {
     Tour reportedTour = tour.copyWith(reports: newReports);
 
     logger.i('Tour reported: ${tour.id}');
-    //TODO: email notification, firestore logic
+    _notifyAdminOfReportOrReviewRequest(tour.id, reportTitle: report.title, reportDetails: report.additionalDetails);
+    
+    //TODO: notify user of report
+    //_notifyUserOfReport();
 
-    updateTour(reportedTour);
+    await updateTour(reportedTour);
+    removeTourFromCachedTours(reportedTour);
   }
 
-  Future<void> requestReviewOfTour(Tour tour) async{
+  Future<Tour> requestReviewOfTour(Tour tour) async{
     Tour tourToReview = tour.copyWith(requestReviewStatus: "requested");
 
     logger.i('Tour Review requested: ${tour.id}');
-    //TODO: email notification, firestore logic
+    _notifyAdminOfReportOrReviewRequest(tour.id);
 
-    updateTour(tourToReview);
+    return await updateTour(tourToReview);
+  }
+
+  //optional params String reportTitle, String reportDetails
+  Future<void> _notifyAdminOfReportOrReviewRequest (String tourId, {String? reportTitle, String? reportDetails}) async {
+    Map<String, dynamic> emailData = {
+      'to': 'contact@tourguide.rmichels.com',
+      'template': {
+        'name': reportTitle != null ? 'report' : 'reportReviewRequest',
+        'data': {
+          'tourId': tourId,
+          if (reportTitle != null) 'reportTitle': reportTitle,
+          if (reportDetails != null) 'reportDetails': reportDetails,
+        }
+      },
+    };
+
+    await FirebaseFirestore.instance.collection('emails').add(emailData);
+  }
+
+  Future<void> _notifyUserOfReport (String tourId, {String? reportTitle, String? reportDetails}) async {
+    Map<String, dynamic> emailData = {
+      'to': 'contact@tourguide.rmichels.com',
+      'template': {
+        'name': reportTitle != null ? 'report' : 'reportReviewRequest',
+        'data': {
+          'tourId': tourId,
+          if (reportTitle != null) 'reportTitle': reportTitle,
+          if (reportDetails != null) 'reportDetails': reportDetails,
+        }
+      },
+    };
+
+    await FirebaseFirestore.instance.collection('emails').add(emailData);
   }
 
   /// for logout

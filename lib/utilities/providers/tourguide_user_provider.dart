@@ -35,10 +35,11 @@ class TourguideUserProvider with ChangeNotifier {
       await _waitForRequiredData();
       await _loadUser();
       logger.t("UserProvider() - _onAuthStateChanged() - User is loaded");
+      _sendWelcomeEmail();
       if (_user == null) {
         // New user, create an entry in Firestore
         await _createUser();
-        _sendWelcomeEmail();
+
       }
     } else {
       logger.t("UserProvider() - _onAuthStateChanged() - User is null");
@@ -123,6 +124,16 @@ class TourguideUserProvider with ChangeNotifier {
         notifyListeners();
       }
     }
+  }
+
+  Future<TourguideUser?> getUserInfo(String userId) async {
+    TourguideUser? user;
+    logger.t("UserProvider._getUserInfo($userId)");
+    DocumentSnapshot doc = await FirebaseFirestore.instance.collection('users').doc(userId).get();
+    if (doc.exists) {
+      user = TourguideUser.fromMap(doc.data() as Map<String, dynamic>);
+    }
+    return user;
   }
 
   Future<TourguideUser> _patchUser(Map<String, dynamic> data)async {
