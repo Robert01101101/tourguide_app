@@ -343,21 +343,52 @@ class _FullscreenTourPageState extends State<FullscreenTourPage> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         if (widget.tour.imageUrl != null && widget.tour.imageUrl.isNotEmpty || widget.tour.isOfflineCreatedTour && widget.tour.imageToUpload != null)
-                          Container(
-                            height: 230,
-                            child: ClipRRect(
-                              child: widget.tour.isOfflineCreatedTour && widget.tour.imageToUpload != null  //add null safety for img to upload
-                              ? Image.file(widget.tour.imageToUpload!,
-                                  width: MediaQuery.of(context).size.width,
-                                  height: 200.0,
-                                  fit: BoxFit.cover)
-                              : Image.network(
-                                  widget.tour.imageUrl,
-                                  width: MediaQuery.of(context).size.width,
-                                  height: 230.0, // Adjust height as needed
-                                  fit: BoxFit.cover,
+                          Stack(
+                            children: [
+                              Container(
+                                height: 230,
+                                child: ClipRRect(
+                                  child: widget.tour.isOfflineCreatedTour && widget.tour.imageToUpload != null  //add null safety for img to upload
+                                  ? Image.file(widget.tour.imageToUpload!,
+                                      width: MediaQuery.of(context).size.width,
+                                      height: 200.0,
+                                      fit: BoxFit.cover)
+                                  : Image.network(
+                                      widget.tour.imageUrl,
+                                      width: MediaQuery.of(context).size.width,
+                                      height: 230.0, // Adjust height as needed
+                                      fit: BoxFit.cover,
+                                  ),
+                                ),
                               ),
-                            ),
+                              if (tourProvider.isUserCreatedTour(widget.tour))
+                                Align(
+                                    alignment: Alignment.topRight,
+                                    child: Padding(
+                                      padding: EdgeInsets.all(8.0),
+                                      child: Row(
+                                        mainAxisAlignment: MainAxisAlignment.end,
+                                        children: [
+                                          if (widget.tour.reports.isNotEmpty)
+                                            const CircleAvatar(
+                                              radius: 16,
+                                              backgroundColor: Colors.black45,
+                                              child: Icon(
+                                                Icons.report_outlined,
+                                                color: Colors.yellow,
+                                                size: 22,),
+                                            ),
+                                          const CircleAvatar(
+                                            radius: 16,
+                                            backgroundColor: Colors.black45,
+                                            child: Icon(
+                                              Icons.attribution,
+                                              color: Colors.white,),
+                                          ),
+                                        ],
+                                      ),
+                                    )),
+                            ],
                           ),
                         const SizedBox(height: 16.0),
                         Container(
@@ -569,10 +600,14 @@ class TourDetailsOptions extends StatefulWidget {
   State<TourDetailsOptions> createState() => _TourDetailsOptionsState();
 }
 
+//TODO: maybe find a better solution, state machine or something like that?
 class _TourDetailsOptionsState extends State<TourDetailsOptions> {
   bool _isConfirmingDelete = false;
   bool _isReportingTour = false;
-  bool _isChecked = false;
+  bool _isViewingReports = false;
+  bool _isRequestingReview = false;
+  bool _isDeleteConfirmChecked = false;
+  bool _isRequestReviewChecked = false;
   String _selectedReportOption = '';
   final TextEditingController _reportDetailsController = TextEditingController();
 
@@ -594,7 +629,9 @@ class _TourDetailsOptionsState extends State<TourDetailsOptions> {
       reportAuthorId: tourguideUserProvider.user!.firebaseAuthId,
     );
     final tourProvider = Provider.of<TourProvider>(context, listen: false);
-    tourProvider.reportTour(widget.tour, report);
+    setState(() {
+      tourProvider.reportTour(widget.tour, report);
+    });
 
     Navigator.of(context).pop();
     showDialog(
@@ -616,25 +653,91 @@ class _TourDetailsOptionsState extends State<TourDetailsOptions> {
     );
   }
 
+  void _requestReview() {
+    logger.i('_requestReview()');
+
+    final tourProvider = Provider.of<TourProvider>(context, listen: false);
+    setState(() {
+      tourProvider.requestReviewOfTour(widget.tour);
+    });
+
+    Navigator.of(context).pop();
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Tour under Review'),
+          content: const Text('Thank you for submitting your request for review. We will review the content and remove the reports if we deem the content to be in compliance with our community guidelines.'),
+          actions: [
+            TextButton(
+              child: const Text('OK'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final tourProvider = Provider.of<TourProvider>(context);
     bool isAuthor = tourProvider.isUserCreatedTour(widget.tour);
     return AlertDialog(
-      title: Text(isAuthor ? (!_isConfirmingDelete ? 'Author Options' : 'Delete Tour') : (!_isReportingTour ? 'Options' : 'Report Tour')),
+      title: Text(isAuthor ? (!_isConfirmingDelete ? (!_isViewingReports ? (!_isRequestingReview ? 'Author Options' : 'Request a Review') : 'Reports') : 'Delete Tour') : (!_isReportingTour ? 'Options' : 'Report Tour')),
       content: SingleChildScrollView(
         child: ListBody(
           children: <Widget>[
             Visibility( //Main Options
-              visible: !_isConfirmingDelete && !_isReportingTour,
+              visible: !_isConfirmingDelete && !_isReportingTour && !_isViewingReports && !_isRequestingReview,
               child: Column(
                 children: [
                   if (isAuthor)
                     Column(
                     children: [
-                      const Padding(
-                        padding: EdgeInsets.all(20.0),
-                        child: Center(child: Text("You\'re the author of this tour.")),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 8.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text("You\'re the author of this tour."),
+                            const SizedBox(height: 8.0),
+                            if (widget.tour.reports.isNotEmpty)
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const Divider(),
+                                  const SizedBox(height: 8.0),
+                                  Text("Your tour was reported!", style: Theme.of(context).textTheme.titleMedium!.copyWith(color: Theme.of(context).colorScheme.error)),
+                                  if (widget.tour.requestReviewStatus.isNotEmpty)
+                                    Column(
+                                      children: [
+                                        const SizedBox(height: 8.0),
+                                        Text("You have requested a review, but we have not yet reviewed the reports.", style: Theme.of(context).textTheme.bodyMedium!.copyWith(fontWeight: FontWeight.bold),),
+                                      ],
+                                    ),
+                                  const SizedBox(height: 8.0),
+                                  const Text("There are reports for your tour, and it may be in violation of our community guidelines. Please review the reports and take appropriate action. In the meantime this tour is only visible to you."),
+                                  const SizedBox(height: 8.0),
+                                  const Text("If you believe you have addressed the reported issues, or that the reports are in error, you can request a review of your tour by selecting View Reports."),
+                                  const SizedBox(height: 8.0),
+                                  Align(
+                                    alignment: Alignment.center,
+                                    child: ElevatedButton.icon(
+                                      onPressed: () => setState(() {
+                                        _isViewingReports = true;
+                                      }),
+                                      icon: const Icon(Icons.report_outlined),
+                                      label: const Text("View Reports"),
+                                    ),
+                                  ),
+                                  const Divider(),
+                                ],
+                            ),
+                          ],
+                        ),
                       ),
                       ElevatedButton.icon(
                         onPressed: widget.onEditPressed,
@@ -684,17 +787,17 @@ class _TourDetailsOptionsState extends State<TourDetailsOptions> {
                   ),
                   CheckboxListTile(
                     title: const Text("Confirm Delete"),
-                    value: _isChecked,
+                    value: _isDeleteConfirmChecked,
                     onChanged: (bool? value) {
                       setState(() {
-                        _isChecked = value ?? false;
+                        _isDeleteConfirmChecked = value ?? false;
                       });
                     },
                   ),
                   ElevatedButton.icon(
                     onPressed: () {
                       setState(() {
-                        _isChecked = false;
+                        _isDeleteConfirmChecked = false;
                         _isConfirmingDelete = false;
                       });
                     },
@@ -702,7 +805,7 @@ class _TourDetailsOptionsState extends State<TourDetailsOptions> {
                     label: const Text("Cancel"),
                   ),
                   ElevatedButton.icon(
-                    onPressed: _isChecked ? widget.onDeletePressed : null,
+                    onPressed: _isDeleteConfirmChecked ? widget.onDeletePressed : null,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Theme.of(context).colorScheme.error, // Background color of the button
                       foregroundColor: Colors.white, // Text color
@@ -777,6 +880,86 @@ class _TourDetailsOptionsState extends State<TourDetailsOptions> {
                     minLines: 3,
                     maxLines: 6,
                     maxLength: 2000,
+                  ),
+                ],
+              ),
+            ),
+            Visibility( //Viewing Reports
+              visible: _isViewingReports && !_isRequestingReview,
+              child: Column(
+                children: [
+                  Column(
+                    children:  widget.tour.reports.map((report) {
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 4.0),
+                        child: Card(
+                          child: ListTile(
+                            title: Padding(
+                              padding: const EdgeInsets.all(4.0),
+                              child: Text(report.title),
+                            ),
+                            subtitle: Padding(
+                              padding: const EdgeInsets.all(4.0),
+                              child: Text(report.additionalDetails),
+                            ),
+                          ),
+                        ),
+                      );
+                    }).toList(),
+                  ),
+                  SizedBox(height: 8.0),
+                  ElevatedButton.icon(
+                    onPressed: () {
+                      setState(() {
+                        _isViewingReports = false;
+                      });
+                    },
+                    icon: const Icon(Icons.arrow_back),
+                    label: const Text("Back"),
+                  ),
+                  ElevatedButton.icon(
+                    onPressed: () {
+                      setState(() {
+                        _isRequestingReview = true;
+                      });
+                    },
+                    icon: const Icon(Icons.account_balance),
+                    label: const Text("Request a Review"),
+                  ),
+                ],
+              ),
+            ),
+            Visibility( //Requesting Review
+              visible: _isRequestingReview,
+              child: Column(
+                children: [
+                  const Padding(
+                    padding: EdgeInsets.all(20.0),
+                    child: Center(child: Text("Please only request a review of your tour once you have addressed the reported issues, or if you believe the reports are in error. Our team will review the reports and take appropriate action if necessary.")),
+                  ),
+                  CheckboxListTile(
+                    title: const Text("Confirm Request"),
+                    value: _isRequestReviewChecked,
+                    onChanged: (bool? value) {
+                      setState(() {
+                        _isRequestReviewChecked = value ?? false;
+                      });
+                    },
+                  ),
+                  ElevatedButton.icon(
+                    onPressed: () {
+                      setState(() {
+                        _isRequestReviewChecked = false;
+                        _isRequestingReview = false;
+                      });
+                    },
+                    icon: const Icon(Icons.arrow_back),
+                    label: const Text("Cancel"),
+                  ),
+                  ElevatedButton.icon(
+                    onPressed: _isRequestReviewChecked ? _requestReview : null,
+                    icon: const Icon(Icons.account_balance),
+                    label: const Text("Request Review"),
                   ),
                 ],
               ),

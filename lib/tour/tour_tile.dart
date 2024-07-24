@@ -159,13 +159,31 @@ class _TourTileState extends State<TourTile> {
                     Container(width: 180, height: 100, color: Colors.white,),
                   ),
                   if (tourProvider.isUserCreatedTour(widget.tour))
-                    const Align(
+                    Align(
                       alignment: Alignment.topRight,
                       child: Padding(
                         padding: EdgeInsets.all(8.0),
-                        child: Icon(
-                          Icons.attribution,
-                          color: Colors.white,),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: [
+                            if (widget.tour.reports.isNotEmpty)
+                              const CircleAvatar(
+                                radius: 16,
+                                backgroundColor: Colors.black45,
+                                child: Icon(
+                                  Icons.report_outlined,
+                                  color: Colors.yellow,
+                                  size: 22,),
+                              ),
+                            const CircleAvatar(
+                              radius: 16,
+                              backgroundColor: Colors.black45,
+                              child: Icon(
+                                Icons.attribution,
+                                color: Colors.white,),
+                            ),
+                          ],
+                        ),
                       )),
                 ],
               ),
@@ -301,6 +319,8 @@ class _ExpandedTourTileOverlayState extends State<ExpandedTourTileOverlay> {
 
   @override
   Widget build(BuildContext context) {
+    TourProvider tourProvider = Provider.of<TourProvider>(context);
+
     return Padding(
       padding: const EdgeInsets.fromLTRB(0, 8, 0, 0),
       child: Column(
@@ -335,19 +355,50 @@ class _ExpandedTourTileOverlayState extends State<ExpandedTourTileOverlay> {
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    widget.tour.isOfflineCreatedTour && widget.tour.imageToUpload != null  //add null safety for img to upload
-                        ?
-                    Image.file(widget.tour.imageToUpload!,
-                        width: MediaQuery.of(context).size.width,
-                        height: 200.0,
-                        fit: BoxFit.cover)
-                        :
-                      Image.network(
-                        widget.tour.imageUrl,
-                        width: MediaQuery.of(context).size.width,
-                        height: 200.0,
-                        fit: BoxFit.cover,
-                      ),
+                    Stack(
+                      children: [
+                        widget.tour.isOfflineCreatedTour && widget.tour.imageToUpload != null  //add null safety for img to upload
+                            ?
+                        Image.file(widget.tour.imageToUpload!,
+                            width: MediaQuery.of(context).size.width,
+                            height: 200.0,
+                            fit: BoxFit.cover)
+                            :
+                          Image.network(
+                            widget.tour.imageUrl,
+                            width: MediaQuery.of(context).size.width,
+                            height: 200.0,
+                            fit: BoxFit.cover,
+                          ),
+                        if (tourProvider.isUserCreatedTour(widget.tour))
+                          Align(
+                              alignment: Alignment.topRight,
+                              child: Padding(
+                                padding: EdgeInsets.all(8.0),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.end,
+                                  children: [
+                                    if (widget.tour.reports.isNotEmpty)
+                                      const CircleAvatar(
+                                        radius: 16,
+                                        backgroundColor: Colors.black45,
+                                        child: Icon(
+                                          Icons.report_outlined,
+                                          color: Colors.yellow,
+                                          size: 22,),
+                                      ),
+                                    const CircleAvatar(
+                                      radius: 16,
+                                      backgroundColor: Colors.black45,
+                                      child: Icon(
+                                        Icons.attribution,
+                                        color: Colors.white,),
+                                    ),
+                                  ],
+                                ),
+                              )),
+                      ],
+                    ),
                     SizedBox(height: 16.0),
                     Text(
                       widget.tour.description,
@@ -373,7 +424,11 @@ class _ExpandedTourTileOverlayState extends State<ExpandedTourTileOverlay> {
                       ),
                       child: Text("Start Tour"),),
                     SizedBox(width: 8.0),
-                    ElevatedButton(onPressed: tourDetails, child: Text("Tour Details")),
+                    ElevatedButton.icon(
+                      onPressed: tourDetails,
+                      label: Text("Tour Details"),
+                      icon: widget.tour.reports.isNotEmpty ? Icon(Icons.report_outlined,) : null,
+                    ),
                   ],
                 ),
                 Row(

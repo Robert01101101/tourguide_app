@@ -101,6 +101,7 @@ class TourService {
 
         // Fetch ratings for the current batch
         await Future.wait(batchTourIds.map((tourId) async {
+          logger.t('Fetching user ratings for tour: $tourId');
           CollectionReference ratingsCollection = FirebaseFirestore.instance
               .collection('tours')
               .doc(tourId)
@@ -131,8 +132,8 @@ class TourService {
           allCachedTours[tourId]!.thisUsersRating = userRating;
         }
       }
-    } catch (error) {
-      print('Error fetching user ratings: $error');
+    } catch (error, stack) {
+      logger.e('Error fetching user ratings, error: $error, stack: $stack');
     }
   }
 
@@ -170,7 +171,6 @@ class TourService {
           .get();
 
       List<Tour> tours = querySnapshot.docs.map((doc) => Tour.fromFirestore(doc)).toList();
-      logger.t('finished fetching popular tours near you ($userLatitude, $userLongitude), total tours: ${tours.length}');
 
       return tours.where((tour) {
         //double distance = LocationProvider.calculateDistance(userLatitude, userLongitude, tour.latitude, tour.longitude);
@@ -235,7 +235,7 @@ class TourService {
 
   static Future<List<Tour>> fetchUserSavedTours(String userId) async {
     // Implement the logic to fetch saved tours for the user from Firestore if you have a saved tours collection
-    return List.generate(4, (index) => Tour.empty());
+    return List.empty();
   }
 
   static Future<List<Tour>> fetchPopularToursAroundTheWorld() async {

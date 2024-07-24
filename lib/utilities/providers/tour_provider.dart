@@ -39,15 +39,15 @@ class TourProvider with ChangeNotifier {
       logger.t("fetchAndSetTours ${getFormattedTime()}");
       _isLoadingTours = true;
       //_allTours = await TourService.fetchAndSortToursByDateTime();
-      _popularTours = _processToursAndUpdateCachedTours(await TourService.fetchPopularToursNearYou(userLatitude, userLongitude));
+      _popularTours = _processToursAndUpdateCachedTours(await TourService.fetchPopularToursNearYou(userLatitude, userLongitude), userId);
       notifyListeners();
-      _localTours = _processToursAndUpdateCachedTours(await TourService.fetchLocalTours(userLatitude, userLongitude));
+      _localTours = _processToursAndUpdateCachedTours(await TourService.fetchLocalTours(userLatitude, userLongitude), userId);
       notifyListeners();
-      _globalTours = _processToursAndUpdateCachedTours(await TourService.fetchPopularToursAroundTheWorld());
+      _globalTours = _processToursAndUpdateCachedTours(await TourService.fetchPopularToursAroundTheWorld(), userId);
       notifyListeners();
-      _userCreatedTours = _processToursAndUpdateCachedTours(await TourService.fetchUserCreatedTours(userId));
+      _userCreatedTours = _processToursAndUpdateCachedTours(await TourService.fetchUserCreatedTours(userId), userId);
       notifyListeners();
-      _userSavedTours = _processToursAndUpdateCachedTours(await TourService.fetchUserSavedTours(userId));
+      _userSavedTours = _processToursAndUpdateCachedTours(await TourService.fetchUserSavedTours(userId), userId);
       notifyListeners();
 
       _formatListsAndGetTourRatings(userId);
@@ -56,11 +56,12 @@ class TourProvider with ChangeNotifier {
     }
   }
 
-  List<Tour> _processToursAndUpdateCachedTours(List<Tour> tours) {
+  List<Tour> _processToursAndUpdateCachedTours(List<Tour> tours, String userId) {
     List<Tour> updatedTours = [];
     for (Tour tour in tours) {
-      if (tour.reports.length > 0) {
-        logger.w('Tour has reports: ${tour.id}');
+      logger.t('Processing tour: ${tour.id}');
+      if (tour.reports.length > 0 && tour.authorId != userId) {
+        logger.w('Tour has reports, removing: ${tour.id}');
         continue; // Skip tours with reports
       }
       if (_allCachedTours.containsKey(tour.id)) {
@@ -76,7 +77,7 @@ class TourProvider with ChangeNotifier {
   }
 
   Future<void> _formatListsAndGetTourRatings(String userId) async {
-    logger.t('getTourRatings ${getFormattedTime()}');
+    logger.t('_formatListsAndGetTourRatings ${getFormattedTime()} ');
     //add empty tour if no tours
     if (_popularTours.isEmpty) _popularTours = List.generate(1, (index) => Tour.isAddTourTile());
     if (_localTours.isEmpty) _localTours = List.generate(1, (index) => Tour.isAddTourTile());
@@ -88,6 +89,7 @@ class TourProvider with ChangeNotifier {
     }
     notifyListeners();
 
+    logger.t('_formatListsAndGetTourRatings - get ratings (count: ${_allCachedTours.length})');
     await TourService.getUserRatingsForTours(_allCachedTours, userId);
     _isLoadingTours = false;
     notifyListeners();
@@ -120,6 +122,7 @@ class TourProvider with ChangeNotifier {
   }
 
   bool isUserCreatedTour(Tour tour) {
+    if (tour.id.isEmpty) return false;
     return userCreatedTours.contains(tour);
   }
 
@@ -145,6 +148,15 @@ class TourProvider with ChangeNotifier {
     //TODO: email notification, firestore logic
 
     updateTour(reportedTour);
+  }
+
+  Future<void> requestReviewOfTour(Tour tour) async{
+    Tour tourToReview = tour.copyWith(requestReviewStatus: "requested");
+
+    logger.i('Tour Review requested: ${tour.id}');
+    //TODO: email notification, firestore logic
+
+    updateTour(tourToReview);
   }
 
   /// for logout

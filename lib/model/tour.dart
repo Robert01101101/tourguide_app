@@ -17,6 +17,7 @@ class Tour {
   final String placeId;
   final String authorName;
   final String authorId;
+  final String requestReviewStatus;
   final List<TourguidePlace> tourguidePlaces;
   final List<TourguideReport> reports;
   /// mutable AND stored in Firestore
@@ -45,6 +46,7 @@ class Tour {
     required this.placeId,
     required this.authorName,
     required this.authorId,
+    required this.requestReviewStatus,
     required this.tourguidePlaces,
     required this.reports,
     required this.upvotes,
@@ -69,6 +71,7 @@ class Tour {
       placeId: '',
       authorName: '',
       authorId: '',
+      requestReviewStatus: '',
       tourguidePlaces: [],
       reports: [],
       upvotes: 0,
@@ -141,6 +144,7 @@ class Tour {
       placeId: data['placeId'] ?? '',
       authorName: data['authorName'] ?? '',
       authorId: data['authorId'] ?? '',
+      requestReviewStatus: data['requestReviewStatus'] ?? '',
       tourguidePlaces: tourguidePlaces,
       reports: reports,
       upvotes: data['upvotes'] ?? 0,
@@ -165,6 +169,7 @@ class Tour {
     String? placeId,
     String? authorName,
     String? authorId,
+    String? requestReviewStatus,
     List<TourguidePlace>? tourguidePlaces,
     List<TourguideReport>? reports,
     int? upvotes,
@@ -187,6 +192,7 @@ class Tour {
       placeId: placeId ?? this.placeId,
       authorName: authorName ?? this.authorName,
       authorId: authorId ?? this.authorId,
+      requestReviewStatus: requestReviewStatus ?? this.requestReviewStatus,
       tourguidePlaces: tourguidePlaces ?? this.tourguidePlaces,
       reports: reports ?? this.reports,
       upvotes: upvotes ?? this.upvotes,
@@ -222,6 +228,7 @@ class Tour {
       'placeId': placeId,
       'authorName': authorName,
       'authorId': authorId,
+      'requestReviewStatus': requestReviewStatus,
       'tourguidePlaces': tourguidePlaces.map((place) => place.toMap()).toList(),
       'reports': reports.map((report) => report.toMap()).toList(),
       'upvotes': upvotes,
@@ -231,7 +238,7 @@ class Tour {
 
   @override
   String toString() {
-    return 'Tour{id: $id, name: $name, description: $description, city: $city, visibility: $visibility, imageUrl: $imageUrl, createdDateTime: $createdDateTime, latitude: $latitude, longitude: $longitude, placeId: $placeId, authorName: $authorName, authorId: $authorId, reports:${reports.toString()}, upvotes: $upvotes, downvotes: $downvotes, isAddTourTile: $isAddTourTile, isOfflineCreatedTour: $isOfflineCreatedTour, imageToUpload: $imageToUpload, \ntourguidePlaces: ${tourguidePlaces.toString()}';
+    return 'Tour{id: $id, name: $name, description: $description, city: $city, visibility: $visibility, imageUrl: $imageUrl, createdDateTime: $createdDateTime, latitude: $latitude, longitude: $longitude, placeId: $placeId, authorName: $authorName, authorId: $authorId, reports:${reports.toString()}, requestReviewStatus: $requestReviewStatus, upvotes: $upvotes, downvotes: $downvotes, isAddTourTile: $isAddTourTile, isOfflineCreatedTour: $isOfflineCreatedTour, imageToUpload: $imageToUpload, \ntourguidePlaces: ${tourguidePlaces.toString()}';
   }
 }
 
