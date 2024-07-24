@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 
+//TODO: change name to tour place? More accurate since the description etc is specific to this place's tour
 class TourguidePlace {
   final double latitude;
   final double longitude;

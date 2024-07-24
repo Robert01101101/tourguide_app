@@ -7,7 +7,7 @@ import 'package:tourguide_app/tour/tour_details.dart';
 import 'package:tourguide_app/ui/shimmer_loading.dart';
 import 'package:tourguide_app/utilities/providers/tour_provider.dart';
 import 'package:tourguide_app/utilities/providers/auth_provider.dart' as myAuth;
-import 'package:tourguide_app/utilities/singletons/tour_service.dart';
+import 'package:tourguide_app/utilities/services/tour_service.dart';
 
 import '../main.dart';
 

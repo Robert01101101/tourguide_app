@@ -22,7 +22,7 @@ import 'package:tourguide_app/utilities/providers/auth_provider.dart' as myAuth;
 import 'package:tourguide_app/main.dart';
 import 'package:tourguide_app/utilities/providers/location_provider.dart';
 import 'package:profanity_filter/profanity_filter.dart';
-import 'package:tourguide_app/utilities/singletons/tour_service.dart';
+import 'package:tourguide_app/utilities/services/tour_service.dart';
 
 import '../model/tour.dart';
 import '../utilities/providers/tour_provider.dart';

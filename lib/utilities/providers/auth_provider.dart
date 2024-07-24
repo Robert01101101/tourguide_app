@@ -187,8 +187,12 @@ class AuthProvider with ChangeNotifier {
       );
       await FirebaseAuth.instance.signOut();
       await googleSignIn.disconnect();
-      SnackBarService.showSnackBar(content: 'You\'re signed out!');
+      _user = null;
+      _googleSignInUser = null;
+      _isAuthorized = false;
+      _silentSignInFailed = false;
       _isLoggingOut = false;
+      SnackBarService.showSnackBar(content: 'You\'re signed out!');
     } catch (e){
       logger.e(e);
       _isLoggingOut = false;

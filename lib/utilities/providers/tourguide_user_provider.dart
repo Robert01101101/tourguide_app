@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart' as auth;
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:provider/provider.dart';
+import 'package:tourguide_app/model/tourguide_report.dart';
 import 'package:tourguide_app/utilities/providers/auth_provider.dart' as my_auth;
 
 import '../../main.dart';
@@ -33,12 +34,14 @@ class TourguideUserProvider with ChangeNotifier {
     if (firebaseUser != null) {
       await _waitForRequiredData();
       await _loadUser();
+      logger.t("UserProvider() - _onAuthStateChanged() - User is loaded");
       if (_user == null) {
         // New user, create an entry in Firestore
         await _createUser();
+        _sendWelcomeEmail();
       }
-      _sendWelcomeEmail(); //for now, ALWAYS send welcome email
     } else {
+      logger.t("UserProvider() - _onAuthStateChanged() - User is null");
       _user = null;
       notifyListeners();
     }
@@ -73,6 +76,7 @@ class TourguideUserProvider with ChangeNotifier {
       email: _authProvider!.googleSignInUser!.email!,
       emailSubscribed: true,
       savedTourIds: [],
+      reports: [],
     );
     notifyListeners();
     await FirebaseFirestore.instance.collection('users').doc(firebaseUser.uid).set(_user!.toMap());
@@ -109,7 +113,8 @@ class TourguideUserProvider with ChangeNotifier {
             || data['username'] == null
             || data['displayName'] == null
             || data['email'] == null
-            || data['emailSubscribed'] == null){
+            || data['emailSubscribed'] == null
+            || data['reports'] == null) {
           logger.w("UserProvider.loadUser() - User data is incomplete, patching user");
           _user = await _patchUser(data);
         } else {
@@ -131,6 +136,7 @@ class TourguideUserProvider with ChangeNotifier {
       email: data['email'] ?? _authProvider!.googleSignInUser!.email!,
       emailSubscribed: data['emailSubscribed'] ?? true,
       savedTourIds: List<String>.from(data['savedTourIds'] ?? []),
+      reports: List<TourguideReport>.from(data['reports'] ?? []),
     );
     //update in Firestore
     await FirebaseFirestore.instance
@@ -161,11 +167,5 @@ class TourguideUserProvider with ChangeNotifier {
     _user = updatedUser;
     notifyListeners();
     await FirebaseFirestore.instance.collection('users').doc(_user!.firebaseAuthId).set(_user!.toMap());
-  }
-
-  void clearUser() {
-    logger.t("UserProvider.clearUser()");
-    _user = null;
-    notifyListeners();
   }
 }

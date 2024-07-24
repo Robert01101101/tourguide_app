@@ -4,9 +4,11 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:tourguide_app/model/tour.dart';
+import 'package:tourguide_app/model/tourguide_report.dart';
 import 'package:tourguide_app/tour/tour_creation.dart';
 import 'package:tourguide_app/ui/my_layouts.dart';
 import 'package:tourguide_app/utilities/providers/tour_provider.dart';
+import 'package:tourguide_app/utilities/providers/tourguide_user_provider.dart';
 import '../utilities/custom_import.dart';
 import 'package:http/http.dart' as http;
 import '../utilities/singletons/tts_service.dart';
@@ -228,6 +230,7 @@ class _FullscreenTourPageState extends State<FullscreenTourPage> {
   }
 
   void _showOptionsDialog(BuildContext context) {
+    final tourProvider = Provider.of<TourProvider>(context, listen: false);
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -245,6 +248,7 @@ class _FullscreenTourPageState extends State<FullscreenTourPage> {
             Navigator.of(context).pop(); // Close the dialog
             _deleteTour();
           },
+          tour: widget.tour,
         );
       },
     );
@@ -299,7 +303,7 @@ class _FullscreenTourPageState extends State<FullscreenTourPage> {
         title: Text(widget.tour.name),
         actions:
           [
-            if (tourProvider.isUserCreatedTour(widget.tour) && !widget.tour.isOfflineCreatedTour)
+            if (!widget.tour.isOfflineCreatedTour)
               IconButton(
               icon: Icon(Icons.more_vert),
               onPressed: () {
@@ -552,11 +556,13 @@ class _FullscreenTourPageState extends State<FullscreenTourPage> {
 class TourDetailsOptions extends StatefulWidget {
   final VoidCallback onEditPressed;
   final VoidCallback onDeletePressed;
+  final Tour tour;
 
 
   TourDetailsOptions({
     required this.onEditPressed,
     required this.onDeletePressed,
+    required this.tour,
   });
 
   @override
@@ -565,46 +571,110 @@ class TourDetailsOptions extends StatefulWidget {
 
 class _TourDetailsOptionsState extends State<TourDetailsOptions> {
   bool _isConfirmingDelete = false;
+  bool _isReportingTour = false;
   bool _isChecked = false;
+  String _selectedReportOption = '';
+  final TextEditingController _reportDetailsController = TextEditingController();
+
+  void _handleRadioValueChange(String? value) {
+    setState(() {
+      _selectedReportOption = value!;
+    });
+  }
+
+  void _submitReport() {
+    String additionalDetails = _reportDetailsController.text;
+    logger.t('Selected Option: $_selectedReportOption');
+    logger.t('Additional Details: $additionalDetails');
+
+    final tourguideUserProvider = Provider.of<TourguideUserProvider>(context, listen: false);
+    TourguideReport report = TourguideReport(
+      title: _selectedReportOption,
+      additionalDetails: additionalDetails,
+      reportAuthorId: tourguideUserProvider.user!.firebaseAuthId,
+    );
+    final tourProvider = Provider.of<TourProvider>(context, listen: false);
+    tourProvider.reportTour(widget.tour, report);
+
+    Navigator.of(context).pop();
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Thank You'),
+          content: Text('Thank you for your report. We will review the content and take appropriate action if necessary.'),
+          actions: [
+            TextButton(
+              child: Text('OK'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
+    final tourProvider = Provider.of<TourProvider>(context);
+    bool isAuthor = tourProvider.isUserCreatedTour(widget.tour);
     return AlertDialog(
-      title: Text(!_isConfirmingDelete ? 'Author Options' : 'Delete Tour'),
+      title: Text(isAuthor ? (!_isConfirmingDelete ? 'Author Options' : 'Delete Tour') : (!_isReportingTour ? 'Options' : 'Report Tour')),
       content: SingleChildScrollView(
         child: ListBody(
           children: <Widget>[
-            Visibility(
-              visible: !_isConfirmingDelete,
+            Visibility( //Main Options
+              visible: !_isConfirmingDelete && !_isReportingTour,
               child: Column(
                 children: [
-                  const Padding(
-                    padding: EdgeInsets.all(20.0),
-                    child: Center(child: Text("You\'re the author of this tour.")),
-                  ),
-                  ElevatedButton.icon(
-                    onPressed: widget.onEditPressed,
-                    icon: const Icon(Icons.edit),
-                    label: const Text("Edit Tour"),
-                  ),
-                  ElevatedButton.icon(
-                    onPressed: () {
-                      setState(() {
-                        _isConfirmingDelete = true;
-                      });
-                    },
-                    style: ElevatedButton.styleFrom(
-                      //backgroundColor: Theme.of(context).colorScheme.error, // Background color of the button
-                      foregroundColor: Theme.of(context).colorScheme.error, // Text color
-                      side: BorderSide(color: Theme.of(context).colorScheme.error, width: 2),
+                  if (isAuthor)
+                    Column(
+                    children: [
+                      const Padding(
+                        padding: EdgeInsets.all(20.0),
+                        child: Center(child: Text("You\'re the author of this tour.")),
+                      ),
+                      ElevatedButton.icon(
+                        onPressed: widget.onEditPressed,
+                        icon: const Icon(Icons.edit),
+                        label: const Text("Edit Tour"),
+                      ),
+                      ElevatedButton.icon(
+                        onPressed: () {
+                          setState(() {
+                            _isConfirmingDelete = true;
+                          });
+                        },
+                        style: ElevatedButton.styleFrom(
+                          //backgroundColor: Theme.of(context).colorScheme.error, // Background color of the button
+                          foregroundColor: Theme.of(context).colorScheme.error, // Text color
+                          side: BorderSide(color: Theme.of(context).colorScheme.error, width: 2),
+                        ),
+                        icon: const Icon(Icons.delete),
+                        label: const Text("Delete Tour"),
+                      ),
+                    ],
+                  )
+                  else
+                    Column(
+                      children: [
+                        ElevatedButton.icon(
+                          onPressed: () {
+                            setState(() {
+                              _isReportingTour = true;
+                            });
+                          },
+                          icon: const Icon(Icons.report),
+                          label: const Text("Report Tour"),
+                        ),
+                      ],
                     ),
-                    icon: const Icon(Icons.delete),
-                    label: const Text("Delete Tour"),
-                  ),
                 ],
               ),
             ),
-            Visibility(
+            Visibility( //Delete Confirmation Options
               visible: _isConfirmingDelete,
               child: Column(
                 children: [
@@ -643,9 +713,116 @@ class _TourDetailsOptionsState extends State<TourDetailsOptions> {
                 ],
               ),
             ),
+            Visibility( //Report Options
+              visible: _isReportingTour,
+              child: Column(
+                children: [
+                  const Padding(
+                    padding: EdgeInsets.all(20.0),
+                    child: Center(child: Text("Please select the reason why you are reporting this tour. Your feedback is important to us and will help us maintain a safe and respectful community.")),
+                  ),
+                  Divider(),
+                  SizedBox(height: 16.0),
+                  ReportOption(
+                    title: 'Nudity or Sexual Content',
+                    description: 'Contains nudity, sexual activity, or other sexually explicit material.',
+                    groupValue: _selectedReportOption,
+                    onChanged: _handleRadioValueChange,
+                  ),
+                  ReportOption(
+                    title: 'Violence or Dangerous Behavior',
+                    description: 'Promotes violence, self-harm, or dangerous behavior.',
+                    groupValue: _selectedReportOption,
+                    onChanged: _handleRadioValueChange,
+                  ),
+                  ReportOption(
+                    title: 'Harassment or Hate Speech',
+                    description: 'Includes harassment, hate speech, or abusive content.',
+                    groupValue: _selectedReportOption,
+                    onChanged: _handleRadioValueChange,
+                  ),
+                  ReportOption(
+                    title: 'Spam or Misleading Information',
+                    description: 'Contains spam, scams, or misleading information.',
+                    groupValue: _selectedReportOption,
+                    onChanged: _handleRadioValueChange,
+                  ),
+                  ReportOption(
+                    title: 'Copyright Infringement',
+                    description: 'Violates copyright laws or includes pirated content.',
+                    groupValue: _selectedReportOption,
+                    onChanged: _handleRadioValueChange,
+                  ),
+                  ReportOption(
+                    title: 'Harmful or Abusive Content',
+                    description: 'Contains harmful, abusive, or malicious content.',
+                    groupValue: _selectedReportOption,
+                    onChanged: _handleRadioValueChange,
+                  ),
+                  ReportOption(
+                    title: 'Illegal Activities',
+                    description: 'Promotes or involves illegal activities.',
+                    groupValue: _selectedReportOption,
+                    onChanged: _handleRadioValueChange,
+                  ),
+                  ReportOption(
+                    title: 'Other',
+                    description: 'Other reasons not listed above.',
+                    groupValue: _selectedReportOption,
+                    onChanged: _handleRadioValueChange,
+                  ),
+                  TextField(
+                    controller: _reportDetailsController,
+                    decoration: InputDecoration(labelText: 'Additional details (optional)'),
+                    minLines: 3,
+                    maxLines: 6,
+                    maxLength: 2000,
+                  ),
+                ],
+              ),
+            ),
           ],
         ),
       ),
+      actions: !_isReportingTour ? null : [
+        TextButton(
+          child: Text('Cancel'),
+          onPressed: () {
+            setState(() {
+              _isReportingTour = false;
+            });
+          },
+        ),
+        TextButton(
+          child: Text('Submit Report'),
+          onPressed: _submitReport,
+        ),
+      ],
+    );
+  }
+}
+
+class ReportOption extends StatelessWidget {
+  final String title;
+  final String description;
+  final String groupValue;
+  final ValueChanged<String?> onChanged;
+
+  ReportOption({required this.title, required this.description, required this.groupValue, required this.onChanged});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        RadioListTile(
+          title: Text(title),
+          subtitle: Text(description),
+          value: title,
+          groupValue: groupValue,
+          onChanged: onChanged,
+        ),
+        Divider(),
+      ],
     );
   }
 }

@@ -1,3 +1,5 @@
+import 'package:tourguide_app/model/tourguide_report.dart';
+
 class TourguideUser {
   String firebaseAuthId;
   String googleSignInId;
@@ -6,6 +8,7 @@ class TourguideUser {
   String email;
   bool emailSubscribed = false;
   List<String> savedTourIds;
+  List<TourguideReport> reports;
 
   TourguideUser({
     required this.firebaseAuthId,
@@ -15,6 +18,7 @@ class TourguideUser {
     required this.email,
     required this.emailSubscribed,
     required this.savedTourIds,
+    required this.reports,
   });
 
   // Convert a User object to a map for Firestore
@@ -27,11 +31,20 @@ class TourguideUser {
       'email': email,
       'emailSubscribed': emailSubscribed,
       'savedTourIds': savedTourIds,
+      'reports': reports.map((report) => report.toMap()).toList(),
     };
   }
 
   // Create a User object from a map
   factory TourguideUser.fromMap(Map<String, dynamic> map) {
+    List<TourguideReport> reports = [];
+    if (map['reports'] != null) {
+      List<dynamic> reportsData = map['reports'];
+      reports = reportsData.map((reportData) {
+        return TourguideReport.fromMap(reportData as Map<String, dynamic>);
+      }).toList();
+    }
+
     return TourguideUser(
       firebaseAuthId: map['firebaseAuthId'],
       googleSignInId: map['googleSignInId'],
@@ -40,6 +53,7 @@ class TourguideUser {
       email: map['email'],
       emailSubscribed: map['emailSubscribed'],
       savedTourIds: List<String>.from(map['savedTourIds']),
+      reports: reports,
     );
   }
 
@@ -51,6 +65,7 @@ class TourguideUser {
     String? email,
     bool? emailSubscribed,
     List<String>? savedTourIds,
+    List<TourguideReport>? reports,
   }) {
     return TourguideUser(
       firebaseAuthId: firebaseAuthId ?? this.firebaseAuthId,
@@ -60,6 +75,7 @@ class TourguideUser {
       email: email ?? this.email,
       emailSubscribed: emailSubscribed ?? this.emailSubscribed,
       savedTourIds: savedTourIds ?? this.savedTourIds,
+      reports: reports ?? this.reports,
     );
   }
 }

@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:tourguide_app/model/tourguide_place.dart';
+import 'package:tourguide_app/model/tourguide_report.dart';
 
 /// Mutable properties: upvotes, downvotes, isAddTourTile, isOfflineCreatedTour, thisUsersRating, imageToUpload
 class Tour {
@@ -17,6 +18,7 @@ class Tour {
   final String authorName;
   final String authorId;
   final List<TourguidePlace> tourguidePlaces;
+  final List<TourguideReport> reports;
   /// mutable AND stored in Firestore
   int upvotes;
   /// mutable AND stored in Firestore
@@ -44,6 +46,7 @@ class Tour {
     required this.authorName,
     required this.authorId,
     required this.tourguidePlaces,
+    required this.reports,
     required this.upvotes,
     required this.downvotes,
     required this.isAddTourTile,
@@ -67,6 +70,7 @@ class Tour {
       authorName: '',
       authorId: '',
       tourguidePlaces: [],
+      reports: [],
       upvotes: 0,
       downvotes: 0,
       isAddTourTile: false,
@@ -116,6 +120,13 @@ class Tour {
         );
       }).toList();
     }
+    List<TourguideReport> reports = [];
+    if (data['reports'] != null) {
+      List<dynamic> reportsData = data['reports'];
+      reports = reportsData.map((reportData) {
+        return TourguideReport.fromMap(reportData as Map<String, dynamic>);
+      }).toList();
+    }
 
     return Tour(
       id: doc.id,
@@ -131,6 +142,7 @@ class Tour {
       authorName: data['authorName'] ?? '',
       authorId: data['authorId'] ?? '',
       tourguidePlaces: tourguidePlaces,
+      reports: reports,
       upvotes: data['upvotes'] ?? 0,
       downvotes: data['downvotes'] ?? 0,
       isAddTourTile: false,
@@ -154,6 +166,7 @@ class Tour {
     String? authorName,
     String? authorId,
     List<TourguidePlace>? tourguidePlaces,
+    List<TourguideReport>? reports,
     int? upvotes,
     int? downvotes,
     bool? isAddTourTile,
@@ -175,6 +188,7 @@ class Tour {
       authorName: authorName ?? this.authorName,
       authorId: authorId ?? this.authorId,
       tourguidePlaces: tourguidePlaces ?? this.tourguidePlaces,
+      reports: reports ?? this.reports,
       upvotes: upvotes ?? this.upvotes,
       downvotes: downvotes ?? this.downvotes,
       isAddTourTile: isAddTourTile ?? this.isAddTourTile,
@@ -209,6 +223,7 @@ class Tour {
       'authorName': authorName,
       'authorId': authorId,
       'tourguidePlaces': tourguidePlaces.map((place) => place.toMap()).toList(),
+      'reports': reports.map((report) => report.toMap()).toList(),
       'upvotes': upvotes,
       'downvotes': downvotes,
     };
@@ -216,70 +231,12 @@ class Tour {
 
   @override
   String toString() {
-    return 'Tour{id: $id, name: $name, description: $description, city: $city, visibility: $visibility, imageUrl: $imageUrl, createdDateTime: $createdDateTime, latitude: $latitude, longitude: $longitude, placeId: $placeId, authorName: $authorName, authorId: $authorId, upvotes: ${upvotes}, downvotes: $downvotes}, isAddTourTile: $isAddTourTile, isOfflineCreatedTour: $isOfflineCreatedTour, imageToUpload: $imageToUpload}, \ntourguidePlaces: ${tourguidePlaces.toString()}';
+    return 'Tour{id: $id, name: $name, description: $description, city: $city, visibility: $visibility, imageUrl: $imageUrl, createdDateTime: $createdDateTime, latitude: $latitude, longitude: $longitude, placeId: $placeId, authorName: $authorName, authorId: $authorId, reports:${reports.toString()}, upvotes: $upvotes, downvotes: $downvotes, isAddTourTile: $isAddTourTile, isOfflineCreatedTour: $isOfflineCreatedTour, imageToUpload: $imageToUpload, \ntourguidePlaces: ${tourguidePlaces.toString()}';
   }
 }
 
 
 
 
-//TODO: Implement Comments
-class Comment {
-  final String id;
-  final String text;
-  final String userId;
-  final String userName;
-  final DateTime timestamp;
-
-  Comment({
-    required this.id,
-    required this.text,
-    required this.userId,
-    required this.userName,
-    required this.timestamp,
-  });
-
-  factory Comment.fromFirestore(DocumentSnapshot doc) {
-    Map<String, dynamic>? data = doc.data() as Map<String, dynamic>?;
-
-    if (data == null) {
-      throw Exception('Document data was null');
-    }
-
-    Timestamp timestamp = data['timestamp'] as Timestamp;
-
-    return Comment(
-      id: doc.id,
-      text: data['text'] ?? '',
-      userId: data['userId'] ?? '',
-      userName: data['userName'] ?? '',
-      timestamp: timestamp.toDate(),
-    );
-  }
-}
 
 
-/// Stored as a document in the Ratings subcollection of each tour
-class Rating {
-  final String userId;
-  final int value; // 1 for thumb up, -1 for thumb down
-
-  Rating({
-    required this.userId,
-    required this.value,
-  });
-
-  Map<String, dynamic> toMap() {
-    return {
-      'userId': userId,
-      'value': value,
-    };
-  }
-
-  factory Rating.fromMap(Map<String, dynamic> data) {
-    return Rating(
-      userId: data['userId'],
-      value: data['value'],
-    );
-  }
-}

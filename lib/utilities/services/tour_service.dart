@@ -5,6 +5,9 @@ import 'package:tourguide_app/main.dart';
 import 'package:tourguide_app/model/tour.dart';
 import 'package:tourguide_app/utilities/providers/location_provider.dart';
 
+import '../../model/tour_comment.dart';
+import '../../model/tour_rating.dart';
+
 
 class TourService {
   static Future<List<Tour>> fetchAllTours() async {
@@ -284,6 +287,30 @@ class TourService {
       //log with stack
       logger.e('Error uploading tour: $e, stack: $stack');
       return tour;
+    }
+  }
+
+  static Future<Tour> updateTour(Tour tour) async{
+    try {
+      await FirebaseFirestore.instance
+          .collection('tours')
+          .doc(tour.id)
+          .set(tour.toMap(), SetOptions(merge: true));
+
+      //TODO: Image update
+      /*
+      if (tour.imageUrl.isNotEmpty) {
+        String newImageUrl = await uploadImage(tour);
+        await db.collection('tours').doc(tour.id).update({
+          'imageUrl': newImageUrl,
+        });
+      }*/
+
+      logger.i('Successfully updated tour: ${tour.toString()}');
+      return tour;
+    } catch (e, stack) {
+      logger.e('Error updating tour: $e, stack: $stack');
+      return tour; // or handle differently based on your needs
     }
   }
 

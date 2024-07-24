@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:tourguide_app/main.dart';
 import 'package:tourguide_app/model/tour.dart';
-import 'package:tourguide_app/utilities/singletons/tour_service.dart';
+import 'package:tourguide_app/model/tourguide_report.dart';
+import 'package:tourguide_app/utilities/services/tour_service.dart';
 
 //TODO: optimize
 class TourProvider with ChangeNotifier {
@@ -38,26 +39,30 @@ class TourProvider with ChangeNotifier {
       logger.t("fetchAndSetTours ${getFormattedTime()}");
       _isLoadingTours = true;
       //_allTours = await TourService.fetchAndSortToursByDateTime();
-      _popularTours = _updateCachedTours(await TourService.fetchPopularToursNearYou(userLatitude, userLongitude));
+      _popularTours = _processToursAndUpdateCachedTours(await TourService.fetchPopularToursNearYou(userLatitude, userLongitude));
       notifyListeners();
-      _localTours = _updateCachedTours(await TourService.fetchLocalTours(userLatitude, userLongitude));
+      _localTours = _processToursAndUpdateCachedTours(await TourService.fetchLocalTours(userLatitude, userLongitude));
       notifyListeners();
-      _globalTours = _updateCachedTours(await TourService.fetchPopularToursAroundTheWorld());
+      _globalTours = _processToursAndUpdateCachedTours(await TourService.fetchPopularToursAroundTheWorld());
       notifyListeners();
-      _userCreatedTours = _updateCachedTours(await TourService.fetchUserCreatedTours(userId));
+      _userCreatedTours = _processToursAndUpdateCachedTours(await TourService.fetchUserCreatedTours(userId));
       notifyListeners();
-      _userSavedTours = _updateCachedTours(await TourService.fetchUserSavedTours(userId));
+      _userSavedTours = _processToursAndUpdateCachedTours(await TourService.fetchUserSavedTours(userId));
       notifyListeners();
 
-      _getTourRatings(userId);
+      _formatListsAndGetTourRatings(userId);
     } catch (error) {
       logger.e('Error fetching tours: $error');
     }
   }
 
-  List<Tour> _updateCachedTours(List<Tour> tours) {
+  List<Tour> _processToursAndUpdateCachedTours(List<Tour> tours) {
     List<Tour> updatedTours = [];
     for (Tour tour in tours) {
+      if (tour.reports.length > 0) {
+        logger.w('Tour has reports: ${tour.id}');
+        continue; // Skip tours with reports
+      }
       if (_allCachedTours.containsKey(tour.id)) {
         // Use the existing tour instance from the cache
         updatedTours.add(_allCachedTours[tour.id]!);
@@ -70,7 +75,7 @@ class TourProvider with ChangeNotifier {
     return updatedTours;
   }
 
-  Future<void> _getTourRatings(String userId) async {
+  Future<void> _formatListsAndGetTourRatings(String userId) async {
     logger.t('getTourRatings ${getFormattedTime()}');
     //add empty tour if no tours
     if (_popularTours.isEmpty) _popularTours = List.generate(1, (index) => Tour.isAddTourTile());
@@ -123,6 +128,23 @@ class TourProvider with ChangeNotifier {
     _allCachedTours[tour.id] = tour;
     _userCreatedTours.insert(1, tour);
     notifyListeners();
+  }
+
+  /// Updates the tour data in cache and firestore (for edits, reporting, etc)
+  Future<void> updateTour(Tour tour) async{
+    tour = await TourService.updateTour(tour);
+    _allCachedTours[tour.id] = tour;
+    notifyListeners();
+  }
+
+  Future<void> reportTour(Tour tour, TourguideReport report) async{
+    List<TourguideReport> newReports =  [...tour.reports, report];
+    Tour reportedTour = tour.copyWith(reports: newReports);
+
+    logger.i('Tour reported: ${tour.id}');
+    //TODO: email notification, firestore logic
+
+    updateTour(reportedTour);
   }
 
   /// for logout
