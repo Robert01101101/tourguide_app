@@ -78,6 +78,7 @@ class TourguideUserProvider with ChangeNotifier {
       emailSubscriptionsDisabled: [],
       savedTourIds: [],
       reports: [],
+      useUsername: false,
     );
     notifyListeners();
     await FirebaseFirestore.instance.collection('users').doc(firebaseUser.uid).set(_user!.toMap());
@@ -116,7 +117,8 @@ class TourguideUserProvider with ChangeNotifier {
             || data['email'] == null
             || data['emailSubscriptionsDisabled'] == null
             || data['reports'] == null
-            || data['savedTourIds'] == null) {
+            || data['savedTourIds'] == null
+            || data['useUsername'] == null) {
           logger.w("UserProvider.loadUser() - User data is incomplete, patching user");
           _user = await _patchUser(data);
         } else {
@@ -149,6 +151,7 @@ class TourguideUserProvider with ChangeNotifier {
       emailSubscriptionsDisabled:List<String>.from(data['emailSubscriptionsDisabled'] ?? []),
       savedTourIds: List<String>.from(data['savedTourIds'] ?? []),
       reports: List<TourguideReport>.from(data['reports'] ?? []),
+      useUsername: data['useUsername'] ?? false,
     );
     //update in Firestore
     await FirebaseFirestore.instance

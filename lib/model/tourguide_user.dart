@@ -9,6 +9,7 @@ class TourguideUser {
   List<String> emailSubscriptionsDisabled;
   List<String> savedTourIds;
   List<TourguideReport> reports;
+  bool useUsername;
 
   TourguideUser({
     required this.firebaseAuthId,
@@ -19,6 +20,7 @@ class TourguideUser {
     required this.emailSubscriptionsDisabled,
     required this.savedTourIds,
     required this.reports,
+    required this.useUsername,
   });
 
   // Convert a User object to a map for Firestore
@@ -32,6 +34,7 @@ class TourguideUser {
       'emailSubscriptionsDisabled': emailSubscriptionsDisabled ?? [],
       'savedTourIds': savedTourIds ?? [],
       'reports': reports.map((report) => report.toMap()).toList() ?? [],
+      'useUsername': useUsername,
     };
   }
 
@@ -56,6 +59,7 @@ class TourguideUser {
           : [],
       savedTourIds: List<String>.from(map['savedTourIds']),
       reports: reports,
+      useUsername: map['useUsername'],
     );
   }
 
@@ -68,6 +72,7 @@ class TourguideUser {
     List<String>? emailSubscriptionsDisabled,
     List<String>? savedTourIds,
     List<TourguideReport>? reports,
+    bool? useUsername,
   }) {
     return TourguideUser(
       firebaseAuthId: firebaseAuthId ?? this.firebaseAuthId,
@@ -78,6 +83,7 @@ class TourguideUser {
       emailSubscriptionsDisabled: emailSubscriptionsDisabled ?? this.emailSubscriptionsDisabled,
       savedTourIds: savedTourIds ?? this.savedTourIds,
       reports: reports ?? this.reports,
+      useUsername: useUsername ?? this.useUsername,
     );
   }
 

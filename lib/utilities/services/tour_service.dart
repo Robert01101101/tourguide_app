@@ -339,6 +339,28 @@ class TourService {
     }
   }
 
+  static Future<void> updateAuthorNameForAllTheirTours(String authorId, String authorNewName) async {
+    try {
+      // Step 1: Query Firestore for all tours with the given authorId
+      QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+          .collection('tours')
+          .where('authorId', isEqualTo: authorId)
+          .get();
+
+      // Step 2: Update each document's authorName field
+      WriteBatch batch = FirebaseFirestore.instance.batch();
+      for (QueryDocumentSnapshot doc in querySnapshot.docs) {
+        batch.update(doc.reference, {'authorName': authorNewName});
+      }
+
+      // Step 3: Commit the batch write
+      await batch.commit();
+      logger.t('Author name updated successfully for all their tours.');
+    } catch (e, stack) {
+      logger.e('Failed to update author name: $e, $stack');
+    }
+  }
+
 
 
   static Future<void> addComment(String tourId, Comment comment) async {

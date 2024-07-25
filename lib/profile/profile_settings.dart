@@ -5,8 +5,11 @@ import 'package:tourguide_app/ui/my_layouts.dart';
 import 'package:tourguide_app/utilities/custom_import.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:tourguide_app/utilities/providers/auth_provider.dart' as myAuth;
+import 'package:tourguide_app/utilities/providers/tour_provider.dart';
 import 'package:tourguide_app/utilities/providers/tourguide_user_provider.dart';
 import 'package:url_launcher/url_launcher.dart';
+
+enum NameDisplaySetting { displayName, username }
 
 class ProfileSettings extends StatefulWidget {
   const ProfileSettings({super.key});
@@ -18,10 +21,12 @@ class ProfileSettings extends StatefulWidget {
 class _ProfileSettingsState extends State<ProfileSettings> {
   late TextEditingController _usernameController;
   bool _updatingUsername = false;
+  bool _updatingUseUsername = false;
   String _newUsername = '';
   bool _isUsernameAvailable = true;
   bool _profanityDetected = false;
   final _filter = ProfanityFilter();
+  NameDisplaySetting? _nameDisplaySetting = NameDisplaySetting.displayName;
 
   @override
   void initState() {
@@ -30,6 +35,7 @@ class _ProfileSettingsState extends State<ProfileSettings> {
     _usernameController = TextEditingController(text: userProvider.user!.username);
     _newUsername = userProvider.user!.username;
     _usernameController.addListener(_onUsernameChanged);
+    _nameDisplaySetting = userProvider.user!.useUsername ? NameDisplaySetting.username : NameDisplaySetting.displayName;
   }
 
   @override
@@ -49,6 +55,12 @@ class _ProfileSettingsState extends State<ProfileSettings> {
           break;
         }
       }
+    });
+  }
+
+  void _onUseUsernameChanged(NameDisplaySetting? value) {
+    setState(() {
+      _nameDisplaySetting = value;
     });
   }
 
@@ -75,13 +87,42 @@ class _ProfileSettingsState extends State<ProfileSettings> {
     await userProvider.updateUser(userProvider.user!.copyWith(
         username: _newUsername,
         displayName: authProvider.googleSignInUser!.displayName!));
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Updated username to ${userProvider.user!.username}')),
-    );
+    if (mounted){
+      ScaffoldMessenger.of(context).hideCurrentSnackBar();
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Updated username to ${userProvider.user!.username}')),
+      );
+    }
     setState(() {
       _updatingUsername = false;
     });
   }
+
+  // TODO: fix access to context -> don't do in async
+  Future<void> _setUseUsername () async {
+    logger.t('Setting use username');
+    if (_updatingUseUsername) return;
+    setState(() {
+      _updatingUseUsername = true;
+    });
+    TourguideUserProvider userProvider = Provider.of(context, listen: false);
+    TourProvider tourProvider = Provider.of(context, listen: false);
+    await userProvider.updateUser(userProvider.user!.copyWith( //TODO improve async safety
+        useUsername: _nameDisplaySetting == NameDisplaySetting.username));
+    await tourProvider.updateAuthorNameForAllTheirTours(
+        userProvider.user!.firebaseAuthId,
+        userProvider.user!.useUsername ? userProvider.user!.username : userProvider.user!.displayName);
+    if (mounted){
+      ScaffoldMessenger.of(context).hideCurrentSnackBar();
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Now using your ${userProvider.user!.useUsername ? 'username' : 'display name'}')),
+      );
+    }
+    setState(() {
+      _updatingUseUsername = false;
+    });
+  }
+
 
 
   @override
@@ -98,79 +139,6 @@ class _ProfileSettingsState extends State<ProfileSettings> {
           children: [
             StandardLayout(
               children: [
-                /*  //debug view
-                StandardLayout(
-                  enableHorizontalPadding: false,
-                  enableVerticalPadding: false,
-                  children: [
-                    SizedBox(height: 16,),
-                    Text("Your userdata:", style: Theme.of(context).textTheme.headlineSmall),
-                    SizedBox(height: 8,),
-                    Text("Google Auth data", style: Theme.of(context).textTheme.bodyLarge),
-                    SizedBox(height: 8,),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      children: [
-                        const Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text("uid:"),
-                            Text("Display Name:"),
-                            Text("email:"),
-                            Text("email verified:"),
-                            Text("multiFactor:"),
-                            Text("phoneNumber: "),
-                          ],
-                        ),
-                        SizedBox(width: 32,),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text("${FirebaseAuth.instance.currentUser!.uid}"),
-                            Text("${FirebaseAuth.instance.currentUser!.displayName}"),
-                            Text("${FirebaseAuth.instance.currentUser!.email}"),
-                            Text("${FirebaseAuth.instance.currentUser!.emailVerified}"),
-                            Text("${FirebaseAuth.instance.currentUser!.multiFactor}"),
-                            Text("${FirebaseAuth.instance.currentUser!.phoneNumber}"),
-                          ],
-                        ),
-                      ],
-                    ),
-                    SizedBox(height: 16,),
-                    Text("Firestore profile data", style: Theme.of(context).textTheme.bodyLarge),
-                    SizedBox(height: 8,),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceAround,
-                      children: [
-                        const Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text("username:"),
-                          ],
-                        ),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            FutureBuilder<DocumentSnapshot>(
-                              future: _profileDataFuture,
-                        builder: (context, snapshot){
-                                if (snapshot.connectionState == ConnectionState.waiting) {
-                                  return CircularProgressIndicator();
-                                } else if (snapshot != null && snapshot.hasData && !snapshot.hasError && snapshot.data!.exists){
-                                  final username = snapshot.data!['username'];
-                                  return Text("${username}");
-                                } else {
-                                  return Text("Error: ${snapshot.error}");
-                                }
-                              },
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-
-                  ],
-                ),*/
                 SizedBox(height: 0,),
                 ListTile(
                   leading: GoogleUserCircleAvatar(
@@ -198,22 +166,37 @@ class _ProfileSettingsState extends State<ProfileSettings> {
                         child: _updatingUsername ? const Text("Saving") : const Text("Save")),
                   ],
                 ),
+                Text("Your name will be displayed as:", style: Theme.of(context).textTheme.labelLarge),
+                Column(
+                  children: [
+                    RadioListTile<NameDisplaySetting>(
+                      title: Text('Display Name \n(${userProvider.user!.displayName})'),
+                      value: NameDisplaySetting.displayName,
+                      groupValue: _nameDisplaySetting,
+                      onChanged: _onUseUsernameChanged,
+                    ),
+                    RadioListTile<NameDisplaySetting>(
+                      title: Text('Username \n(${userProvider.user!.username})'),
+                      value: NameDisplaySetting.username,
+                      groupValue: _nameDisplaySetting,
+                      onChanged: _onUseUsernameChanged,
+                    ),
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: ElevatedButton(
+                          onPressed: (_updatingUseUsername ||
+                              (_nameDisplaySetting == NameDisplaySetting.username) == userProvider.user!.useUsername)
+                              ? null : () => _setUseUsername(),
+                          child: _updatingUseUsername ? const Text("Saving") : const Text("Save")),
+                    ),
+                  ],
+                ),
                 SizedBox(height: 32,),
               ],
             ),
             Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                /*
-                ProfileListButton(
-                  label: 'Update Firestore profile data (get)',
-                  leftIcon: Icons.data_object,
-                  onPressed: () {
-                    setState(() {
-                      _profileDataFuture = _firestoreGetUserProfileData();
-                    });
-                  },
-                ),*/
                 ProfileListButton(
                   label: 'Delete Account',
                   leftIcon: Icons.delete_outline,
