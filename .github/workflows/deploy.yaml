@@ -63,6 +63,13 @@ jobs:
         env:
           KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
 
+      - name: Create tourguide.properties
+        run: |
+          touch android/tourguide.properties
+          echo "geoApiKey={{GEO_API_KEY}}" >> android/key.properties
+        env:
+          GEO_API_KEY: ${{ secrets.GEO_API_KEY }}
+
       - name: Set Flutter SDK Path Environment Variable
         run: echo "FLUTTER_SDK_PATH=${{ runner.workspace }}/flutter" >> $GITHUB_ENV
 

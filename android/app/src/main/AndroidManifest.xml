@@ -26,7 +26,7 @@
         <!-- MY EDITS -->
         <meta-data
             android:name="com.google.android.geo.API_KEY"
-            android:value="AIzaSyBa7mCp1FUiWMhfTHPWNJ2Cy-A84w4i2I4"/>
+            android:value="@string/GEO_API_KEY"/>
         <!-- End of my edits -->
 
         <activity

@@ -29,10 +29,19 @@ if (keystorePropertiesFile.exists()) {
     keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
 }
 
+def tourguideProperties = new Properties()
+def tourguidePropertiesFile = rootProject.file('tourguide.properties')
+if (tourguidePropertiesFile.exists()) {
+    tourguideProperties.load(new FileInputStream(tourguidePropertiesFile))
+}
+
 android {
     namespace "com.robertMichelsDigitalMedia.tourguide_app"
     compileSdkVersion flutter.compileSdkVersion
     ndkVersion flutter.ndkVersion
+
+    def geoApiKey = tourguideProperties['geoApiKey']
+    resValue "string", "GEO_API_KEY", geoApiKey
 
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
