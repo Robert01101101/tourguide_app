@@ -89,12 +89,12 @@ class _ContributeState extends State<Contribute> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text("Tours you created", style: Theme.of(context).textTheme.headlineSmall),
-                    IconButton(onPressed: (){
+                    /*IconButton(onPressed: (){
                       Navigator.push(
                         context,
                         MaterialPageRoute(builder: (context) => const CreateEditTour()),
                       );
-                    }, icon: Icon(Icons.add_circle_outline_sharp),),
+                    }, icon: Icon(Icons.add_circle_outline_sharp),),*/
                   ],
                 ),
                 StandardLayoutChild(

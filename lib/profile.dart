@@ -102,6 +102,13 @@ class _ProfileState extends State<Profile> {
                   },
                 ),
                 ProfileListButton(
+                  label: 'Community Guidelines',
+                  leftIcon: Icons.local_library_outlined,
+                  onPressed: () {
+                    launchUrl(Uri.parse("https://tourguide.rmichels.com/communityGuidelines.html"));
+                  },
+                ),
+                ProfileListButton(
                   label: 'Terms of Service',
                   leftIcon: Icons.description_outlined,
                   onPressed: () {
@@ -114,6 +121,12 @@ class _ProfileState extends State<Profile> {
                   onPressed: () {
                     launchUrl(Uri.parse("https://tourguide.rmichels.com/privacyPolicy.html"));
                   },
+                ),
+                ProfileListButton(
+                  label: 'Rate Tourguide',
+                  leftIcon: Icons.star_border,
+                  onPressed: (){},
+                  disabled: true,
                 ),
                 ProfileListButton(
                   label: 'Sign out',
@@ -140,6 +153,7 @@ class ProfileListButton extends StatelessWidget {
   final VoidCallback onPressed;
   final bool? isLastItem;
   final Color? color;
+  final bool? disabled;
 
   const ProfileListButton({
     required this.label,
@@ -147,7 +161,8 @@ class ProfileListButton extends StatelessWidget {
     this.rightIcon,
     required this.onPressed,
     this.isLastItem,
-    this.color
+    this.color,
+    this.disabled,
   });
 
   @override
@@ -161,7 +176,7 @@ class ProfileListButton extends StatelessWidget {
           child: Divider(height: 1, color: Colors.grey),
         ),
         TextButton(
-          onPressed: onPressed,
+          onPressed: disabled ?? false ? null : onPressed,
           style: TextButton.styleFrom(
             padding: EdgeInsets.all(16.0),
             alignment: Alignment.centerLeft,

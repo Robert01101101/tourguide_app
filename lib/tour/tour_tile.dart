@@ -106,7 +106,7 @@ class _TourTileState extends State<TourTile> {
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(16.0),
-          border: widget.tour.isAddTourTile ? Border.all(color: Colors.grey, width: 2.0) : Border.all(color: Colors.transparent, width: 0), // Adjust the width as needed
+          border: widget.tour.isAddTourTile ? Border.all(color: Color(0xaa9e9e9e), width: 2.0) : Border.all(color: Colors.transparent, width: 0), // Adjust the width as needed
           boxShadow: const [
             BoxShadow(
               color: Colors.black26,

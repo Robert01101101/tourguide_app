@@ -1,3 +1,4 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
@@ -10,6 +11,7 @@ import 'package:tourguide_app/utilities/providers/tour_provider.dart';
 import 'package:tourguide_app/utilities/providers/tourguide_user_provider.dart';
 import 'package:tourguide_app/utilities/tourguide_navigation.dart';
 import 'package:tourguide_app/utilities/providers/auth_provider.dart' as my_auth;
+import 'package:url_launcher/url_launcher.dart';
 
 import 'main.dart';
 
@@ -86,7 +88,33 @@ class _TourguideOnboardState extends State<TourguideOnboard> {
           ),
           PageViewModel(
             title: 'Contribute',
-            body: 'Tourguide is a community-driven app. You can contribute by adding new tours, updating information, and sharing your experiences.',
+            bodyWidget: RichText(
+              textAlign: TextAlign.center,
+              text: TextSpan(
+                children: [
+                  TextSpan(
+                    text: "Tourguide is a community-driven app. You can contribute by adding new tours, updating information, and sharing your experiences.\n\n"
+                        "Please take a moment to review our ",
+                    style: Theme.of(context).textTheme.bodyLarge!.copyWith(
+                        color: Colors.white),
+                  ),
+                  TextSpan(
+                    text: "community guidelines",
+                    style: Theme.of(context).textTheme.bodyLarge!.copyWith(
+                      color: Colors.white, decorationColor: Colors.white, decoration: TextDecoration.underline,),
+                    recognizer: TapGestureRecognizer()
+                      ..onTap = () {
+                        launchUrl(Uri.parse("https://tourguide.rmichels.com/communityGuidelines.html"));
+                      },
+                  ),
+                  TextSpan(
+                    text: ".",
+                    style: Theme.of(context).textTheme.bodyLarge!.copyWith(
+                        color: Colors.white),
+                  ),
+                ],
+              ),
+            ),
             image: Image.asset('assets/onboarding/onboard3.png', width: 250, height: 250),
             decoration: pageDecoration.copyWith(pageColor: Color(0x22ffffff),),
           ),

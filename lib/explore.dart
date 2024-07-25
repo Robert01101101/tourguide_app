@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter_google_places_sdk/flutter_google_places_sdk.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -248,101 +249,99 @@ class ExploreState extends State<Explore> {
                     StandardLayout(
                         children: [
                           FutureBuilder(
-                          future: _handleSignIn(),
-                          builder: (context, snapshot) {
-                            //Assemble welcome string
-                            String displayName = authProvider.googleSignInUser!.displayName!;
+                            future: _handleSignIn(),
+                            builder: (context, snapshot) {
+                              //Assemble welcome string
+                              String displayName = authProvider.googleSignInUser!.displayName!;
 
-                            // Stylized Welcome Banner text
-                            return SizedBox(
-                              height: 290,
-                              child: Padding(
-                                padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 0),
-                                child: Align(
-                                  alignment: Alignment.bottomCenter,
-                                  child: GradientText(
-                                    gradient: const LinearGradient(colors: [
-                                      Color(0xeeF2F8F8),
-                                      Color(0xeeE4F0EF),
-                                    ]),
-                                    richText: RichText(
-                                      text: TextSpan(
-                                        style: Theme.of(context).textTheme.displayMedium,
-                                        children: <TextSpan>[
-                                          const TextSpan(text: 'Welcome'),
-                                          if (locationProvider.currentCity != null)
-                                            const TextSpan(text: ' to \r',),
-                                          if (locationProvider.currentCity != null)
-                                            TextSpan(
-                                              text: locationProvider.currentCity,
-                                              style: GoogleFonts.vollkorn(  //need to explicitly specify font for weight setting to work for some reason
-                                                textStyle: Theme.of(context).textTheme.displayMedium,
-                                                fontWeight: FontWeight.w600,
-                                                fontStyle: FontStyle.italic,
+                              // Stylized Welcome Banner text
+                              return SizedBox(
+                                height: 290,
+                                child: Padding(
+                                  padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 0),
+                                  child: Align(
+                                    alignment: Alignment.bottomCenter,
+                                    child: GradientText(
+                                      gradient: const LinearGradient(colors: [
+                                        Color(0xeeF2F8F8),
+                                        Color(0xeeE4F0EF),
+                                      ]),
+                                      richText: RichText(
+                                        text: TextSpan(
+                                          style: Theme.of(context).textTheme.displayMedium,
+                                          children: <TextSpan>[
+                                            const TextSpan(text: 'Welcome'),
+                                            if (locationProvider.currentCity != null)
+                                              TextSpan(text: ' to \r'),
+                                            if (locationProvider.currentCity != null)
+                                              TextSpan(
+                                                text: locationProvider.currentCity,
+                                                style: GoogleFonts.vollkorn(  //need to explicitly specify font for weight setting to work for some reason
+                                                  textStyle: Theme.of(context).textTheme.displayMedium,
+                                                  fontWeight: FontWeight.w600,
+                                                  fontStyle: FontStyle.italic,
+                                                ),
+                                                recognizer: TapGestureRecognizer()..onTap = () {
+                                                  logger.t('Tapped city name');
+                                                  _showOptionsDialog(context);
+                                                }
                                               ),
-                                            ),
-                                          if (displayName != null && displayName.isNotEmpty) TextSpan(text: ', ${displayName.split(' ').first}'),
-                                        ],
+                                            if (displayName != null && displayName.isNotEmpty) TextSpan(text: ', ${displayName.split(' ').first}'),
+                                          ],
+                                        ),
                                       ),
                                     ),
                                   ),
                                 ),
-                              ),
-                            );
-                          }
-                        ),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text("Popular tours near you", style: Theme.of(context).textTheme.headlineSmall),
-                                IconButton(onPressed: (){
+                              );
+                            }
+                          ),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text("Popular tours near you", style: Theme.of(context).textTheme.headlineSmall),
+                              IconButton(onPressed: (){
 
-                                }, icon: Icon(Icons.map))
-                              ],
+                              }, icon: Icon(Icons.map))
+                            ],
+                          ),
+                          StandardLayoutChild(
+                            fullWidth: true,
+                            child: SizedBox(
+                              height: 220.0, // Set a fixed height for the horizontal scroller
+                              child: HorizontalScroller(tours: tourProvider.popularTours),
                             ),
-                            StandardLayoutChild(
-                              fullWidth: true,
-                              child: SizedBox(
-                                height: 220.0, // Set a fixed height for the horizontal scroller
-                                child: HorizontalScroller(tours: tourProvider.popularTours),
+                          ),
+                          Text("Local tours", style: Theme.of(context).textTheme.headlineSmall),
+                          StandardLayoutChild(
+                            fullWidth: true,
+                            child: SizedBox(
+                              height: 220.0, // Set a fixed height for the horizontal scroller
+                              child: HorizontalScroller(tours: tourProvider.localTours),
+                            ),
+                          ),
+                          Text("Tours around the world", style: Theme.of(context).textTheme.headlineSmall),
+                          StandardLayoutChild(
+                            fullWidth: true,
+                            child: SizedBox(
+                              height: 220.0, // Set a fixed height for the horizontal scroller
+                              child: HorizontalScroller(tours: tourProvider.globalTours),
+                            ),
+                          ),
+                          Text("Debug", style: Theme.of(context).textTheme.headlineSmall),
+                          Row(
+                            children: [
+                              ElevatedButton(
+                                onPressed: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(builder: (context) => const DebugScreen()),
+                                  );
+                                },
+                                child: const Text('Debug Screen'),
                               ),
-                            ),
-                            Text("Local tours", style: Theme.of(context).textTheme.headlineSmall),
-                            StandardLayoutChild(
-                              fullWidth: true,
-                              child: SizedBox(
-                                height: 220.0, // Set a fixed height for the horizontal scroller
-                                child: HorizontalScroller(tours: tourProvider.localTours),
-                              ),
-                            ),
-                            Text("Tours around the world", style: Theme.of(context).textTheme.headlineSmall),
-                            StandardLayoutChild(
-                              fullWidth: true,
-                              child: SizedBox(
-                                height: 220.0, // Set a fixed height for the horizontal scroller
-                                child: HorizontalScroller(tours: tourProvider.globalTours),
-                              ),
-                            ),
-                          ],
-                        ),
-                        Text("Debug", style: Theme.of(context).textTheme.headlineSmall),
-                        Row(
-                          children: [
-                            ElevatedButton(
-                              onPressed: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(builder: (context) => const DebugScreen()),
-                                );
-                              },
-                              child: const Text('Debug Screen'),
-                            ),
-                          ],
-                        ),
-                        //Text('User is signed in!!  :)\n\nUsername: ${FirebaseAuth.instance.currentUser!.displayName}\nEmail: ${FirebaseAuth.instance.currentUser!.email}'),
+                            ],
+                          ),
                       ]
                     ),
                     Align(
