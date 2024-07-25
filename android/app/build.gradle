@@ -40,9 +40,6 @@ android {
     compileSdkVersion flutter.compileSdkVersion
     ndkVersion flutter.ndkVersion
 
-    def geoApiKey = tourguideProperties['geoApiKey']
-    resValue "string", "GEO_API_KEY", geoApiKey
-
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
@@ -65,6 +62,10 @@ android {
         versionCode flutterVersionCode.toInteger()
         versionName flutterVersionName
         multiDexEnabled true
+
+        //Tourguide Settings
+        def geoApiKey = tourguideProperties['geoApiKey']
+        resValue "string", "GEO_API_KEY", geoApiKey
     }
 
     signingConfigs {
