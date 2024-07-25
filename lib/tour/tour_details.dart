@@ -7,6 +7,7 @@ import 'package:tourguide_app/model/tour.dart';
 import 'package:tourguide_app/model/tourguide_report.dart';
 import 'package:tourguide_app/model/tourguide_user.dart';
 import 'package:tourguide_app/tour/tour_creation.dart';
+import 'package:tourguide_app/tour/tourguide_user_profile_view.dart';
 import 'package:tourguide_app/ui/my_layouts.dart';
 import 'package:tourguide_app/utilities/providers/tour_provider.dart';
 import 'package:tourguide_app/utilities/providers/tourguide_user_provider.dart';
@@ -506,6 +507,24 @@ class _FullscreenTourPageState extends State<FullscreenTourPage> {
                           );
                         }).toList(),
                       ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Created on ${widget.tour.createdDateTime!.toLocal().toString().split(' ')[0]} by:',
+                          style: Theme.of(context).textTheme.bodyMedium,
+                        ),
+                        TextButton(onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (context) =>
+                                TourguideUserProfileView(
+                                    tourguideUserId: widget.tour.authorId,
+                                    tourguideUserDisplayName: widget.tour.authorName)),
+                          );
+                        }, child: Text(widget.tour.authorName))
+                      ],
+                    ),
                   ],
                 ),
               ),

@@ -114,8 +114,9 @@ class TourguideUserProvider with ChangeNotifier {
             || data['username'] == null
             || data['displayName'] == null
             || data['email'] == null
-            || data['emailSubscribed'] == null
-            || data['reports'] == null) {
+            || data['emailSubscriptionsDisabled'] == null
+            || data['reports'] == null
+            || data['savedTourIds'] == null) {
           logger.w("UserProvider.loadUser() - User data is incomplete, patching user");
           _user = await _patchUser(data);
         } else {
