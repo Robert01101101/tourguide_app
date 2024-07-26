@@ -353,10 +353,11 @@ class _BottomNavigationPageState extends State<BottomNavigationPage> {
               label: 'Contribute',
             ),
             NavigationDestination(
-              icon: Badge(
+              /*icon: Badge(
                 label: Text('2'),
                 child: Icon(Icons.account_circle),
-              ),
+              ),*/
+              icon: Icon(Icons.account_circle),
               label: 'Profile',
             ),
           ],

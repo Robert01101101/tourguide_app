@@ -129,6 +129,13 @@ class _ProfileState extends State<Profile> {
                   disabled: true,
                 ),
                 ProfileListButton(
+                  label: 'Provide Feedback',
+                  leftIcon: Icons.feedback_outlined,
+                  onPressed: () {
+                    launchUrl(Uri.parse("mailto:feedback@tourguide.rmichels.com?subject=Tourguide%20Feedback"));
+                  },
+                ),
+                ProfileListButton(
                   label: 'Sign out',
                   leftIcon: Icons.logout,
                   onPressed: () {
