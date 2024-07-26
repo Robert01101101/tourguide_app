@@ -4,6 +4,7 @@ import 'package:flutter_google_places_sdk/flutter_google_places_sdk.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:tourguide_app/explore_map.dart';
 import 'package:tourguide_app/model/tour.dart';
 import 'package:tourguide_app/testing/debug_screen.dart';
 import 'package:tourguide_app/sign_in.dart';
@@ -301,7 +302,10 @@ class ExploreState extends State<Explore> {
                             children: [
                               Text("Popular tours near you", style: Theme.of(context).textTheme.headlineSmall),
                               IconButton(onPressed: (){
-
+                                Navigator.push(
+                                   context,
+                                   MaterialPageRoute(builder: (context) => const ExploreMap()),
+                                );
                               }, icon: Icon(Icons.map))
                             ],
                           ),

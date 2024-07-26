@@ -87,4 +87,23 @@ class MapUtils {
 
     return BitmapDescriptor.fromBytes(byteData.buffer.asUint8List());
   }
+
+  static LatLngBounds createLatLngBounds(List<LatLng> points) {
+    double south = points.first.latitude;
+    double north = points.first.latitude;
+    double west = points.first.longitude;
+    double east = points.first.longitude;
+
+    for (LatLng point in points) {
+      if (point.latitude < south) south = point.latitude;
+      if (point.latitude > north) north = point.latitude;
+      if (point.longitude < west) west = point.longitude;
+      if (point.longitude > east) east = point.longitude;
+    }
+
+    return LatLngBounds(
+      southwest: LatLng(south, west),
+      northeast: LatLng(north, east),
+    );
+  }
 }

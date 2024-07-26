@@ -81,7 +81,7 @@ class _FullscreenTourPageState extends State<FullscreenTourPage> {
     });
 
     //set zoom
-    LatLngBounds bounds = _createLatLngBounds(widget.tour.tourguidePlaces.map((place) => LatLng(place.latitude, place.longitude)).toList());
+    LatLngBounds bounds = MapUtils.createLatLngBounds(widget.tour.tourguidePlaces.map((place) => LatLng(place.latitude, place.longitude)).toList());
     final GoogleMapController controller = await _mapControllerCompleter.future;
     controller.moveCamera(CameraUpdate.newLatLngBounds(bounds, 50));
 
@@ -205,25 +205,6 @@ class _FullscreenTourPageState extends State<FullscreenTourPage> {
     setState(() {
       _polylines = _polylines;
     });
-  }
-
-  LatLngBounds _createLatLngBounds(List<LatLng> points) {
-    double south = points.first.latitude;
-    double north = points.first.latitude;
-    double west = points.first.longitude;
-    double east = points.first.longitude;
-
-    for (LatLng point in points) {
-      if (point.latitude < south) south = point.latitude;
-      if (point.latitude > north) north = point.latitude;
-      if (point.longitude < west) west = point.longitude;
-      if (point.longitude > east) east = point.longitude;
-    }
-
-    return LatLngBounds(
-      southwest: LatLng(south, west),
-      northeast: LatLng(north, east),
-    );
   }
 
   void _showOptionsDialog(BuildContext context) {

@@ -104,8 +104,15 @@ class _ContributeState extends State<Contribute> {
                     child: HorizontalScroller(tours: tourProvider.userCreatedTours, leftPadding: true),
                   ),
                 ),
-                const SizedBox(height: 64),
-                Text("View existing tours", style: Theme.of(context).textTheme.headlineSmall),
+                Text("Review unreviewed tours", style: Theme.of(context).textTheme.headlineSmall),
+                StandardLayoutChild(
+                  fullWidth: true,
+                  child: SizedBox(
+                    height: 220.0, // Set a fixed height for the horizontal scroller
+                    child: HorizontalScroller(tours: tourProvider.userCreatedTours, leftPadding: true),
+                  ),
+                ),
+                /*
                 Row(
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: [
@@ -123,7 +130,7 @@ class _ContributeState extends State<Contribute> {
                       );
                     }, child: const Text("Your private tours")),
                   ],
-                ),
+                ),*/
               ],
             ),
           ),
