@@ -44,7 +44,7 @@ class _PlaceAutocompleteState extends State<PlaceAutocomplete> {
 
   @override
   void initState() {
-    logger.i('PlaceAutocomplete.initState(), textEditingController.text=${widget.textEditingController.text}');
+    //logger.i('PlaceAutocomplete.initState(), textEditingController.text=${widget.textEditingController.text}');
     super.initState();
     LocationProvider locationProvider = Provider.of<LocationProvider>(context, listen: false);
     _debouncedSearch = _debounce<Iterable<AutocompletePrediction>?, String>(
@@ -80,7 +80,7 @@ class _PlaceAutocompleteState extends State<PlaceAutocomplete> {
               if (widget.textEditingController.text.isNotEmpty && fieldTextEditingController.text.isEmpty) {
                 fieldTextEditingController.text = widget.textEditingController.text;
                 _isValidSelection = true;
-                logger.i('Updated text in fieldTextEditingController: ${fieldTextEditingController.text}, addresses bug where city field in tour creation sometimes resets to empty');
+                //logger.i('Updated text in fieldTextEditingController: ${fieldTextEditingController.text}, addresses bug where city field in tour creation sometimes resets to empty');
               }
             });
 

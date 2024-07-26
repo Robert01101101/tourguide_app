@@ -1,10 +1,13 @@
+import 'dart:async';
 import 'dart:io';
+import 'dart:math';
 import 'dart:ui';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
 import 'package:google_places_autocomplete_text_field/google_places_autocomplete_text_field.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -26,6 +29,8 @@ import 'package:tourguide_app/utilities/services/tour_service.dart';
 
 import '../model/tour.dart';
 import '../utilities/providers/tour_provider.dart';
+
+late StreamSubscription<bool> keyboardSubscription;
 
 /// If isEditMode is true, tour is required. Edit mode is off by default.
 class CreateEditTour extends StatefulWidget {
@@ -58,32 +63,47 @@ class _CreateEditTourState extends State<CreateEditTour> {
   final int _descriptionMaxChars = 250;
   final int _reviewStepIndex = 4;
   File? _image;
-  List<TourguidePlace> _places = []; // List to hold TourguidePlace instances
   Place? _city;
   int _selectedImgIndex = 0;
   int _currentStep = 0;
+  int _maxStepReached = 0;
+  bool _stepChanging = false;
+  KeyboardVisibilityController? keyboardVisibilityController;
 
   @override
   void initState() {
     super.initState();
+
     if (widget.isEditMode) {
+      _maxStepReached = _reviewStepIndex;
       _tour = widget.tour!;
       _nameController.text = _tour.name;
       _descriptionController.text = _tour.description;
       _cityController.text = _tour.city;
-      _tour.tourguidePlaces.forEach((place) {
-        _places.add(place);
-        TextEditingController placeController = TextEditingController();
-        placeController.text = place.title;
-        _placeControllers.add(placeController);
-        place.descriptionEditingController = TextEditingController();
-      });
+      //for loop
+      for (int i = 0; i < _tour.tourguidePlaces.length; i++) {
+        TourguidePlace place = _tour.tourguidePlaces[i];
+        _placeControllers.add(TextEditingController(text: place.title));
+        _placeControllers[i].selection = TextSelection.fromPosition(TextPosition(offset: _placeControllers[i].text.length));
+        place.descriptionEditingController = TextEditingController(text: place.description);
+        place.descriptionEditingController!.selection =
+            TextSelection.fromPosition(TextPosition(offset: place.descriptionEditingController!.text.length));
+        _updateTourguidePlaceDetailsWithPlaceId(i, place.googleMapPlaceId, place.title);
+      }
     }
+
+    keyboardVisibilityController = KeyboardVisibilityController();
+  }
+
+  @override
+  void dispose() {
+    keyboardSubscription.cancel();
+    super.dispose();
   }
 
   void _addPlace() {
     setState(() {
-      _places.add(TourguidePlace(
+      _tour.tourguidePlaces.add(TourguidePlace(
         latitude: 0.0,
         longitude: 0.0,
         googleMapPlaceId: '',
@@ -98,7 +118,7 @@ class _CreateEditTourState extends State<CreateEditTour> {
   void _removePlace(int index) {
     logger.t('Removing place at index $index');
     setState(() {
-      _places.removeAt(index);
+      _tour.tourguidePlaces.removeAt(index);
       _placeControllers[index].dispose();
       _placeControllers.removeAt(index);
     });
@@ -109,20 +129,21 @@ class _CreateEditTourState extends State<CreateEditTour> {
   // TODO; don't use context in async!!
   Future<void> _firestoreCreateTour() async {
     try {
+      /*  //should be handled by the form validation, don't validate form inactive due to not being in current step
       if (!(_formKey.currentState!.validate() && _formKeyPlaces.currentState!.validate() && _formKeyPlacesDetails.currentState!.validate() && _formKeyDetails.currentState!.validate())){
         //log the form that failed
         if (!(_formKey.currentState!.validate())) logger.e('Error creating tour: Basic Info form validation failed');
         if (!(_formKeyPlaces.currentState!.validate())) logger.e('Error creating tour: Places form validation failed');
         if (!(_formKeyPlacesDetails.currentState!.validate())) logger.e('Error creating tour: Places Details form validation failed');
         if (!(_formKeyDetails.currentState!.validate())) logger.e('Error creating tour: Details form validation failed');
-        return;
-      }
+        throw Exception('Error creating tour: Form validation failed');
+      }*/
       final tourProvider = Provider.of<TourProvider>(context, listen: false);
       setState(() {
         _isFormSubmitted = true;
       });
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Uploading tour...')),
+        SnackBar(content: Text('${widget.isEditMode ? 'Updating' : 'Uploading'} tour...')),
       );
       //Final update to tour data
       final myAuth.AuthProvider authProvider = Provider.of(context, listen: false);
@@ -133,11 +154,11 @@ class _CreateEditTourState extends State<CreateEditTour> {
         authorName: authProvider.user!.displayName,
       );
       // Validation passed, proceed with tour creation
-      await tourProvider.uploadTour(_tour);
+      widget.isEditMode ? await tourProvider.updateTour(_tour) : await tourProvider.uploadTour(_tour);
 
       if (mounted){
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Successfully created tour. Thanks for contributing!')),
+          SnackBar(content: Text('Successfully ${widget.isEditMode ? 'updated' : 'uploaded'} tour. Thanks for contributing!')),
         );
         Navigator.pop(context);
       }
@@ -193,85 +214,124 @@ class _CreateEditTourState extends State<CreateEditTour> {
 
   /// Try to go to the step, but first validate and update the tour if data is valid
   void _tryToGoToStep(int step){
-    final tourProvider = Provider.of<TourProvider>(context, listen: false);
+    try{
+      if (_stepChanging) return;
+      _stepChanging = true;
+      final tourProvider = Provider.of<TourProvider>(context, listen: false);
 
-    if (step == _reviewStepIndex+1) {
-      // Final step (Review), create the tour
-      logger.t("_currentStep: $_currentStep, step: $step -> Creating tour...");
-      _firestoreCreateTour();
-      return;
-    }
+      if (step == _reviewStepIndex+1) {
+        // Final step (Review), create the tour
+        logger.t("_currentStep: $_currentStep, step: $step -> Creating tour...");
+        _firestoreCreateTour();
+        _stepChanging = false;
+        return;
+      }
 
-    final filter = ProfanityFilter();
-    bool isValid = false;
+      final filter = ProfanityFilter();
+      bool isValid = false;
+      bool skipPermitted = step <= _currentStep+1 || step <= _maxStepReached; //true if not skipping, or skipping to a previous step
 
 
-    if (step < _currentStep) {
-      isValid = true;
-    } else {
-      // Determine which form key to validate based on the step
-      switch (_currentStep) {
-        case 0: // Basic Info
-          isValid = _formKey.currentState!.validate();
-          if (isValid){
+      if (step < _currentStep) {
+        isValid = true;
+      } else {
+        // Determine which form key to validate based on the step
+        switch (_currentStep) {
+          case 0: // Basic Info
+            isValid = _formKey.currentState!.validate() && skipPermitted;
+            if (isValid){
+              setState(() {
+                if (!widget.isEditMode){
+                  _tour = _tour.copyWith(
+                      name: filter.censor(_nameController.text),
+                      description: filter.censor(_descriptionController.text),
+                      city: _cityController.text,
+                      latitude: _city!.latLng!.lat,
+                      longitude: _city!.latLng!.lng,
+                      placeId: _city!.id);
+                } else {
+                  _tour = _tour.copyWith(
+                      name: filter.censor(_nameController.text),
+                      description: filter.censor(_descriptionController.text),
+                      city: _cityController.text);
+                }
+              });
+            }
+            break;
+          case 1: // Places
+            isValid = _formKeyPlaces.currentState!.validate() && skipPermitted;
+            if (isValid){
+              setState(() {
+                LatLng centerPoint = _calculateCenterPoint(_tour.tourguidePlaces.map((p) => LatLng(lat: p.latitude, lng: p.longitude)).toList());
+                _tour = _tour.copyWith(
+                    latitude: centerPoint.lat,
+                    longitude: centerPoint.lng,
+                    tourguidePlaces: _tour.tourguidePlaces);
+              });
+            }
+            break;
+          case 2: // Place Details
+            isValid = _formKeyPlacesDetails.currentState!.validate() && skipPermitted;
+            //Set the description of the places using the controller
             setState(() {
-              if (!widget.isEditMode){
-                _tour = _tour.copyWith(
-                    name: filter.censor(_nameController.text),
-                    description: filter.censor(_descriptionController.text),
-                    city: _cityController.text,
-                    latitude: _city!.latLng!.lat,
-                    longitude: _city!.latLng!.lng,
-                    placeId: _city!.id);
-              } else {
-                _tour = _tour.copyWith(
-                    name: filter.censor(_nameController.text),
-                    description: filter.censor(_descriptionController.text),
-                    city: _cityController.text);
+              for (int i = 0; i < _tour.tourguidePlaces.length; i++) {
+                String description = _tour.tourguidePlaces[i].descriptionEditingController!.text;
+                //logger.t("Updating place $i with description: $description");
+                _tour.tourguidePlaces[i] = _tour.tourguidePlaces[i].copyWith(description: filter.censor(description));
               }
             });
-          }
-          break;
-        case 1: // Places
-          isValid = _formKeyPlaces.currentState!.validate();
-          if (isValid){
-            setState(() {
-              LatLng centerPoint = _calculateCenterPoint(_places.map((p) => LatLng(lat: p.latitude, lng: p.longitude)).toList());
-              _tour = _tour.copyWith(
-                  latitude: centerPoint.lat,
-                  longitude: centerPoint.lng,
-                  tourguidePlaces: _places);
-            });
-          }
-          break;
-        case 2: // Place Details
-          isValid = _formKeyPlacesDetails.currentState!.validate();
-          //Set the description of the places using the controller
-          setState(() {
-            for (int i = 0; i < _places.length; i++) {
-              String description = _places[i].descriptionEditingController!.text;
-              _places[i] = _places[i].copyWith(description: filter.censor(description));
-            }
-          });
-          break;
-        case 3: // Tour Details
-          isValid = _formKeyDetails.currentState!.validate();
-          _tour = _tour.copyWith(imageToUpload: _selectedImgIndex == -1 ? _image : _places[_selectedImgIndex!].imageFile);
-          logger.i("Reviewing tour: ${_tour.toString()}");
-          break;
-        default:
-          break;
+            break;
+          case 3: // Tour Details
+            isValid = _formKeyDetails.currentState!.validate() && skipPermitted;
+            _tour = _tour.copyWith(imageToUpload: _selectedImgIndex == -1 ? _image : _tour.tourguidePlaces[_selectedImgIndex!].imageFile);
+            logger.i("Reviewing tour: ${_tour.toString()}");
+            break;
+          default:
+            break;
+        }
       }
+
+      logger.t("_currentStep: $_currentStep, step: $step, isValid: $isValid, skipPermitted: $skipPermitted");
+
+      _setAutoValidate(isValid);
+
+      _goToStepAsync(isValid, step);
+    } catch (e, stackTrace){
+      logger.e('Error trying to go to step: $e \n stackTrace: $stackTrace');
     }
+  }
 
-    logger.t("_currentStep: $_currentStep, step: $step, isValid: $isValid");
+  Future<void> _goToStepAsync (bool isValid, int step) async {
+    try {
+      if (isValid) {
+        final isKeyboardOpen = keyboardVisibilityController!.isVisible || _currentStep == 2; //Places Details is super buggy, always wait here
+        //logger.i('Keyboard visibility goToStepAsync = ${keyboardVisibilityController!.isVisible}');
+        setState(() {
+          FocusScope.of(context).unfocus(); // Hide the keyboard
+        });
+        //bugfix for bug where keyboard being open and scrolled all the way down
+        // causes a huge gap after places details, when advancing from it to details
+        // (last text box selected prior to clicking next)
+        if (isKeyboardOpen) {
+          logger.i('Keyboard is open, waiting for it to close...');
+          await Future.delayed(const Duration(milliseconds: 500));
+        }
+        setState(() {
+          _currentStep = step; // Move to the next step
+          _maxStepReached = max(_maxStepReached, _currentStep);
+        });
+        if (isKeyboardOpen) {
+          //logger.i('Keyboard is open, waiting for it to close...');
+          await Future.delayed(const Duration(milliseconds: 400));
+        }
+        setState(() {
 
-    _setAutoValidate(isValid);
-
-    if (isValid) {
-      setState(() {
-        _currentStep = step; // Move to the next step
-      });
+        });
+      }
+      _stepChanging = false;
+    } catch (e, stackTrace){
+      logger.e('Error trying to go to step: $e \n stackTrace: $stackTrace');
+      _stepChanging = false;
     }
   }
 
@@ -297,13 +357,15 @@ class _CreateEditTourState extends State<CreateEditTour> {
     }
   }
 
-
-
   Future <void> _updateTourguidePlaceDetails(int index, AutocompletePrediction placePrediction) async{
+    _updateTourguidePlaceDetailsWithPlaceId(index, placePrediction.placeId, placePrediction.primaryText);
+  }
+
+  Future <void> _updateTourguidePlaceDetailsWithPlaceId(int index, String placeId, String primaryText) async{
     try {
       LocationProvider locationProvider = Provider.of(context, listen: false);
-      Place? googlePlaceWithDetails = await locationProvider.getLocationDetailsFromPlaceId(placePrediction.placeId);
-      TourguidePlaceImg? tourguidePlaceImg = await locationProvider.fetchPlacePhoto(placeId: placePrediction.placeId, setAsCurrentImage: false);
+      Place? googlePlaceWithDetails = await locationProvider.getLocationDetailsFromPlaceId(placeId);
+      TourguidePlaceImg? tourguidePlaceImg = await locationProvider.fetchPlacePhoto(placeId: placeId, setAsCurrentImage: false);
       String? photoUrl;
       Image? photo;
       if (tourguidePlaceImg == null) {
@@ -327,7 +389,7 @@ class _CreateEditTourState extends State<CreateEditTour> {
         latitude: googlePlaceWithDetails!.latLng!.lat,
         longitude: googlePlaceWithDetails!.latLng!.lng,
         googleMapPlaceId: googlePlaceWithDetails!.id!,
-        title: placePrediction.primaryText,
+        title: primaryText,
         description: '',
         photoUrl: photoUrl ?? '',
         image: photo,
@@ -336,7 +398,7 @@ class _CreateEditTourState extends State<CreateEditTour> {
       );
       logger.i("_updateTourguidePlaceDetails() - created updated TourguidePlace: $newTourguidePlace");
       setState(() {
-        _places[index] = newTourguidePlace;
+        _tour.tourguidePlaces[index] = newTourguidePlace;
       });
     } catch (e, stack) {
       logger.e("_updateTourguidePlaceDetails() - error: $e, stack: $stack");
@@ -395,7 +457,7 @@ class _CreateEditTourState extends State<CreateEditTour> {
                       borderRadius: BorderRadius.circular(3.0), // Custom radius
                     ),
                   ),
-                  child: _currentStep != _reviewStepIndex ? const Text('Next') : const Text('Create Tour'),
+                  child: _currentStep != _reviewStepIndex ? const Text('Next') : widget.isEditMode ? const Text('Update Tour') : const Text('Create Tour'),
                 ),
                 Spacer(),
                 if (_currentStep == 1)
@@ -411,7 +473,7 @@ class _CreateEditTourState extends State<CreateEditTour> {
           Step(
             title: const Text('Basic Info'),
             isActive: _currentStep >= 0,
-            state: _currentStep > 0 ? StepState.complete : StepState.indexed,
+            state: _maxStepReached > 0 ? StepState.complete : StepState.indexed,
             content: Form(
               autovalidateMode: _formValidateMode,
               key: _formKey,
@@ -487,13 +549,13 @@ class _CreateEditTourState extends State<CreateEditTour> {
           Step(
             title: const Text('Places'),
             isActive: _currentStep >= 1,
-            state: _currentStep > 1 ? StepState.complete : StepState.indexed,
+            state: _maxStepReached > 1 ? StepState.complete : StepState.indexed,
             content: Form(
               autovalidateMode: _formPlacesValidateMode,
               key: _formKeyPlaces,
               child: FormField(
                 validator: (value) {
-                  if (_places.length < 2) {
+                  if (_tour.tourguidePlaces.length < 2) {
                     return 'Please add at least two places.';
                   }
                   return null;
@@ -529,15 +591,15 @@ class _CreateEditTourState extends State<CreateEditTour> {
                             if (newIndex > oldIndex) {
                               newIndex -= 1;
                             }
-                            final TourguidePlace place = _places.removeAt(oldIndex);
-                            _places.insert(newIndex, place);
+                            final TourguidePlace place = _tour.tourguidePlaces.removeAt(oldIndex);
+                            _tour.tourguidePlaces.insert(newIndex, place);
 
                             final TextEditingController controller = _placeControllers.removeAt(oldIndex);
                             _placeControllers.insert(newIndex, controller);
                           });
                         },
                         children: [
-                          for (int index = 0; index < _places.length; index++)
+                          for (int index = 0; index < _tour.tourguidePlaces.length; index++)
                             Container(
                               key: ValueKey(_placeControllers[index]),
                               width: double.infinity,
@@ -594,70 +656,71 @@ class _CreateEditTourState extends State<CreateEditTour> {
           Step(
             title: const Text('Places Details'),
             isActive: _currentStep >= 2,
-            state: _currentStep > 2 ? StepState.complete : StepState.indexed,
-            content: Form(
-              autovalidateMode: _formPlacesDetailsValidateMode,
-              key: _formKeyPlacesDetails,
-              child: ListView.builder(
-                physics: ClampingScrollPhysics(),
-                shrinkWrap: true,
-                itemCount: _places.length,
-                itemBuilder: (BuildContext context, int index) {
-                  return Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 8.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          (index+1).toString() + ")  " + _places[index].title, // Assuming _places[index] has a 'name' field
-                          style: Theme.of(context).textTheme.titleMedium,
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.only(left: 20.0, top: 8.0),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              if (_places[index].image != null)
-                                Container(
-                                  height: 100, // Set the desired height here
-                                  width: double.infinity, // Make it fill the width of its parent
-                                  child: FittedBox(
-                                    fit: BoxFit.cover,
-                                    clipBehavior: Clip.hardEdge,
-                                    child: _places[index].image!,
-                                  ),
-                                ),
-                              SizedBox(height: 2,),
-                              TextFormField(
-                                controller: _places[index].descriptionEditingController, // Assuming each place has a description controller
-                                decoration: InputDecoration(
-                                  labelText: 'Description',
-                                ),
-                                minLines: 3,
-                                maxLines: 20,
-                                validator: (value) {
-                                  if (value == null || value.isEmpty) {
-                                    return 'Please enter a description';
-                                  }
-                                  return null;
-                                },
-                              ),
-                              if (index < _places.length - 1)
-                                SizedBox(height: 30,),
-                            ],
+            state: _maxStepReached > 2 ? StepState.complete : StepState.indexed,
+            content: Container(
+              color: Colors.red,
+              child: Form(
+                autovalidateMode: _formPlacesDetailsValidateMode,
+                key: _formKeyPlacesDetails,
+                child: Column(
+                  children: [
+                    for (int index = 0; index < _tour.tourguidePlaces.length; index++)
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 8.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            (index+1).toString() + ")  " + _tour.tourguidePlaces[index].title, // Assuming _places[index] has a 'name' field
+                            style: Theme.of(context).textTheme.titleMedium,
                           ),
-                        ),
-                      ],
-                    ),
-                  );
-                },
+                          Padding(
+                            padding: const EdgeInsets.only(left: 20.0, top: 8.0),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                if (_tour.tourguidePlaces[index].image != null)
+                                  Container(
+                                    height: 100, // Set the desired height here
+                                    width: double.infinity, // Make it fill the width of its parent
+                                    child: FittedBox(
+                                      fit: BoxFit.cover,
+                                      clipBehavior: Clip.hardEdge,
+                                      child: _tour.tourguidePlaces[index].image!,
+                                    ),
+                                  ),
+                                SizedBox(height: 2,),
+                                TextFormField(
+                                  controller: _tour.tourguidePlaces[index].descriptionEditingController, // Assuming each place has a description controller
+                                  decoration: InputDecoration(
+                                    labelText: 'Description',
+                                  ),
+                                  minLines: 3,
+                                  maxLines: 20,
+                                  validator: (value) {
+                                    if (value == null || value.isEmpty) {
+                                      return 'Please enter a description';
+                                    }
+                                    return null;
+                                  },
+                                ),
+                                if (index < _tour.tourguidePlaces.length - 1)
+                                  SizedBox(height: 30,),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    )
+                  ],
+                ),
               ),
             ),
           ),
           Step(
             title: const Text('Details'),
             isActive: _currentStep >= 3,
-            state: _currentStep > 3 ? StepState.complete : StepState.indexed,
+            state: _maxStepReached > 3 ? StepState.complete : StepState.indexed,
             content: Form(
               autovalidateMode: _formDetailsValidateMode,
               key: _formKeyDetails,
@@ -667,7 +730,7 @@ class _CreateEditTourState extends State<CreateEditTour> {
                   Text('Select an image for your tour', style: Theme.of(context).textTheme.titleMedium),
                   SizedBox(height: 16,),
                   SizedBox(
-                    height: ((_places.length+1)/2).ceil() * 164,
+                    height: ((_tour.tourguidePlaces.length+1)/2).ceil() * 166,
                     child: GridView.count(
                       crossAxisCount: 2,
                       physics: NeverScrollableScrollPhysics(),
@@ -675,8 +738,8 @@ class _CreateEditTourState extends State<CreateEditTour> {
                       mainAxisSpacing: 8.0,
                       childAspectRatio: 1.0, // Adjust as needed
                       children: [
-                        for (int i = 0; i < _places.length; i++)
-                          if (_places[i].image != null)
+                        for (int i = 0; i < _tour.tourguidePlaces.length; i++)
+                          if (_tour.tourguidePlaces[i].image != null)
                             GestureDetector(
                               onTap: () {
                                 _setTourImageSelection(i);
@@ -690,7 +753,7 @@ class _CreateEditTourState extends State<CreateEditTour> {
                                     child: FittedBox(
                                       fit: BoxFit.cover,
                                       clipBehavior: Clip.hardEdge,
-                                      child: _places[i].image!,
+                                      child: _tour.tourguidePlaces[i].image!,
                                     ),
                                   ),
                                   if (_selectedImgIndex == i)
@@ -761,7 +824,7 @@ class _CreateEditTourState extends State<CreateEditTour> {
           Step(
             title: const Text('Review'),
             isActive: _currentStep >= 4,
-            state: _currentStep > 4 ? StepState.complete : StepState.indexed,
+            state: _maxStepReached > 4 ? StepState.complete : StepState.indexed,
             content: Container(
               width: double.infinity,
               child: Column(
