@@ -73,7 +73,10 @@ class _CreateEditTourState extends State<CreateEditTour> {
       _cityController.text = _tour.city;
       _tour.tourguidePlaces.forEach((place) {
         _places.add(place);
-        _placeControllers.add(TextEditingController());
+        TextEditingController placeController = TextEditingController();
+        placeController.text = place.title;
+        _placeControllers.add(placeController);
+        place.descriptionEditingController = TextEditingController();
       });
     }
   }
@@ -212,13 +215,20 @@ class _CreateEditTourState extends State<CreateEditTour> {
           isValid = _formKey.currentState!.validate();
           if (isValid){
             setState(() {
+              if (!widget.isEditMode){
                 _tour = _tour.copyWith(
-                  name: filter.censor(_nameController.text),
-                  description: filter.censor(_descriptionController.text),
-                  city: _cityController.text,
-                  latitude: _city!.latLng!.lat,
-                  longitude: _city!.latLng!.lng,
-                  placeId: _city!.id);
+                    name: filter.censor(_nameController.text),
+                    description: filter.censor(_descriptionController.text),
+                    city: _cityController.text,
+                    latitude: _city!.latLng!.lat,
+                    longitude: _city!.latLng!.lng,
+                    placeId: _city!.id);
+              } else {
+                _tour = _tour.copyWith(
+                    name: filter.censor(_nameController.text),
+                    description: filter.censor(_descriptionController.text),
+                    city: _cityController.text);
+              }
             });
           }
           break;
