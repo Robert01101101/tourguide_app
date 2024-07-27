@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter_google_places_sdk/flutter_google_places_sdk.dart';
+import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:google_sign_in/google_sign_in.dart';
@@ -138,9 +139,17 @@ class ExploreState extends State<Explore> {
     showDialog(
       context: context,
       builder: (BuildContext context) {
-        return OptionsDialog();
+        return OptionsDialog(
+          onPlaceSet: _handlePlaceSet,);
       },
     );
+  }
+
+  void _handlePlaceSet() {
+    TourProvider tourProvider = Provider.of<TourProvider>(context, listen: false);
+    if (!tourProvider.isLoadingTours){
+      downloadTours();
+    }
   }
 
   final ScrollController _scrollController = ScrollController(); //for bg parallax effect and refresh
@@ -394,6 +403,10 @@ class GradientText extends StatelessWidget {
 }
 
 class OptionsDialog extends StatefulWidget {
+  final VoidCallback onPlaceSet;
+
+  const OptionsDialog({super.key, required this.onPlaceSet});
+
   @override
   _OptionsDialogState createState() => _OptionsDialogState();
 }
@@ -403,6 +416,20 @@ class _OptionsDialogState extends State<OptionsDialog> {
   final _formKey = GlobalKey<FormState>();
   bool _showConfirm = false;
   Place? newPlace;
+  Alignment _alignment = Alignment.center;
+
+
+  @override
+  void initState() {
+    super.initState();
+
+    KeyboardVisibilityController keyboardVisibilityController = KeyboardVisibilityController();
+    keyboardSubscription = keyboardVisibilityController!.onChange.listen((bool visible) {
+      setState(() {
+        _alignment = visible ? Alignment.topCenter : Alignment.center;
+      });
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -410,6 +437,7 @@ class _OptionsDialogState extends State<OptionsDialog> {
 
     return AlertDialog(
       title: Text('Change Location'),
+      alignment: _alignment,
       content: Form(
         key: _formKey,
         child: SingleChildScrollView(
@@ -442,6 +470,7 @@ class _OptionsDialogState extends State<OptionsDialog> {
                       // Validate form
                       if (_formKey.currentState!.validate()) {
                         locationProvider.setCurrentPlace(newPlace!);
+                        widget.onPlaceSet();
                         // Handle the confirm action here
                         Navigator.of(context).pop();
                       }

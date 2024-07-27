@@ -90,17 +90,6 @@ class LocationProvider with ChangeNotifier {
       Position position = await Geolocator.getCurrentPosition(
         desiredAccuracy: LocationAccuracy.high,
       );
-      Position testPos = Position(
-          latitude: 52.51253974139681,
-          longitude: 13.405139039805762,
-          timestamp: DateTime.now(),
-          accuracy: 0,
-          altitude: 0,
-          heading: 0,
-          speed: 0,
-          speedAccuracy: 0,
-          headingAccuracy: 0,
-          altitudeAccuracy: 0);
       _currentPosition = position; // = testPos;
       notifyListeners();
 
@@ -182,6 +171,18 @@ class LocationProvider with ChangeNotifier {
       _currentCity = place.addressComponents!.firstWhere((element) => element.types!.contains("locality")).name!;
       _currentState = place.addressComponents!.firstWhere((element) => element.types!.contains("administrative_area_level_1")).name!;
       _currentCountry = place.addressComponents!.firstWhere((element) => element.types!.contains("country")).name!;
+      _currentPosition = Position(
+          latitude: place.latLng!.lat,
+          longitude: place.latLng!.lng,
+          timestamp: DateTime.now(),
+          accuracy: 0,
+          altitude: 0,
+          heading: 0,
+          speed: 0,
+          speedAccuracy: 0,
+          headingAccuracy: 0,
+          altitudeAccuracy: 0
+      );
       _placeId = place.id!;
       _currentPlaceImg = await fetchPlacePhoto();
       notifyListeners();

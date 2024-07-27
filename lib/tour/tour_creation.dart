@@ -657,63 +657,60 @@ class _CreateEditTourState extends State<CreateEditTour> {
             title: const Text('Places Details'),
             isActive: _currentStep >= 2,
             state: _maxStepReached > 2 ? StepState.complete : StepState.indexed,
-            content: Container(
-              color: Colors.red,
-              child: Form(
-                autovalidateMode: _formPlacesDetailsValidateMode,
-                key: _formKeyPlacesDetails,
-                child: Column(
-                  children: [
-                    for (int index = 0; index < _tour.tourguidePlaces.length; index++)
-                    Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 8.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            (index+1).toString() + ")  " + _tour.tourguidePlaces[index].title, // Assuming _places[index] has a 'name' field
-                            style: Theme.of(context).textTheme.titleMedium,
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.only(left: 20.0, top: 8.0),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                if (_tour.tourguidePlaces[index].image != null)
-                                  Container(
-                                    height: 100, // Set the desired height here
-                                    width: double.infinity, // Make it fill the width of its parent
-                                    child: FittedBox(
-                                      fit: BoxFit.cover,
-                                      clipBehavior: Clip.hardEdge,
-                                      child: _tour.tourguidePlaces[index].image!,
-                                    ),
+            content: Form(
+              autovalidateMode: _formPlacesDetailsValidateMode,
+              key: _formKeyPlacesDetails,
+              child: Column(
+                children: [
+                  for (int index = 0; index < _tour.tourguidePlaces.length; index++)
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 8.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          (index+1).toString() + ")  " + _tour.tourguidePlaces[index].title, // Assuming _places[index] has a 'name' field
+                          style: Theme.of(context).textTheme.titleMedium,
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.only(left: 20.0, top: 8.0),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              if (_tour.tourguidePlaces[index].image != null)
+                                Container(
+                                  height: 100, // Set the desired height here
+                                  width: double.infinity, // Make it fill the width of its parent
+                                  child: FittedBox(
+                                    fit: BoxFit.cover,
+                                    clipBehavior: Clip.hardEdge,
+                                    child: _tour.tourguidePlaces[index].image!,
                                   ),
-                                SizedBox(height: 2,),
-                                TextFormField(
-                                  controller: _tour.tourguidePlaces[index].descriptionEditingController, // Assuming each place has a description controller
-                                  decoration: InputDecoration(
-                                    labelText: 'Description',
-                                  ),
-                                  minLines: 3,
-                                  maxLines: 20,
-                                  validator: (value) {
-                                    if (value == null || value.isEmpty) {
-                                      return 'Please enter a description';
-                                    }
-                                    return null;
-                                  },
                                 ),
-                                if (index < _tour.tourguidePlaces.length - 1)
-                                  SizedBox(height: 30,),
-                              ],
-                            ),
+                              SizedBox(height: 2,),
+                              TextFormField(
+                                controller: _tour.tourguidePlaces[index].descriptionEditingController, // Assuming each place has a description controller
+                                decoration: InputDecoration(
+                                  labelText: 'Description',
+                                ),
+                                minLines: 3,
+                                maxLines: 20,
+                                validator: (value) {
+                                  if (value == null || value.isEmpty) {
+                                    return 'Please enter a description';
+                                  }
+                                  return null;
+                                },
+                              ),
+                              if (index < _tour.tourguidePlaces.length - 1)
+                                SizedBox(height: 30,),
+                            ],
                           ),
-                        ],
-                      ),
-                    )
-                  ],
-                ),
+                        ),
+                      ],
+                    ),
+                  )
+                ],
               ),
             ),
           ),
