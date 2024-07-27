@@ -30,8 +30,6 @@ import 'package:tourguide_app/utilities/services/tour_service.dart';
 import '../model/tour.dart';
 import '../utilities/providers/tour_provider.dart';
 
-late StreamSubscription<bool> keyboardSubscription;
-
 /// If isEditMode is true, tour is required. Edit mode is off by default.
 class CreateEditTour extends StatefulWidget {
   final bool isEditMode;
@@ -74,6 +72,8 @@ class _CreateEditTourState extends State<CreateEditTour> {
   void initState() {
     super.initState();
 
+    logger.t('TourCreation initState() - isEditMode: ${widget.isEditMode}');
+
     if (widget.isEditMode) {
       _maxStepReached = _reviewStepIndex;
       _tour = widget.tour!;
@@ -97,7 +97,6 @@ class _CreateEditTourState extends State<CreateEditTour> {
 
   @override
   void dispose() {
-    keyboardSubscription.cancel();
     super.dispose();
   }
 
@@ -304,7 +303,7 @@ class _CreateEditTourState extends State<CreateEditTour> {
   Future<void> _goToStepAsync (bool isValid, int step) async {
     try {
       if (isValid) {
-        final isKeyboardOpen = keyboardVisibilityController!.isVisible || _currentStep == 2; //Places Details is super buggy, always wait here
+        final isKeyboardOpen = keyboardVisibilityController!.isVisible || (_currentStep == 2 && step > _currentStep); //Places Details is super buggy, always wait here
         //logger.i('Keyboard visibility goToStepAsync = ${keyboardVisibilityController!.isVisible}');
         setState(() {
           FocusScope.of(context).unfocus(); // Hide the keyboard
@@ -363,6 +362,13 @@ class _CreateEditTourState extends State<CreateEditTour> {
 
   Future <void> _updateTourguidePlaceDetailsWithPlaceId(int index, String placeId, String primaryText) async{
     try {
+      bool existingPlace = false;
+      //check if it has a place with placeId
+      if (_tour.tourguidePlaces.length > index && _tour.tourguidePlaces[index].googleMapPlaceId == placeId) {
+        logger.i("_updateTourguidePlaceDetails() - place already exists with placeId: $placeId");
+        existingPlace = true;
+      }
+
       LocationProvider locationProvider = Provider.of(context, listen: false);
       Place? googlePlaceWithDetails = await locationProvider.getLocationDetailsFromPlaceId(placeId);
       TourguidePlaceImg? tourguidePlaceImg = await locationProvider.fetchPlacePhoto(placeId: placeId, setAsCurrentImage: false);
@@ -393,12 +399,23 @@ class _CreateEditTourState extends State<CreateEditTour> {
         description: '',
         photoUrl: photoUrl ?? '',
         image: photo,
-        imageFile: tourguidePlaceImg != null ? tourguidePlaceImg.file : null,
+        imageFile: tourguidePlaceImg?.file,
         descriptionEditingController: TextEditingController(),
       );
       logger.i("_updateTourguidePlaceDetails() - created updated TourguidePlace: $newTourguidePlace");
       setState(() {
-        _tour.tourguidePlaces[index] = newTourguidePlace;
+        if (existingPlace){
+          _tour.tourguidePlaces[index] = _tour.tourguidePlaces[index].copyWith(
+            latitude: newTourguidePlace.latitude,
+            longitude: newTourguidePlace.longitude,
+            googleMapPlaceId: newTourguidePlace.googleMapPlaceId,
+            title: newTourguidePlace.title,
+            photoUrl: newTourguidePlace.photoUrl,
+            image: newTourguidePlace.image,
+            imageFile: newTourguidePlace.imageFile);
+        } else {
+          _tour.tourguidePlaces[index] = newTourguidePlace;
+        }
       });
     } catch (e, stack) {
       logger.e("_updateTourguidePlaceDetails() - error: $e, stack: $stack");
@@ -727,7 +744,7 @@ class _CreateEditTourState extends State<CreateEditTour> {
                   Text('Select an image for your tour', style: Theme.of(context).textTheme.titleMedium),
                   SizedBox(height: 16,),
                   SizedBox(
-                    height: ((_tour.tourguidePlaces.length+1)/2).ceil() * 166,
+                    height: ((_tour.tourguidePlaces.length+1)/2).ceil() * 167,
                     child: GridView.count(
                       crossAxisCount: 2,
                       physics: NeverScrollableScrollPhysics(),

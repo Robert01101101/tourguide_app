@@ -49,7 +49,12 @@ class _PlaceAutocompleteState extends State<PlaceAutocomplete> {
     LocationProvider locationProvider = Provider.of<LocationProvider>(context, listen: false);
     _debouncedSearch = _debounce<Iterable<AutocompletePrediction>?, String>(
             (query) => locationProvider.getAutocompleteSuggestions(query, restrictToCities: widget.restrictToCities));
+    if (widget.textEditingController.text.isNotEmpty) {
+      _isValidSelection = true;
+    }
   }
+
+
 
 
   @override
@@ -73,11 +78,12 @@ class _PlaceAutocompleteState extends State<PlaceAutocomplete> {
             _lastOptions = options;
             return options;
           },
+          initialValue: widget.textEditingController.value,
           displayStringForOption: (AutocompletePrediction option) => option.fullText!,
           fieldViewBuilder: (BuildContext context, TextEditingController fieldTextEditingController, FocusNode fieldFocusNode, VoidCallback onFieldSubmitted) {
             // TODO: better understand why the city field in tour creation sometimes resets to empty
             WidgetsBinding.instance.addPostFrameCallback((_) {
-              if (widget.textEditingController.text.isNotEmpty && fieldTextEditingController.text.isEmpty) {
+              if (widget.textEditingController.text.isNotEmpty && fieldTextEditingController.text.isEmpty && !fieldFocusNode.hasFocus) {
                 fieldTextEditingController.text = widget.textEditingController.text;
                 _isValidSelection = true;
                 //logger.i('Updated text in fieldTextEditingController: ${fieldTextEditingController.text}, addresses bug where city field in tour creation sometimes resets to empty');

@@ -197,7 +197,14 @@ class AuthProvider with ChangeNotifier {
       logger.e(e);
       _isLoggingOut = false;
     }
+  }
 
+  void resetAuthProvider(){
+    _user = null;
+    _googleSignInUser = null;
+    _isAuthorized = false;
+    _silentSignInFailed = false;
+    googleSignIn.disconnect();
   }
 //#endregion
 }

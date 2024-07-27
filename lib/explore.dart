@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter_google_places_sdk/flutter_google_places_sdk.dart';
@@ -5,6 +7,7 @@ import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tourguide_app/explore_map.dart';
 import 'package:tourguide_app/model/tour.dart';
 import 'package:tourguide_app/testing/debug_screen.dart';
@@ -55,6 +58,8 @@ class ExploreState extends State<Explore> {
   void initState() {
     logger.t('ExploreState.initState() !!!!!!!!!!!!!!!!!!!!');
 
+    _checkIfFirstTimeUserAfterAccountDeletion();
+
     //Firebase auth
     FirebaseAuth.instance
         .userChanges()
@@ -81,6 +86,16 @@ class ExploreState extends State<Explore> {
         _scrollOffset = _scrollController.offset;
       });
     });
+  }
+
+  void _checkIfFirstTimeUserAfterAccountDeletion() async{
+    var prefs = await SharedPreferences.getInstance();
+    if (prefs.getBool('firstTimeUser') == null){
+      logger.i('_checkIfFirstTimeUserAfterAccountDeletion -> true');
+      TourguideNavigation.router.go(
+        TourguideNavigation.onboardingPath,
+      );
+    }
   }
 
 
@@ -417,6 +432,7 @@ class _OptionsDialogState extends State<OptionsDialog> {
   bool _showConfirm = false;
   Place? newPlace;
   Alignment _alignment = Alignment.center;
+  late StreamSubscription<bool> keyboardSubscription;
 
 
   @override
@@ -424,11 +440,17 @@ class _OptionsDialogState extends State<OptionsDialog> {
     super.initState();
 
     KeyboardVisibilityController keyboardVisibilityController = KeyboardVisibilityController();
-    keyboardSubscription = keyboardVisibilityController!.onChange.listen((bool visible) {
+    keyboardSubscription  = keyboardVisibilityController!.onChange.listen((bool visible) {
       setState(() {
         _alignment = visible ? Alignment.topCenter : Alignment.center;
       });
     });
+  }
+
+  @override
+  void dispose() {
+    keyboardSubscription.cancel();
+    super.dispose();
   }
 
   @override

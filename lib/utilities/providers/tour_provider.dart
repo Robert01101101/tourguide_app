@@ -202,6 +202,7 @@ class TourProvider with ChangeNotifier {
           'authId': reportedTourAuthor.firebaseAuthId,
         }
       },
+      'userId': reportedTourAuthor!.firebaseAuthId,
     };
 
     await FirebaseFirestore.instance.collection('emails').add(emailData);

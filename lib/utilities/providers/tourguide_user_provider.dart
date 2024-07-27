@@ -35,10 +35,10 @@ class TourguideUserProvider with ChangeNotifier {
       await _waitForRequiredData();
       await _loadUser();
       logger.t("UserProvider() - _onAuthStateChanged() - User is loaded");
-      _sendWelcomeEmail();
       if (_user == null) {
         // New user, create an entry in Firestore
         await _createUser();
+        _sendWelcomeEmail();
 
       }
     } else {
@@ -99,6 +99,7 @@ class TourguideUserProvider with ChangeNotifier {
           'authId': _user!.firebaseAuthId,
         }
       },
+      'userId': _user!.firebaseAuthId,
     };
 
     await FirebaseFirestore.instance.collection('emails').add(emailData);
@@ -182,5 +183,9 @@ class TourguideUserProvider with ChangeNotifier {
     _user = updatedUser;
     notifyListeners();
     await FirebaseFirestore.instance.collection('users').doc(_user!.firebaseAuthId).set(_user!.toMap());
+  }
+
+  void resetUserProvider(){
+    _user = null;
   }
 }

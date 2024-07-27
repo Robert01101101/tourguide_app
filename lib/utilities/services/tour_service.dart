@@ -267,10 +267,10 @@ class TourService {
       String tourId = tourDocRef.id; // Retrieve the auto-generated ID
 
       // Step 2: Upload image
+      tour = tour.copyWith(id: tourId);
       String imageUrl = await uploadImage(tour);
 
       // Step 3: Update the Tour's ID and imageUrl fields
-      tour = tour.copyWith(id: tourId);
       await db.collection("tours").doc(tourId).update({
         'id': tour.id,
         'imageUrl': imageUrl,
@@ -292,6 +292,11 @@ class TourService {
 
   static Future<Tour> updateTour(Tour tour) async{
     try {
+      if (tour.imageToUpload != null) {
+        // Upload the new image
+        String newImageUrl = await uploadImage(tour);
+        tour = tour.copyWith(imageUrl: newImageUrl);
+      }
       await FirebaseFirestore.instance
           .collection('tours')
           .doc(tour.id)
@@ -320,6 +325,7 @@ class TourService {
       Reference ref = FirebaseStorage.instance
           .ref()
           .child('tour_images')
+          .child(tour.authorId)
           .child(tour.id);  // Use the tourId to associate the image with the tour
 
       // Upload the file to Firebase Storage

@@ -483,24 +483,25 @@ class _FullscreenTourPageState extends State<FullscreenTourPage> {
                           );
                         }).toList(),
                       ),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Created on ${widget.tour.createdDateTime!.toLocal().toString().split(' ')[0]} by:',
-                          style: Theme.of(context).textTheme.bodyMedium,
-                        ),
-                        TextButton(onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(builder: (context) =>
-                                TourguideUserProfileView(
-                                    tourguideUserId: widget.tour.authorId,
-                                    tourguideUserDisplayName: widget.tour.authorName)),
-                          );
-                        }, child: Text(widget.tour.authorName))
-                      ],
-                    ),
+                    if (!widget.tour.isOfflineCreatedTour)
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Created on ${widget.tour.createdDateTime!.toLocal().toString().split(' ')[0]} by:',
+                            style: Theme.of(context).textTheme.bodyMedium,
+                          ),
+                          TextButton(onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (context) =>
+                                  TourguideUserProfileView(
+                                      tourguideUserId: widget.tour.authorId,
+                                      tourguideUserDisplayName: widget.tour.authorName)),
+                            );
+                          }, child: Text(widget.tour.authorName))
+                        ],
+                      ),
                   ],
                 ),
               ),

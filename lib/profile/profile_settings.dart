@@ -1,10 +1,12 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:profanity_filter/profanity_filter.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tourguide_app/ui/my_layouts.dart';
 import 'package:tourguide_app/utilities/custom_import.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:tourguide_app/utilities/providers/auth_provider.dart' as myAuth;
+import 'package:tourguide_app/utilities/providers/location_provider.dart';
 import 'package:tourguide_app/utilities/providers/tour_provider.dart';
 import 'package:tourguide_app/utilities/providers/tourguide_user_provider.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -255,8 +257,66 @@ class _ProfileSettingsDeleteAccountState extends State<ProfileSettingsDeleteAcco
     });
   }
 
-  void _deleteAccount(){
+  bool _deleteStarted = false;
+  void _deleteAccount() async{
+    myAuth.AuthProvider authProvider = Provider.of(context, listen: false);
+    if (_deleteStarted) return;
     logger.w("Delete account confirmed and pressed");
+    User? user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      try {
+        _deleteStarted = true;
+        TourProvider tourProvider = Provider.of(context, listen: false);
+        TourguideUserProvider tourguideUserProvider = Provider.of(context, listen: false);
+
+        tourProvider.resetTourProvider();
+        tourguideUserProvider.resetUserProvider();
+        await user.delete();
+        SharedPreferences prefs = await SharedPreferences.getInstance();
+        prefs.remove('firstTimeUser');
+        authProvider.resetAuthProvider();
+
+        TourguideNavigation.router.go(
+            TourguideNavigation.signInPath,
+        );
+
+        if (mounted){
+          ScaffoldMessenger.of(context).hideCurrentSnackBar();
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Account successfully deleted')),
+          );
+        }
+
+        logger.w("User account deleted");
+      } on FirebaseAuthException catch (e, stack) {
+        logger.e("Error deleting user account: $e \n $stack");
+
+        if (mounted){
+          ScaffoldMessenger.of(context).hideCurrentSnackBar();
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Failed to delete account. For security reasons you ned to re-authenticate first.')),
+          );
+        }
+        authProvider.signOut();
+      } catch (e, stack) {
+        logger.e("Error deleting user account: $e \n $stack");
+
+        if (mounted){
+          ScaffoldMessenger.of(context).hideCurrentSnackBar();
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Failed to delete account. Try logging out and back in. Or email contact@tourguide.rmichels.com.')),
+          );
+        }
+      }
+    } else {
+      logger.w("No user is currently signed in");
+      if (mounted){
+        ScaffoldMessenger.of(context).hideCurrentSnackBar();
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Failed to delete account. Try logging out and back in. Or email contact@tourguide.rmichels.com.')),
+        );
+      }
+    }
   }
 
 
