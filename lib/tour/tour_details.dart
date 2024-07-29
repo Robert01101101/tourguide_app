@@ -262,7 +262,21 @@ class _FullscreenTourPageState extends State<FullscreenTourPage> {
 
   }
 
+  int? currentlyPlayingIndex; // Track the index of the currently playing place
 
+  void _toggleTTS(String description, int index) {
+    if (currentlyPlayingIndex == index) {
+      _ttsService.stop(); // Stop the TTS service if the same button is pressed
+      setState(() {
+        currentlyPlayingIndex = null; // Reset the index
+      });
+    } else {
+      _ttsService.speak(description); // Start speaking
+      setState(() {
+        currentlyPlayingIndex = index; // Set the currently playing index
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -275,6 +289,8 @@ class _FullscreenTourPageState extends State<FullscreenTourPage> {
         zoom: 14.0,
       );
     }
+
+
 
     return Scaffold(
       appBar: AppBar(
@@ -455,28 +471,36 @@ class _FullscreenTourPageState extends State<FullscreenTourPage> {
                     if (widget.tour.tourguidePlaces.isNotEmpty)
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
-                        children: widget.tour.tourguidePlaces.map((place) {
+                        children: widget.tour.tourguidePlaces.asMap().entries.map((entry) {
+                          int index = entry.key;
+                          var place = entry.value;
                           return Padding(
                             padding: const EdgeInsets.symmetric(vertical: 8.0),
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      place.title,
-                                      style: Theme.of(context).textTheme.titleMedium,
-                                    ),
-                                    Text(
-                                      place.description, // Assuming each place has a 'description' field
-                                      style: Theme.of(context).textTheme.bodyMedium,
-                                    ),
-                                  ],
+                                Flexible(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        place.title,
+                                        style: Theme.of(context).textTheme.titleMedium,
+                                      ),
+                                      Text(
+                                        place.description, // Assuming each place has a 'description' field
+                                        style: Theme.of(context).textTheme.bodyMedium,
+                                        softWrap: true,
+                                        maxLines: null,
+                                        overflow: TextOverflow.visible,
+                                      ),
+                                    ],
+                                  ),
                                 ),
                                 IconButton(
-                                    onPressed: () => _ttsService.speak(place.description),
-                                    icon: Icon(Icons.play_circle),
+                                    onPressed: () => _toggleTTS(place.description, index),
+                                    icon: Icon(currentlyPlayingIndex == index ? Icons.stop : Icons.play_circle,),
                                 )
                               ],
                             ),
