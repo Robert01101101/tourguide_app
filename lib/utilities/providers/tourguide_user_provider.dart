@@ -188,4 +188,43 @@ class TourguideUserProvider with ChangeNotifier {
   void resetUserProvider(){
     _user = null;
   }
+
+  // ____________________________ Reports ____________________________
+  Future<void> reportUser(TourguideReport report, String reportedUserId) async{
+    try {
+      //TODO: improve (very messy atm, not based on my original system design)
+      /*DocumentSnapshot doc = await FirebaseFirestore.instance.collection('users').doc(reportedUserId).get();
+      TourguideUser reportedUser = TourguideUser.fromMap(doc.data() as Map<String, dynamic>);
+      List<TourguideReport> newReports =  [...reportedUser.reports, report];
+      TourguideUser reportedUserCopy = reportedUser.copyWith(reports: newReports);
+      logger.i('User reported: ${reportedUserCopy.firebaseAuthId}');*/  //not possible atm with my permissions setup
+
+      _notifyAdminOfReportOrReviewRequest(reportedUserId, reportTitle: report.title, reportDetails: report.additionalDetails);
+      //await FirebaseFirestore.instance.collection('users').doc(reportedUserCopy.firebaseAuthId).set(reportedUserCopy.toMap()); //not possible atm with my permissions setup
+      Map<String, dynamic> reportData = report.toMap();
+      //add key 'reportingUserId' to the reportData (very hacky, not according to data model)
+      reportData['reportedUser'] = reportedUserId;
+      await FirebaseFirestore.instance.collection('user_reports').add(reportData);
+    } catch (e, stack) {
+      logger.e('Error submitting report: $e\n$stack');
+    }
+
+  }
+
+  Future<void> _notifyAdminOfReportOrReviewRequest (String userId, {String? reportTitle, String? reportDetails}) async {
+    Map<String, dynamic> emailData = {
+      'to': 'contact@tourguide.rmichels.com',
+      'template': {
+        'name': reportTitle != null ? 'report' : 'reportReviewRequest',
+        'data': {
+          'reportItem': 'User',
+          'itemId': userId,
+          if (reportTitle != null) 'reportTitle': reportTitle,
+          if (reportDetails != null) 'reportDetails': reportDetails,
+        }
+      },
+    };
+
+    await FirebaseFirestore.instance.collection('emails').add(emailData);
+  }
 }

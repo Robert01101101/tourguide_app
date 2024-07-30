@@ -148,6 +148,26 @@ class TourProvider with ChangeNotifier {
     return _allCachedTours[tour.id]!;
   }
 
+  /// for logout
+  void resetTourProvider(){
+    _selectedTour = null;
+    _isLoadingTours = false;
+    _allCachedTours = {};
+    _popularTours = List.generate(4, (index) => Tour.empty());
+    _localTours = List.generate(4, (index) => Tour.empty());
+    _globalTours = List.generate(4, (index) => Tour.empty());
+    _userCreatedTours = List.generate(1, (index) => Tour.isAddTourTile());
+    _userSavedTours = List.empty();
+    logger.t("TourProvider.resetTourProvider()");
+  }
+
+  //TODO: swap for approach where we use already cached list to avoid the first get call?
+  Future<void> updateAuthorNameForAllTheirTours(String authorId, String newAuthorName) async {
+    await TourService.updateAuthorNameForAllTheirTours(authorId, newAuthorName);
+    notifyListeners();
+  }
+
+  // ____________________________ Reports ____________________________
   Future<void> reportTour(Tour tour, TourguideReport report, TourguideUser reportedTourAuthor) async{
     List<TourguideReport> newReports =  [...tour.reports, report];
     Tour reportedTour = tour.copyWith(reports: newReports);
@@ -176,7 +196,8 @@ class TourProvider with ChangeNotifier {
       'template': {
         'name': reportTitle != null ? 'report' : 'reportReviewRequest',
         'data': {
-          'tourId': tourId,
+          'reportItem': 'Tour',
+          'itemId': tourId,
           if (reportTitle != null) 'reportTitle': reportTitle,
           if (reportDetails != null) 'reportDetails': reportDetails,
         }
@@ -206,24 +227,5 @@ class TourProvider with ChangeNotifier {
     };
 
     await FirebaseFirestore.instance.collection('emails').add(emailData);
-  }
-
-  /// for logout
-  void resetTourProvider(){
-    _selectedTour = null;
-    _isLoadingTours = false;
-    _allCachedTours = {};
-    _popularTours = List.generate(4, (index) => Tour.empty());
-    _localTours = List.generate(4, (index) => Tour.empty());
-    _globalTours = List.generate(4, (index) => Tour.empty());
-    _userCreatedTours = List.generate(1, (index) => Tour.isAddTourTile());
-    _userSavedTours = List.empty();
-    logger.t("TourProvider.resetTourProvider()");
-  }
-
-  //TODO: swap for approach where we use already cached list to avoid the first get call?
-  Future<void> updateAuthorNameForAllTheirTours(String authorId, String newAuthorName) async {
-    await TourService.updateAuthorNameForAllTheirTours(authorId, newAuthorName);
-    notifyListeners();
   }
 }

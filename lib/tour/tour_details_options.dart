@@ -1,9 +1,11 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:profanity_filter/profanity_filter.dart';
 import 'package:provider/provider.dart';
 import 'package:tourguide_app/model/tour.dart';
 import 'package:tourguide_app/model/tourguide_report.dart';
 import 'package:tourguide_app/model/tourguide_user.dart';
+import 'package:tourguide_app/ui/report_dialogue.dart';
 import 'package:tourguide_app/utilities/providers/tour_provider.dart';
 import 'package:tourguide_app/utilities/providers/tourguide_user_provider.dart';
 import '../utilities/custom_import.dart';
@@ -46,6 +48,10 @@ class _TourDetailsOptionsState extends State<TourDetailsOptions> {
     if (_reportSubmitted) return;
     _reportSubmitted = true;
     String additionalDetails = _reportDetailsController.text;
+    //censor details with profanity_filter
+    final filter = ProfanityFilter();
+    additionalDetails = filter.censor(additionalDetails);
+
     logger.t('Selected Option: $_selectedReportOption');
     logger.t('Additional Details: $additionalDetails');
 
@@ -244,70 +250,11 @@ class _TourDetailsOptionsState extends State<TourDetailsOptions> {
             ),
             Visibility( //Report Options
               visible: _isReportingTour,
-              child: Column(
-                children: [
-                  const Padding(
-                    padding: EdgeInsets.all(20.0),
-                    child: Center(child: Text("Please select the reason why you are reporting this tour. Your feedback is important to us and will help us maintain a safe and respectful community.")),
-                  ),
-                  Divider(),
-                  SizedBox(height: 16.0),
-                  ReportOption(
-                    title: 'Nudity or Sexual Content',
-                    description: 'Contains nudity, sexual activity, or other sexually explicit material.',
-                    groupValue: _selectedReportOption,
-                    onChanged: _handleRadioValueChange,
-                  ),
-                  ReportOption(
-                    title: 'Violence or Dangerous Behavior',
-                    description: 'Promotes violence, self-harm, or dangerous behavior.',
-                    groupValue: _selectedReportOption,
-                    onChanged: _handleRadioValueChange,
-                  ),
-                  ReportOption(
-                    title: 'Harassment or Hate Speech',
-                    description: 'Includes harassment, hate speech, or abusive content.',
-                    groupValue: _selectedReportOption,
-                    onChanged: _handleRadioValueChange,
-                  ),
-                  ReportOption(
-                    title: 'Spam or Misleading Information',
-                    description: 'Contains spam, scams, or misleading information.',
-                    groupValue: _selectedReportOption,
-                    onChanged: _handleRadioValueChange,
-                  ),
-                  ReportOption(
-                    title: 'Copyright Infringement',
-                    description: 'Violates copyright laws or includes pirated content.',
-                    groupValue: _selectedReportOption,
-                    onChanged: _handleRadioValueChange,
-                  ),
-                  ReportOption(
-                    title: 'Harmful or Abusive Content',
-                    description: 'Contains harmful, abusive, or malicious content.',
-                    groupValue: _selectedReportOption,
-                    onChanged: _handleRadioValueChange,
-                  ),
-                  ReportOption(
-                    title: 'Illegal Activities',
-                    description: 'Promotes or involves illegal activities.',
-                    groupValue: _selectedReportOption,
-                    onChanged: _handleRadioValueChange,
-                  ),
-                  ReportOption(
-                    title: 'Other',
-                    description: 'Other reasons not listed above.',
-                    groupValue: _selectedReportOption,
-                    onChanged: _handleRadioValueChange,
-                  ),
-                  TextField(
-                    controller: _reportDetailsController,
-                    decoration: InputDecoration(labelText: 'Additional details (optional)'),
-                    minLines: 3,
-                    maxLines: 6,
-                    maxLength: 2000,
-                  ),
-                ],
+              child: ReportDialogue(
+                selectedReportOption: _selectedReportOption,
+                onChanged: _handleRadioValueChange,
+                reportDetailsController: _reportDetailsController,
+                reportItem: 'tour',
               ),
             ),
             Visibility( //Viewing Reports
@@ -404,34 +351,10 @@ class _TourDetailsOptionsState extends State<TourDetailsOptions> {
         ),
         TextButton(
           child: Text('Submit Report'),
-          onPressed: _submitReport,
+          onPressed: _selectedReportOption.isEmpty ? null : _submitReport,
         ),
       ],
     );
   }
 }
 
-class ReportOption extends StatelessWidget {
-  final String title;
-  final String description;
-  final String groupValue;
-  final ValueChanged<String?> onChanged;
-
-  ReportOption({required this.title, required this.description, required this.groupValue, required this.onChanged});
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        RadioListTile(
-          title: Text(title),
-          subtitle: Text(description),
-          value: title,
-          groupValue: groupValue,
-          onChanged: onChanged,
-        ),
-        Divider(),
-      ],
-    );
-  }
-}

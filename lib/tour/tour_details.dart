@@ -43,6 +43,12 @@ class _FullscreenTourPageState extends State<FullscreenTourPage> {
     _addMarkers();
   }
 
+  @override
+  void dispose() {
+    _ttsService.stop();
+    super.dispose();
+  }
+
 
 
   Future<void> _addMarkers() async {
@@ -475,33 +481,35 @@ class _FullscreenTourPageState extends State<FullscreenTourPage> {
                           int index = entry.key;
                           var place = entry.value;
                           return Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 8.0),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            padding: const EdgeInsets.symmetric(vertical: 12.0),
+                            child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Flexible(
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Flexible(
+                                      child: Text(
                                         place.title,
                                         style: Theme.of(context).textTheme.titleMedium,
+                                        maxLines: 2,
+                                        overflow: TextOverflow.ellipsis,
                                       ),
-                                      Text(
-                                        place.description, // Assuming each place has a 'description' field
-                                        style: Theme.of(context).textTheme.bodyMedium,
-                                        softWrap: true,
-                                        maxLines: null,
-                                        overflow: TextOverflow.visible,
-                                      ),
-                                    ],
-                                  ),
+                                    ),
+                                    IconButton(
+                                      onPressed: () => _toggleTTS(place.description, index),
+                                      icon: Icon(currentlyPlayingIndex == index ? Icons.stop : Icons.play_circle,),
+                                    ),
+                                  ],
                                 ),
-                                IconButton(
-                                    onPressed: () => _toggleTTS(place.description, index),
-                                    icon: Icon(currentlyPlayingIndex == index ? Icons.stop : Icons.play_circle,),
-                                )
+                                SizedBox(height: 6.0),
+                                Text(
+                                  place.description, // Assuming each place has a 'description' field
+                                  style: Theme.of(context).textTheme.bodyMedium,
+                                  softWrap: true,
+                                  maxLines: null,
+                                  overflow: TextOverflow.visible,
+                                ),
                               ],
                             ),
                           );

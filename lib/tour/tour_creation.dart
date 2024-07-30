@@ -3,20 +3,12 @@ import 'dart:io';
 import 'dart:math';
 import 'dart:ui';
 
-import 'package:cached_network_image/cached_network_image.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
-import 'package:google_places_autocomplete_text_field/google_places_autocomplete_text_field.dart';
-import 'package:image_picker/image_picker.dart';
-import 'package:permission_handler/permission_handler.dart';
 import 'package:tourguide_app/model/tourguide_place.dart';
 import 'package:tourguide_app/tour/tour_tile.dart';
 import 'package:tourguide_app/ui/add_image_tile.dart';
-import 'package:tourguide_app/ui/google_places_image.dart';
 import 'package:tourguide_app/ui/place_autocomplete.dart';
-import 'package:tourguide_app/ui/my_layouts.dart';
 import 'package:tourguide_app/ui/shimmer_loading.dart';
 import 'package:tourguide_app/utilities/custom_import.dart';
 import 'package:flutter_google_places_sdk/flutter_google_places_sdk.dart';
@@ -25,7 +17,6 @@ import 'package:tourguide_app/utilities/providers/auth_provider.dart' as myAuth;
 import 'package:tourguide_app/main.dart';
 import 'package:tourguide_app/utilities/providers/location_provider.dart';
 import 'package:profanity_filter/profanity_filter.dart';
-import 'package:tourguide_app/utilities/services/tour_service.dart';
 
 import '../model/tour.dart';
 import '../utilities/providers/tour_provider.dart';
