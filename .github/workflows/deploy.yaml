@@ -66,7 +66,7 @@ jobs:
       - name: Create tourguide.properties
         run: |
           touch android/tourguide.properties
-          echo "geoApiKey={{GEO_API_KEY}}" >> android/key.properties
+          echo "geoApiKey={{GEO_API_KEY}}" >> android/tourguide.properties
         env:
           GEO_API_KEY: ${{ secrets.GEO_API_KEY }}
 
