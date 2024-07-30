@@ -1,13 +1,11 @@
 import 'package:tourguide_app/testing/flutter_google_places_sample.dart';
 import 'package:tourguide_app/gemini_chat.dart';
 import 'package:tourguide_app/testing/second_screen_test.dart';
-import 'package:tourguide_app/testing/tour_creation_places_testing.dart';
 import 'package:tourguide_app/utilities/custom_import.dart';
 import 'package:tourguide_app/utilities/map_utils.dart';
 import 'package:flutter/material.dart';
 
 import 'google_maps_sample.dart';
-import 'google_maps_sample_draw_route.dart';
 import 'map.dart';
 
 //Debug Screen
@@ -60,12 +58,6 @@ class DebugScreenState extends State<DebugScreen> {
               ElevatedButton(onPressed: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => const MapSampleDrawRoute()),
-                );
-              }, child: const Text("Map Routing")),
-              ElevatedButton(onPressed: () {
-                Navigator.push(
-                  context,
                   MaterialPageRoute(builder: (context) => const SecondRoute()),
                 );
               }, child: const Text("Route 2")),
@@ -75,12 +67,6 @@ class DebugScreenState extends State<DebugScreen> {
                   MaterialPageRoute(builder: (context) => const FlutterGooglePlacesSample()),
                 );
               }, child: const Text("Places")),
-              ElevatedButton(onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const CreateTourTesting()),
-                );
-              }, child: const Text("Tour creation places testing")),
               ElevatedButton(onPressed: () {
                 Navigator.push(
                   context,
