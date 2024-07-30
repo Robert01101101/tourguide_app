@@ -22,7 +22,7 @@ platform :android do
     sh "flutter build appbundle"
     upload_to_play_store(
       json_key: "app/google-play-key.json",
-      track: 'internal',
+      track: 'alpha',
       aab: "../build/app/outputs/bundle/release/app-release.aab"
     )
   end

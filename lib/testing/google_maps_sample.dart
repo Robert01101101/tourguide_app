@@ -1,8 +1,9 @@
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'dart:async';
-
 import 'package:tourguide_app/utilities/custom_import.dart';
+import 'package:tourguide_app/testing/second_screen_test.dart';
+import 'package:flutter/material.dart';
 
 
 // FROM FLUTTER SAMPLE

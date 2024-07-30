@@ -1,4 +1,6 @@
 import 'package:tourguide_app/utilities/custom_import.dart';
+import 'package:flutter/material.dart';
+import 'google_maps_sample.dart';
 
 class SecondRoute extends StatelessWidget {
   const SecondRoute({super.key});

@@ -61,13 +61,7 @@ class TourguideNavigation {
   static const String profilePath = '/profile'; //NEW
   static const String geminiChatPath = '/geminiChat'; //NEW
 
-  static const String debugPath = '/debug'; //signUp
-  static const String mapSamplePath = '/mapSample'; //signIn
-  static const String mapRoutingPath = '/mapRouting'; //detail //TODO: Figure out what this was used for (see below in code as well)
-  static const String routeTwoPath = '/routeTwo'; //NEW
   static const String rootDetailPath = '/rootDetail'; //rootDetail
-  static const String listViewAPath = '/listViewA';
-
 
   static const String onboardingPath = '/onboarding'; //onboarding
   static const String signInPath = '/signIn';
@@ -155,53 +149,6 @@ class TourguideNavigation {
             child: BottomNavigationPage(
               child: navigationShell,
             ),
-            state: state,
-          );
-        },
-      ),
-      GoRoute(
-        parentNavigatorKey: parentNavigatorKey, //?? TODO figure out meaning
-        path: debugPath,
-        pageBuilder: (context, state) {
-          return getPage(
-            child: const DebugScreen(),
-            state: state,
-          );
-        },
-      ),
-      GoRoute(
-        parentNavigatorKey: parentNavigatorKey, //?? TODO figure out meaning
-        path: mapSamplePath,
-        pageBuilder: (context, state) {
-          return getPage(
-            child: const MapSample(),
-            state: state,
-          );
-        },
-      ),
-      GoRoute(
-        path: mapRoutingPath,
-        pageBuilder: (context, state) {
-          return getPage(
-            child: const MapSampleDrawRoute(),
-            state: state,
-          );
-        },
-      ),
-      GoRoute(
-        path: routeTwoPath,
-        pageBuilder: (context, state) {
-          return getPage(
-            child: const SecondRoute(),
-            state: state,
-          );
-        },
-      ),
-      GoRoute(
-        path: listViewAPath,
-        pageBuilder: (context, state) {
-          return getPage(
-            child: const ListViewA(),
             state: state,
           );
         },

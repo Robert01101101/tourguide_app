@@ -10,7 +10,6 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tourguide_app/explore_map.dart';
 import 'package:tourguide_app/model/tour.dart';
-import 'package:tourguide_app/testing/debug_screen.dart';
 import 'package:tourguide_app/sign_in.dart';
 import 'package:tourguide_app/tour/tour_creation.dart';
 import 'package:tourguide_app/ui/google_places_image.dart';
@@ -356,7 +355,7 @@ class ExploreState extends State<Explore> {
                               child: HorizontalScroller(tours: tourProvider.globalTours),
                             ),
                           ),
-                          Text("Debug", style: Theme.of(context).textTheme.headlineSmall),
+                          /*Text("Debug", style: Theme.of(context).textTheme.headlineSmall),
                           Row(
                             children: [
                               ElevatedButton(
@@ -369,7 +368,7 @@ class ExploreState extends State<Explore> {
                                 child: const Text('Debug Screen'),
                               ),
                             ],
-                          ),
+                          ),*/
                       ]
                     ),
                     Align(
