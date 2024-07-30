@@ -16,13 +16,13 @@
 default_platform(:android)
 
 platform :android do
-  desc "Build and deploy to Internal Testing track"
+  desc "Build and deploy to Open Testing track"
   lane :deploy do
     # gradle(task: "bundle", build_type: "Release")
     sh "flutter build appbundle"
     upload_to_play_store(
       json_key: "app/google-play-key.json",
-      track: 'alpha',
+      track: 'beta',
       aab: "../build/app/outputs/bundle/release/app-release.aab"
     )
   end
