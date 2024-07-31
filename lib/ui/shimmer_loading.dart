@@ -61,15 +61,17 @@ class _ShimmerLoadingState extends State<ShimmerLoading> {
     final gradient = shimmer.gradient;
     // Ensure the RenderBox is available.
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      final renderObject = context.findRenderObject();
-      if (renderObject is RenderBox) {
-        final offsetWithinShimmer = shimmer.getDescendantOffset(
-          descendant: renderObject,
-        );
+      if (mounted){
+        final renderObject = context.findRenderObject();
+        if (renderObject is RenderBox) {
+          final offsetWithinShimmer = shimmer.getDescendantOffset(
+            descendant: renderObject,
+          );
 
-        setState(() {
-          // Use the offsetWithinShimmer here if needed
-        });
+          setState(() {
+            // Use the offsetWithinShimmer here if needed
+          });
+        }
       }
     });
 

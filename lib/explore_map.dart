@@ -9,7 +9,9 @@ import 'main.dart';
 import 'model/tour.dart';
 
 class ExploreMap extends StatefulWidget {
-  const ExploreMap({super.key});
+  final List<Tour> tours;
+
+  const ExploreMap({Key? key, required this.tours}) : super(key: key);
 
   @override
   _ExploreMapState createState() => _ExploreMapState();
@@ -36,9 +38,9 @@ class _ExploreMapState extends State<ExploreMap> {
     TourProvider tourProvider = Provider.of<TourProvider>(context, listen: false);
 
     //add tour markers
-    for (int i = 0; i < tourProvider.popularTours.length; i++) {
-      logger.t("Adding marker for tour ${tourProvider.popularTours[i].name}");
-      Tour tour = tourProvider.popularTours[i];
+    for (int i = 0; i < widget.tours.length; i++) {
+      logger.t("Adding marker for tour ${widget.tours[i].name}");
+      Tour tour = widget.tours[i];
       _markers.add(
         Marker(
           markerId: MarkerId(tour.placeId),
@@ -57,7 +59,7 @@ class _ExploreMapState extends State<ExploreMap> {
     });
 
     //set zoom
-    LatLngBounds bounds = MapUtils.createLatLngBounds(tourProvider.popularTours.map((tour) => LatLng(tour.latitude, tour.longitude)).toList());
+    LatLngBounds bounds = MapUtils.createLatLngBounds(widget.tours.map((tour) => LatLng(tour.latitude, tour.longitude)).toList());
     final GoogleMapController controller = await _mapControllerCompleter.future;
     controller.moveCamera(CameraUpdate.newLatLngBounds(bounds, 50));
   }

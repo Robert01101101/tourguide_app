@@ -4,6 +4,7 @@ import 'package:tourguide_app/onboarding.dart';
 import 'package:tourguide_app/profile/profile_settings.dart';
 import 'package:tourguide_app/sign_in.dart';
 import 'package:tourguide_app/gemini_chat.dart';
+import 'package:tourguide_app/tour/tour_running.dart';
 import 'package:tourguide_app/utilities/custom_import.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -65,6 +66,8 @@ class TourguideNavigation {
 
   static const String onboardingPath = '/onboarding'; //onboarding
   static const String signInPath = '/signIn';
+
+  static const String tourRunningPath = '/tour/tour_running'; //home
 
   factory TourguideNavigation() {
     return _instance;
@@ -158,6 +161,15 @@ class TourguideNavigation {
         pageBuilder: (context, state) {
           return getPage(
             child: const SignIn(),
+            state: state,
+          );
+        },
+      ),
+      GoRoute(
+        path: tourRunningPath,
+        pageBuilder: (context, state) {
+          return getPage(
+            child: const TourRunning(),
             state: state,
           );
         },

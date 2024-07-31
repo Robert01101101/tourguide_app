@@ -4,10 +4,12 @@ import 'package:provider/provider.dart';
 import 'package:tourguide_app/model/tour.dart';
 import 'package:tourguide_app/tour/tour_creation.dart';
 import 'package:tourguide_app/tour/tour_details.dart';
+import 'package:tourguide_app/tour/tour_running.dart';
 import 'package:tourguide_app/ui/shimmer_loading.dart';
 import 'package:tourguide_app/utilities/providers/tour_provider.dart';
 import 'package:tourguide_app/utilities/providers/auth_provider.dart' as myAuth;
 import 'package:tourguide_app/utilities/services/tour_service.dart';
+import 'package:tourguide_app/utilities/tourguide_navigation.dart';
 
 import '../main.dart';
 
@@ -305,6 +307,15 @@ class _ExpandedTourTileOverlayState extends State<ExpandedTourTileOverlay> {
     });
   }
 
+  void startTour() {
+    TourProvider tourProvider = Provider.of<TourProvider>(context, listen: false);
+    tourProvider.selectTourById(widget.tour.id);
+    // Navigate to the fullscreen tour page
+    TourguideNavigation.router.push(
+      TourguideNavigation.tourRunningPath,
+    );
+  }
+
   void tourDetails() {
     TourProvider tourProvider = Provider.of<TourProvider>(context, listen: false);
     tourProvider.selectTourById(widget.tour.id);
@@ -417,7 +428,7 @@ class _ExpandedTourTileOverlayState extends State<ExpandedTourTileOverlay> {
                 Row(
                   children: [
                     ElevatedButton(
-                      onPressed: widget.tour.isOfflineCreatedTour ? null : () {},
+                      onPressed: widget.tour.isOfflineCreatedTour ? null : startTour,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Theme.of(context).primaryColor, // background
                         foregroundColor: Colors.white, // foreground

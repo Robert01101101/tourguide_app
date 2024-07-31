@@ -327,7 +327,7 @@ class ExploreState extends State<Explore> {
                               IconButton(onPressed: (){
                                 Navigator.push(
                                    context,
-                                   MaterialPageRoute(builder: (context) => const ExploreMap()),
+                                   MaterialPageRoute(builder: (context) => ExploreMap(tours: tourProvider.popularTours)),
                                 );
                               }, icon: Icon(Icons.map))
                             ],
@@ -339,7 +339,18 @@ class ExploreState extends State<Explore> {
                               child: HorizontalScroller(tours: tourProvider.popularTours),
                             ),
                           ),
-                          Text("Local tours", style: Theme.of(context).textTheme.headlineSmall),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text("Local tours", style: Theme.of(context).textTheme.headlineSmall),
+                              IconButton(onPressed: (){
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(builder: (context) => ExploreMap(tours: tourProvider.localTours)),
+                                );
+                              }, icon: Icon(Icons.map))
+                            ],
+                          ),
                           StandardLayoutChild(
                             fullWidth: true,
                             child: SizedBox(
@@ -347,7 +358,18 @@ class ExploreState extends State<Explore> {
                               child: HorizontalScroller(tours: tourProvider.localTours),
                             ),
                           ),
-                          Text("Tours around the world", style: Theme.of(context).textTheme.headlineSmall),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text("Tours around the world", style: Theme.of(context).textTheme.headlineSmall),
+                              IconButton(onPressed: (){
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(builder: (context) => ExploreMap(tours: tourProvider.globalTours)),
+                                );
+                              }, icon: Icon(Icons.map))
+                            ],
+                          ),
                           StandardLayoutChild(
                             fullWidth: true,
                             child: SizedBox(

@@ -498,9 +498,12 @@ class _FullscreenTourPageState extends State<FullscreenTourPage> {
                           ],
                         ),
                       ),
-                    Text(
-                      'Places you\'ll visit',
-                      style: Theme.of(context).textTheme.titleLarge
+                    Padding(
+                      padding: const EdgeInsets.only(top: 12.0),
+                      child: Text(
+                        'Places you\'ll visit',
+                        style: Theme.of(context).textTheme.titleLarge
+                      ),
                     ),
                     if (widget.tour.tourguidePlaces.isNotEmpty)
                       Column(
@@ -510,34 +513,23 @@ class _FullscreenTourPageState extends State<FullscreenTourPage> {
                           var place = entry.value;
                           return Padding(
                             key: _targetKeys.isNotEmpty ? _targetKeys[index] : null,
-                            padding: const EdgeInsets.symmetric(vertical: 12.0),
+                            padding: index != 0 ? const EdgeInsets.symmetric(vertical: 12.0) : const EdgeInsets.only(bottom: 12.0),
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Flexible(
-                                      child: Text(
-                                        "${index+1}.  ${place.title}",
-                                        style: Theme.of(context).textTheme.titleMedium,
-                                        maxLines: 2,
-                                        overflow: TextOverflow.ellipsis,
-                                      ),
-                                    ),
-                                    IconButton(
-                                      onPressed: () => _toggleTTS(place.description, index),
-                                      icon: Icon(currentlyPlayingIndex == index ? Icons.stop : Icons.play_circle,),
-                                    ),
-                                  ],
+                                Text(
+                                  "${index+1}.  ${place.title}",
+                                  style: Theme.of(context).textTheme.titleMedium,
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
                                 ),
                                 SizedBox(height: 6.0),
                                 Text(
                                   place.description, // Assuming each place has a 'description' field
                                   style: Theme.of(context).textTheme.bodyMedium,
                                   softWrap: true,
-                                  maxLines: null,
-                                  overflow: TextOverflow.visible,
+                                  maxLines: 3,
+                                  overflow: TextOverflow.ellipsis,
                                 ),
                               ],
                             ),
