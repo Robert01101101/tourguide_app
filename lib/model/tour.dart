@@ -12,6 +12,7 @@ class Tour {
   final String visibility;
   final String imageUrl;
   final DateTime? createdDateTime;
+  final DateTime? lastChangedDateTime;
   final double latitude;
   final double longitude;
   final String placeId;
@@ -32,6 +33,8 @@ class Tour {
   int? thisUsersRating;
   /// mutable, NOT stored in Firestore, Track this user's rating
   File? imageToUpload;
+  /// mutable, NOT stored in Firestore
+  DateTime? lastCachedOn;
 
   Tour({
     required this.id,
@@ -41,6 +44,7 @@ class Tour {
     required this.visibility,
     required this.imageUrl,
     required this.createdDateTime,
+    required this.lastChangedDateTime,
     required this.latitude,
     required this.longitude,
     required this.placeId,
@@ -66,6 +70,7 @@ class Tour {
       visibility: '',
       imageUrl: '',
       createdDateTime: null,
+      lastChangedDateTime: null,
       latitude: 0.0,
       longitude: 0.0,
       placeId: '',
@@ -108,6 +113,13 @@ class Tour {
     } else {
       createdDateTime = null;
     }
+    DateTime? lastChangedDateTime;
+    if (data['lastChangedDateTime'] != null) {
+      Timestamp timestamp = data['lastChangedDateTime'] as Timestamp;
+      lastChangedDateTime = timestamp.toDate();
+    } else {
+      lastChangedDateTime = null;
+    }
 
     List<TourguidePlace> tourguidePlaces = [];
     if (data['tourguidePlaces'] != null) {
@@ -139,6 +151,7 @@ class Tour {
       visibility: data['visibility'] ?? '',
       imageUrl: data['imageUrl'] ?? '',
       createdDateTime: createdDateTime,
+      lastChangedDateTime: lastChangedDateTime,
       latitude: data['latitude']?.toDouble() ?? 0.0,
       longitude: data['longitude']?.toDouble() ?? 0.0,
       placeId: data['placeId'] ?? '',
@@ -164,6 +177,7 @@ class Tour {
     String? visibility,
     String? imageUrl,
     DateTime? createdDateTime,
+    DateTime? lastChangedDateTime,
     double? latitude,
     double? longitude,
     String? placeId,
@@ -187,6 +201,7 @@ class Tour {
       visibility: visibility ?? this.visibility,
       imageUrl: imageUrl ?? this.imageUrl,
       createdDateTime: createdDateTime ?? this.createdDateTime,
+      lastChangedDateTime: lastChangedDateTime ?? this.lastChangedDateTime,
       latitude: latitude ?? this.latitude,
       longitude: longitude ?? this.longitude,
       placeId: placeId ?? this.placeId,
@@ -223,6 +238,7 @@ class Tour {
       'visibility': visibility,
       'imageUrl': imageUrl,
       'createdDateTime': createdDateTime,
+      'lastChangedDateTime': lastChangedDateTime,
       'latitude': latitude,
       'longitude': longitude,
       'placeId': placeId,
@@ -238,7 +254,7 @@ class Tour {
 
   @override
   String toString() {
-    return 'Tour{id: $id, name: $name, description: $description, city: $city, visibility: $visibility, imageUrl: $imageUrl, createdDateTime: $createdDateTime, latitude: $latitude, longitude: $longitude, placeId: $placeId, authorName: $authorName, authorId: $authorId, reports:${reports.toString()}, requestReviewStatus: $requestReviewStatus, upvotes: $upvotes, downvotes: $downvotes, isAddTourTile: $isAddTourTile, isOfflineCreatedTour: $isOfflineCreatedTour, imageToUpload: $imageToUpload, \ntourguidePlaces: ${tourguidePlaces.toString()}';
+    return 'Tour{id: $id, name: $name, description: $description, city: $city, visibility: $visibility, imageUrl: $imageUrl, createdDateTime: $createdDateTime, lastChangedDateTime: $lastChangedDateTime, latitude: $latitude, longitude: $longitude, placeId: $placeId, authorName: $authorName, authorId: $authorId, reports:${reports.toString()}, requestReviewStatus: $requestReviewStatus, upvotes: $upvotes, downvotes: $downvotes, isAddTourTile: $isAddTourTile, isOfflineCreatedTour: $isOfflineCreatedTour, imageToUpload: $imageToUpload, \ntourguidePlaces: ${tourguidePlaces.toString()}';
   }
 }
 

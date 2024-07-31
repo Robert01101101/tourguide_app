@@ -137,9 +137,11 @@ class _CreateEditTourState extends State<CreateEditTour> {
       );
       //Final update to tour data
       final myAuth.AuthProvider authProvider = Provider.of(context, listen: false);
+      DateTime? createdDateTime = _tour.createdDateTime;
       _tour = _tour.copyWith(
         visibility: _tourIsPublic ? "public" : "private", //always true for now
-        createdDateTime: DateTime.now(),
+        createdDateTime: createdDateTime ?? DateTime.now(),
+        lastChangedDateTime: DateTime.now(),
         authorId: authProvider.user!.uid,
         authorName: authProvider.user!.displayName,
       );

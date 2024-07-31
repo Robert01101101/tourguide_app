@@ -280,6 +280,7 @@ class TourService {
     }
   }
 
+  ////////// Write //////////
   static Future<Tour> uploadTour(Tour tour) async{
     try {
       FirebaseFirestore db = FirebaseFirestore.instance;

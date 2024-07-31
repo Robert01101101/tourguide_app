@@ -172,7 +172,7 @@ class TourProvider with ChangeNotifier {
   // ____________________________ Reports ____________________________
   Future<void> reportTour(Tour tour, TourguideReport report, TourguideUser reportedTourAuthor) async{
     List<TourguideReport> newReports =  [...tour.reports, report];
-    Tour reportedTour = tour.copyWith(reports: newReports);
+    Tour reportedTour = tour.copyWith(reports: newReports, lastChangedDateTime: DateTime.now());
 
     logger.i('Tour reported: ${tour.id}');
     _notifyAdminOfReportOrReviewRequest(tour.id, reportTitle: report.title, reportDetails: report.additionalDetails);
@@ -183,7 +183,7 @@ class TourProvider with ChangeNotifier {
   }
 
   Future<Tour> requestReviewOfTour(Tour tour) async{
-    Tour tourToReview = tour.copyWith(requestReviewStatus: "requested");
+    Tour tourToReview = tour.copyWith(requestReviewStatus: "requested", lastChangedDateTime: DateTime.now());
 
     logger.i('Tour Review requested: ${tour.id}');
     _notifyAdminOfReportOrReviewRequest(tour.id);
