@@ -1,5 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -35,6 +37,8 @@ class _FullscreenTourPageState extends State<FullscreenTourPage> {
   Set<Marker> _markers = Set<Marker>();
   Set<Polyline> _polylines = Set<Polyline>();
   final TtsService _ttsService = TtsService();
+  final ScrollController _scrollController = ScrollController();
+  List<GlobalKey> _targetKeys = [];
 
 
   @override
@@ -69,6 +73,7 @@ class _FullscreenTourPageState extends State<FullscreenTourPage> {
     for (int i = 0; i < widget.tour.tourguidePlaces.length; i++) {
       TourguidePlace tourguidePlace = widget.tour.tourguidePlaces[i];
       final BitmapDescriptor icon = await MapUtils.createNumberedMarkerBitmap(i + 1);
+      _targetKeys.add(GlobalKey());
       _markers.add(
         Marker(
           markerId: MarkerId(tourguidePlace.googleMapPlaceId),
@@ -77,6 +82,11 @@ class _FullscreenTourPageState extends State<FullscreenTourPage> {
           infoWindow: InfoWindow(
             title: tourguidePlace.title,
             snippet: tourguidePlace.description,
+            onTap: () {
+              // Handle marker tap
+              _scrollToTarget(i);
+              logger.i('Marker tapped: ${tourguidePlace.title}');
+            },
           ),
         ),
       );
@@ -284,6 +294,21 @@ class _FullscreenTourPageState extends State<FullscreenTourPage> {
     }
   }
 
+  void _scrollToTarget(int placeIndex) {
+    final context = _targetKeys[placeIndex].currentContext;
+    if (context != null) {
+      setState(() {
+        _isFullScreen = false;
+      });
+      Scrollable.ensureVisible(
+        context,
+        duration: Duration(milliseconds: 500),
+        curve: Curves.easeInOut,
+      );
+    }
+  }
+
+
   @override
   Widget build(BuildContext context) {
     final tourProvider = Provider.of<TourProvider>(context);
@@ -295,8 +320,6 @@ class _FullscreenTourPageState extends State<FullscreenTourPage> {
         zoom: 14.0,
       );
     }
-
-
 
     return Scaffold(
       appBar: AppBar(
@@ -336,7 +359,9 @@ class _FullscreenTourPageState extends State<FullscreenTourPage> {
           children: [
             Scrollbar(
               thumbVisibility: true,
+              controller: _scrollController,
               child: SingleChildScrollView(
+                controller: _scrollController,
                 child: StandardLayout(
                   children: [
                     Column(
@@ -406,6 +431,9 @@ class _FullscreenTourPageState extends State<FullscreenTourPage> {
                         child: Stack(
                           children: [
                             GoogleMap(
+                              gestureRecognizers: {
+                                Factory<OneSequenceGestureRecognizer>(() => EagerGestureRecognizer())
+                              },
                               mapType: MapType.normal,
                               initialCameraPosition: _currentCameraPosition,
                               markers: _markers,
@@ -481,6 +509,7 @@ class _FullscreenTourPageState extends State<FullscreenTourPage> {
                           int index = entry.key;
                           var place = entry.value;
                           return Padding(
+                            key: _targetKeys.isNotEmpty ? _targetKeys[index] : null,
                             padding: const EdgeInsets.symmetric(vertical: 12.0),
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
@@ -490,7 +519,7 @@ class _FullscreenTourPageState extends State<FullscreenTourPage> {
                                   children: [
                                     Flexible(
                                       child: Text(
-                                        place.title,
+                                        "${index+1}.  ${place.title}",
                                         style: Theme.of(context).textTheme.titleMedium,
                                         maxLines: 2,
                                         overflow: TextOverflow.ellipsis,
