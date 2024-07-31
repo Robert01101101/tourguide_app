@@ -22,6 +22,7 @@ import 'package:tourguide_app/utilities/custom_import.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:tourguide_app/utilities/providers/location_provider.dart';
 import 'package:tourguide_app/utilities/providers/tour_provider.dart';
+import 'package:tourguide_app/utilities/providers/tourguide_user_provider.dart';
 import 'main.dart';
 import 'package:tourguide_app/utilities/providers/auth_provider.dart' as myAuth;
 import 'dart:ui' as ui;
@@ -118,20 +119,21 @@ class ExploreState extends State<Explore> {
     final tourProvider = Provider.of<TourProvider>(context, listen: false);
     final locationProvider = Provider.of<LocationProvider>(context, listen: false);
     final myAuth.AuthProvider authProvider = Provider.of(context, listen: false);
+    TourguideUserProvider userProvider = Provider.of<TourguideUserProvider>(context, listen: false);
 
     try {
       await Future.doWhile(() async {
         // Check if the currentPosition is null
-        if (locationProvider.currentPosition == null) {
+        if (locationProvider.currentPosition == null || userProvider.user == null) {
           // Wait for a short duration before checking again
           await Future.delayed(Duration(milliseconds: 100));
           return true; // Continue looping
         }
         return false; // Exit loop if currentPosition is not null
-      }).timeout(Duration(seconds: 2));
+      }).timeout(Duration(seconds: 3));
     } catch (e) {
       // Handle timeout
-      logger.e('Timeout waiting for location');
+      logger.e('Timeout waiting for location or user provider');
       // You might want to handle this situation differently
       return;
     }
@@ -142,6 +144,7 @@ class ExploreState extends State<Explore> {
         locationProvider.currentPosition!.latitude,
         locationProvider.currentPosition!.longitude,
         authProvider.user!.uid,
+        userProvider.user!.savedTourIds,
       );
     } else {
       // Handle the case where currentPosition is still null after timeout

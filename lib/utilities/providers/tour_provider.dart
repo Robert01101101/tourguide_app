@@ -22,6 +22,7 @@ class TourProvider with ChangeNotifier {
   List<Tour> get localTours => _localTours;
   List<Tour> get globalTours => _globalTours;
   List<Tour> get userCreatedTours => _userCreatedTours;
+  List<Tour> get userSavedTours => _userSavedTours;
   Tour? get selectedTour => _selectedTour;
   bool get isLoadingTours => _isLoadingTours;
 
@@ -36,10 +37,11 @@ class TourProvider with ChangeNotifier {
 
 
 
-  Future<void> fetchAndSetTours(double userLatitude, double userLongitude, String userId) async {
+  Future<void> fetchAndSetTours(double userLatitude, double userLongitude, String userId, List<String> userSavedTours) async {
     try {
       logger.t("fetchAndSetTours ${getFormattedTime()}");
       _isLoadingTours = true;
+      //TODO: optimize (don't download already downloaded tours?)
       //_allTours = await TourService.fetchAndSortToursByDateTime();
       _popularTours = _processToursAndUpdateCachedTours(await TourService.fetchPopularToursNearYou(userLatitude, userLongitude), userId);
       notifyListeners();
@@ -49,7 +51,7 @@ class TourProvider with ChangeNotifier {
       notifyListeners();
       _userCreatedTours = _processToursAndUpdateCachedTours(await TourService.fetchUserCreatedTours(userId), userId);
       notifyListeners();
-      _userSavedTours = _processToursAndUpdateCachedTours(await TourService.fetchUserSavedTours(userId), userId);
+      _userSavedTours = _processToursAndUpdateCachedTours(await TourService.fetchUserSavedTours(userSavedTours), userId);
       notifyListeners();
 
       _formatListsAndGetTourRatings(userId);

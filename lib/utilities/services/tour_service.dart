@@ -233,9 +233,31 @@ class TourService {
     }
   }
 
-  static Future<List<Tour>> fetchUserSavedTours(String userId) async {
-    // Implement the logic to fetch saved tours for the user from Firestore if you have a saved tours collection
-    return List.empty();
+  static Future<List<Tour>> fetchUserSavedTours(List<String> userSavedTours) async {
+    FirebaseFirestore db = FirebaseFirestore.instance;
+
+    try {
+      // Check if userSavedTours is not empty to avoid unnecessary queries
+      if (userSavedTours.isEmpty) {
+        logger.t('No saved tours for the user.');
+        return [];
+      }
+
+      // Fetch tours where the document ID is in the user's saved tours
+      QuerySnapshot querySnapshot = await db.collection('tours')
+          .where(FieldPath.documentId, whereIn: userSavedTours) // Query based on document IDs
+          .orderBy('createdDateTime', descending: true) // Sort by created date time
+          .get();
+
+      List<Tour> tours = querySnapshot.docs.map((doc) => Tour.fromFirestore(doc)).toList();
+
+      logger.t('Finished fetching user saved tours, total tours: ${tours.length}');
+
+      return tours;
+    } catch (e, stack) {
+      logger.e('Error fetching user saved tours: $e \nuserSavedTours=$userSavedTours \nstack: $stack');
+      return [];
+    }
   }
 
   static Future<List<Tour>> fetchPopularToursAroundTheWorld() async {

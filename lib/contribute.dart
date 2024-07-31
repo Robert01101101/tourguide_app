@@ -10,6 +10,7 @@ import 'package:tourguide_app/utilities/custom_import.dart';
 import 'package:tourguide_app/utilities/providers/location_provider.dart';
 import 'package:tourguide_app/utilities/providers/tour_provider.dart';
 import 'package:tourguide_app/utilities/providers/auth_provider.dart' as myAuth;
+import 'package:tourguide_app/utilities/providers/tourguide_user_provider.dart';
 
 import 'main.dart';
 
@@ -31,6 +32,7 @@ class _ContributeState extends State<Contribute> {
     final tourProvider = Provider.of<TourProvider>(context, listen: false);
     final locationProvider = Provider.of<LocationProvider>(context, listen: false);
     final myAuth.AuthProvider authProvider = Provider.of(context, listen: false);
+    TourguideUserProvider userProvider = Provider.of<TourguideUserProvider>(context, listen: false);
 
     try {
       await Future.doWhile(() async {
@@ -55,6 +57,7 @@ class _ContributeState extends State<Contribute> {
         locationProvider.currentPosition!.latitude,
         locationProvider.currentPosition!.longitude,
         authProvider.user!.uid,
+        userProvider.user!.savedTourIds,
       );
     } else {
       // Handle the case where currentPosition is still null after timeout

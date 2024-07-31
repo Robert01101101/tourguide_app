@@ -39,7 +39,7 @@ class _ToTourListState extends State<ToTourList> {
                 height: 220.0, // Set a fixed height for the horizontal scroller
                 child: HorizontalScroller(
                     leftPadding: true,
-                    tours: tourProvider.userCreatedTours),
+                    tours: tourProvider.userSavedTours),
               ),
             ),
           ],
