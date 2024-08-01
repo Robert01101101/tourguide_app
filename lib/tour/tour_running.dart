@@ -380,52 +380,52 @@ class _TourRunningState extends State<TourRunning> {
                           Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              if (_tour.imageUrl != null && _tour.imageUrl.isNotEmpty || _tour.isOfflineCreatedTour && _tour.imageToUpload != null)
-                                Stack(
-                                  children: [
-                                    Container(
-                                      height: 230,
-                                      child: ClipRRect(
-                                        child: _tour.isOfflineCreatedTour && _tour.imageToUpload != null  //add null safety for img to upload
-                                            ? Image.file(_tour.imageToUpload!,
-                                            width: MediaQuery.of(context).size.width,
-                                            height: 200.0,
-                                            fit: BoxFit.cover)
-                                            : Image.network(
-                                          _tour.imageUrl,
+                              Stack(
+                                children: [
+                                  Container(
+                                    height: 230,
+                                    child: ClipRRect(
+                                      child: _tour.imageFile != null  //add null safety for img to upload
+                                        ? Image.file(_tour.imageFile!,
+                                        width: MediaQuery.of(context).size.width,
+                                        height: 200.0,
+                                        fit: BoxFit.cover)
+                                        :
+                                        Container(
+                                          color: Colors.grey,
                                           width: MediaQuery.of(context).size.width,
-                                          height: 230.0, // Adjust height as needed
-                                          fit: BoxFit.cover,
+                                          height: 200.0,
+                                      ),
+                                    ),
+                                  ),
+                                  if (tourProvider.isUserCreatedTour(_tour))
+                                    Align(
+                                      alignment: Alignment.topRight,
+                                      child: Padding(
+                                        padding: EdgeInsets.all(8.0),
+                                        child: Row(
+                                          mainAxisAlignment: MainAxisAlignment.end,
+                                          children: [
+                                            if (_tour.reports.isNotEmpty)
+                                              const CircleAvatar(
+                                                radius: 16,
+                                                backgroundColor: Colors.black45,
+                                                child: Icon(
+                                                  Icons.report_outlined,
+                                                  color: Colors.yellow,
+                                                  size: 22,),
+                                              ),
+                                            const CircleAvatar(
+                                              radius: 16,
+                                              backgroundColor: Colors.black45,
+                                              child: Icon(
+                                                Icons.attribution,
+                                                color: Colors.white,),
+                                            ),
+                                          ],
                                         ),
                                       ),
                                     ),
-                                    if (tourProvider.isUserCreatedTour(_tour))
-                                      Align(
-                                          alignment: Alignment.topRight,
-                                          child: Padding(
-                                            padding: EdgeInsets.all(8.0),
-                                            child: Row(
-                                              mainAxisAlignment: MainAxisAlignment.end,
-                                              children: [
-                                                if (_tour.reports.isNotEmpty)
-                                                  const CircleAvatar(
-                                                    radius: 16,
-                                                    backgroundColor: Colors.black45,
-                                                    child: Icon(
-                                                      Icons.report_outlined,
-                                                      color: Colors.yellow,
-                                                      size: 22,),
-                                                  ),
-                                                const CircleAvatar(
-                                                  radius: 16,
-                                                  backgroundColor: Colors.black45,
-                                                  child: Icon(
-                                                    Icons.attribution,
-                                                    color: Colors.white,),
-                                                ),
-                                              ],
-                                            ),
-                                          )),
                                   ],
                                 ),
                               const SizedBox(height: 16.0),

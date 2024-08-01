@@ -367,22 +367,20 @@ class _FullscreenTourPageState extends State<FullscreenTourPage> {
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        if (widget.tour.imageUrl != null && widget.tour.imageUrl.isNotEmpty || widget.tour.isOfflineCreatedTour && widget.tour.imageToUpload != null)
-                          Stack(
+                        Stack(
                             children: [
                               Container(
                                 height: 230,
                                 child: ClipRRect(
-                                  child: widget.tour.isOfflineCreatedTour && widget.tour.imageToUpload != null  //add null safety for img to upload
-                                  ? Image.file(widget.tour.imageToUpload!,
+                                  child: widget.tour.imageFile != null  //add null safety for img to upload
+                                  ? Image.file(widget.tour.imageFile!,
                                       width: MediaQuery.of(context).size.width,
                                       height: 200.0,
                                       fit: BoxFit.cover)
-                                  : Image.network(
-                                      widget.tour.imageUrl,
-                                      width: MediaQuery.of(context).size.width,
-                                      height: 230.0, // Adjust height as needed
-                                      fit: BoxFit.cover,
+                                  : Container(
+                                    color: Colors.grey,
+                                    width: MediaQuery.of(context).size.width,
+                                    height: 200.0,
                                   ),
                                 ),
                               ),

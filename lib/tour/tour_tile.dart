@@ -25,49 +25,12 @@ class TourTile extends StatefulWidget {
 }
 
 class _TourTileState extends State<TourTile> {
-  late String imageUrl;
-  bool isLoadingImage = true;
 
   @override
   void initState() {
     super.initState();
-    imageUrl = widget.tour.imageUrl;
-    startImageLoad();
   }
 
-  @override
-  void didUpdateWidget(covariant TourTile oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.tour.imageUrl != widget.tour.imageUrl || (imageUrl != null && imageUrl != "")) {
-      setState(() {
-        startImageLoad();
-      });
-    }
-  }
-
-  void startImageLoad(){
-    imageUrl = widget.tour.imageUrl;
-    bool imageUrlReady = imageUrl != null && imageUrl != "";
-    if (imageUrlReady) _loadImage();
-  }
-
-  Future<void> _loadImage() async {
-    final ImageStream imageStream = NetworkImage(imageUrl).resolve(ImageConfiguration.empty);
-    final ImageStreamListener listener = ImageStreamListener((ImageInfo info, bool synchronousCall) {
-      if (mounted) {
-        setState(() {
-          isLoadingImage = false;
-        });
-      }
-    }, onError: (dynamic exception, StackTrace? stackTrace) {
-      if (mounted) {
-        setState(() {
-          isLoadingImage = false;
-        });
-      }
-    });
-    imageStream.addListener(listener);
-  }
 
   void _showOverlay(BuildContext context) {
     showModalBottomSheet(
@@ -102,6 +65,7 @@ class _TourTileState extends State<TourTile> {
   Widget build(BuildContext context) {
     bool textDataReady = widget.tour.name != null && widget.tour.name != "";
     TourProvider tourProvider = Provider.of<TourProvider>(context);
+    bool isLoadingImage = widget.tour.imageFile == null;
 
     return GestureDetector(
       onTap: () => widget.tour.isAddTourTile ? _createTour() : _showOverlay(context),
@@ -144,21 +108,12 @@ class _TourTileState extends State<TourTile> {
                 children: [
                   ShimmerLoading(
                     isLoading: widget.tour.isOfflineCreatedTour ? false : isLoadingImage,
-                    child: widget.tour.isOfflineCreatedTour && widget.tour.imageToUpload != null
+                    child: widget.tour.imageFile != null
                         ?
-                    Image.file(widget.tour.imageToUpload!,
+                    Image.file(widget.tour.imageFile!,
                         width: 180.0,
                         height: 100.0,
                         fit: BoxFit.cover)
-                        :
-                    !isLoadingImage && widget.tour.imageUrl.isNotEmpty  || widget.tour.isOfflineCreatedTour && widget.tour.imageToUpload != null
-                        ?
-                    Image.network(
-                      widget.tour.imageUrl,
-                      width: 180.0,
-                      height: 100.0,
-                      fit: BoxFit.cover,
-                    )
                         :
                     Container(width: 180, height: 100, color: Colors.white,),
                   ),
@@ -384,19 +339,14 @@ class _ExpandedTourTileOverlayState extends State<ExpandedTourTileOverlay> {
                   children: [
                     Stack(
                       children: [
-                        widget.tour.isOfflineCreatedTour && widget.tour.imageToUpload != null  //add null safety for img to upload
+                        widget.tour.imageFile != null  //add null safety for img to upload
                             ?
-                        Image.file(widget.tour.imageToUpload!,
+                        Image.file(widget.tour.imageFile!,
                             width: MediaQuery.of(context).size.width,
                             height: 200.0,
                             fit: BoxFit.cover)
                             :
-                          Image.network(
-                            widget.tour.imageUrl,
-                            width: MediaQuery.of(context).size.width,
-                            height: 200.0,
-                            fit: BoxFit.cover,
-                          ),
+                        Container(width: MediaQuery.of(context).size.width, height: 200, color: Colors.white,),
                         if (tourProvider.isUserCreatedTour(widget.tour))
                           Align(
                               alignment: Alignment.topRight,

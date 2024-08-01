@@ -32,11 +32,8 @@ class _TourguideOnboardState extends State<TourguideOnboard> {
     FlutterNativeSplash.remove();
     super.initState();
 
-    // Init providers
-    my_auth.AuthProvider authProvider = Provider.of(context, listen: false);
-    LocationProvider locationProvider = Provider.of(context, listen: false);
-    TourProvider tourProvider = Provider.of(context, listen: false);
-    TourguideUserProvider tourguideUserProvider = Provider.of(context, listen: false);
+    MyGlobals.initProviders(context);
+    my_auth.AuthProvider authProvider = Provider.of<my_auth.AuthProvider>(context, listen: false);
 
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
       authProvider.addListener(() {

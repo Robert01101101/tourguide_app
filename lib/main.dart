@@ -2,6 +2,8 @@ import 'dart:ui';
 
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:firebase_remote_config/firebase_remote_config.dart';
+import 'package:hive/hive.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:logger/logger.dart';
 import 'package:provider/provider.dart';
@@ -16,6 +18,11 @@ import 'package:tourguide_app/utilities/providers/tourguide_user_provider.dart';
 import 'firebase_options.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:tourguide_app/utilities/providers/auth_provider.dart' as myAuth;
+
+import 'model/tour.dart';
+import 'model/tourguide_place.dart';
+import 'model/tourguide_report.dart';
 
 var logger = Logger();
 final FirebaseRemoteConfig remoteConfig = FirebaseRemoteConfig.instance;
@@ -34,6 +41,12 @@ Future<void> main() async {
 
   //LOGGING
   Logger.level = Level.trace;
+
+  //HIVE DB
+  await Hive.initFlutter();
+  Hive.registerAdapter(TourAdapter());
+  Hive.registerAdapter(TourguidePlaceAdapter());
+  Hive.registerAdapter(TourguideReportAdapter());
 
   //ROUTING
   await TourguideNavigation.instance.initialize();
@@ -171,6 +184,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
 
 class MyGlobals {
   static AutoScrollController? scrollController;
+  static List<String> processedImageUrls = [];
   static const shimmerGradient = LinearGradient(
     colors: [
       Color(0xFFEBEBF4),
@@ -186,6 +200,14 @@ class MyGlobals {
     end: Alignment(1.0, 0.3),
     tileMode: TileMode.clamp,
   );
+
+  static void initProviders(BuildContext context){
+    logger.t("initProviders()");
+    myAuth.AuthProvider authProvider = Provider.of(context, listen: false);
+    LocationProvider locationProvider = Provider.of(context, listen: false);
+    TourProvider tourProvider = Provider.of(context, listen: false);
+    TourguideUserProvider tourguideUserProvider = Provider.of(context, listen: false);
+  }
 }
 
 class SnackBarService {

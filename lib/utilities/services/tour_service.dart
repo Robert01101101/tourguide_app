@@ -1,6 +1,11 @@
+import 'dart:io';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:hive_flutter/hive_flutter.dart';
+import 'package:http/http.dart' as http;
+import 'package:path_provider/path_provider.dart';
 import 'package:tourguide_app/main.dart';
 import 'package:tourguide_app/model/tour.dart';
 import 'package:tourguide_app/utilities/providers/location_provider.dart';
@@ -10,6 +15,77 @@ import '../../model/tour_rating.dart';
 
 
 class TourService {
+  // ---------------------------- Hive ----------------------------
+  static String popularToursBoxName = 'popularToursBox';
+  static String localToursBoxName = 'localToursBox';
+  static String globalToursBoxName = 'globalToursBox';
+  static String userCreatedToursBoxName = 'userCreatedToursBox';
+  static String userSavedToursBoxName = 'userSavedToursBox';
+
+  static Future<Box<Tour>> openPopularToursBox() async {
+    return await Hive.openBox<Tour>('popularToursBox');
+  }
+
+  static Future<Box<Tour>> openLocalToursBox() async {
+    return await Hive.openBox<Tour>('localToursBox');
+  }
+
+  static Future<Box<Tour>> openGlobalToursBox() async {
+    return await Hive.openBox<Tour>('globalToursBox');
+  }
+
+  static Future<Box<Tour>> openUserCreatedToursBox() async {
+    return await Hive.openBox<Tour>('userCreatedToursBox');
+  }
+
+  static Future<Box<Tour>> openUserSavedToursBox() async {
+    return await Hive.openBox<Tour>('userSavedToursBox');
+  }
+
+  // Save tours to a specific box
+  static Future<void> saveToursToHive(String boxName, List<Tour> tours) async {
+    logger.t('Saving tours to Hive box: $boxName');
+    final box = await Hive.openBox<Tour>(boxName);
+    await box.clear(); // Clear existing data if needed
+    for (Tour tour in tours) {
+      await box.put(tour.id, tour);
+    }
+  }
+
+  // Retrieve tours from a specific box
+  static Future<List<Tour>> getToursFromHive(String boxName) async {
+    logger.t('Getting tours from Hive box: $boxName');
+    final box = await Hive.openBox<Tour>(boxName);
+    return box.values.toList();
+  }
+
+  // Update a specific tour in the box
+  static Future<void> updateTourInHive(String boxName, Tour tour) async {
+    logger.t('Updating tour in Hive box: $boxName');
+    final box = await Hive.openBox<Tour>(boxName);
+    await box.put(tour.id, tour); // Update by putting the tour with the same id
+  }
+
+  // Delete a specific tour from the box
+  static Future<void> deleteTourFromHive(String boxName, String tourId) async {
+    logger.t('Deleting tour from Hive box: $boxName');
+    final box = await Hive.openBox<Tour>(boxName);
+    await box.delete(tourId); // Delete the tour by its id
+  }
+
+  // Update all tours in the box
+  static Future<void> overwriteToursInHive(String boxName, List<Tour> newTours) async {
+    logger.t('Overwriting tours in Hive box: $boxName');
+    final box = await Hive.openBox<Tour>(boxName);
+    await box.clear(); // Clear existing data
+    for (Tour tour in newTours) {
+      await box.put(tour.id, tour); // Add the new tour
+    }
+  }
+
+
+  // ---------------------------- Fetch ----------------------------
+
   static Future<List<Tour>> fetchAllTours() async {
     FirebaseFirestore db = FirebaseFirestore.instance;
     FirebaseStorage storage = FirebaseStorage.instance;
@@ -153,6 +229,80 @@ class TourService {
     });
 
     return tours;
+  }
+
+  static Future<void> downloadAndSaveImage(String imageUrl, String tourId) async {
+    logger.t('downloadAndSaveImage for tourId: $tourId, imageUrl: $imageUrl');
+    if (imageUrl.isEmpty || tourId.isEmpty) {
+      logger.t('Image URL or id is empty, cannot download image');
+      return;
+    }
+    try {
+      // Step 1: Download the image
+      final http.Response response = await http.get(Uri.parse(imageUrl));
+      if (response.statusCode == 200) {
+        // Step 2: Get the content type
+        final String? contentType = response.headers['content-type'];
+
+        // Determine the file extension based on content type
+        String fileExtension = '';
+        switch (contentType) {
+          case 'image/jpeg':
+          case 'image/jpg':
+            fileExtension = 'jpg';
+            break;
+          case 'image/png':
+            fileExtension = 'png';
+            break;
+          case 'image/webp':
+            fileExtension = 'webp';
+            break;
+          case 'image/gif':
+            fileExtension = 'gif';
+            break;
+          case 'image/bmp':
+            fileExtension = 'bmp';
+            break;
+          case 'image/tiff':
+            fileExtension = 'tiff';
+            break;
+          default:
+            print('Unsupported content type: $contentType');
+            return;
+        }
+
+        // Step 3: Get the local file path
+        final Directory appDocDir = await getApplicationDocumentsDirectory();
+        final Directory tourImgsDir = Directory('${appDocDir.path}/tourImgs');
+        if (!await tourImgsDir.exists()) {
+          await tourImgsDir.create(recursive: true);
+        }
+        final String localPath = '${appDocDir.path}/tourImgs/$tourId.$fileExtension';
+        final File file = File(localPath);
+
+        // Step 4: Write the file to the local storage
+        await file.writeAsBytes(response.bodyBytes);
+        logger.i('Image downloaded and saved to $localPath');
+      } else {
+        logger.e('Error downloading image: ${response.statusCode}');
+      }
+    } catch (e) {
+      logger.e('Error: $e');
+    }
+  }
+
+  static Future<File?> getLocalImageFile(String tourId) async {
+    final Directory appDocDir = await getApplicationDocumentsDirectory();
+    final List<String> extensions = ['jpg', 'png', 'webp', 'gif', 'bmp', 'tiff'];
+    for (String extension in extensions) {
+      final String localPath = '${appDocDir.path}/tourImgs/$tourId.$extension';
+      final File file = File(localPath);
+      if (await file.exists()) {
+        logger.i('Local image found for tourId: $tourId');
+        return file;
+      }
+    }
+    return null;
   }
 
   ////////// Fetch with Filters (New) //////////
@@ -315,7 +465,7 @@ class TourService {
 
   static Future<Tour> updateTour(Tour tour) async{
     try {
-      if (tour.imageToUpload != null) {
+      if (tour.imageFile != null) {
         // Upload the new image
         String newImageUrl = await uploadImage(tour);
         tour = tour.copyWith(imageUrl: newImageUrl);
@@ -352,7 +502,7 @@ class TourService {
           .child(tour.id);  // Use the tourId to associate the image with the tour
 
       // Upload the file to Firebase Storage
-      UploadTask uploadTask = ref.putFile(tour.imageToUpload!);
+      UploadTask uploadTask = ref.putFile(tour.imageFile!);
 
       // Await the completion of the upload task
       TaskSnapshot taskSnapshot = await uploadTask;
@@ -389,6 +539,7 @@ class TourService {
       logger.e('Failed to update author name: $e, $stack');
     }
   }
+
 
 
 

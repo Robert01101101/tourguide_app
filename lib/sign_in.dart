@@ -43,10 +43,8 @@ class _SignInState extends State<SignIn> {
     super.initState();
 
     // Init providers
+    MyGlobals.initProviders(context);
     my_auth.AuthProvider authProvider = Provider.of(context, listen: false);
-    LocationProvider locationProvider = Provider.of(context, listen: false);
-    TourProvider tourProvider = Provider.of(context, listen: false);
-    TourguideUserProvider tourguideUserProvider = Provider.of(context, listen: false);
 
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
       authProvider.addListener(() {

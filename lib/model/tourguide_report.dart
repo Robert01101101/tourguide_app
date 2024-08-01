@@ -1,8 +1,12 @@
+import 'package:hive/hive.dart';
 
+part 'tourguide_report.g.dart';
+
+@HiveType(typeId: 2)
 class TourguideReport {
- final String title;
- final String additionalDetails;
- final String reportAuthorId;
+  @HiveField(0) final String title;
+  @HiveField(1) final String additionalDetails;
+  @HiveField(2) final String reportAuthorId;
 
   TourguideReport({
     required this.title,

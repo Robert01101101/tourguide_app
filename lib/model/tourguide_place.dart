@@ -1,15 +1,19 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:hive/hive.dart';
+
+part 'tourguide_place.g.dart';
 
 //TODO: change name to tour place? More accurate since the description etc is specific to this place's tour
+@HiveType(typeId: 1)
 class TourguidePlace {
-  final double latitude;
-  final double longitude;
-  final String googleMapPlaceId;
-  final String title;
-  final String description;
-  final String photoUrl;
+  @HiveField(0) final double latitude;
+  @HiveField(1) final double longitude;
+  @HiveField(2) final String googleMapPlaceId;
+  @HiveField(3) final String title;
+  @HiveField(4) final String description;
+  @HiveField(5) final String photoUrl;
   TextEditingController? descriptionEditingController;  //mutable
   Image? image; //mutable
   File? imageFile; //mutable

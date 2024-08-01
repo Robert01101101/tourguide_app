@@ -2,29 +2,33 @@ import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:tourguide_app/model/tourguide_place.dart';
 import 'package:tourguide_app/model/tourguide_report.dart';
+import 'package:hive/hive.dart';
+
+part 'tour.g.dart';
 
 /// Mutable properties: upvotes, downvotes, isAddTourTile, isOfflineCreatedTour, thisUsersRating, imageToUpload
+@HiveType(typeId: 0)
 class Tour {
-  final String id;
-  final String name;
-  final String description;
-  final String city;
-  final String visibility;
-  final String imageUrl;
-  final DateTime? createdDateTime;
-  final DateTime? lastChangedDateTime;
-  final double latitude;
-  final double longitude;
-  final String placeId;
-  final String authorName;
-  final String authorId;
-  final String requestReviewStatus;
-  final List<TourguidePlace> tourguidePlaces;
-  final List<TourguideReport> reports;
+  @HiveField(0) final String id;
+  @HiveField(1) final String name;
+  @HiveField(2) final String description;
+  @HiveField(3) final String city;
+  @HiveField(4) final String visibility;
+  @HiveField(5) final String imageUrl;
+  @HiveField(6) final DateTime? createdDateTime;
+  @HiveField(7) final DateTime? lastChangedDateTime;
+  @HiveField(8) final double latitude;
+  @HiveField(9) final double longitude;
+  @HiveField(10) final String placeId;
+  @HiveField(11) final String authorName;
+  @HiveField(12) final String authorId;
+  @HiveField(13) final String requestReviewStatus;
+  @HiveField(14) final List<TourguidePlace> tourguidePlaces;
+  @HiveField(15) final List<TourguideReport> reports;
   /// mutable AND stored in Firestore
-  int upvotes;
+  @HiveField(16) int upvotes;
   /// mutable AND stored in Firestore
-  int downvotes;
+  @HiveField(17) int downvotes;
   /// mutable, NOT stored in Firestore, indicates add tour button (dirty)
   bool isAddTourTile;
   /// mutable, NOT stored in Firestore, indicates this is an offline tour about to be uploaded
@@ -32,9 +36,9 @@ class Tour {
   /// mutable, NOT stored in Firestore, Track this user's rating
   int? thisUsersRating;
   /// mutable, NOT stored in Firestore, Track this user's rating
-  File? imageToUpload;
-  /// mutable, NOT stored in Firestore
-  DateTime? lastCachedOn;
+  File? imageFile;
+  /// mutable, NOT stored in Firestore, request media re-downloads for for this tour
+  bool requestMediaRedownload = false;
 
   Tour({
     required this.id,
@@ -58,7 +62,7 @@ class Tour {
     required this.isAddTourTile,
     required this.isOfflineCreatedTour,
     this.thisUsersRating,
-    this.imageToUpload,
+    this.imageFile,
   });
 
   factory Tour.empty() {
@@ -83,7 +87,7 @@ class Tour {
       downvotes: 0,
       isAddTourTile: false,
       isOfflineCreatedTour: false,
-      imageToUpload: null,
+      imageFile: null,
     );
   }
 
@@ -164,7 +168,7 @@ class Tour {
       downvotes: data['downvotes'] ?? 0,
       isAddTourTile: false,
       isOfflineCreatedTour: false,
-      imageToUpload: null,
+      imageFile: null,
     );
   }
 
@@ -215,7 +219,7 @@ class Tour {
       isAddTourTile: isAddTourTile ?? this.isAddTourTile,
       isOfflineCreatedTour: isOfflineCreatedTour ?? this.isOfflineCreatedTour,
       thisUsersRating: thisUsersRating ?? this.thisUsersRating,
-      imageToUpload: imageToUpload ?? this.imageToUpload,
+      imageFile: imageToUpload ?? this.imageFile,
     );
   }
 
@@ -254,7 +258,7 @@ class Tour {
 
   @override
   String toString() {
-    return 'Tour{id: $id, name: $name, description: $description, city: $city, visibility: $visibility, imageUrl: $imageUrl, createdDateTime: $createdDateTime, lastChangedDateTime: $lastChangedDateTime, latitude: $latitude, longitude: $longitude, placeId: $placeId, authorName: $authorName, authorId: $authorId, reports:${reports.toString()}, requestReviewStatus: $requestReviewStatus, upvotes: $upvotes, downvotes: $downvotes, isAddTourTile: $isAddTourTile, isOfflineCreatedTour: $isOfflineCreatedTour, imageToUpload: $imageToUpload, \ntourguidePlaces: ${tourguidePlaces.toString()}';
+    return 'Tour{id: $id, name: $name, description: $description, city: $city, visibility: $visibility, imageUrl: $imageUrl, createdDateTime: $createdDateTime, lastChangedDateTime: $lastChangedDateTime, latitude: $latitude, longitude: $longitude, placeId: $placeId, authorName: $authorName, authorId: $authorId, reports:${reports.toString()}, requestReviewStatus: $requestReviewStatus, upvotes: $upvotes, downvotes: $downvotes, isAddTourTile: $isAddTourTile, isOfflineCreatedTour: $isOfflineCreatedTour, imageToUpload: $imageFile, \ntourguidePlaces: ${tourguidePlaces.toString()}';
   }
 }
 
