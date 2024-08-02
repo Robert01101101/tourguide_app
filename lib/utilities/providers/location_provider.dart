@@ -400,6 +400,10 @@ class LocationProvider with ChangeNotifier {
         );
         _imageCache[placeId!] = tourguidePlaceImg;
 
+        if (setAsCurrentImage){
+          _currentPlaceImg = tourguidePlaceImg;
+          notifyListeners();
+        }
         return tourguidePlaceImg;
       } else {
         return null;

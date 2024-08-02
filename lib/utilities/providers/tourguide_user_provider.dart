@@ -1,3 +1,4 @@
+import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart' as auth;
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -82,6 +83,7 @@ class TourguideUserProvider with ChangeNotifier {
     );
     notifyListeners();
     await FirebaseFirestore.instance.collection('users').doc(firebaseUser.uid).set(_user!.toMap());
+    await FirebaseAnalytics.instance.logSignUp(signUpMethod:'google');
   }
 
   Future<void> _sendWelcomeEmail () async {

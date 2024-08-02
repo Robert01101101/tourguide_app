@@ -1,3 +1,4 @@
+import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -43,6 +44,7 @@ class _TourguideOnboardState extends State<TourguideOnboard> {
         }
       });
     });
+    FirebaseAnalytics.instance.logTutorialBegin(parameters: {'tutorialName': 'onboarding',},);
   }
 
   void _completeOnboarding() async {
@@ -51,6 +53,7 @@ class _TourguideOnboardState extends State<TourguideOnboard> {
     TourguideNavigation.router.go(
       pathToGoToNext,
     );
+    FirebaseAnalytics.instance.logTutorialComplete(parameters: {'tutorialName': 'onboarding',},);
   }
 
   @override

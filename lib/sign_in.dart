@@ -8,6 +8,7 @@ import 'dart:async';
 import 'dart:convert' show json;
 import 'dart:math';
 
+import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -55,6 +56,7 @@ class _SignInState extends State<SignIn> {
           TourguideNavigation.router.go(
             TourguideNavigation.explorePath,
           );
+          FirebaseAnalytics.instance.logLogin(loginMethod:'google');
         } else if (authProvider.googleSignInUser == null || authProvider.silentSignInFailed){
           logger.t("signIn.initState().authProviderListener -> user is null or silentSignInFailed");
           FlutterNativeSplash.remove();

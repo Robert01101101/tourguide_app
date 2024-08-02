@@ -1,3 +1,4 @@
+import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -218,6 +219,7 @@ class _ExpandedTourTileOverlayState extends State<ExpandedTourTileOverlay> {
   void initState() {
     thisUsersRating = widget.tour.thisUsersRating ?? 0;
     super.initState();
+    FirebaseAnalytics.instance.logSelectContent(contentType: 'tour_tile', itemId: widget.tour.id);
   }
 
   void toggleThumbsUp() {
@@ -416,7 +418,7 @@ class _ExpandedTourTileOverlayState extends State<ExpandedTourTileOverlay> {
                         shape: CircleBorder(),
                         padding: EdgeInsets.all(0),
                         foregroundColor:
-                        tourguideUserProvider.user!.savedTourIds.contains(widget.tour.id) ?
+                        tourguideUserProvider.user != null && tourguideUserProvider.user!.savedTourIds.contains(widget.tour.id) ?
                         Theme.of(context).primaryColor : Colors.grey,
                       ),
                       child: Icon(Icons.bookmark_rounded), // Replace with your desired icon

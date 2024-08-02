@@ -1,5 +1,6 @@
 import 'dart:ui';
 
+import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:firebase_remote_config/firebase_remote_config.dart';
 import 'package:hive/hive.dart';
@@ -52,6 +53,7 @@ Future<void> main() async {
   await TourguideNavigation.instance.initialize();
 
   //CRASHLYTICS
+  FirebaseAnalytics analytics = FirebaseAnalytics.instance;
   // Pass all uncaught "fatal" errors from the framework to Crashlytics
   FlutterError.onError = (errorDetails) {
     FirebaseCrashlytics.instance.recordFlutterFatalError(errorDetails);
