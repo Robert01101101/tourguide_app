@@ -534,7 +534,7 @@ class _FullscreenTourPageState extends State<FullscreenTourPage> {
                           );
                         }).toList(),
                       ),
-                    if (!widget.tour.isOfflineCreatedTour)
+                    if (!widget.tour.isOfflineCreatedTour && widget.tour.createdDateTime != null)
                       Row(
                         mainAxisAlignment: MainAxisAlignment.start,
                         children: [
