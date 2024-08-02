@@ -64,6 +64,7 @@ class ExploreState extends State<Explore> {
     FirebaseAuth.instance
         .userChanges()
         .listen((User? user) {
+      if (!mounted) return;
       final tourProvider = Provider.of<TourProvider>(context, listen: false);
       if (user == null) {
         logger.t('ExploreState.initState() - FirabaseAuth listen - FIREBASE AUTH (EXPLORE) - User is currently signed out!');
@@ -86,6 +87,12 @@ class ExploreState extends State<Explore> {
         _scrollOffset = _scrollController.offset;
       });
     });
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
   }
 
   void _checkIfFirstTimeUserAfterAccountDeletion() async{
