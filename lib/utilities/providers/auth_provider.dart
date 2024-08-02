@@ -67,7 +67,11 @@ class AuthProvider with ChangeNotifier {
           CustomNavigationHelper.explorePath,
         );*/
       } else {
-        handleAuthorizeScopes();
+        if (account != null) {
+          handleAuthorizeScopes();
+        } else {
+          logger.e('No account to authorize scopes.');
+        }
       }
     });
     signInSilently();
@@ -166,13 +170,21 @@ class AuthProvider with ChangeNotifier {
   // On the web, this must be called from an user interaction (button click).
   Future<void> handleAuthorizeScopes() async {
     logger.t('AuthProvider.handleAuthorizeScopes()');
-    final bool newIsAuthorized = await googleSignIn.requestScopes(scopes);
-    _isAuthorized = newIsAuthorized;
-    notifyListeners();
+    if (_googleSignInUser == null) {
+      logger.e('No account to grant scopes.');
+      return;
+    }
 
+    try {
+      final bool newIsAuthorized = await googleSignIn.requestScopes(scopes);
+      _isAuthorized = newIsAuthorized;
+      notifyListeners();
 
-    if (newIsAuthorized) {
-      await signInWithFirebase(_googleSignInUser!); //from chatgpt
+      if (newIsAuthorized) {
+        await signInWithFirebase(_googleSignInUser!);
+      }
+    } catch (e) {
+      logger.e('Failed to request scopes: $e');
     }
   }
 
