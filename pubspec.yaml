@@ -74,6 +74,7 @@ dependencies:
   hive: ^2.2.3
   hive_flutter: ^1.1.0
   firebase_app_check: ^0.3.0+4
+  sliver_tools: ^0.2.12
 
 
 dev_dependencies:
