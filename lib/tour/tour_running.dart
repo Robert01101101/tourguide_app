@@ -299,17 +299,23 @@ class _TourRunningState extends State<TourRunning> {
     }
   }
 
-  void _scrollToTarget(int placeIndex) {
-    final context = _targetKeys[placeIndex].currentContext;
-    if (context != null) {
-      setState(() {
-        _isFullScreen = false;
+  void _scrollToTarget(int placeIndex, {bool delay = false}) {
+    if (delay) {
+      Future.delayed(Duration(milliseconds: 500), () {
+        _scrollToTarget(placeIndex);
       });
-      Scrollable.ensureVisible(
-        context,
-        duration: Duration(milliseconds: 500),
-        curve: Curves.easeInOut,
-      );
+    } else {
+      final context = _targetKeys[placeIndex].currentContext;
+      if (context != null) {
+        setState(() {
+          _isFullScreen = false;
+        });
+        Scrollable.ensureVisible(
+          context,
+          duration: Duration(milliseconds: 500),
+          curve: Curves.easeInOut,
+        );
+      }
     }
   }
 
@@ -337,6 +343,7 @@ class _TourRunningState extends State<TourRunning> {
           }
         },
         child: CustomScrollView(
+          controller: _scrollController,
           slivers: [
             SliverAppBar(
               title: Text(_tour.name),
@@ -531,7 +538,7 @@ class _TourRunningState extends State<TourRunning> {
                                 offset: Offset(0, -32),
                                 child: Stepper(
                                   currentStep: _currentStep,
-                                  physics: NeverScrollableScrollPhysics(),
+                                  physics: ClampingScrollPhysics(),
                                   onStepTapped: (step) {
                                     setState(() {
                                       if (_currentStep == step) {
@@ -541,12 +548,14 @@ class _TourRunningState extends State<TourRunning> {
                                       }
                                       _currentStep = step;
                                     });
+                                    _scrollToTarget(_currentStep, delay: true);
                                   },
                                   onStepContinue: () {
                                     if (_currentStep < _tour.tourguidePlaces.length) {
                                       setState(() {
                                         _currentStep += 1;
                                       });
+                                      _scrollToTarget(_currentStep, delay: true);
                                     }
                                   },
                                   onStepCancel: () {
@@ -554,8 +563,10 @@ class _TourRunningState extends State<TourRunning> {
                                       setState(() {
                                         _currentStep -= 1;
                                       });
+                                      _scrollToTarget(_currentStep, delay: true);
                                     }
                                   },
+                                  controller: _scrollController,
                                   controlsBuilder: (BuildContext context, ControlsDetails controlsDetails) {
                                     return Stack(
                                       children: [
@@ -615,13 +626,12 @@ class _TourRunningState extends State<TourRunning> {
                                     int index = entry.key;
                                     var place = entry.value;
                                     return Step(
-                                      title: Text(place.title),
+                                      title: Text(key: _targetKeys.isNotEmpty && _targetKeys.length > index ? _targetKeys[index] : null, place.title),
                                       isActive: _currentStep >= (index),
                                       state: _currentStep > (index) ? StepState.complete : StepState.indexed,
                                       content: Visibility(
                                         visible: _currentStepVisible,
                                         child: Column(
-                                          key: _targetKeys.isNotEmpty ? _targetKeys[index] : null,
                                           crossAxisAlignment: CrossAxisAlignment.start,
                                           children: [
                                             Row(

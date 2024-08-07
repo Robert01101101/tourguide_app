@@ -107,14 +107,14 @@ class _ContributeState extends State<Contribute> {
                     child: HorizontalScroller(tours: tourProvider.userCreatedTours, leftPadding: true),
                   ),
                 ),
-                Text("Review unreviewed tours", style: Theme.of(context).textTheme.headlineSmall),
+                /*Text("Review unreviewed tours", style: Theme.of(context).textTheme.headlineSmall),
                 StandardLayoutChild(
                   fullWidth: true,
                   child: SizedBox(
                     height: 220.0, // Set a fixed height for the horizontal scroller
                     child: HorizontalScroller(tours: tourProvider.userCreatedTours, leftPadding: true),
                   ),
-                ),
+                ),*/
                 /*
                 Row(
                   mainAxisAlignment: MainAxisAlignment.start,
