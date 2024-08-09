@@ -107,7 +107,7 @@ class _GeminiChatState extends State<GeminiChat> with WidgetsBindingObserver {
   void _startNewChat(){
     // Initialize the chat
     final locationProvider = Provider.of<LocationProvider>(context, listen: false);
-    String initialPrompt = 'Please act as my friendly and knowledgeable tourguide, and respond in normal written English. Try to keep your response short unless I ask for detailed or longer responses. If I ask for an address, inform me that information like a specific address might be inaccurate.';
+    String initialPrompt = 'Please act as my friendly and knowledgeable tour guide, and respond in normal written English. Your name is AI Tourguide. Try to keep your response short unless I ask for detailed or longer responses, and avoid asking clarifying questions unless my question is extremely broad or requires clarification. If I ask for an address, inform me that information like a specific address might be inaccurate. If I ask for the location of something, say where you think it is, but suggest to confirm the location in Google Maps, and that your stated location might be inaccurate. Don\'t be shy to remind me of your limitations.';
     if (locationProvider.currentCity != null){
       initialPrompt += " I am currently located in ${locationProvider.currentCity}, ${locationProvider.currentState}, ${locationProvider.currentCountry}";
     }
@@ -160,22 +160,47 @@ class _GeminiChatState extends State<GeminiChat> with WidgetsBindingObserver {
       // Initialize with a welcome message if no messages are stored
       final m = types.TextMessage(
         author: _bot!,
-        text: 'Hello ${FirebaseAuth.instance.currentUser!.displayName}, how can I help you today?',
+        text: 'Hi ${FirebaseAuth.instance.currentUser!.displayName!.split(' ').first}, how can I help you today?',
         id: const Uuid().v4(),
         status: types.Status.delivered,
       );
-      Map<String, dynamic> aiTagMetadata = {
-        'aiCustomPrompt': 'true',
-      };
       final mCustom = types.TextMessage(
         author: _user!,
-        text: 'Suggest a local tour',
+        text: 'Scenic local tours',
         id: const Uuid().v4(),
         status: types.Status.delivered,
-        metadata: aiTagMetadata,
+        metadata: const {
+          'aiCustomPrompt': 'true',
+          'prompt': 'tours'
+        },
         showStatus: false
       );
+      final mCustom2 = types.TextMessage(
+          author: _user!,
+          text: 'Popular nearby parks',
+          id: const Uuid().v4(),
+          status: types.Status.delivered,
+          metadata: const {
+            'aiCustomPrompt': 'true',
+            'prompt': 'parks'
+          },
+          showStatus: false
+      );
+      final mCustom3 = types.TextMessage(
+          author: _user!,
+          text: 'Best spots in the city',
+          id: const Uuid().v4(),
+          status: types.Status.delivered,
+          metadata: const {
+            'aiCustomPrompt': 'true',
+            'prompt': 'city'
+          },
+          showStatus: false
+      );
       setState((){
+
+        _messages.add(mCustom2);
+        _messages.add(mCustom3);
         _messages.add(mCustom);
         _messages.add(m);
         logger.t("_loadMessages() - init new - set state ${m.text}");
@@ -206,7 +231,14 @@ class _GeminiChatState extends State<GeminiChat> with WidgetsBindingObserver {
 
   //TODO fix
   String _cleanUpAiResponseString(String responseString){
-    return responseString.replaceAll("**", "*"); //for correct bolding of text
+    String cleanedUpString = responseString
+        .replaceAll("* **", "*")
+        .replaceAll("**", "*")
+        .trimRight();
+    //correctly bold text (** -> * and special case for lists)
+    //trim empty spaces at the end such as newline chars
+    logger.t("cleanedUpString: $cleanedUpString");
+    return cleanedUpString;
   }
 
   void _showOptionsDialog(BuildContext context) {
@@ -345,7 +377,16 @@ class _GeminiChatState extends State<GeminiChat> with WidgetsBindingObserver {
           padding: const EdgeInsets.all(10.0),
           child: ElevatedButton(
             onPressed: (){
-              _handleSendPrompt("What's a nice scenic local tour I can take?");
+              //check if text in metadata contains "tour"
+              //log all metadata
+              logger.i("metadata: ${message.metadata}");
+              if (message.metadata!["prompt"] == "tours") {
+                _handleSendPrompt("What's a nice scenic local tour I can take?");
+              } else if (message.metadata!["prompt"] == "parks") {
+                _handleSendPrompt("What are the 5 most popular parks around here? I want a day out in nature!");
+              } else if (message.metadata!["prompt"] == "city") {
+                _handleSendPrompt("What are the best 5 urban spots around here? I want to explore the city!");
+              }
             },
             child: Wrap(
               crossAxisAlignment: WrapCrossAlignment.center,
@@ -390,15 +431,38 @@ class _GeminiChatState extends State<GeminiChat> with WidgetsBindingObserver {
 
     return Container(
       padding: isAiCustomPrompt? EdgeInsets.all(16) : EdgeInsets.symmetric(vertical: 18, horizontal: 20),
-      child: Text(
-        textMessage.text,
-        //set text black and large body
-        style: TextStyle(
-          color: isAiCustomPrompt ? Color(0xff006a65) : textMessage.author.id == _user!.id ? Colors.white : Colors.black,
-          fontSize: 16,
+      child: SelectableText.rich(
+        TextSpan(
+          children: _parseTextWithMarkdown(textMessage.text),
+          style: Theme.of(context).textTheme.bodyMedium!.copyWith(
+            color: isAiCustomPrompt ? Color(0xff006a65) : textMessage.author.id == _user!.id ? Colors.white : Colors.black,
+            fontSize: 16,
+            fontWeight: FontWeight.w500,
+            height: 1.5,
+          ),
         ),
       ),
     );
+  }
+
+  List<TextSpan> _parseTextWithMarkdown(String text) {
+    final boldRegex = RegExp(r'\*(.*?)\*');
+    final spans = <TextSpan>[];
+
+    int start = 0;
+    for (final match in boldRegex.allMatches(text)) {
+      if (match.start > start) {
+        spans.add(TextSpan(text: text.substring(start, match.start)));
+      }
+      spans.add(TextSpan(text: match.group(1), style: TextStyle(fontWeight: FontWeight.bold)));
+      start = match.end;
+    }
+
+    if (start < text.length) {
+      spans.add(TextSpan(text: text.substring(start)));
+    }
+
+    return spans;
   }
 
 
