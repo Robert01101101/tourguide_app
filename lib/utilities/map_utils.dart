@@ -28,7 +28,7 @@ class MapUtils {
     }
   }
 
-  static Future<BitmapDescriptor> createNumberedMarkerBitmap(int number) async {
+  static Future<BitmapDescriptor> createNumberedMarkerBitmap(int number, {Color color = Colors.lightBlue}) async {
     final double baseSize = 40.0; // Smaller size for the marker
     final double circleSize = baseSize * 2; // Circle diameter
     final double textSize = baseSize * 1; // Text size proportional to the marker
@@ -48,7 +48,7 @@ class MapUtils {
     );
 
     // Draw the main circle
-    final Paint paint = Paint()..color = Colors.lightBlue;
+    final Paint paint = Paint()..color = color;
     canvas.drawCircle(
       Offset(circleSize / 2, circleSize / 2),
       circleSize / 2 - 6,

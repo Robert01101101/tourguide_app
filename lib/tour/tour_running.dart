@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:math';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -14,12 +15,12 @@ import 'package:tourguide_app/tour/tourguide_user_profile_view.dart';
 import 'package:tourguide_app/ui/my_layouts.dart';
 import 'package:tourguide_app/utilities/map_utils.dart';
 import 'package:tourguide_app/utilities/providers/tour_provider.dart';
+import 'package:visibility_detector/visibility_detector.dart';
 import '../utilities/custom_import.dart';
 import 'package:http/http.dart' as http;
 import '../utilities/singletons/tts_service.dart';
 
 class TourRunning extends StatefulWidget {
-
   const TourRunning({Key? key}) : super(key: key);
 
   @override
@@ -42,6 +43,10 @@ class _TourRunningState extends State<TourRunning> {
   Tour _tour = Tour.empty();
   int _currentStep = 0;
   bool _currentStepVisible = true;
+  bool _initialZoomToFirstWaypointComplete = false;
+  List<BitmapDescriptor> _defaultMarkerBitmaps = [];
+  List<BitmapDescriptor> _highlightedMarkerBitmaps = [];
+
 
 
   @override
@@ -61,29 +66,30 @@ class _TourRunningState extends State<TourRunning> {
 
 
   Future<void> _addMarkers() async {
-    // Add tour city marker
-    /*
-    _markers.add(
-      Marker(
-        markerId: MarkerId(_tour.id),
-        position: LatLng(_tour.latitude, _tour.longitude),
-        infoWindow: InfoWindow(
-          title: _tour.name,
-          snippet: _tour.description,
-        ),
-      ),
-    );*/
+    // Clear previous bitmaps
+    _defaultMarkerBitmaps.clear();
+    _highlightedMarkerBitmaps.clear();
+    //TODO: fix primary color reference
+    Color colPrimary = const Color(0xff006a65);
 
     //add tourguidePlace markers
     for (int i = 0; i < _tour.tourguidePlaces.length; i++) {
       TourguidePlace tourguidePlace = _tour.tourguidePlaces[i];
-      final BitmapDescriptor icon = await MapUtils.createNumberedMarkerBitmap(i + 1);
+
+      // Create default and highlighted bitmaps
+      final BitmapDescriptor defaultIcon = await MapUtils.createNumberedMarkerBitmap(i + 1);
+      final BitmapDescriptor highlightedIcon = await MapUtils.createNumberedMarkerBitmap(i + 1, color: colPrimary);
+
+      // Store the bitmaps in the lists
+      _defaultMarkerBitmaps.add(defaultIcon);
+      _highlightedMarkerBitmaps.add(highlightedIcon);
+
       _targetKeys.add(GlobalKey());
       _markers.add(
         Marker(
           markerId: MarkerId(tourguidePlace.googleMapPlaceId),
           position: LatLng(tourguidePlace.latitude, tourguidePlace.longitude),
-          icon: icon,
+          icon: defaultIcon,
           infoWindow: InfoWindow(
             title: tourguidePlace.title,
             snippet: tourguidePlace.description,
@@ -319,6 +325,57 @@ class _TourRunningState extends State<TourRunning> {
     }
   }
 
+  void _moveCameraToMarkerAndHighlightMarker(int index) async {
+    if (index >= 0 && index < _markers.length) {
+      // Update the marker with the new bitmap
+      setState(() {
+        _markers = _markers.map((marker) {
+          if (marker.markerId.value == _tour.tourguidePlaces[index].googleMapPlaceId) {
+            // Use the highlighted bitmap for the selected marker
+            return marker.copyWith(iconParam: _highlightedMarkerBitmaps[index]);
+          } else {
+            // Use the default bitmap for other markers
+            return marker.copyWith(iconParam: _defaultMarkerBitmaps[_markers.toList().indexOf(marker)]);
+          }
+        }).toSet();
+      });
+
+      final marker = _markers.elementAt(index); // Get the marker at the specified index
+      final targetPosition = LatLng(marker.position.latitude, marker.position.longitude);
+
+      LatLngBounds bounds;
+
+      if (index == 0) {
+        // If it's the first marker, just zoom into that marker
+        bounds = LatLngBounds(
+          southwest: LatLng(marker.position.latitude - 0.005, marker.position.longitude - 0.005),
+          northeast: LatLng(marker.position.latitude + 0.005, marker.position.longitude + 0.005),
+        );
+      } else {
+        // Get the previous marker
+        final previousMarker = _markers.elementAt(index - 1);
+        final previousPosition = LatLng(previousMarker.position.latitude, previousMarker.position.longitude);
+
+        // Create bounds to cover both markers
+        bounds = LatLngBounds(
+          southwest: LatLng(
+            min(targetPosition.latitude, previousPosition.latitude) - 0.0002,
+            min(targetPosition.longitude, previousPosition.longitude) - 0.0002,
+          ),
+          northeast: LatLng(
+            max(targetPosition.latitude, previousPosition.latitude) + 0.0002,
+            max(targetPosition.longitude, previousPosition.longitude) + 0.0002,
+          ),
+        );
+      }
+
+      final GoogleMapController mapController = await _mapControllerCompleter.future;
+
+      // Move the camera to the bounds
+      mapController.animateCamera(CameraUpdate.newLatLngBounds(bounds, 100)); // The padding is set to 100
+    }
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -549,6 +606,7 @@ class _TourRunningState extends State<TourRunning> {
                                       _currentStep = step;
                                     });
                                     _scrollToTarget(_currentStep, delay: true);
+                                    _moveCameraToMarkerAndHighlightMarker(_currentStep);
                                   },
                                   onStepContinue: () {
                                     if (_currentStep < _tour.tourguidePlaces.length) {
@@ -556,6 +614,7 @@ class _TourRunningState extends State<TourRunning> {
                                         _currentStep += 1;
                                       });
                                       _scrollToTarget(_currentStep, delay: true);
+                                      _moveCameraToMarkerAndHighlightMarker(_currentStep);
                                     }
                                   },
                                   onStepCancel: () {
@@ -564,6 +623,7 @@ class _TourRunningState extends State<TourRunning> {
                                         _currentStep -= 1;
                                       });
                                       _scrollToTarget(_currentStep, delay: true);
+                                      _moveCameraToMarkerAndHighlightMarker(_currentStep);
                                     }
                                   },
                                   controller: _scrollController,
@@ -579,21 +639,21 @@ class _TourRunningState extends State<TourRunning> {
                                             padding: const EdgeInsets.all(8.0),
                                             child: Row(
                                               children: <Widget>[
+                                                const SizedBox(width: 8),
                                                 if (_currentStep > 0)
-                                                  const SizedBox(width: 8),
-                                                TextButton(
-                                                  onPressed: controlsDetails.onStepCancel,
-                                                  style: ElevatedButton.styleFrom(
-                                                    elevation: 0,
-                                                    backgroundColor: Colors.transparent,
-                                                    foregroundColor: Colors.grey[700],
-                                                    //primary: Colors.blue, // Custom color for "Continue" button
-                                                    shape: RoundedRectangleBorder(
-                                                      borderRadius: BorderRadius.circular(3.0), // Custom radius
+                                                  TextButton(
+                                                    onPressed: controlsDetails.onStepCancel,
+                                                    style: ElevatedButton.styleFrom(
+                                                      elevation: 0,
+                                                      backgroundColor: Colors.transparent,
+                                                      foregroundColor: Colors.grey[700],
+                                                      //primary: Colors.blue, // Custom color for "Continue" button
+                                                      shape: RoundedRectangleBorder(
+                                                        borderRadius: BorderRadius.circular(3.0), // Custom radius
+                                                      ),
                                                     ),
+                                                    child: const Text('Previous Place'),
                                                   ),
-                                                  child: const Text('Previous Place'),
-                                                ),
                                                 const SizedBox(width: 24), // Add spacing between buttons if needed
                                                 TextButton(
                                                   onPressed: controlsDetails.onStepContinue,
@@ -608,11 +668,11 @@ class _TourRunningState extends State<TourRunning> {
                                                   child: _currentStep != _tour.tourguidePlaces.length-1 ? const Text('Next Place') : const Text('Finish Tour'),
                                                 ),
                                                 Spacer(),
-                                                if (_currentStep == 1)
+                                                /*if (_currentStep == 1)
                                                   IconButton(
                                                       padding: EdgeInsets.all(10),
                                                       onPressed: (){},
-                                                      icon: Icon(Icons.map))
+                                                      icon: Icon(Icons.map))*/
                                               ],
                                             ),
                                           ),
@@ -634,7 +694,7 @@ class _TourRunningState extends State<TourRunning> {
                                         child: Column(
                                           crossAxisAlignment: CrossAxisAlignment.start,
                                           children: [
-                                            Row(
+                                            Row(//Title Row
                                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                               children: [
                                                 Flexible(
@@ -652,12 +712,24 @@ class _TourRunningState extends State<TourRunning> {
                                               ],
                                             ),
                                             SizedBox(height: 6.0),
-                                            Text(
-                                              place.description, // Assuming each place has a 'description' field
-                                              style: Theme.of(context).textTheme.bodyMedium,
-                                              softWrap: true,
-                                              maxLines: null,
-                                              overflow: TextOverflow.visible,
+                                            VisibilityDetector(
+                                              key: Key('place$index'),
+                                              onVisibilityChanged: (VisibilityInfo info) {
+                                                if (info.visibleFraction == 1) {
+                                                  if (!_initialZoomToFirstWaypointComplete) {
+                                                    logger.t('Place $index visibility: ${info.visibleFraction} - > _initialZoomToFirstWaypoint');
+                                                    _initialZoomToFirstWaypointComplete = true;
+                                                    _moveCameraToMarkerAndHighlightMarker(0);
+                                                  }
+                                                }
+                                              },
+                                              child: Text(
+                                                place.description, // Assuming each place has a 'description' field
+                                                style: Theme.of(context).textTheme.bodyMedium,
+                                                softWrap: true,
+                                                maxLines: null,
+                                                overflow: TextOverflow.visible,
+                                              ),
                                             ),
                                           ],
                                         ),

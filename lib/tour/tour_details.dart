@@ -15,7 +15,10 @@ import 'package:tourguide_app/utilities/map_utils.dart';
 import 'package:tourguide_app/utilities/providers/tour_provider.dart';
 import '../utilities/custom_import.dart';
 import 'package:http/http.dart' as http;
+import '../utilities/providers/tourguide_user_provider.dart';
+import '../utilities/services/tour_service.dart';
 import '../utilities/singletons/tts_service.dart';
+import 'package:tourguide_app/utilities/providers/auth_provider.dart' as myAuth;
 
 class FullscreenTourPage extends StatefulWidget {
   final Tour tour;
@@ -39,10 +42,12 @@ class _FullscreenTourPageState extends State<FullscreenTourPage> {
   final TtsService _ttsService = TtsService();
   final ScrollController _scrollController = ScrollController();
   List<GlobalKey> _targetKeys = [];
+  int thisUsersRating = 0;
 
 
   @override
   void initState() {
+    thisUsersRating = widget.tour.thisUsersRating ?? 0;
     super.initState();
     _addMarkers();
   }
@@ -280,20 +285,6 @@ class _FullscreenTourPageState extends State<FullscreenTourPage> {
 
   int? currentlyPlayingIndex; // Track the index of the currently playing place
 
-  void _toggleTTS(String description, int index) {
-    if (currentlyPlayingIndex == index) {
-      _ttsService.stop(); // Stop the TTS service if the same button is pressed
-      setState(() {
-        currentlyPlayingIndex = null; // Reset the index
-      });
-    } else {
-      _ttsService.speak(description); // Start speaking
-      setState(() {
-        currentlyPlayingIndex = index; // Set the currently playing index
-      });
-    }
-  }
-
   void _scrollToTarget(int placeIndex) {
     final context = _targetKeys[placeIndex].currentContext;
     if (context != null) {
@@ -308,10 +299,81 @@ class _FullscreenTourPageState extends State<FullscreenTourPage> {
     }
   }
 
+  //TODO unify behavior and UI with tour tile
+  void saveTour() {
+    if (widget.tour.isOfflineCreatedTour) return; // Tour creation tile should not have rating
+
+    TourguideUserProvider tourguideUserProvider = Provider.of(context, listen: false);
+
+    setState(() {
+      tourguideUserProvider.user!.savedTourIds.contains(widget.tour.id)
+          ? tourguideUserProvider.user!.savedTourIds.remove(widget.tour.id)
+          : tourguideUserProvider.user!.savedTourIds.add(widget.tour.id);
+      tourguideUserProvider.updateUser(tourguideUserProvider.user!);
+    });
+  }
+
+  //TODO unify behavior and UI with tour tile
+  void toggleThumbsUp() {
+    if (widget.tour.isOfflineCreatedTour) return; // Tour creation tile should not have rating
+
+    myAuth.AuthProvider authProvider = Provider.of(context, listen: false);
+
+    setState(() {
+      if (thisUsersRating == 1) {
+        // Cancel upvote
+        thisUsersRating = 0;
+        widget.tour.upvotes--; // Decrease upvotes
+      } else {
+        // Upvote
+        if (thisUsersRating == -1) {
+          widget.tour.downvotes--; // Cancel downvote if any
+        }
+        thisUsersRating = 1;
+        widget.tour.upvotes++; // Increase upvotes
+      }
+      TourService.addOrUpdateRating(widget.tour.id, thisUsersRating, authProvider.user!.uid);
+    });
+  }
+
+  //TODO unify behavior and UI with tour tile
+  void toggleThumbsDown() {
+    if (widget.tour.isOfflineCreatedTour) return; // Tour creation tile should not have rating
+
+    myAuth.AuthProvider authProvider = Provider.of(context, listen: false);
+
+    setState(() {
+      if (thisUsersRating == -1) {
+        // Cancel downvote
+        thisUsersRating = 0;
+        widget.tour.downvotes--; // Decrease downvotes
+      } else {
+        // Downvote
+        if (thisUsersRating == 1) {
+          widget.tour.upvotes--; // Cancel upvote if any
+        }
+        thisUsersRating = -1;
+        widget.tour.downvotes++; // Increase downvotes
+      }
+      TourService.addOrUpdateRating(widget.tour.id, thisUsersRating, authProvider.user!.uid);
+    });
+  }
+
+  //TODO unify behavior and UI with tour tile
+  void startTour() {
+    TourProvider tourProvider = Provider.of<TourProvider>(context, listen: false);
+    tourProvider.selectTourById(widget.tour.id);
+    // Navigate to the fullscreen tour page
+    TourguideNavigation.router.push(
+      TourguideNavigation.tourRunningPath,
+    );
+  }
+
 
   @override
   Widget build(BuildContext context) {
     final tourProvider = Provider.of<TourProvider>(context);
+    final tourguideUserProvider = Provider.of<TourguideUserProvider>(context);
 
     bool showMap = widget.tour.latitude != null && widget.tour.latitude != 0 && widget.tour.longitude != null && widget.tour.longitude != 0;
     if (showMap && _currentCameraPosition.target == LatLng(0, 0)) {
@@ -420,6 +482,77 @@ class _FullscreenTourPageState extends State<FullscreenTourPage> {
                             widget.tour.description,
                             style: Theme.of(context).textTheme.bodyMedium,
                           ),
+                        ),
+                      ],
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Container(
+                          width: MediaQuery.of(context).size.width * 0.5,
+                          child:
+                            ElevatedButton(
+                              onPressed: widget.tour.isOfflineCreatedTour ? null : startTour,
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Theme.of(context).primaryColor, // background
+                                foregroundColor: Colors.white, // foreground
+                              ),
+                              child: Text("Start"),),
+                        ),
+                        Row(
+                          children: [
+                            ElevatedButton(
+                              onPressed: widget.tour.isOfflineCreatedTour ? null : saveTour,
+                              style: ElevatedButton.styleFrom(
+                                shape: CircleBorder(),
+                                padding: EdgeInsets.all(0),
+                                foregroundColor:
+                                tourguideUserProvider.user != null && tourguideUserProvider.user!.savedTourIds.contains(widget.tour.id) ?
+                                Theme.of(context).primaryColor : Colors.grey,
+                              ),
+                              child: Icon(Icons.bookmark_rounded), // Replace with your desired icon
+                            ),
+                            Material(
+                              elevation: 1,
+                              color: Color(0xffeff5f3),
+                              borderRadius: BorderRadius.circular(32.0),
+                              child: Padding(
+                                padding: const EdgeInsets.all(2.0),
+                                child: Row(
+                                  children: [
+                                    SizedBox(
+                                      width: 35,
+                                      height: 35,
+                                      child: IconButton(
+                                        onPressed: toggleThumbsUp,
+                                        icon: Icon(Icons.thumb_up, color: thisUsersRating == 1 ? Theme.of(context).primaryColor : Colors.grey),
+                                        iconSize: 18,
+                                        padding: EdgeInsets.all(0),
+                                        constraints: BoxConstraints(),
+                                      ),
+                                    ),
+                                    Text(
+                                      '${(widget.tour.upvotes - widget.tour.downvotes).sign == 1 ? '+' : ''}${widget.tour.upvotes - widget.tour.downvotes}',
+                                      style: Theme.of(context).textTheme.labelMedium,
+                                      overflow: TextOverflow.visible,
+                                      maxLines: 1,
+                                    ),
+                                    SizedBox(
+                                      width: 35,
+                                      height: 35,
+                                      child: IconButton(
+                                        onPressed: toggleThumbsDown,
+                                        icon: Icon(Icons.thumb_down, color: thisUsersRating == -1 ? Theme.of(context).primaryColor : Colors.grey),
+                                        iconSize: 18,
+                                        padding: EdgeInsets.all(0),
+                                        constraints: BoxConstraints(),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                       ],
                     ),

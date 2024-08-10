@@ -222,6 +222,7 @@ class _ExpandedTourTileOverlayState extends State<ExpandedTourTileOverlay> {
     FirebaseAnalytics.instance.logSelectContent(contentType: 'tour_tile', itemId: widget.tour.id);
   }
 
+  //TODO unify behavior and UI with tour details
   void toggleThumbsUp() {
     if (widget.tour.isOfflineCreatedTour) return; // Tour creation tile should not have rating
 
@@ -244,6 +245,7 @@ class _ExpandedTourTileOverlayState extends State<ExpandedTourTileOverlay> {
     });
   }
 
+  //TODO unify behavior and UI with tour details
   void toggleThumbsDown() {
     if (widget.tour.isOfflineCreatedTour) return; // Tour creation tile should not have rating
 
@@ -266,6 +268,7 @@ class _ExpandedTourTileOverlayState extends State<ExpandedTourTileOverlay> {
     });
   }
 
+  //TODO unify behavior and UI with tour details
   void saveTour() {
     if (widget.tour.isOfflineCreatedTour) return; // Tour creation tile should not have rating
 
@@ -279,6 +282,7 @@ class _ExpandedTourTileOverlayState extends State<ExpandedTourTileOverlay> {
     });
   }
 
+  //TODO unify behavior and UI with tour details
   void startTour() {
     TourProvider tourProvider = Provider.of<TourProvider>(context, listen: false);
     tourProvider.selectTourById(widget.tour.id);
