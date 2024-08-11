@@ -299,7 +299,7 @@ class _FullscreenTourPageState extends State<FullscreenTourPage> {
     }
   }
 
-  //TODO unify behavior and UI with tour tile
+  //TODO unify behavior and UI with tour tile and tour running
   void saveTour() {
     if (widget.tour.isOfflineCreatedTour) return; // Tour creation tile should not have rating
 
@@ -313,7 +313,7 @@ class _FullscreenTourPageState extends State<FullscreenTourPage> {
     });
   }
 
-  //TODO unify behavior and UI with tour tile
+  //TODO unify behavior and UI with tour tile and tour running
   void toggleThumbsUp() {
     if (widget.tour.isOfflineCreatedTour) return; // Tour creation tile should not have rating
 
@@ -336,7 +336,7 @@ class _FullscreenTourPageState extends State<FullscreenTourPage> {
     });
   }
 
-  //TODO unify behavior and UI with tour tile
+  //TODO unify behavior and UI with tour tile and tour running
   void toggleThumbsDown() {
     if (widget.tour.isOfflineCreatedTour) return; // Tour creation tile should not have rating
 

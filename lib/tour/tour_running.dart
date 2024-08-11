@@ -18,7 +18,10 @@ import 'package:tourguide_app/utilities/providers/tour_provider.dart';
 import 'package:visibility_detector/visibility_detector.dart';
 import '../utilities/custom_import.dart';
 import 'package:http/http.dart' as http;
+import '../utilities/providers/tourguide_user_provider.dart';
+import '../utilities/services/tour_service.dart';
 import '../utilities/singletons/tts_service.dart';
+import 'package:tourguide_app/utilities/providers/auth_provider.dart' as myAuth;
 
 class TourRunning extends StatefulWidget {
   const TourRunning({Key? key}) : super(key: key);
@@ -46,6 +49,9 @@ class _TourRunningState extends State<TourRunning> {
   bool _initialZoomToFirstWaypointComplete = false;
   List<BitmapDescriptor> _defaultMarkerBitmaps = [];
   List<BitmapDescriptor> _highlightedMarkerBitmaps = [];
+  List<List<LatLng>> _routeSegments = [];
+  int thisUsersRating = 0;
+  bool _tourFinished = false;
 
 
 
@@ -54,6 +60,7 @@ class _TourRunningState extends State<TourRunning> {
     super.initState();
     TourProvider tourProvider = Provider.of<TourProvider>(context, listen: false);
     _tour = tourProvider.selectedTour!;
+    thisUsersRating = _tour.thisUsersRating ?? 0;
     _addMarkers();
   }
 
@@ -102,6 +109,8 @@ class _TourRunningState extends State<TourRunning> {
         ),
       );
     }
+
+    _targetKeys.add(GlobalKey()); //add extra key for finish tour scroll
 
     setState(() {
       _markers = _markers;
@@ -164,7 +173,6 @@ class _TourRunningState extends State<TourRunning> {
 
         if (response.statusCode == 200) {
           Map<String, dynamic> data = jsonDecode(response.body);
-
           // Check the status field
           String status = data['status'];
 
@@ -174,6 +182,16 @@ class _TourRunningState extends State<TourRunning> {
             continue;
           }
           List<LatLng> points = _decodePolyline(data['routes'][0]['overview_polyline']['points']);
+
+          // Convert waypoints to LatLng
+          List<LatLng> waypointLatLngs = _tour.tourguidePlaces
+              .map((place) => LatLng(place.latitude, place.longitude))
+              .toList();
+
+          // Segment the polyline based on the waypoints
+          _routeSegments = _createRouteSegments(points, waypointLatLngs);
+
+          // Initially add the full polyline
           _addPolyline(points);
           break;
         } else {
@@ -184,6 +202,44 @@ class _TourRunningState extends State<TourRunning> {
         attempt++;
       }
     }
+  }
+
+  List<List<LatLng>> _createRouteSegments(List<LatLng> points, List<LatLng> waypoints) {
+    List<List<LatLng>> segments = [];
+    List<int> waypointIndices = _findWaypointIndices(points, waypoints);
+
+    for (int i = 0; i < waypointIndices.length - 1; i++) {
+      int start = waypointIndices[i];
+      int end = waypointIndices[i + 1];
+      segments.add(points.sublist(start, end + 1)); // Include end point
+    }
+
+    // Add the last segment
+    int lastSegmentStart = waypointIndices[waypointIndices.length - 1];
+    segments.add(points.sublist(lastSegmentStart, points.length));
+
+    return segments;
+  }
+
+  List<int> _findWaypointIndices(List<LatLng> points, List<LatLng> waypoints) {
+    List<int> waypointIndices = [];
+
+    for (LatLng waypoint in waypoints) {
+      double minDistance = double.infinity;
+      int closestIndex = 0;
+
+      for (int i = 0; i < points.length; i++) {
+        double distance = MapUtils.calculateDistance(waypoint, points[i]);
+        if (distance < minDistance) {
+          minDistance = distance;
+          closestIndex = i;
+        }
+      }
+
+      waypointIndices.add(closestIndex);
+    }
+
+    return waypointIndices;
   }
 
   List<LatLng> _decodePolyline(String encoded) {
@@ -373,13 +429,106 @@ class _TourRunningState extends State<TourRunning> {
 
       // Move the camera to the bounds
       mapController.animateCamera(CameraUpdate.newLatLngBounds(bounds, 100)); // The padding is set to 100
+
+      _highlightSegment(index-1);
     }
+  }
+
+  void _highlightSegment(int segmentIndex) {
+    // Clear existing polylines
+    _polylines.clear();
+    Color colPrimary = const Color(0xff006a65);
+
+    // Add non-highlighted segments
+    for (int i = 0; i < _routeSegments.length; i++) {
+      _polylines.add(
+        Polyline(
+          polylineId: PolylineId('Segment_$i'),
+          color: i == segmentIndex ? colPrimary : Colors.blue,
+          width: 5,
+          points: _routeSegments[i],
+        ),
+      );
+    }
+
+    setState(() {
+      _polylines = _polylines;
+    });
+  }
+
+  void _finishTour(){
+    logger.i('Tour Finished');
+    setState(() {
+      _tourFinished = true;
+    });
+    _scrollToTarget(_tour.tourguidePlaces.length, delay: true);
+  }
+
+  //TODO unify behavior and UI with tour tile and tour details
+  void saveTour() {
+    if (_tour.isOfflineCreatedTour) return; // Tour creation tile should not have rating
+
+    TourguideUserProvider tourguideUserProvider = Provider.of(context, listen: false);
+
+    setState(() {
+      tourguideUserProvider.user!.savedTourIds.contains(_tour.id)
+          ? tourguideUserProvider.user!.savedTourIds.remove(_tour.id)
+          : tourguideUserProvider.user!.savedTourIds.add(_tour.id);
+      tourguideUserProvider.updateUser(tourguideUserProvider.user!);
+    });
+  }
+
+  //TODO unify behavior and UI with tour tile and tour details
+  void toggleThumbsUp() {
+    if (_tour.isOfflineCreatedTour) return; // Tour creation tile should not have rating
+
+    myAuth.AuthProvider authProvider = Provider.of(context, listen: false);
+
+    setState(() {
+      if (thisUsersRating == 1) {
+        // Cancel upvote
+        thisUsersRating = 0;
+        _tour.upvotes--; // Decrease upvotes
+      } else {
+        // Upvote
+        if (thisUsersRating == -1) {
+          _tour.downvotes--; // Cancel downvote if any
+        }
+        thisUsersRating = 1;
+        _tour.upvotes++; // Increase upvotes
+      }
+      TourService.addOrUpdateRating(_tour.id, thisUsersRating, authProvider.user!.uid);
+    });
+  }
+
+  //TODO unify behavior and UI with tour tile and tour details
+  void toggleThumbsDown() {
+    if (_tour.isOfflineCreatedTour) return; // Tour creation tile should not have rating
+
+    myAuth.AuthProvider authProvider = Provider.of(context, listen: false);
+
+    setState(() {
+      if (thisUsersRating == -1) {
+        // Cancel downvote
+        thisUsersRating = 0;
+        _tour.downvotes--; // Decrease downvotes
+      } else {
+        // Downvote
+        if (thisUsersRating == 1) {
+          _tour.upvotes--; // Cancel upvote if any
+        }
+        thisUsersRating = -1;
+        _tour.downvotes++; // Increase downvotes
+      }
+      TourService.addOrUpdateRating(_tour.id, thisUsersRating, authProvider.user!.uid);
+    });
   }
 
 
   @override
   Widget build(BuildContext context) {
     final tourProvider = Provider.of<TourProvider>(context);
+    final tourguideUserProvider = Provider.of<TourguideUserProvider>(context);
 
     bool showMap = _tour.latitude != null && _tour.latitude != 0 && _tour.longitude != null && _tour.longitude != 0;
     if (showMap && _currentCameraPosition.target == LatLng(0, 0)) {
@@ -656,7 +805,7 @@ class _TourRunningState extends State<TourRunning> {
                                                   ),
                                                 const SizedBox(width: 24), // Add spacing between buttons if needed
                                                 TextButton(
-                                                  onPressed: controlsDetails.onStepContinue,
+                                                  onPressed: _currentStep != _tour.tourguidePlaces.length-1 ? controlsDetails.onStepContinue : !_tourFinished ? _finishTour : null,
                                                   style: ElevatedButton.styleFrom(
                                                     backgroundColor: Theme.of(context).colorScheme.primary,
                                                     foregroundColor: Colors.white,
@@ -698,12 +847,34 @@ class _TourRunningState extends State<TourRunning> {
                                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                               children: [
                                                 Flexible(
-                                                  child: Text(
-                                                    "${index+1}.  ${place.title}",
-                                                    style: Theme.of(context).textTheme.titleMedium,
-                                                    maxLines: 2,
-                                                    overflow: TextOverflow.ellipsis,
+                                                  child: Row(
+                                                    children: [
+                                                      Text(
+                                                        "${index+1}. ",
+                                                        style: Theme.of(context).textTheme.titleMedium,
+                                                        maxLines: 2,
+                                                        overflow: TextOverflow.ellipsis,
+                                                      ),
+                                                      SizedBox(width: 8.0),
+                                                      Flexible(
+                                                        child: Text(
+                                                          "${place.title}",
+                                                          style: Theme.of(context).textTheme.titleMedium,
+                                                          maxLines: 2,
+                                                          overflow: TextOverflow.ellipsis,
+                                                        ),
+                                                      ),
+                                                    ],
                                                   ),
+                                                ),
+                                                Row(
+                                                  mainAxisAlignment: MainAxisAlignment.end,
+                                                  children: [
+                                                    IconButton(
+                                                      onPressed: () => MapUtils.openMapWithQuery(place.title),
+                                                      icon: Icon(Icons.directions),
+                                                    ),
+                                                  ],
                                                 ),
                                                 IconButton(
                                                   onPressed: () => _toggleTTS(place.description, index),
@@ -738,6 +909,72 @@ class _TourRunningState extends State<TourRunning> {
                                   }).toList(),
                                 ),
                               ),
+                            Visibility(
+                              visible: _tourFinished,
+                              child: Column(
+                                children: [
+                                  Text(key: _targetKeys.isNotEmpty && _targetKeys.length > _tour.tourguidePlaces.length ? _targetKeys[_targetKeys.length-1] : null, 'We hope you\'ve enjoyed this tour!', style: Theme.of(context).textTheme.bodyMedium),
+                                  SizedBox(height: 32.0),
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      ElevatedButton(
+                                        onPressed: _tour.isOfflineCreatedTour ? null : saveTour,
+                                        style: ElevatedButton.styleFrom(
+                                          shape: CircleBorder(),
+                                          padding: EdgeInsets.all(0),
+                                          foregroundColor:
+                                          tourguideUserProvider.user != null && tourguideUserProvider.user!.savedTourIds.contains(_tour.id) ?
+                                          Theme.of(context).primaryColor : Colors.grey,
+                                        ),
+                                        child: Icon(Icons.bookmark_rounded), // Replace with your desired icon
+                                      ),
+                                      Material(
+                                        elevation: 1,
+                                        color: Color(0xffeff5f3),
+                                        borderRadius: BorderRadius.circular(32.0),
+                                        child: Padding(
+                                          padding: const EdgeInsets.all(2.0),
+                                          child: Row(
+                                            children: [
+                                              SizedBox(
+                                                width: 35,
+                                                height: 35,
+                                                child: IconButton(
+                                                  onPressed: toggleThumbsUp,
+                                                  icon: Icon(Icons.thumb_up, color: thisUsersRating == 1 ? Theme.of(context).primaryColor : Colors.grey),
+                                                  iconSize: 18,
+                                                  padding: EdgeInsets.all(0),
+                                                  constraints: BoxConstraints(),
+                                                ),
+                                              ),
+                                              Text(
+                                                '${(_tour.upvotes - _tour.downvotes).sign == 1 ? '+' : ''}${_tour.upvotes - _tour.downvotes}',
+                                                style: Theme.of(context).textTheme.labelMedium,
+                                                overflow: TextOverflow.visible,
+                                                maxLines: 1,
+                                              ),
+                                              SizedBox(
+                                                width: 35,
+                                                height: 35,
+                                                child: IconButton(
+                                                  onPressed: toggleThumbsDown,
+                                                  icon: Icon(Icons.thumb_down, color: thisUsersRating == -1 ? Theme.of(context).primaryColor : Colors.grey),
+                                                  iconSize: 18,
+                                                  padding: EdgeInsets.all(0),
+                                                  constraints: BoxConstraints(),
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  SizedBox(height: 32.0),
+                                ],
+                              ),
+                            ),
                             if (!_tour.isOfflineCreatedTour)
                               Padding(
                                 padding: const EdgeInsets.symmetric(horizontal: 16.0),

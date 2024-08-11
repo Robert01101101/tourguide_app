@@ -106,4 +106,11 @@ class MapUtils {
       northeast: LatLng(north, east),
     );
   }
+
+  static double calculateDistance(LatLng point1, LatLng point2) {
+    // You can use Haversine formula or simple Euclidean distance for close points
+    double dx = point1.latitude - point2.latitude;
+    double dy = point1.longitude - point2.longitude;
+    return dx * dx + dy * dy;
+  }
 }
