@@ -187,7 +187,9 @@ class ExploreState extends State<Explore> {
     TourProvider tourProvider = Provider.of<TourProvider>(context);
 
     Future<void> refresh() async {
+      LocationProvider locationProvider = Provider.of<LocationProvider>(context, listen: false);
       if (!tourProvider.isLoadingTours){
+        await locationProvider.refreshCurrentLocation();
         await downloadTours();
       }
     }

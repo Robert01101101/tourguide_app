@@ -101,6 +101,13 @@ class LocationProvider with ChangeNotifier {
     }
   }
 
+  Future<void> refreshCurrentLocation() async {
+    logger.t("LocationProvider.refreshCurrentLocation()");
+    await getCurrentLocation();
+    await fetchPlacePhoto();
+    notifyListeners();
+  }
+
   Future<void> _getLocationDetailsFromCoordinates(Position position) async {
     try {
       //logger.t("LocationProvider._getLocationDetailsFromCoordinates()");
@@ -309,7 +316,11 @@ class LocationProvider with ChangeNotifier {
       // Check if the image is already cached in memory
       if (_imageCache.containsKey(placeId!)) {
         logger.t("locationProvider._fetchPlacePhoto() - found photo in cache for $placeId");
-        return _imageCache[placeId!];
+        if (setAsCurrentImage){
+          _currentPlaceImg = _imageCache[placeId!];
+          notifyListeners();
+        }
+        return _currentPlaceImg;
       }
 
       // Get the directory to store the image and metadata
