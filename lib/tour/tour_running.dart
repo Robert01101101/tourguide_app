@@ -102,7 +102,7 @@ class _TourRunningState extends State<TourRunning> {
             snippet: tourguidePlace.description,
             onTap: () {
               // Handle marker tap
-              _scrollToTarget(i);
+              _setStep(i);
               logger.i('Marker tapped: ${tourguidePlace.title}');
             },
           ),
@@ -478,6 +478,19 @@ class _TourRunningState extends State<TourRunning> {
     });
   }
 
+  void _setStep(int step){
+    setState(() {
+      if (_currentStep == step) {
+        _currentStepVisible = !_currentStepVisible;
+      } else {
+        _currentStepVisible = true;
+      }
+      _currentStep = step;
+    });
+    _scrollToTarget(_currentStep, delay: true);
+    _moveCameraToMarkerAndHighlightMarker(_currentStep);
+  }
+
   //TODO unify behavior and UI with tour tile and tour details
   void toggleThumbsUp() {
     if (_tour.isOfflineCreatedTour) return; // Tour creation tile should not have rating
@@ -745,16 +758,7 @@ class _TourRunningState extends State<TourRunning> {
                                 currentStep: _currentStep,
                                 physics: ClampingScrollPhysics(),
                                 onStepTapped: (step) {
-                                  setState(() {
-                                    if (_currentStep == step) {
-                                      _currentStepVisible = !_currentStepVisible;
-                                    } else {
-                                      _currentStepVisible = true;
-                                    }
-                                    _currentStep = step;
-                                  });
-                                  _scrollToTarget(_currentStep, delay: true);
-                                  _moveCameraToMarkerAndHighlightMarker(_currentStep);
+                                  _setStep(step);
                                 },
                                 onStepContinue: () {
                                   if (_currentStep < _tour.tourguidePlaces.length) {

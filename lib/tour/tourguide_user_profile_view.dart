@@ -63,7 +63,7 @@ class _TourguideUserProfileViewState extends State<TourguideUserProfileView> {
               label: 'Block User',
               leftIcon: Icons.block,
               onPressed: (){},
-              disabled: true,//isCurrentUser,
+              disabled: true,//isCurrentUser, //TODO
             ),
             ProfileListButton(
               label: 'Report User',
