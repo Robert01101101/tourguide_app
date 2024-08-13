@@ -102,7 +102,7 @@ class _TourRunningState extends State<TourRunning> {
             snippet: tourguidePlace.description,
             onTap: () {
               // Handle marker tap
-              _scrollToTarget(i);
+              _setStep(i);
               logger.i('Marker tapped: ${tourguidePlace.title}');
             },
           ),
@@ -478,6 +478,19 @@ class _TourRunningState extends State<TourRunning> {
     });
   }
 
+  void _setStep(int step){
+    setState(() {
+      if (_currentStep == step) {
+        _currentStepVisible = !_currentStepVisible;
+      } else {
+        _currentStepVisible = true;
+      }
+      _currentStep = step;
+    });
+    _scrollToTarget(_currentStep, delay: true);
+    _moveCameraToMarkerAndHighlightMarker(_currentStep);
+  }
+
   //TODO unify behavior and UI with tour tile and tour details
   void toggleThumbsUp() {
     if (_tour.isOfflineCreatedTour) return; // Tour creation tile should not have rating
@@ -548,533 +561,523 @@ class _TourRunningState extends State<TourRunning> {
             });
           }
         },
-        child: CustomScrollView(
-          controller: _scrollController,
-          slivers: [
-            SliverAppBar(
-              title: Text(_tour.name),
-              actions: [
-                if (!_tour.isOfflineCreatedTour)
-                  IconButton(
-                    icon: Icon(Icons.more_vert),
-                    onPressed: () {
-                      _showOptionsDialog(context);
-                    },
+        child: Stack(
+          children: [CustomScrollView(
+            controller: _scrollController,
+            slivers: [
+              SliverAppBar(
+                title: Text(_tour.name),
+                actions: [
+                  if (!_tour.isOfflineCreatedTour)
+                    IconButton(
+                      icon: Icon(Icons.more_vert),
+                      onPressed: () {
+                        _showOptionsDialog(context);
+                      },
+                    ),
+                ],
+                leading: _isFullScreen
+                    ? IconButton(
+                  icon: Icon(Icons.arrow_back),
+                  onPressed: () {
+                    setState(() {
+                      _isFullScreen = false;
+                    });
+                  },
+                )
+                    : null,
+                floating: true,
+                pinned: false,
+                snap: true,
+                /*expandedHeight: 200.0,
+                flexibleSpace: FlexibleSpaceBar(
+                  background: Image.network(
+                    _tour.imageUrl,
+                    fit: BoxFit.cover,
                   ),
-              ],
-              leading: _isFullScreen
-                  ? IconButton(
-                icon: Icon(Icons.arrow_back),
-                onPressed: () {
-                  setState(() {
-                    _isFullScreen = false;
-                  });
-                },
-              )
-                  : null,
-              floating: true,
-              pinned: false,
-              snap: true,
-              /*expandedHeight: 200.0,
-              flexibleSpace: FlexibleSpaceBar(
-                background: Image.network(
-                  _tour.imageUrl,
-                  fit: BoxFit.cover,
-                ),
-              ),*/
-            ),
-            SliverToBoxAdapter(
-              child: Stack(
-                children: [
-                  StandardLayout(
-                    children: [
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Stack(
-                            children: [
-                              Container(
-                                height: 230,
-                                child: ClipRRect(
-                                  child: _tour.imageFile != null  //add null safety for img to upload
-                                    ? Image.file(_tour.imageFile!,
-                                    width: MediaQuery.of(context).size.width,
-                                    height: 200.0,
-                                    fit: BoxFit.cover)
-                                    :
-                                    Container(
-                                      color: Colors.grey,
+                ),*/
+              ),
+              SliverToBoxAdapter(
+                child: Stack(
+                  children: [
+                    StandardLayout(
+                      children: [
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Stack(
+                              children: [
+                                Container(
+                                  height: 230,
+                                  child: ClipRRect(
+                                    child: _tour.imageFile != null  //add null safety for img to upload
+                                      ? Image.file(_tour.imageFile!,
                                       width: MediaQuery.of(context).size.width,
                                       height: 200.0,
+                                      fit: BoxFit.cover)
+                                      :
+                                      Container(
+                                        color: Colors.grey,
+                                        width: MediaQuery.of(context).size.width,
+                                        height: 200.0,
+                                    ),
                                   ),
                                 ),
-                              ),
-                              if (tourProvider.isUserCreatedTour(_tour))
-                                Align(
-                                  alignment: Alignment.topRight,
-                                  child: Padding(
-                                    padding: EdgeInsets.all(8.0),
-                                    child: Row(
-                                      mainAxisAlignment: MainAxisAlignment.end,
-                                      children: [
-                                        if (_tour.reports.isNotEmpty)
+                                if (tourProvider.isUserCreatedTour(_tour))
+                                  Align(
+                                    alignment: Alignment.topRight,
+                                    child: Padding(
+                                      padding: EdgeInsets.all(8.0),
+                                      child: Row(
+                                        mainAxisAlignment: MainAxisAlignment.end,
+                                        children: [
+                                          if (_tour.reports.isNotEmpty)
+                                            const CircleAvatar(
+                                              radius: 16,
+                                              backgroundColor: Colors.black45,
+                                              child: Icon(
+                                                Icons.report_outlined,
+                                                color: Colors.yellow,
+                                                size: 22,),
+                                            ),
                                           const CircleAvatar(
                                             radius: 16,
                                             backgroundColor: Colors.black45,
                                             child: Icon(
-                                              Icons.report_outlined,
-                                              color: Colors.yellow,
-                                              size: 22,),
+                                              Icons.attribution,
+                                              color: Colors.white,),
                                           ),
-                                        const CircleAvatar(
-                                          radius: 16,
-                                          backgroundColor: Colors.black45,
-                                          child: Icon(
-                                            Icons.attribution,
-                                            color: Colors.white,),
-                                        ),
-                                      ],
+                                        ],
+                                      ),
                                     ),
                                   ),
-                                ),
-                              ],
-                            ),
-                          const SizedBox(height: 16.0),
-                          Container(
-                            height: 105,
-                            child: Text(
-                              _tour.description,
-                              style: Theme.of(context).textTheme.bodyMedium,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-            SliverPinnedHeader(
-              child:
-                Container(
-                  height: 350.0, // Adjust height as needed
-                  child: Stack(
-                    children: [
-                      if (showMap)
-                      GoogleMap(
-                        gestureRecognizers: {
-                          Factory<OneSequenceGestureRecognizer>(() => EagerGestureRecognizer())
-                        },
-                        mapType: MapType.normal,
-                        initialCameraPosition: _currentCameraPosition,
-                        markers: _markers,
-                        polylines: _polylines,
-                        onMapCreated: (GoogleMapController controller) async {
-                          if (!_mapControllerCompleter.isCompleted) {
-                            _mapControllerCompleter.complete(controller);
-                          } else {
-                            final GoogleMapController mapController = await _mapControllerCompleter.future;
-                            mapController.moveCamera(CameraUpdate.newCameraPosition(_currentCameraPosition));
-                          }
-                          await Future.delayed(const Duration(milliseconds: 200)); //avoid flicker
-                          setState(() {
-                            _isLoading = false;
-                          });
-                        },
-                        onCameraMove: (CameraPosition position) {
-                          _currentCameraPosition = position;
-                        },
-                      ),
-                      if (_isLoading)
-                        Container(
-                          color: Color(0xffe8eaed),
-                          child: Center(
-                            child: CircularProgressIndicator(),
-                          ),
-                        ),
-                      if (!_isLoading)
-                        Positioned(
-                          bottom: 120,
-                          right: 10,
-                          child: SizedBox(
-                            width: 42,
-                            height: 42,
-                            child: RawMaterialButton(
-                              onPressed: () async {
-                                final controller = await _mapControllerCompleter.future;
-                                setState(() {
-                                  _isFullScreen = !_isFullScreen;
-                                  _isLoadingFullscreen = true;
-                                });
-                                controller.moveCamera(
-                                  CameraUpdate.newCameraPosition(_currentCameraPosition),
-                                );
-                              },
-                              elevation: 1.0,
-                              fillColor: Colors.white.withOpacity(0.9),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(8.0), // Adjust the radius as needed
+                                ],
                               ),
-                              child: Padding(
-                                padding: const EdgeInsets.all(1.0), // Adjust inner padding as needed
-                                child: Icon(
-                                  _isFullScreen ? Icons.fullscreen_exit : Icons.fullscreen,
-                                  color: const Color(0xff666666),
-                                  size: 32.0, // Adjust the size of the icon as needed
-                                ),
+                            const SizedBox(height: 16.0),
+                            Container(
+                              height: 105,
+                              child: Text(
+                                _tour.description,
+                                style: Theme.of(context).textTheme.bodyMedium,
                               ),
                             ),
-                          ),
+                          ],
                         ),
-                    ],
-                  ),
+                      ],
+                    ),
+                  ],
                 ),
-            ),
-            SliverToBoxAdapter(
-              child: Stack(
-                children: [
-                  StandardLayout(
-                    children: [
-                      StandardLayoutChild(
-                        fullWidth: true,
-                        child: Column( //wrap in columnn to remove gap between stepper and bottom row, since stepper has a lot of margin by default
-                          children: [
-                            if (_tour.tourguidePlaces.isNotEmpty)
-                              Transform.translate( // Move the stepper up to hide top margin, seems to be the easiest way to achieve it
-                                offset: Offset(0, -32),
-                                child: Stepper(
-                                  currentStep: _currentStep,
-                                  physics: ClampingScrollPhysics(),
-                                  onStepTapped: (step) {
+              ),
+              SliverPinnedHeader(
+                child:
+                  Container(
+                    height: 350.0, // Adjust height as needed
+                    child: Stack(
+                      children: [
+                        if (showMap)
+                        GoogleMap(
+                          gestureRecognizers: {
+                            Factory<OneSequenceGestureRecognizer>(() => EagerGestureRecognizer())
+                          },
+                          mapType: MapType.normal,
+                          initialCameraPosition: _currentCameraPosition,
+                          markers: _markers,
+                          polylines: _polylines,
+                          onMapCreated: (GoogleMapController controller) async {
+                            if (!_mapControllerCompleter.isCompleted) {
+                              _mapControllerCompleter.complete(controller);
+                            } else {
+                              final GoogleMapController mapController = await _mapControllerCompleter.future;
+                              mapController.moveCamera(CameraUpdate.newCameraPosition(_currentCameraPosition));
+                            }
+                            await Future.delayed(const Duration(milliseconds: 200)); //avoid flicker
+                            setState(() {
+                              _isLoading = false;
+                            });
+                          },
+                          onCameraMove: (CameraPosition position) {
+                            _currentCameraPosition = position;
+                          },
+                        ),
+                        if (_isLoading)
+                          Container(
+                            color: Color(0xffe8eaed),
+                            child: Center(
+                              child: CircularProgressIndicator(),
+                            ),
+                          ),
+                        if (!_isLoading)
+                          Positioned(
+                            bottom: 120,
+                            right: 10,
+                            child: SizedBox(
+                              width: 42,
+                              height: 42,
+                              child: RawMaterialButton(
+                                onPressed: () async {
+                                  final controller = await _mapControllerCompleter.future;
+                                  setState(() {
+                                    _isFullScreen = !_isFullScreen;
+                                    _isLoadingFullscreen = true;
+                                  });
+                                  controller.moveCamera(
+                                    CameraUpdate.newCameraPosition(_currentCameraPosition),
+                                  );
+                                },
+                                elevation: 1.0,
+                                fillColor: Colors.white.withOpacity(0.9),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(8.0), // Adjust the radius as needed
+                                ),
+                                child: Padding(
+                                  padding: const EdgeInsets.all(1.0), // Adjust inner padding as needed
+                                  child: Icon(
+                                    _isFullScreen ? Icons.fullscreen_exit : Icons.fullscreen,
+                                    color: const Color(0xff666666),
+                                    size: 32.0, // Adjust the size of the icon as needed
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
+              ),
+              SliverToBoxAdapter(
+                child: StandardLayout(
+                  children: [
+                    StandardLayoutChild(
+                      fullWidth: true,
+                      child: Column( //wrap in columnn to remove gap between stepper and bottom row, since stepper has a lot of margin by default
+                        children: [
+                          if (_tour.tourguidePlaces.isNotEmpty)
+                            Transform.translate( // Move the stepper up to hide top margin, seems to be the easiest way to achieve it
+                              offset: Offset(0, -32),
+                              child: Stepper(
+                                currentStep: _currentStep,
+                                physics: ClampingScrollPhysics(),
+                                onStepTapped: (step) {
+                                  _setStep(step);
+                                },
+                                onStepContinue: () {
+                                  if (_currentStep < _tour.tourguidePlaces.length) {
                                     setState(() {
-                                      if (_currentStep == step) {
-                                        _currentStepVisible = !_currentStepVisible;
-                                      } else {
-                                        _currentStepVisible = true;
-                                      }
-                                      _currentStep = step;
+                                      _currentStep += 1;
                                     });
                                     _scrollToTarget(_currentStep, delay: true);
                                     _moveCameraToMarkerAndHighlightMarker(_currentStep);
-                                  },
-                                  onStepContinue: () {
-                                    if (_currentStep < _tour.tourguidePlaces.length) {
-                                      setState(() {
-                                        _currentStep += 1;
-                                      });
-                                      _scrollToTarget(_currentStep, delay: true);
-                                      _moveCameraToMarkerAndHighlightMarker(_currentStep);
-                                    }
-                                  },
-                                  onStepCancel: () {
-                                    if (_currentStep > 0) {
-                                      setState(() {
-                                        _currentStep -= 1;
-                                      });
-                                      _scrollToTarget(_currentStep, delay: true);
-                                      _moveCameraToMarkerAndHighlightMarker(_currentStep);
-                                    }
-                                  },
-                                  controller: _scrollController,
-                                  controlsBuilder: (BuildContext context, ControlsDetails controlsDetails) {
-                                    return Stack(
-                                      children: [
-                                        Visibility(
-                                            visible: !_currentStepVisible,
-                                            child: Container()),
-                                        Visibility(
-                                          visible: _currentStepVisible,
-                                          child: Padding(
-                                            padding: const EdgeInsets.all(8.0),
-                                            child: Row(
-                                              children: <Widget>[
-                                                const SizedBox(width: 8),
-                                                if (_currentStep > 0)
-                                                  TextButton(
-                                                    onPressed: controlsDetails.onStepCancel,
-                                                    style: ElevatedButton.styleFrom(
-                                                      elevation: 0,
-                                                      backgroundColor: Colors.transparent,
-                                                      foregroundColor: Colors.grey[700],
-                                                      //primary: Colors.blue, // Custom color for "Continue" button
-                                                      shape: RoundedRectangleBorder(
-                                                        borderRadius: BorderRadius.circular(3.0), // Custom radius
-                                                      ),
-                                                    ),
-                                                    child: const Text('Previous Place'),
-                                                  ),
-                                                const SizedBox(width: 24), // Add spacing between buttons if needed
+                                  }
+                                },
+                                onStepCancel: () {
+                                  if (_currentStep > 0) {
+                                    setState(() {
+                                      _currentStep -= 1;
+                                    });
+                                    _scrollToTarget(_currentStep, delay: true);
+                                    _moveCameraToMarkerAndHighlightMarker(_currentStep);
+                                  }
+                                },
+                                controller: _scrollController,
+                                controlsBuilder: (BuildContext context, ControlsDetails controlsDetails) {
+                                  return Stack(
+                                    children: [
+                                      Visibility(
+                                          visible: !_currentStepVisible,
+                                          child: Container()),
+                                      Visibility(
+                                        visible: _currentStepVisible,
+                                        child: Padding(
+                                          padding: const EdgeInsets.all(8.0),
+                                          child: Row(
+                                            children: <Widget>[
+                                              const SizedBox(width: 8),
+                                              if (_currentStep > 0)
                                                 TextButton(
-                                                  onPressed: _currentStep != _tour.tourguidePlaces.length-1 ? controlsDetails.onStepContinue : !_tourFinished ? _finishTour : null,
+                                                  onPressed: controlsDetails.onStepCancel,
                                                   style: ElevatedButton.styleFrom(
-                                                    backgroundColor: Theme.of(context).colorScheme.primary,
-                                                    foregroundColor: Colors.white,
-                                                    //primary: Colors.grey, // Custom color for "Back" button
+                                                    elevation: 0,
+                                                    backgroundColor: Colors.transparent,
+                                                    foregroundColor: Colors.grey[700],
+                                                    //primary: Colors.blue, // Custom color for "Continue" button
                                                     shape: RoundedRectangleBorder(
                                                       borderRadius: BorderRadius.circular(3.0), // Custom radius
                                                     ),
                                                   ),
-                                                  child: _currentStep != _tour.tourguidePlaces.length-1 ? const Text('Next Place') : const Text('Finish Tour'),
+                                                  child: const Text('Previous Place'),
                                                 ),
-                                                Spacer(),
-                                                /*if (_currentStep == 1)
-                                                  IconButton(
-                                                      padding: EdgeInsets.all(10),
-                                                      onPressed: (){},
-                                                      icon: Icon(Icons.map))*/
-                                              ],
-                                            ),
-                                          ),
-                                        ),
-                                      ],
-                                    );
-
-                                  },
-                                  margin: EdgeInsets.zero,
-                                  steps: _tour.tourguidePlaces.asMap().entries.map((entry) {
-                                    int index = entry.key;
-                                    var place = entry.value;
-                                    return Step(
-                                      title: Text(key: _targetKeys.isNotEmpty && _targetKeys.length > index ? _targetKeys[index] : null, place.title),
-                                      isActive: _currentStep >= (index),
-                                      state: _currentStep > (index) ? StepState.complete : StepState.indexed,
-                                      content: Visibility(
-                                        visible: _currentStepVisible,
-                                        child: Column(
-                                          crossAxisAlignment: CrossAxisAlignment.start,
-                                          children: [
-                                            Row(//Title Row
-                                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                              children: [
-                                                Flexible(
-                                                  child: Row(
-                                                    children: [
-                                                      Text(
-                                                        "${index+1}. ",
-                                                        style: Theme.of(context).textTheme.titleMedium,
-                                                        maxLines: 2,
-                                                        overflow: TextOverflow.ellipsis,
-                                                      ),
-                                                      SizedBox(width: 8.0),
-                                                      Flexible(
-                                                        child: Text(
-                                                          "${place.title}",
-                                                          style: Theme.of(context).textTheme.titleMedium,
-                                                          maxLines: 2,
-                                                          overflow: TextOverflow.ellipsis,
-                                                        ),
-                                                      ),
-                                                    ],
+                                              const SizedBox(width: 24), // Add spacing between buttons if needed
+                                              TextButton(
+                                                onPressed: _currentStep != _tour.tourguidePlaces.length-1 ? controlsDetails.onStepContinue : !_tourFinished ? _finishTour : null,
+                                                style: ElevatedButton.styleFrom(
+                                                  backgroundColor: Theme.of(context).colorScheme.primary,
+                                                  foregroundColor: Colors.white,
+                                                  //primary: Colors.grey, // Custom color for "Back" button
+                                                  shape: RoundedRectangleBorder(
+                                                    borderRadius: BorderRadius.circular(3.0), // Custom radius
                                                   ),
                                                 ),
-                                                Row(
-                                                  mainAxisAlignment: MainAxisAlignment.end,
-                                                  children: [
-                                                    IconButton(
-                                                      onPressed: () => MapUtils.openMapWithQuery(place.title),
-                                                      icon: Icon(Icons.directions),
-                                                    ),
-                                                  ],
-                                                ),
+                                                child: _currentStep != _tour.tourguidePlaces.length-1 ? const Text('Next Place') : const Text('Finish Tour'),
+                                              ),
+                                              Spacer(),
+                                              /*if (_currentStep == 1)
                                                 IconButton(
-                                                  onPressed: () => _toggleTTS(place.description, index),
-                                                  icon: Icon(currentlyPlayingIndex == index ? Icons.stop : Icons.play_circle,),
-                                                ),
-                                              ],
-                                            ),
-                                            SizedBox(height: 6.0),
-                                            VisibilityDetector(
-                                              key: Key('place$index'),
-                                              onVisibilityChanged: (VisibilityInfo info) {
-                                                if (info.visibleFraction == 1) {
-                                                  if (!_initialZoomToFirstWaypointComplete) {
-                                                    logger.t('Place $index visibility: ${info.visibleFraction} - > _initialZoomToFirstWaypoint');
-                                                    _initialZoomToFirstWaypointComplete = true;
-                                                    _moveCameraToMarkerAndHighlightMarker(0);
-                                                  }
-                                                }
-                                              },
-                                              child: Text(
-                                                place.description, // Assuming each place has a 'description' field
-                                                style: Theme.of(context).textTheme.bodyMedium,
-                                                softWrap: true,
-                                                maxLines: null,
-                                                overflow: TextOverflow.visible,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    );
-                                  }).toList(),
-                                ),
-                              ),
-                            Visibility(
-                              visible: _tourFinished,
-                              child: Column(
-                                children: [
-                                  Text(key: _targetKeys.isNotEmpty && _targetKeys.length > _tour.tourguidePlaces.length ? _targetKeys[_targetKeys.length-1] : null, 'We hope you\'ve enjoyed this tour!', style: Theme.of(context).textTheme.bodyMedium),
-                                  SizedBox(height: 32.0),
-                                  Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      ElevatedButton(
-                                        onPressed: _tour.isOfflineCreatedTour ? null : saveTour,
-                                        style: ElevatedButton.styleFrom(
-                                          shape: CircleBorder(),
-                                          padding: EdgeInsets.all(0),
-                                          foregroundColor:
-                                          tourguideUserProvider.user != null && tourguideUserProvider.user!.savedTourIds.contains(_tour.id) ?
-                                          Theme.of(context).primaryColor : Colors.grey,
-                                        ),
-                                        child: Icon(Icons.bookmark_rounded), // Replace with your desired icon
-                                      ),
-                                      Material(
-                                        elevation: 1,
-                                        color: Color(0xffeff5f3),
-                                        borderRadius: BorderRadius.circular(32.0),
-                                        child: Padding(
-                                          padding: const EdgeInsets.all(2.0),
-                                          child: Row(
-                                            children: [
-                                              SizedBox(
-                                                width: 35,
-                                                height: 35,
-                                                child: IconButton(
-                                                  onPressed: toggleThumbsUp,
-                                                  icon: Icon(Icons.thumb_up, color: thisUsersRating == 1 ? Theme.of(context).primaryColor : Colors.grey),
-                                                  iconSize: 18,
-                                                  padding: EdgeInsets.all(0),
-                                                  constraints: BoxConstraints(),
-                                                ),
-                                              ),
-                                              Text(
-                                                '${(_tour.upvotes - _tour.downvotes).sign == 1 ? '+' : ''}${_tour.upvotes - _tour.downvotes}',
-                                                style: Theme.of(context).textTheme.labelMedium,
-                                                overflow: TextOverflow.visible,
-                                                maxLines: 1,
-                                              ),
-                                              SizedBox(
-                                                width: 35,
-                                                height: 35,
-                                                child: IconButton(
-                                                  onPressed: toggleThumbsDown,
-                                                  icon: Icon(Icons.thumb_down, color: thisUsersRating == -1 ? Theme.of(context).primaryColor : Colors.grey),
-                                                  iconSize: 18,
-                                                  padding: EdgeInsets.all(0),
-                                                  constraints: BoxConstraints(),
-                                                ),
-                                              ),
+                                                    padding: EdgeInsets.all(10),
+                                                    onPressed: (){},
+                                                    icon: Icon(Icons.map))*/
                                             ],
                                           ),
                                         ),
                                       ),
                                     ],
-                                  ),
-                                  SizedBox(height: 32.0),
-                                ],
+                                  );
+
+                                },
+                                margin: EdgeInsets.zero,
+                                steps: _tour.tourguidePlaces.asMap().entries.map((entry) {
+                                  int index = entry.key;
+                                  var place = entry.value;
+                                  return Step(
+                                    title: Text(key: _targetKeys.isNotEmpty && _targetKeys.length > index ? _targetKeys[index] : null, place.title),
+                                    isActive: _currentStep >= (index),
+                                    state: _currentStep > (index) ? StepState.complete : StepState.indexed,
+                                    content: Visibility(
+                                      visible: _currentStepVisible,
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Row(//Title Row
+                                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                            children: [
+                                              Flexible(
+                                                child: Row(
+                                                  children: [
+                                                    Text(
+                                                      "${index+1}. ",
+                                                      style: Theme.of(context).textTheme.titleMedium,
+                                                      maxLines: 2,
+                                                      overflow: TextOverflow.ellipsis,
+                                                    ),
+                                                    SizedBox(width: 8.0),
+                                                    Flexible(
+                                                      child: Text(
+                                                        "${place.title}",
+                                                        style: Theme.of(context).textTheme.titleMedium,
+                                                        maxLines: 2,
+                                                        overflow: TextOverflow.ellipsis,
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                              ),
+                                              Row(
+                                                mainAxisAlignment: MainAxisAlignment.end,
+                                                children: [
+                                                  IconButton(
+                                                    onPressed: () => MapUtils.openMapWithQuery(place.title),
+                                                    icon: Icon(Icons.directions),
+                                                  ),
+                                                ],
+                                              ),
+                                              IconButton(
+                                                onPressed: () => _toggleTTS(place.description, index),
+                                                icon: Icon(currentlyPlayingIndex == index ? Icons.stop : Icons.play_circle,),
+                                              ),
+                                            ],
+                                          ),
+                                          SizedBox(height: 6.0),
+                                          VisibilityDetector(
+                                            key: Key('place$index'),
+                                            onVisibilityChanged: (VisibilityInfo info) {
+                                              if (info.visibleFraction == 1) {
+                                                if (!_initialZoomToFirstWaypointComplete) {
+                                                  logger.t('Place $index visibility: ${info.visibleFraction} - > _initialZoomToFirstWaypoint');
+                                                  _initialZoomToFirstWaypointComplete = true;
+                                                  _moveCameraToMarkerAndHighlightMarker(0);
+                                                }
+                                              }
+                                            },
+                                            child: Text(
+                                              place.description, // Assuming each place has a 'description' field
+                                              style: Theme.of(context).textTheme.bodyMedium,
+                                              softWrap: true,
+                                              maxLines: null,
+                                              overflow: TextOverflow.visible,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  );
+                                }).toList(),
                               ),
                             ),
-                            if (!_tour.isOfflineCreatedTour)
-                              Padding(
-                                padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.start,
+                          Visibility(
+                            visible: _tourFinished,
+                            child: Column(
+                              children: [
+                                Text(key: _targetKeys.isNotEmpty && _targetKeys.length > _tour.tourguidePlaces.length ? _targetKeys[_targetKeys.length-1] : null, 'We hope you\'ve enjoyed this tour!', style: Theme.of(context).textTheme.bodyMedium),
+                                SizedBox(height: 32.0),
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
-                                    Text(
-                                      'Created on ${_tour.createdDateTime!.toLocal().toString().split(' ')[0]} by:',
-                                      style: Theme.of(context).textTheme.bodyMedium,
+                                    ElevatedButton(
+                                      onPressed: _tour.isOfflineCreatedTour ? null : saveTour,
+                                      style: ElevatedButton.styleFrom(
+                                        shape: CircleBorder(),
+                                        padding: EdgeInsets.all(0),
+                                        foregroundColor:
+                                        tourguideUserProvider.user != null && tourguideUserProvider.user!.savedTourIds.contains(_tour.id) ?
+                                        Theme.of(context).primaryColor : Colors.grey,
+                                      ),
+                                      child: Icon(Icons.bookmark_rounded), // Replace with your desired icon
                                     ),
-                                    TextButton(onPressed: () {
-                                      Navigator.push(
-                                        context,
-                                        MaterialPageRoute(builder: (context) =>
-                                            TourguideUserProfileView(
-                                                tourguideUserId: _tour.authorId,
-                                                tourguideUserDisplayName: _tour.authorName)),
-                                      );
-                                    }, child: Text(_tour.authorName))
+                                    Material(
+                                      elevation: 1,
+                                      color: Color(0xffeff5f3),
+                                      borderRadius: BorderRadius.circular(32.0),
+                                      child: Padding(
+                                        padding: const EdgeInsets.all(2.0),
+                                        child: Row(
+                                          children: [
+                                            SizedBox(
+                                              width: 35,
+                                              height: 35,
+                                              child: IconButton(
+                                                onPressed: toggleThumbsUp,
+                                                icon: Icon(Icons.thumb_up, color: thisUsersRating == 1 ? Theme.of(context).primaryColor : Colors.grey),
+                                                iconSize: 18,
+                                                padding: EdgeInsets.all(0),
+                                                constraints: BoxConstraints(),
+                                              ),
+                                            ),
+                                            Text(
+                                              '${(_tour.upvotes - _tour.downvotes).sign == 1 ? '+' : ''}${_tour.upvotes - _tour.downvotes}',
+                                              style: Theme.of(context).textTheme.labelMedium,
+                                              overflow: TextOverflow.visible,
+                                              maxLines: 1,
+                                            ),
+                                            SizedBox(
+                                              width: 35,
+                                              height: 35,
+                                              child: IconButton(
+                                                onPressed: toggleThumbsDown,
+                                                icon: Icon(Icons.thumb_down, color: thisUsersRating == -1 ? Theme.of(context).primaryColor : Colors.grey),
+                                                iconSize: 18,
+                                                padding: EdgeInsets.all(0),
+                                                constraints: BoxConstraints(),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
                                   ],
                                 ),
-                              ),
-                          ],
-                        ),
-                      )
-
-                    ],
-                  ),
-                  if (_isFullScreen)
-                    Positioned.fill(
-                      child: Stack(
-                        children: [
-                          GoogleMap(
-                            mapType: MapType.normal,
-                            initialCameraPosition: _currentCameraPosition,
-                            markers: _markers,
-                            polylines: _polylines,
-                            onMapCreated: (GoogleMapController controller) async {
-                              if (!_mapControllerCompleter.isCompleted) {
-                                _mapControllerCompleter.complete(controller);
-                              } else {
-                                final GoogleMapController mapController = await _mapControllerCompleter.future;
-                                mapController.moveCamera(CameraUpdate.newCameraPosition(_currentCameraPosition));
-                              }
-                              await Future.delayed(const Duration(milliseconds: 300)); //avoid flicker
-                              setState(() {
-                                _isLoadingFullscreen = false;
-                              });
-                            },
-                            onCameraMove: (CameraPosition position) {
-                              _currentCameraPosition = position;
-                            },
-                          ),
-                          if (_isLoadingFullscreen)
-                            Container(
-                              color: Color(0xffe8eaed),
-                              child: Center(
-                                child: CircularProgressIndicator(),
-                              ),
+                                SizedBox(height: 32.0),
+                              ],
                             ),
-                          if (!_isLoadingFullscreen)
-                            Positioned(
-                              bottom: 120,
-                              right: 10,
-                              child: SizedBox(
-                                width: 42,
-                                height: 42,
-                                child: RawMaterialButton(
-                                  onPressed: () async {
-                                    final controller = await _mapControllerCompleter.future;
-                                    setState(() {
-                                      _isFullScreen = !_isFullScreen;
-                                    });
-                                    controller.moveCamera(
-                                      CameraUpdate.newCameraPosition(_currentCameraPosition),
+                          ),
+                          if (!_tour.isOfflineCreatedTour)
+                            Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    'Created on ${_tour.createdDateTime!.toLocal().toString().split(' ')[0]} by:',
+                                    style: Theme.of(context).textTheme.bodyMedium,
+                                  ),
+                                  TextButton(onPressed: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(builder: (context) =>
+                                          TourguideUserProfileView(
+                                              tourguideUserId: _tour.authorId,
+                                              tourguideUserDisplayName: _tour.authorName)),
                                     );
-                                  },
-                                  elevation: 1.0,
-                                  fillColor: Colors.white.withOpacity(0.9),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(8.0), // Adjust the radius as needed
-                                  ),
-                                  child: Padding(
-                                    padding: const EdgeInsets.all(1.0), // Adjust inner padding as needed
-                                    child: Icon(
-                                      _isFullScreen ? Icons.fullscreen_exit : Icons.fullscreen,
-                                      color: const Color(0xff666666),
-                                      size: 32.0, // Adjust the size of the icon as needed
-                                    ),
-                                  ),
-                                ),
+                                  }, child: Text(_tour.authorName))
+                                ],
                               ),
                             ),
                         ],
                       ),
+                    )
+
+                  ],
+                ),
+              )
+            ],
+          ),
+          if (_isFullScreen)
+            Positioned.fill(
+              child: Stack(
+                children: [
+                  GoogleMap(
+                    mapType: MapType.normal,
+                    initialCameraPosition: _currentCameraPosition,
+                    markers: _markers,
+                    polylines: _polylines,
+                    onMapCreated: (GoogleMapController controller) async {
+                      if (!_mapControllerCompleter.isCompleted) {
+                        _mapControllerCompleter.complete(controller);
+                      } else {
+                        final GoogleMapController mapController = await _mapControllerCompleter.future;
+                        mapController.moveCamera(CameraUpdate.newCameraPosition(_currentCameraPosition));
+                      }
+                      await Future.delayed(const Duration(milliseconds: 300)); //avoid flicker
+                      setState(() {
+                        _isLoadingFullscreen = false;
+                      });
+                    },
+                    onCameraMove: (CameraPosition position) {
+                      _currentCameraPosition = position;
+                    },
+                  ),
+                  if (_isLoadingFullscreen)
+                    Container(
+                      color: Color(0xffe8eaed),
+                      child: Center(
+                        child: CircularProgressIndicator(),
+                      ),
+                    ),
+                  if (!_isLoadingFullscreen)
+                    Positioned(
+                      bottom: 120,
+                      right: 10,
+                      child: SizedBox(
+                        width: 42,
+                        height: 42,
+                        child: RawMaterialButton(
+                          onPressed: () async {
+                            final controller = await _mapControllerCompleter.future;
+                            setState(() {
+                              _isFullScreen = !_isFullScreen;
+                            });
+                            controller.moveCamera(
+                              CameraUpdate.newCameraPosition(_currentCameraPosition),
+                            );
+                          },
+                          elevation: 1.0,
+                          fillColor: Colors.white.withOpacity(0.9),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8.0), // Adjust the radius as needed
+                          ),
+                          child: Padding(
+                            padding: const EdgeInsets.all(1.0), // Adjust inner padding as needed
+                            child: Icon(
+                              _isFullScreen ? Icons.fullscreen_exit : Icons.fullscreen,
+                              color: const Color(0xff666666),
+                              size: 32.0, // Adjust the size of the icon as needed
+                            ),
+                          ),
+                        ),
+                      ),
                     ),
                 ],
               ),
-            )
-          ],
+            ),
+        ],
         ),
       ),
     );
