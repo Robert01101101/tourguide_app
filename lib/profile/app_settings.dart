@@ -5,6 +5,7 @@ import 'package:tourguide_app/ui/my_layouts.dart';
 import 'package:tourguide_app/utilities/custom_import.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:tourguide_app/utilities/providers/auth_provider.dart' as myAuth;
+import 'package:tourguide_app/utilities/providers/theme_provider.dart';
 import 'package:tourguide_app/utilities/providers/tourguide_user_provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -21,10 +22,14 @@ class _AppSettingsState extends State<AppSettings> {
   late bool _emailGeneralNotificationsEnabledInitialState = true;
   late bool _emailReportsNotificationsEnabledInitialState = true;
   bool _savingSettings = false;
+  final List<String> themeList = <String>['System', 'Light', 'Dark'];
+  late String initialThemeMode;
 
   @override
   void initState() {
     super.initState();
+    ThemeProvider themeProvider = Provider.of<ThemeProvider>(context, listen: false);
+    initialThemeMode = themeProvider.themeMode.toString().split('.').last.capitalize();
     _loadSettings();
   }
 
@@ -61,6 +66,7 @@ class _AppSettingsState extends State<AppSettings> {
   @override
   Widget build(BuildContext context) {
     TourguideUserProvider userProvider = Provider.of<TourguideUserProvider>(context);
+    ThemeProvider themeProvider = Provider.of<ThemeProvider>(context);
 
     return Scaffold(
       appBar: AppBar(
@@ -102,11 +108,23 @@ class _AppSettingsState extends State<AppSettings> {
               });
             },
           ),
-          const SizedBox(height: 20),
           ElevatedButton(
             onPressed: _emailGeneralNotificationsEnabledInitialState != _emailGeneralNotificationsEnabled ||
                 _emailReportsNotificationsEnabledInitialState != _emailReportsNotificationsEnabled ? _saveSettings : null,
             child: _savingSettings ? const Text('Saving Settings') : const Text('Save Settings'),
+          ),
+          const SizedBox(height: 32),
+          Text("Theme Settings", style: Theme.of(context).textTheme.headlineSmall),
+          DropdownMenu<String>(
+            initialSelection: initialThemeMode,
+            onSelected: (String? value) {
+              // This is called when the user selects an item.
+              String themeModeString = 'ThemeMode.' + value!.toLowerCase();
+              themeProvider.setThemeModeWithString(themeModeString);
+            },
+            dropdownMenuEntries: themeList.map<DropdownMenuEntry<String>>((String value) {
+              return DropdownMenuEntry<String>(value: value, label: value);
+            }).toList(),
           ),
         ],
       ),
