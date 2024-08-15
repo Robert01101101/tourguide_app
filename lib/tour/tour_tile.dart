@@ -9,12 +9,12 @@ import 'package:tourguide_app/tour/tour_details.dart';
 import 'package:tourguide_app/tour/tour_running.dart';
 import 'package:tourguide_app/ui/shimmer_loading.dart';
 import 'package:tourguide_app/utilities/providers/tour_provider.dart';
-import 'package:tourguide_app/utilities/providers/auth_provider.dart' as myAuth;
 import 'package:tourguide_app/utilities/providers/tourguide_user_provider.dart';
 import 'package:tourguide_app/utilities/services/tour_service.dart';
 import 'package:tourguide_app/utilities/tourguide_navigation.dart';
 
 import '../main.dart';
+import '../ui/tour_rating_bookmark_buttons.dart';
 
 class TourTile extends StatefulWidget {
   final Tour tour;
@@ -73,9 +73,8 @@ class _TourTileState extends State<TourTile> {
       child: Container(
         width: 180.0,
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: Theme.of(context).colorScheme.surfaceContainer,
           borderRadius: BorderRadius.circular(16.0),
-          border: widget.tour.isAddTourTile ? Border.all(color: Color(0xaa9e9e9e), width: 2.0) : Border.all(color: Colors.transparent, width: 0), // Adjust the width as needed
           boxShadow: const [
             BoxShadow(
               color: Colors.black26,
@@ -179,7 +178,7 @@ class _TourTileState extends State<TourTile> {
                        alignment: Alignment.topLeft,
                        child: Text(
                         widget.tour.description,
-                         style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Colors.grey[600]),
+                         style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant),
                          overflow: TextOverflow.ellipsis,
                          maxLines: 3,
                        ),
@@ -222,65 +221,7 @@ class _ExpandedTourTileOverlayState extends State<ExpandedTourTileOverlay> {
     FirebaseAnalytics.instance.logSelectContent(contentType: 'tour_tile', itemId: widget.tour.id);
   }
 
-  //TODO unify behavior and UI with tour details and tour running
-  void toggleThumbsUp() {
-    if (widget.tour.isOfflineCreatedTour) return; // Tour creation tile should not have rating
 
-    myAuth.AuthProvider authProvider = Provider.of(context, listen: false);
-
-    setState(() {
-      if (thisUsersRating == 1) {
-        // Cancel upvote
-        thisUsersRating = 0;
-        widget.tour.upvotes--; // Decrease upvotes
-      } else {
-        // Upvote
-        if (thisUsersRating == -1) {
-          widget.tour.downvotes--; // Cancel downvote if any
-        }
-        thisUsersRating = 1;
-        widget.tour.upvotes++; // Increase upvotes
-      }
-      TourService.addOrUpdateRating(widget.tour.id, thisUsersRating, authProvider.user!.uid);
-    });
-  }
-
-  //TODO unify behavior and UI with tour details and tour running
-  void toggleThumbsDown() {
-    if (widget.tour.isOfflineCreatedTour) return; // Tour creation tile should not have rating
-
-    myAuth.AuthProvider authProvider = Provider.of(context, listen: false);
-
-    setState(() {
-      if (thisUsersRating == -1) {
-        // Cancel downvote
-        thisUsersRating = 0;
-        widget.tour.downvotes--; // Decrease downvotes
-      } else {
-        // Downvote
-        if (thisUsersRating == 1) {
-          widget.tour.upvotes--; // Cancel upvote if any
-        }
-        thisUsersRating = -1;
-        widget.tour.downvotes++; // Increase downvotes
-      }
-      TourService.addOrUpdateRating(widget.tour.id, thisUsersRating, authProvider.user!.uid);
-    });
-  }
-
-  //TODO unify behavior and UI with tour details and tour running
-  void saveTour() {
-    if (widget.tour.isOfflineCreatedTour) return; // Tour creation tile should not have rating
-
-    TourguideUserProvider tourguideUserProvider = Provider.of(context, listen: false);
-
-    setState(() {
-      tourguideUserProvider.user!.savedTourIds.contains(widget.tour.id)
-          ? tourguideUserProvider.user!.savedTourIds.remove(widget.tour.id)
-          : tourguideUserProvider.user!.savedTourIds.add(widget.tour.id);
-      tourguideUserProvider.updateUser(tourguideUserProvider.user!);
-    });
-  }
 
   //TODO unify behavior and UI with tour details
   void startTour() {
@@ -307,7 +248,6 @@ class _ExpandedTourTileOverlayState extends State<ExpandedTourTileOverlay> {
   @override
   Widget build(BuildContext context) {
     TourProvider tourProvider = Provider.of<TourProvider>(context);
-    TourguideUserProvider tourguideUserProvider = Provider.of<TourguideUserProvider>(context);
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(0, 8, 0, 0),
@@ -402,8 +342,8 @@ class _ExpandedTourTileOverlayState extends State<ExpandedTourTileOverlay> {
                     ElevatedButton(
                       onPressed: widget.tour.isOfflineCreatedTour ? null : startTour,
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Theme.of(context).primaryColor, // background
-                        foregroundColor: Colors.white, // foreground
+                        backgroundColor: Theme.of(context).colorScheme.primary,
+                        foregroundColor: Theme.of(context).colorScheme.surfaceContainerLow,
                       ),
                       child: Text("Start"),),
                     SizedBox(width: 8.0),
@@ -411,62 +351,15 @@ class _ExpandedTourTileOverlayState extends State<ExpandedTourTileOverlay> {
                       onPressed: tourDetails,
                       label: Text("Details"),
                       icon: widget.tour.reports.isNotEmpty ? Icon(Icons.report_outlined,) : null,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Theme.of(context).colorScheme.surfaceContainer,
+                      ),
                     ),
                   ],
                 ),
                 Row(
                   children: [
-                    ElevatedButton(
-                      onPressed: widget.tour.isOfflineCreatedTour ? null : saveTour,
-                      style: ElevatedButton.styleFrom(
-                        shape: CircleBorder(),
-                        padding: EdgeInsets.all(0),
-                        foregroundColor:
-                        tourguideUserProvider.user != null && tourguideUserProvider.user!.savedTourIds.contains(widget.tour.id) ?
-                        Theme.of(context).primaryColor : Colors.grey,
-                      ),
-                      child: Icon(Icons.bookmark_rounded), // Replace with your desired icon
-                    ),
-                    Material(
-                      elevation: 1,
-                      color: Color(0xffeff5f3),
-                      borderRadius: BorderRadius.circular(32.0),
-                      child: Padding(
-                        padding: const EdgeInsets.all(2.0),
-                        child: Row(
-                          children: [
-                            SizedBox(
-                              width: 35,
-                              height: 35,
-                              child: IconButton(
-                                onPressed: toggleThumbsUp,
-                                icon: Icon(Icons.thumb_up, color: thisUsersRating == 1 ? Theme.of(context).primaryColor : Colors.grey),
-                                iconSize: 18,
-                                padding: EdgeInsets.all(0),
-                                constraints: BoxConstraints(),
-                              ),
-                            ),
-                            Text(
-                                '${(widget.tour.upvotes - widget.tour.downvotes).sign == 1 ? '+' : ''}${widget.tour.upvotes - widget.tour.downvotes}',
-                                style: Theme.of(context).textTheme.labelMedium,
-                                overflow: TextOverflow.visible,
-                                maxLines: 1,
-                            ),
-                            SizedBox(
-                              width: 35,
-                              height: 35,
-                              child: IconButton(
-                                onPressed: toggleThumbsDown,
-                                icon: Icon(Icons.thumb_down, color: thisUsersRating == -1 ? Theme.of(context).primaryColor : Colors.grey),
-                                iconSize: 18,
-                                padding: EdgeInsets.all(0),
-                                constraints: BoxConstraints(),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
+                    TourRatingBookmarkButtons(tour: widget.tour),
                   ],
                 ),
               ],

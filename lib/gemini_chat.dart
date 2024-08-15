@@ -334,8 +334,9 @@ class _GeminiChatState extends State<GeminiChat> with WidgetsBindingObserver {
           messages: _messages,
           onSendPressed: _handleSendPressed,
           user: _user!,
-          theme: const DefaultChatTheme(
-            primaryColor: Color(0xff596f6d),
+          theme: DefaultChatTheme(
+            backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+            primaryColor: Theme.of(context).colorScheme.secondary,
             inputBackgroundColor: Color(0xff434949),
             //border radius 5 up 20 down
             inputBorderRadius: const BorderRadius.only(
@@ -369,9 +370,9 @@ class _GeminiChatState extends State<GeminiChat> with WidgetsBindingObserver {
     return isAiCustomPrompt ?
       Center(
         child: Container(
-        decoration: const BoxDecoration(
+        decoration: BoxDecoration(
           borderRadius: BorderRadius.all(Radius.circular(36)),
-          color: Color(0xff95a9a8),
+          color: Theme.of(context).colorScheme.secondary,
         ),
         child: Padding(
           padding: const EdgeInsets.all(10.0),
@@ -388,6 +389,10 @@ class _GeminiChatState extends State<GeminiChat> with WidgetsBindingObserver {
                 _handleSendPrompt("What are the best 5 urban spots around here? I want to explore the city!");
               }
             },
+            style: ElevatedButton.styleFrom(
+              padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 0),
+              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            ),
             child: Wrap(
               crossAxisAlignment: WrapCrossAlignment.center,
               children: <Widget>[
@@ -395,7 +400,9 @@ class _GeminiChatState extends State<GeminiChat> with WidgetsBindingObserver {
                   Icons.lightbulb,
                   size: 24.0,
                 ),
-                IgnorePointer(child: child,),//IgnorePointer ensures clicks pass through to button behind it
+                IgnorePointer(
+                  child: child,
+                ),//IgnorePointer ensures clicks pass through to button behind it
               ],
             ),
           ),
@@ -414,8 +421,8 @@ class _GeminiChatState extends State<GeminiChat> with WidgetsBindingObserver {
             bottomRight: radiusMessage,
           ),
           color: isUser ?
-          const Color(0xff596f6d) :
-          const Color(0xfff5f5f7),
+          Theme.of(context).colorScheme.secondary :
+          Theme.of(context).colorScheme.surfaceContainerLow,
         ),
         child: child
     );
@@ -435,7 +442,11 @@ class _GeminiChatState extends State<GeminiChat> with WidgetsBindingObserver {
         TextSpan(
           children: _parseTextWithMarkdown(textMessage.text),
           style: Theme.of(context).textTheme.bodyMedium!.copyWith(
-            color: isAiCustomPrompt ? Color(0xff006a65) : textMessage.author.id == _user!.id ? Colors.white : Colors.black,
+            color: isAiCustomPrompt ?
+              Theme.of(context).colorScheme.primary :
+              textMessage.author.id == _user!.id ?
+              Theme.of(context).colorScheme.onSecondary :
+              Theme.of(context).colorScheme.onSurface,
             fontSize: 16,
             fontWeight: FontWeight.w500,
             height: 1.5,

@@ -277,7 +277,7 @@ class ExploreState extends State<Explore> {
                           color: Colors.transparent,
                         ),
                         Container(
-                          color: Colors.white,
+                          color: Theme.of(context).scaffoldBackgroundColor,
                           height: 800,  //BAD! Hardcoded, but it's fine for now since it only needs to be enough to cover the google img on scroll
                         )
                       ],

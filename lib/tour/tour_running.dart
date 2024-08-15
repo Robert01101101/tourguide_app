@@ -13,6 +13,8 @@ import 'package:tourguide_app/tour/tour_creation.dart';
 import 'package:tourguide_app/tour/tour_details_options.dart';
 import 'package:tourguide_app/tour/tourguide_user_profile_view.dart';
 import 'package:tourguide_app/ui/my_layouts.dart';
+import 'package:tourguide_app/ui/tour_rating_bookmark_buttons.dart';
+import 'package:tourguide_app/ui/tourguide_theme.dart';
 import 'package:tourguide_app/utilities/map_utils.dart';
 import 'package:tourguide_app/utilities/providers/tour_provider.dart';
 import 'package:visibility_detector/visibility_detector.dart';
@@ -76,8 +78,6 @@ class _TourRunningState extends State<TourRunning> {
     // Clear previous bitmaps
     _defaultMarkerBitmaps.clear();
     _highlightedMarkerBitmaps.clear();
-    //TODO: fix primary color reference
-    Color colPrimary = const Color(0xff006a65);
 
     //add tourguidePlace markers
     for (int i = 0; i < _tour.tourguidePlaces.length; i++) {
@@ -85,7 +85,7 @@ class _TourRunningState extends State<TourRunning> {
 
       // Create default and highlighted bitmaps
       final BitmapDescriptor defaultIcon = await MapUtils.createNumberedMarkerBitmap(i + 1);
-      final BitmapDescriptor highlightedIcon = await MapUtils.createNumberedMarkerBitmap(i + 1, color: colPrimary);
+      final BitmapDescriptor highlightedIcon = await MapUtils.createNumberedMarkerBitmap(i + 1, color: Theme.of(context).colorScheme.primary);
 
       // Store the bitmaps in the lists
       _defaultMarkerBitmaps.add(defaultIcon);
@@ -149,29 +149,33 @@ class _TourRunningState extends State<TourRunning> {
           .join('|');
     }
 
+    logger.t('Waypoints.length: ${waypoints.length}');
+
     //TODO: Sometimes placeId works better, sometimes lat long, with placeIds it seems walking mode can be tricky -> address
 
     // Construct directions API URL
     int attempt = 0;
     while (attempt < 2) {
+      logger.t('attempt: ${attempt}');
       try {
-        attempt++;
         String url = 'https://maps.googleapis.com/maps/api/directions/json?'
         //'origin=${waypoints.first.latitude},${waypoints.last.longitude}&'
         //'destination=${waypoints.last.latitude},${waypoints.last.longitude}&'
             'origin=place_id:${waypoints.first}&'
             'destination=place_id:${waypoints.last}&'
             '${waypointsString.isNotEmpty ? 'waypoints=$waypointsString&' : waypointsString}'
-            'mode=${attempt == 1 ? 'walking&' : 'driving&'}'
+            'mode=${attempt == 0 ? 'walking&' : 'driving&'}'
             'key=$apiKey';
 
         //logger.i(url);
 
         final response = await http.get(Uri.parse(url));
+        logger.t('response: ${response}');
 
         //logger.i(response.body);
 
         if (response.statusCode == 200) {
+          attempt++;
           Map<String, dynamic> data = jsonDecode(response.body);
           // Check the status field
           String status = data['status'];
@@ -184,41 +188,27 @@ class _TourRunningState extends State<TourRunning> {
           List<LatLng> points = _decodePolyline(data['routes'][0]['overview_polyline']['points']);
 
           // Convert waypoints to LatLng
+          logger.t('convert:');
           List<LatLng> waypointLatLngs = _tour.tourguidePlaces
               .map((place) => LatLng(place.latitude, place.longitude))
               .toList();
 
           // Segment the polyline based on the waypoints
+          logger.t('segment:');
           _routeSegments = _createRouteSegments(points, waypointLatLngs);
 
+          logger.t('polyline:');
           // Initially add the full polyline
           _addPolyline(points);
           break;
         } else {
           throw Exception('Failed to load directions');
         }
-      } catch (e) {
-        logger.e('Failed to get directions: $e');
+      } catch (e, stack) {
+        logger.e('Failed to get directions: $e \n $stack');
         attempt++;
       }
     }
-  }
-
-  List<List<LatLng>> _createRouteSegments(List<LatLng> points, List<LatLng> waypoints) {
-    List<List<LatLng>> segments = [];
-    List<int> waypointIndices = _findWaypointIndices(points, waypoints);
-
-    for (int i = 0; i < waypointIndices.length - 1; i++) {
-      int start = waypointIndices[i];
-      int end = waypointIndices[i + 1];
-      segments.add(points.sublist(start, end + 1)); // Include end point
-    }
-
-    // Add the last segment
-    int lastSegmentStart = waypointIndices[waypointIndices.length - 1];
-    segments.add(points.sublist(lastSegmentStart, points.length));
-
-    return segments;
   }
 
   List<int> _findWaypointIndices(List<LatLng> points, List<LatLng> waypoints) {
@@ -236,10 +226,51 @@ class _TourRunningState extends State<TourRunning> {
         }
       }
 
-      waypointIndices.add(closestIndex);
+      // Ensure the index is strictly increasing
+      if (waypointIndices.isNotEmpty && closestIndex <= waypointIndices.last) {
+        // Adjust the index to be greater than the previous one
+        closestIndex = waypointIndices.last + 1;
+      }
+
+      // Ensure the index is within bounds
+      if (closestIndex < points.length) {
+        waypointIndices.add(closestIndex);
+      }
     }
 
     return waypointIndices;
+  }
+
+  List<List<LatLng>> _createRouteSegments(List<LatLng> points, List<LatLng> waypoints) {
+    try {
+      List<List<LatLng>> segments = [];
+      List<int> waypointIndices = _findWaypointIndices(points, waypoints);
+
+      for (int i = 0; i < waypointIndices.length - 1; i++) {
+        int start = waypointIndices[i];
+        int end = waypointIndices[i + 1];
+
+        // Ensure valid range
+        if (start <= end && end + 1 <= points.length) {
+          segments.add(points.sublist(start, end + 1)); // Include end point
+        } else {
+          logger.w('Invalid segment range: start=$start, end=$end');
+        }
+      }
+
+      // Add the last segment
+      int lastSegmentStart = waypointIndices[waypointIndices.length - 1];
+      if (lastSegmentStart < points.length) {
+        segments.add(points.sublist(lastSegmentStart, points.length));
+      } else {
+        logger.w('Skipping last segment creation due to invalid lastSegmentStart=$lastSegmentStart');
+      }
+
+      return segments;
+    } catch (e, stack) {
+      logger.e('Failed to create route segments: $e \n $stack');
+      return [];
+    }
   }
 
   List<LatLng> _decodePolyline(String encoded) {
@@ -437,7 +468,7 @@ class _TourRunningState extends State<TourRunning> {
   void _highlightSegment(int segmentIndex) {
     // Clear existing polylines
     _polylines.clear();
-    Color colPrimary = const Color(0xff006a65);
+    Color colPrimary = Theme.of(context).colorScheme.primary;
 
     // Add non-highlighted segments
     for (int i = 0; i < _routeSegments.length; i++) {
@@ -464,20 +495,6 @@ class _TourRunningState extends State<TourRunning> {
     _scrollToTarget(_tour.tourguidePlaces.length, delay: true);
   }
 
-  //TODO unify behavior and UI with tour tile and tour details
-  void saveTour() {
-    if (_tour.isOfflineCreatedTour) return; // Tour creation tile should not have rating
-
-    TourguideUserProvider tourguideUserProvider = Provider.of(context, listen: false);
-
-    setState(() {
-      tourguideUserProvider.user!.savedTourIds.contains(_tour.id)
-          ? tourguideUserProvider.user!.savedTourIds.remove(_tour.id)
-          : tourguideUserProvider.user!.savedTourIds.add(_tour.id);
-      tourguideUserProvider.updateUser(tourguideUserProvider.user!);
-    });
-  }
-
   void _setStep(int step){
     setState(() {
       if (_currentStep == step) {
@@ -491,51 +508,6 @@ class _TourRunningState extends State<TourRunning> {
     _moveCameraToMarkerAndHighlightMarker(_currentStep);
   }
 
-  //TODO unify behavior and UI with tour tile and tour details
-  void toggleThumbsUp() {
-    if (_tour.isOfflineCreatedTour) return; // Tour creation tile should not have rating
-
-    myAuth.AuthProvider authProvider = Provider.of(context, listen: false);
-
-    setState(() {
-      if (thisUsersRating == 1) {
-        // Cancel upvote
-        thisUsersRating = 0;
-        _tour.upvotes--; // Decrease upvotes
-      } else {
-        // Upvote
-        if (thisUsersRating == -1) {
-          _tour.downvotes--; // Cancel downvote if any
-        }
-        thisUsersRating = 1;
-        _tour.upvotes++; // Increase upvotes
-      }
-      TourService.addOrUpdateRating(_tour.id, thisUsersRating, authProvider.user!.uid);
-    });
-  }
-
-  //TODO unify behavior and UI with tour tile and tour details
-  void toggleThumbsDown() {
-    if (_tour.isOfflineCreatedTour) return; // Tour creation tile should not have rating
-
-    myAuth.AuthProvider authProvider = Provider.of(context, listen: false);
-
-    setState(() {
-      if (thisUsersRating == -1) {
-        // Cancel downvote
-        thisUsersRating = 0;
-        _tour.downvotes--; // Decrease downvotes
-      } else {
-        // Downvote
-        if (thisUsersRating == 1) {
-          _tour.upvotes--; // Cancel upvote if any
-        }
-        thisUsersRating = -1;
-        _tour.downvotes++; // Increase downvotes
-      }
-      TourService.addOrUpdateRating(_tour.id, thisUsersRating, authProvider.user!.uid);
-    });
-  }
 
 
   @override
@@ -798,7 +770,7 @@ class _TourRunningState extends State<TourRunning> {
                                                   style: ElevatedButton.styleFrom(
                                                     elevation: 0,
                                                     backgroundColor: Colors.transparent,
-                                                    foregroundColor: Colors.grey[700],
+                                                    foregroundColor: Theme.of(context).colorScheme.onSecondaryContainer,
                                                     //primary: Colors.blue, // Custom color for "Continue" button
                                                     shape: RoundedRectangleBorder(
                                                       borderRadius: BorderRadius.circular(3.0), // Custom radius
@@ -811,7 +783,7 @@ class _TourRunningState extends State<TourRunning> {
                                                 onPressed: _currentStep != _tour.tourguidePlaces.length-1 ? controlsDetails.onStepContinue : !_tourFinished ? _finishTour : null,
                                                 style: ElevatedButton.styleFrom(
                                                   backgroundColor: Theme.of(context).colorScheme.primary,
-                                                  foregroundColor: Colors.white,
+                                                  foregroundColor: Theme.of(context).colorScheme.surfaceContainerLow,
                                                   //primary: Colors.grey, // Custom color for "Back" button
                                                   shape: RoundedRectangleBorder(
                                                     borderRadius: BorderRadius.circular(3.0), // Custom radius
@@ -921,57 +893,7 @@ class _TourRunningState extends State<TourRunning> {
                                 Row(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
-                                    ElevatedButton(
-                                      onPressed: _tour.isOfflineCreatedTour ? null : saveTour,
-                                      style: ElevatedButton.styleFrom(
-                                        shape: CircleBorder(),
-                                        padding: EdgeInsets.all(0),
-                                        foregroundColor:
-                                        tourguideUserProvider.user != null && tourguideUserProvider.user!.savedTourIds.contains(_tour.id) ?
-                                        Theme.of(context).primaryColor : Colors.grey,
-                                      ),
-                                      child: Icon(Icons.bookmark_rounded), // Replace with your desired icon
-                                    ),
-                                    Material(
-                                      elevation: 1,
-                                      color: Color(0xffeff5f3),
-                                      borderRadius: BorderRadius.circular(32.0),
-                                      child: Padding(
-                                        padding: const EdgeInsets.all(2.0),
-                                        child: Row(
-                                          children: [
-                                            SizedBox(
-                                              width: 35,
-                                              height: 35,
-                                              child: IconButton(
-                                                onPressed: toggleThumbsUp,
-                                                icon: Icon(Icons.thumb_up, color: thisUsersRating == 1 ? Theme.of(context).primaryColor : Colors.grey),
-                                                iconSize: 18,
-                                                padding: EdgeInsets.all(0),
-                                                constraints: BoxConstraints(),
-                                              ),
-                                            ),
-                                            Text(
-                                              '${(_tour.upvotes - _tour.downvotes).sign == 1 ? '+' : ''}${_tour.upvotes - _tour.downvotes}',
-                                              style: Theme.of(context).textTheme.labelMedium,
-                                              overflow: TextOverflow.visible,
-                                              maxLines: 1,
-                                            ),
-                                            SizedBox(
-                                              width: 35,
-                                              height: 35,
-                                              child: IconButton(
-                                                onPressed: toggleThumbsDown,
-                                                icon: Icon(Icons.thumb_down, color: thisUsersRating == -1 ? Theme.of(context).primaryColor : Colors.grey),
-                                                iconSize: 18,
-                                                padding: EdgeInsets.all(0),
-                                                constraints: BoxConstraints(),
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    ),
+                                    TourRatingBookmarkButtons(tour: _tour),
                                   ],
                                 ),
                                 SizedBox(height: 32.0),

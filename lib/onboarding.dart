@@ -148,7 +148,7 @@ class _TourguideOnboardState extends State<TourguideOnboard> {
             borderRadius: BorderRadius.all(Radius.circular(8.0)),
           ),
         ),*/
-        globalBackgroundColor: Theme.of(context).primaryColor,
+        globalBackgroundColor: Theme.of(context).colorScheme.primary,
         scrollPhysics: ClampingScrollPhysics(),
         //next: Icon(Icons.arrow_forward, color: Colors.white),
         //doneButtonPersist: true, // Persist done button across pages

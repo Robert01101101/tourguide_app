@@ -13,6 +13,7 @@ import 'package:tourguide_app/tour/tourguide_user_profile_view.dart';
 import 'package:tourguide_app/ui/my_layouts.dart';
 import 'package:tourguide_app/utilities/map_utils.dart';
 import 'package:tourguide_app/utilities/providers/tour_provider.dart';
+import '../ui/tour_rating_bookmark_buttons.dart';
 import '../utilities/custom_import.dart';
 import 'package:http/http.dart' as http;
 import '../utilities/providers/tourguide_user_provider.dart';
@@ -61,19 +62,6 @@ class _FullscreenTourPageState extends State<FullscreenTourPage> {
 
 
   Future<void> _addMarkers() async {
-    // Add tour city marker
-    /*
-    _markers.add(
-      Marker(
-        markerId: MarkerId(widget.tour.id),
-        position: LatLng(widget.tour.latitude, widget.tour.longitude),
-        infoWindow: InfoWindow(
-          title: widget.tour.name,
-          snippet: widget.tour.description,
-        ),
-      ),
-    );*/
-
     //add tourguidePlace markers
     for (int i = 0; i < widget.tour.tourguidePlaces.length; i++) {
       TourguidePlace tourguidePlace = widget.tour.tourguidePlaces[i];
@@ -140,14 +128,13 @@ class _FullscreenTourPageState extends State<FullscreenTourPage> {
     int attempt = 0;
     while (attempt < 2) {
       try {
-        attempt++;
         String url = 'https://maps.googleapis.com/maps/api/directions/json?'
         //'origin=${waypoints.first.latitude},${waypoints.last.longitude}&'
         //'destination=${waypoints.last.latitude},${waypoints.last.longitude}&'
             'origin=place_id:${waypoints.first}&'
             'destination=place_id:${waypoints.last}&'
             '${waypointsString.isNotEmpty ? 'waypoints=$waypointsString&' : waypointsString}'
-            'mode=${attempt == 1 ? 'walking&' : 'driving&'}'
+            'mode=${attempt == 0 ? 'walking&' : 'driving&'}'
             'key=$apiKey';
 
         //logger.i(url);
@@ -157,6 +144,7 @@ class _FullscreenTourPageState extends State<FullscreenTourPage> {
         //logger.i(response.body);
 
         if (response.statusCode == 200) {
+          attempt++;
           Map<String, dynamic> data = jsonDecode(response.body);
 
           // Check the status field
@@ -299,66 +287,6 @@ class _FullscreenTourPageState extends State<FullscreenTourPage> {
     }
   }
 
-  //TODO unify behavior and UI with tour tile and tour running
-  void saveTour() {
-    if (widget.tour.isOfflineCreatedTour) return; // Tour creation tile should not have rating
-
-    TourguideUserProvider tourguideUserProvider = Provider.of(context, listen: false);
-
-    setState(() {
-      tourguideUserProvider.user!.savedTourIds.contains(widget.tour.id)
-          ? tourguideUserProvider.user!.savedTourIds.remove(widget.tour.id)
-          : tourguideUserProvider.user!.savedTourIds.add(widget.tour.id);
-      tourguideUserProvider.updateUser(tourguideUserProvider.user!);
-    });
-  }
-
-  //TODO unify behavior and UI with tour tile and tour running
-  void toggleThumbsUp() {
-    if (widget.tour.isOfflineCreatedTour) return; // Tour creation tile should not have rating
-
-    myAuth.AuthProvider authProvider = Provider.of(context, listen: false);
-
-    setState(() {
-      if (thisUsersRating == 1) {
-        // Cancel upvote
-        thisUsersRating = 0;
-        widget.tour.upvotes--; // Decrease upvotes
-      } else {
-        // Upvote
-        if (thisUsersRating == -1) {
-          widget.tour.downvotes--; // Cancel downvote if any
-        }
-        thisUsersRating = 1;
-        widget.tour.upvotes++; // Increase upvotes
-      }
-      TourService.addOrUpdateRating(widget.tour.id, thisUsersRating, authProvider.user!.uid);
-    });
-  }
-
-  //TODO unify behavior and UI with tour tile and tour running
-  void toggleThumbsDown() {
-    if (widget.tour.isOfflineCreatedTour) return; // Tour creation tile should not have rating
-
-    myAuth.AuthProvider authProvider = Provider.of(context, listen: false);
-
-    setState(() {
-      if (thisUsersRating == -1) {
-        // Cancel downvote
-        thisUsersRating = 0;
-        widget.tour.downvotes--; // Decrease downvotes
-      } else {
-        // Downvote
-        if (thisUsersRating == 1) {
-          widget.tour.upvotes--; // Cancel upvote if any
-        }
-        thisUsersRating = -1;
-        widget.tour.downvotes++; // Increase downvotes
-      }
-      TourService.addOrUpdateRating(widget.tour.id, thisUsersRating, authProvider.user!.uid);
-    });
-  }
-
   //TODO unify behavior and UI with tour tile
   void startTour() {
     TourProvider tourProvider = Provider.of<TourProvider>(context, listen: false);
@@ -494,66 +422,12 @@ class _FullscreenTourPageState extends State<FullscreenTourPage> {
                             ElevatedButton(
                               onPressed: widget.tour.isOfflineCreatedTour ? null : startTour,
                               style: ElevatedButton.styleFrom(
-                                backgroundColor: Theme.of(context).primaryColor, // background
-                                foregroundColor: Colors.white, // foreground
+                                backgroundColor: Theme.of(context).colorScheme.primary,
+                                foregroundColor: Theme.of(context).colorScheme.surfaceContainerLow,
                               ),
                               child: Text("Start"),),
                         ),
-                        Row(
-                          children: [
-                            ElevatedButton(
-                              onPressed: widget.tour.isOfflineCreatedTour ? null : saveTour,
-                              style: ElevatedButton.styleFrom(
-                                shape: CircleBorder(),
-                                padding: EdgeInsets.all(0),
-                                foregroundColor:
-                                tourguideUserProvider.user != null && tourguideUserProvider.user!.savedTourIds.contains(widget.tour.id) ?
-                                Theme.of(context).primaryColor : Colors.grey,
-                              ),
-                              child: Icon(Icons.bookmark_rounded), // Replace with your desired icon
-                            ),
-                            Material(
-                              elevation: 1,
-                              color: Color(0xffeff5f3),
-                              borderRadius: BorderRadius.circular(32.0),
-                              child: Padding(
-                                padding: const EdgeInsets.all(2.0),
-                                child: Row(
-                                  children: [
-                                    SizedBox(
-                                      width: 35,
-                                      height: 35,
-                                      child: IconButton(
-                                        onPressed: toggleThumbsUp,
-                                        icon: Icon(Icons.thumb_up, color: thisUsersRating == 1 ? Theme.of(context).primaryColor : Colors.grey),
-                                        iconSize: 18,
-                                        padding: EdgeInsets.all(0),
-                                        constraints: BoxConstraints(),
-                                      ),
-                                    ),
-                                    Text(
-                                      '${(widget.tour.upvotes - widget.tour.downvotes).sign == 1 ? '+' : ''}${widget.tour.upvotes - widget.tour.downvotes}',
-                                      style: Theme.of(context).textTheme.labelMedium,
-                                      overflow: TextOverflow.visible,
-                                      maxLines: 1,
-                                    ),
-                                    SizedBox(
-                                      width: 35,
-                                      height: 35,
-                                      child: IconButton(
-                                        onPressed: toggleThumbsDown,
-                                        icon: Icon(Icons.thumb_down, color: thisUsersRating == -1 ? Theme.of(context).primaryColor : Colors.grey),
-                                        iconSize: 18,
-                                        padding: EdgeInsets.all(0),
-                                        constraints: BoxConstraints(),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
+                        TourRatingBookmarkButtons(tour: widget.tour),
                       ],
                     ),
                     if (showMap)
