@@ -73,10 +73,14 @@ jobs:
       - name: Set Flutter SDK Path Environment Variable
         run: echo "FLUTTER_SDK_PATH=${{ runner.workspace }}/flutter" >> $GITHUB_ENV
 
+      - name: Get the latest commit message
+        id: commit_message
+        run: echo "COMMIT_MSG=$(git log -1 --pretty=%B)" >> $GITHUB_ENV
+
       - name: Build and deploy
         run: |
           cd android
-          bundle exec fastlane deploy
+          bundle exec fastlane deploy release_notes:"${{ env.COMMIT_MSG }}"
         env:
           GOOGLE_PLAY_JSON_KEY: ${{ secrets.GOOGLE_PLAY_JSON_KEY }}
           KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
