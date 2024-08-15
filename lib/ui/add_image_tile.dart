@@ -72,7 +72,7 @@ class __AddImageTileContentState extends State<_AddImageTileContent> {
         decoration: BoxDecoration(
           border: Border.all(
             color: !widget.state.hasError
-                ? widget.enabled ? Theme.of(context).primaryColor : Colors.grey
+                ? widget.enabled ? Theme.of(context).colorScheme.primary : Colors.grey
                 : Theme.of(context).colorScheme.error,
             width: 2.0,
           ),
@@ -120,7 +120,7 @@ class __AddImageTileContentState extends State<_AddImageTileContent> {
                     children: [
                       ElevatedButton(
                         onPressed: widget.enabled ? () => _pickImage(ImageSource.camera) : () => logger.e("Clicked take image after form submit"),
-                        child: Icon(Icons.camera_alt, color: widget.enabled ? Theme.of(context).primaryColor : Colors.grey),
+                        child: Icon(Icons.camera_alt, color: widget.enabled ? Theme.of(context).colorScheme.primary : Colors.grey),
                         style: ElevatedButton.styleFrom(
                           shape: CircleBorder(),
                           padding: EdgeInsets.all(15),
@@ -129,7 +129,7 @@ class __AddImageTileContentState extends State<_AddImageTileContent> {
                       SizedBox(width: 15),
                       ElevatedButton(
                         onPressed: widget.enabled ? () => _pickImage(ImageSource.gallery) : () => logger.e("Clicked pick image after form submit"),
-                        child: Icon(Icons.collections, color: widget.enabled ? Theme.of(context).primaryColor : Colors.grey),
+                        child: Icon(Icons.collections, color: widget.enabled ? Theme.of(context).colorScheme.primary : Colors.grey),
                         style: ElevatedButton.styleFrom(
                           shape: CircleBorder(),
                           padding: EdgeInsets.all(15),

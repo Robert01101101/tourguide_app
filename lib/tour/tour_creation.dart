@@ -461,7 +461,7 @@ class _CreateEditTourState extends State<CreateEditTour> {
                   onPressed: _isFormSubmitted ? null : controlsDetails.onStepContinue,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Theme.of(context).colorScheme.primary,
-                    foregroundColor: Colors.white,
+                    foregroundColor: Theme.of(context).colorScheme.surfaceContainerLow,
                     //primary: Colors.grey, // Custom color for "Back" button
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(3.0), // Custom radius

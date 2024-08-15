@@ -12,10 +12,12 @@ import 'package:logger/logger.dart';
 import 'package:provider/provider.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:tourguide_app/ui/tourguide_theme.dart';
 import 'package:tourguide_app/utilities/providers/auth_provider.dart';
 import 'package:tourguide_app/utilities/custom_import.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:tourguide_app/utilities/providers/location_provider.dart';
+import 'package:tourguide_app/utilities/providers/theme_provider.dart';
 import 'package:tourguide_app/utilities/providers/tour_provider.dart';
 import 'package:tourguide_app/utilities/providers/tourguide_user_provider.dart';
 import 'firebase_options.dart';
@@ -160,44 +162,18 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
           create: (_) => TourguideUserProvider(), // Provide TourguideUserProvider with access to AuthProvider
           update: (_, authProvider, userProvider) => userProvider!..setAuthProvider(authProvider),
         ),
+        ChangeNotifierProvider(create: (_) => ThemeProvider()),
       ],
-      child: MaterialApp.router(
-        scaffoldMessengerKey: SnackBarService.scaffoldKey,
-        title: 'Tourguide App',
-        routerConfig: TourguideNavigation.router,
-        theme: _buildTheme(),
-      ),
-    );
-  }
-
-  ThemeData _buildTheme() {
-    const Color primaryColor = Color(0xFF6fece4);
-    var baseTheme = ThemeData(
-      useMaterial3: true,
-      colorScheme: ColorScheme.fromSeed(seedColor: primaryColor),
-    );
-
-    final textTheme = baseTheme.textTheme;
-
-    return baseTheme.copyWith(
-      scaffoldBackgroundColor: Colors.white,
-      textTheme: GoogleFonts.latoTextTheme(textTheme).copyWith(
-        //Titles are GoogleFonts latoTextTheme but bold
-        titleLarge: GoogleFonts.lato(textStyle: textTheme.titleLarge, color: const Color(0xff3b4948), fontWeight: FontWeight.bold),
-        titleMedium: GoogleFonts.lato(textStyle: textTheme.titleMedium, color: const Color(0xff3b4948), fontWeight: FontWeight.bold),
-        titleSmall: GoogleFonts.lato(textStyle: textTheme.titleSmall, color: const Color(0xff3b4948), fontWeight: FontWeight.bold),
-        headlineLarge: GoogleFonts.lato(textStyle: textTheme.headlineLarge, color: const Color(0xff3b4948), fontWeight: FontWeight.bold),
-        headlineMedium: GoogleFonts.lato(textStyle: textTheme.headlineMedium, color: const Color(0xff3b4948), fontWeight: FontWeight.bold),
-        headlineSmall: GoogleFonts.lato(textStyle: textTheme.headlineSmall, color: const Color(0xff3b4948), fontWeight: FontWeight.bold),
-        displayLarge: GoogleFonts.vollkorn(textStyle: textTheme.displayLarge, color: const Color(0xff3b4948), fontWeight: FontWeight.w400),
-        displayMedium: GoogleFonts.vollkorn(textStyle: textTheme.displayMedium, color: const Color(0xff3b4948), fontWeight: FontWeight.w400),
-        displaySmall: GoogleFonts.vollkorn(textStyle: textTheme.displaySmall, color: const Color(0xff3b4948), fontWeight: FontWeight.w400),
-      ),
-      elevatedButtonTheme: ElevatedButtonThemeData(
-        style: ElevatedButton.styleFrom(
-          textStyle: TextStyle(fontWeight: FontWeight.w500),
-        ),
-      ),
+      child: Consumer<ThemeProvider>(builder: (context, themeProvider, child) {
+        return MaterialApp.router(
+          scaffoldMessengerKey: SnackBarService.scaffoldKey,
+          title: 'Tourguide App',
+          routerConfig: TourguideNavigation.router,
+          theme: TourguideTheme.lightTheme,
+          darkTheme: TourguideTheme.darkTheme,
+          themeMode: themeProvider.themeMode,
+        );
+      }),
     );
   }
 }
@@ -229,6 +205,7 @@ class MyGlobals {
     LocationProvider locationProvider = Provider.of(context, listen: false);
     TourProvider tourProvider = Provider.of(context, listen: false);
     TourguideUserProvider tourguideUserProvider = Provider.of(context, listen: false);
+    ThemeProvider themeProvider = Provider.of(context, listen: false);
   }
 }
 
@@ -239,3 +216,8 @@ class SnackBarService {
   }
 }
 
+extension StringExtension on String {
+  String capitalize() {
+    return "${this[0].toUpperCase()}${this.substring(1).toLowerCase()}";
+  }
+}
