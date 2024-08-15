@@ -18,11 +18,30 @@ default_platform(:android)
 platform :android do
   desc "Build and deploy to Open Testing track"
   lane :deploy do
+
+    # Build the appbundle
     # gradle(task: "bundle", build_type: "Release")
     sh "flutter build appbundle"
-    changelog_from_git_commits(
+
+    # Generate the changelog from Git commits
+    changelog = changelog_from_git_commits(
       commits_count: 1
     )
+
+    # Define the version code (this needs to match your APK/AAB version code)
+    version_code = get_version_code(
+      gradle_file: "android/app/build.gradle"
+    )
+
+    # Define the path for the changelog file
+    changelog_directory = "fastlane/metadata/android/en-US/changelogs"
+    FileUtils.mkdir_p(changelog_directory)
+    changelog_file_path = "#{changelog_directory}/#{version_code}.txt"
+
+    # Write the changelog to the file
+    File.write(changelog_file_path, changelog)
+
+    # Upload the appbundle to the Play Store - note this automatically reads changelogs from the changelog directory
     upload_to_play_store(
       json_key: "app/google-play-key.json",
       track: 'beta',
