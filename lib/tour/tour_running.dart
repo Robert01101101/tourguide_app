@@ -646,6 +646,10 @@ class _TourRunningState extends State<TourRunning> {
                     height: 350.0, // Adjust height as needed
                     child: Stack(
                       children: [
+                        if (showMap)  //TODO - understand why this is necessary - Google Map appears transparent in spots without it
+                          Container(
+                            color: Color(0xffe8eaed),
+                          ),
                         if (showMap)
                         GoogleMap(
                           gestureRecognizers: {
