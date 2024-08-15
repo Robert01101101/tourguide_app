@@ -20,6 +20,9 @@ platform :android do
   lane :deploy do
     # gradle(task: "bundle", build_type: "Release")
     sh "flutter build appbundle"
+    changelog_from_git_commits(
+      commits_count: 1
+    )
     upload_to_play_store(
       json_key: "app/google-play-key.json",
       track: 'beta',
