@@ -17,18 +17,13 @@ default_platform(:android)
 
 platform :android do
   desc "Build and deploy to Open Testing track"
-  lane :deploy do |options|
-    release_notes = options[:release_notes] || "No release notes available"
-
+  lane :deploy do
     # gradle(task: "bundle", build_type: "Release")
     sh "flutter build appbundle"
     upload_to_play_store(
       json_key: "app/google-play-key.json",
       track: 'beta',
       aab: "../build/app/outputs/bundle/release/app-release.aab"
-      release_notes: {
-        'en-US' => release_notes
-      }
     )
   end
 
