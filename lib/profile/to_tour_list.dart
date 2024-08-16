@@ -35,12 +35,9 @@ class _ToTourListState extends State<ToTourList> {
             Text("To Tour List", style: Theme.of(context).textTheme.headlineSmall),
             StandardLayoutChild(
               fullWidth: true,
-              child: SizedBox(
-                height: 220.0, // Set a fixed height for the horizontal scroller
-                child: HorizontalScroller(
-                    leftPadding: true,
-                    tours: tourProvider.userSavedTours),
-              ),
+              child: HorizontalScroller(
+                  leftPadding: true,
+                  tours: tourProvider.userSavedTours),
             ),
           ],
         ),

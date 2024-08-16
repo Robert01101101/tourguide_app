@@ -346,10 +346,7 @@ class ExploreState extends State<Explore> {
                           ),
                           StandardLayoutChild(
                             fullWidth: true,
-                            child: SizedBox(
-                              height: 220.0, // Set a fixed height for the horizontal scroller
-                              child: HorizontalScroller(tours: tourProvider.popularTours),
-                            ),
+                            child: HorizontalScroller(tours: tourProvider.popularTours),
                           ),
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -365,10 +362,7 @@ class ExploreState extends State<Explore> {
                           ),
                           StandardLayoutChild(
                             fullWidth: true,
-                            child: SizedBox(
-                              height: 220.0, // Set a fixed height for the horizontal scroller
-                              child: HorizontalScroller(tours: tourProvider.localTours),
-                            ),
+                            child: HorizontalScroller(tours: tourProvider.localTours),
                           ),
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -384,10 +378,7 @@ class ExploreState extends State<Explore> {
                           ),
                           StandardLayoutChild(
                             fullWidth: true,
-                            child: SizedBox(
-                              height: 220.0, // Set a fixed height for the horizontal scroller
-                              child: HorizontalScroller(tours: tourProvider.globalTours),
-                            ),
+                            child: HorizontalScroller(tours: tourProvider.globalTours),
                           ),
                           /*Text("Debug", style: Theme.of(context).textTheme.headlineSmall),
                           Row(
