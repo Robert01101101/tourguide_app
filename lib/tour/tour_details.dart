@@ -85,9 +85,11 @@ class _FullscreenTourPageState extends State<FullscreenTourPage> {
       );
     }
 
-    setState(() {
-      _markers = _markers;
-    });
+    if (mounted){
+      setState(() {
+        _markers = _markers;
+      });
+    }
 
     //set zoom
     LatLngBounds bounds = MapUtils.createLatLngBounds(widget.tour.tourguidePlaces.map((place) => LatLng(place.latitude, place.longitude)).toList());
@@ -211,9 +213,11 @@ class _FullscreenTourPageState extends State<FullscreenTourPage> {
       ),
     );
 
-    setState(() {
-      _polylines = _polylines;
-    });
+    if (mounted){
+      setState(() {
+        _polylines = _polylines;
+      });
+    }
   }
 
   void _showOptionsDialog(BuildContext context) {

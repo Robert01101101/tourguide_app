@@ -37,7 +37,7 @@ platform :android do
     next_version_code = latest_version_code + 1
 
     # Define the path for the changelog file
-    changelog_directory = "fastlane/metadata/android/en-US/changelogs"
+    changelog_directory = "metadata/android/en-US/changelogs"
     FileUtils.mkdir_p(changelog_directory)
     changelog_file_path = "#{changelog_directory}/#{next_version_code}.txt"
 

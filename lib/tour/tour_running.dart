@@ -538,7 +538,7 @@ class _TourRunningState extends State<TourRunning> {
             controller: _scrollController,
             slivers: [
               SliverAppBar(
-                title: Text(_tour.name),
+                //title: Center(child: Text(_tour.name)),
                 actions: [
                   if (!_tour.isOfflineCreatedTour)
                     IconButton(
@@ -558,16 +558,58 @@ class _TourRunningState extends State<TourRunning> {
                   },
                 )
                     : null,
-                floating: true,
+                floating: false,
                 pinned: false,
-                snap: true,
-                /*expandedHeight: 200.0,
+                expandedHeight: 230.0,
                 flexibleSpace: FlexibleSpaceBar(
-                  background: Image.network(
-                    _tour.imageUrl,
-                    fit: BoxFit.cover,
+                  centerTitle: true,
+                  title: Transform.translate(
+                    offset: Offset(0, -32),
+                    child: Text(
+                      textAlign: TextAlign.center,
+                      _tour.name,
+                      style: Theme.of(context).textTheme.displaySmall!.copyWith(
+                        color: Colors.white,
+                      )
+                    ),
                   ),
-                ),*/
+                  titlePadding: EdgeInsets.only(bottom: 0.0),
+                  expandedTitleScale: 1,
+                  collapseMode: CollapseMode.parallax,
+                  background: Stack(
+                    fit: StackFit.expand,
+                    children: [
+                      Container(
+                        height: 230,
+                        child: ClipRRect(
+                          child: _tour.imageFile != null  //add null safety for img to upload
+                              ? Image.file(_tour.imageFile!,
+                              width: MediaQuery.of(context).size.width,
+                              height: 200.0,
+                              fit: BoxFit.cover)
+                              :
+                          Container(
+                            color: Colors.grey,
+                            width: MediaQuery.of(context).size.width,
+                            height: 200.0,
+                          ),
+                        ),
+                      ),
+                      Container(
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            begin: Alignment.topCenter,
+                            end: Alignment.bottomCenter,
+                            colors: [
+                              Colors.black.withOpacity(0.2),
+                              Colors.black.withOpacity(0.5),
+                            ],
+                          ),
+                        ),
+                      )
+                    ],
+                  ),
+                ),
               ),
               SliverToBoxAdapter(
                 child: Stack(
@@ -577,6 +619,7 @@ class _TourRunningState extends State<TourRunning> {
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
+                            /*
                             Stack(
                               children: [
                                 Container(
@@ -624,7 +667,7 @@ class _TourRunningState extends State<TourRunning> {
                                     ),
                                   ),
                                 ],
-                              ),
+                              ),*/
                             const SizedBox(height: 16.0),
                             Container(
                               height: 105,
