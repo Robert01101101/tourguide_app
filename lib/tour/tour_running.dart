@@ -524,6 +524,28 @@ class _TourRunningState extends State<TourRunning> {
     }
 
     return Scaffold(
+      appBar: _isFullScreen ? AppBar(
+        title: Text(_tour.name),
+        actions:
+        [
+          if (!_tour.isOfflineCreatedTour)
+            IconButton(
+              icon: Icon(Icons.more_vert),
+              onPressed: () {
+                // Show options menu
+                _showOptionsDialog(context);
+              },
+            ),
+        ],
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back),
+          onPressed: () {
+            setState(() {
+              _isFullScreen = false;
+            });
+          },
+        ),
+      ) : null,
       body: PopScope(
         canPop: !_isFullScreen,
         onPopInvoked: (bool didPop) {
@@ -542,22 +564,21 @@ class _TourRunningState extends State<TourRunning> {
                 actions: [
                   if (!_tour.isOfflineCreatedTour)
                     IconButton(
-                      icon: Icon(Icons.more_vert),
+                      icon: const Icon(Icons.more_vert),
                       onPressed: () {
                         _showOptionsDialog(context);
                       },
                     ),
                 ],
-                leading: _isFullScreen
-                    ? IconButton(
-                  icon: Icon(Icons.arrow_back),
+                /*leading: IconButton(
+                  icon: const Icon(Icons.arrow_back, color: Colors.white),
                   onPressed: () {
                     setState(() {
-                      _isFullScreen = false;
+                      Navigator.of(context).pop();
                     });
                   },
-                )
-                    : null,
+                ),*/
+                foregroundColor: Theme.of(context).brightness == Brightness.light ? Theme.of(context).scaffoldBackgroundColor : Colors.white,
                 floating: false,
                 pinned: false,
                 expandedHeight: 230.0,
@@ -569,7 +590,7 @@ class _TourRunningState extends State<TourRunning> {
                       textAlign: TextAlign.center,
                       _tour.name,
                       style: Theme.of(context).textTheme.displaySmall!.copyWith(
-                        color: Colors.white,
+                        color: Theme.of(context).brightness == Brightness.light ? Theme.of(context).scaffoldBackgroundColor : Colors.white,
                       )
                     ),
                   ),
@@ -619,55 +640,6 @@ class _TourRunningState extends State<TourRunning> {
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            /*
-                            Stack(
-                              children: [
-                                Container(
-                                  height: 230,
-                                  child: ClipRRect(
-                                    child: _tour.imageFile != null  //add null safety for img to upload
-                                      ? Image.file(_tour.imageFile!,
-                                      width: MediaQuery.of(context).size.width,
-                                      height: 200.0,
-                                      fit: BoxFit.cover)
-                                      :
-                                      Container(
-                                        color: Colors.grey,
-                                        width: MediaQuery.of(context).size.width,
-                                        height: 200.0,
-                                    ),
-                                  ),
-                                ),
-                                if (tourProvider.isUserCreatedTour(_tour))
-                                  Align(
-                                    alignment: Alignment.topRight,
-                                    child: Padding(
-                                      padding: EdgeInsets.all(8.0),
-                                      child: Row(
-                                        mainAxisAlignment: MainAxisAlignment.end,
-                                        children: [
-                                          if (_tour.reports.isNotEmpty)
-                                            const CircleAvatar(
-                                              radius: 16,
-                                              backgroundColor: Colors.black45,
-                                              child: Icon(
-                                                Icons.report_outlined,
-                                                color: Colors.yellow,
-                                                size: 22,),
-                                            ),
-                                          const CircleAvatar(
-                                            radius: 16,
-                                            backgroundColor: Colors.black45,
-                                            child: Icon(
-                                              Icons.attribution,
-                                              color: Colors.white,),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),*/
                             const SizedBox(height: 16.0),
                             Container(
                               height: 105,
@@ -676,6 +648,7 @@ class _TourRunningState extends State<TourRunning> {
                                 style: Theme.of(context).textTheme.bodyMedium,
                               ),
                             ),
+                            const SizedBox(height: 16.0),
                           ],
                         ),
                       ],

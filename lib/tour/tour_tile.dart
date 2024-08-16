@@ -67,11 +67,12 @@ class _TourTileState extends State<TourTile> {
     bool textDataReady = widget.tour.name != null && widget.tour.name != "";
     TourProvider tourProvider = Provider.of<TourProvider>(context);
     bool isLoadingImage = widget.tour.imageFile == null;
+    double tileWidth = 210;
 
     return GestureDetector(
       onTap: () => widget.tour.isAddTourTile ? _createTour() : _showOverlay(context),
       child: Container(
-        width: 180.0,
+        width: tileWidth,
         decoration: BoxDecoration(
           color: Theme.of(context).colorScheme.surfaceContainer,
           borderRadius: BorderRadius.circular(16.0),
@@ -111,11 +112,11 @@ class _TourTileState extends State<TourTile> {
                     child: widget.tour.imageFile != null
                         ?
                     Image.file(widget.tour.imageFile!,
-                        width: 180.0,
-                        height: 100.0,
+                        width: tileWidth,
+                        height: 0.55*tileWidth.ceil(),
                         fit: BoxFit.cover)
                         :
-                    Container(width: 180, height: 100, color: Colors.white,),
+                    Container(width: tileWidth, height: 0.55*tileWidth.ceil(), color: Colors.white,),
                   ),
                   if (tourProvider.isUserCreatedTour(widget.tour))
                     Align(
@@ -180,7 +181,7 @@ class _TourTileState extends State<TourTile> {
                         widget.tour.description,
                          style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant),
                          overflow: TextOverflow.ellipsis,
-                         maxLines: 3,
+                         maxLines: 4,
                        ),
                      ),
                    ) :

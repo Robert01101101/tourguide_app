@@ -364,7 +364,7 @@ class _FullscreenTourPageState extends State<FullscreenTourPage> {
                         Stack(
                             children: [
                               Container(
-                                height: 230,
+                                height: 200,
                                 child: ClipRRect(
                                   child: widget.tour.imageFile != null  //add null safety for img to upload
                                   ? Image.file(widget.tour.imageFile!,
@@ -436,7 +436,7 @@ class _FullscreenTourPageState extends State<FullscreenTourPage> {
                     ),
                     if (showMap)
                       Container(
-                        height: 260.0, // Adjust height as needed
+                        height: 240.0, // Adjust height as needed
                         child: Stack(
                           children: [
                             GoogleMap(

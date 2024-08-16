@@ -28,6 +28,8 @@ platform :android do
       commits_count: 1
     )
 
+    UI.message("Generated changelog:\n#{changelog}")
+
     # Define the version code (this needs to match your APK/AAB version code)
     latest_version_code = (
       google_play_track_version_codes(
@@ -35,11 +37,13 @@ platform :android do
       )
     ).max
     next_version_code = latest_version_code + 1
+    UI.message("Next version code: #{next_version_code}")
 
     # Define the path for the changelog file
-    changelog_directory = "metadata/android/en-US/changelogs"
+    changelog_directory = "fastlane/metadata/android/en-US/changelogs"
     FileUtils.mkdir_p(changelog_directory)
     changelog_file_path = "#{changelog_directory}/#{next_version_code}.txt"
+     UI.message("Writing changelog to #{changelog_file_path}...")
 
     # Write the changelog to the file
     File.write(changelog_file_path, changelog)
