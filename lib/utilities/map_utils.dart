@@ -88,6 +88,54 @@ class MapUtils {
     return BitmapDescriptor.fromBytes(byteData.buffer.asUint8List());
   }
 
+  static Future<BitmapDescriptor> createUserPositionIcon() async {
+    final dotSize = 64.0; // Size of the blue dot
+    final triangleSize = Size(300, 150); // Size of the triangle
+
+    final size = Size(triangleSize.width, triangleSize.height); // Total canvas size
+    final recorder = ui.PictureRecorder();
+    final canvas = Canvas(recorder, Rect.fromLTWH(0, 0, size.width, size.height));
+
+    // Draw the blue dot
+    final dotPaint = Paint()
+      ..color = Colors.teal
+      ..style = PaintingStyle.fill;
+    canvas.drawCircle(
+      Offset(size.width / 2, dotSize / 2), // Center of the canvas
+      dotSize / 2,
+      dotPaint,
+    );
+
+    // Draw the triangle
+    final trianglePaint = Paint()
+      ..shader = LinearGradient(
+        colors: [Colors.teal.withOpacity(0.5), Colors.transparent],
+        begin: Alignment.topCenter,
+        end: Alignment.bottomCenter,
+      ).createShader(Rect.fromLTWH(0, 0, triangleSize.width, triangleSize.height))
+      ..style = PaintingStyle.fill;
+
+    final path = Path()
+      ..moveTo(triangleSize.width / 2, 0) // Tip of the triangle
+      ..lineTo(0, triangleSize.height) // Bottom left
+      ..lineTo(triangleSize.width, triangleSize.height) // Bottom right
+      ..close();
+
+    // Position and rotate the triangle
+    canvas.save();
+    canvas.translate(size.width / 2, size.height / 2); // Move origin to center
+    canvas.translate(-triangleSize.width / 2, -triangleSize.height / 2); // Move origin to top-left corner of the triangle
+    canvas.drawPath(path, trianglePaint);
+    canvas.restore();
+
+    final picture = recorder.endRecording();
+    final img = await picture.toImage(size.width.toInt(), size.height.toInt());
+    final byteData = await img.toByteData(format: ui.ImageByteFormat.png);
+    final uint8list = byteData!.buffer.asUint8List();
+
+    return BitmapDescriptor.fromBytes(uint8list);
+  }
+
   static LatLngBounds createLatLngBounds(List<LatLng> points) {
     double south = points.first.latitude;
     double north = points.first.latitude;

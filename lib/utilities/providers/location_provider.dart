@@ -21,6 +21,7 @@ import '../../ui/google_places_image.dart';
 /// Global Location Provider so I can access location anywhere in the app
 class LocationProvider with ChangeNotifier {
   Position? _currentPosition;
+  final ValueNotifier<Position?> _currentPositionContinuous = ValueNotifier<Position?>(null);
   String _currentCity = '';
   String _currentState = '';
   String _currentCountry = '';
@@ -34,8 +35,10 @@ class LocationProvider with ChangeNotifier {
   String get currentCountry => _currentCountry;
   String get placeId => _placeId;
   TourguidePlaceImg? get currentPlaceImg => _currentPlaceImg;
+  ValueNotifier<Position?> get currentPositionContinuous => _currentPositionContinuous;
 
   Map<String, TourguidePlaceImg> _imageCache = {};
+  StreamSubscription<Position>? _positionStreamSubscription;
 
   LocationProvider() {
     _init();
@@ -55,6 +58,24 @@ class LocationProvider with ChangeNotifier {
 
   Future<void> getCurrentLocation() async {
     logger.t("LocationProvider.getCurrentLocation()");
+    await _ensureLocationPermissions();
+
+    try {
+      Position position = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.high,
+      );
+      _currentPosition = position; // = testPos;
+      notifyListeners();
+
+      await _getLocationDetailsFromCoordinates(position);
+      await _saveLocation();
+      notifyListeners();
+    } catch (e) {
+      logger.e(e);
+    }
+  }
+
+  Future<void> _ensureLocationPermissions() async {
     bool serviceEnabled;
     LocationPermission permission;
 
@@ -85,20 +106,26 @@ class LocationProvider with ChangeNotifier {
       return Future.error(
           'Location permissions are permanently denied, we cannot request permissions.');
     }
+  }
 
-    try {
-      Position position = await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.high,
-      );
-      _currentPosition = position; // = testPos;
-      notifyListeners();
+  Future<void> startListeningForLocationContinuous() async {
+    logger.t("LocationProvider.getLocationContinuous()");
+    await _ensureLocationPermissions();
 
-      await _getLocationDetailsFromCoordinates(position);
-      await _saveLocation();
-      notifyListeners();
-    } catch (e) {
-      logger.e(e);
-    }
+    const LocationSettings locationSettings = LocationSettings(
+      accuracy: LocationAccuracy.high,
+      distanceFilter: 100,
+    );
+    _positionStreamSubscription  = Geolocator.getPositionStream(locationSettings: locationSettings).listen(
+            (Position? position) {
+          print(position == null ? 'Unknown' : '${position.latitude.toString()}, ${position.longitude.toString()}');
+          _currentPositionContinuous.value = position;
+        });
+  }
+
+  void stopListeningForLocationContinuous() {
+    _positionStreamSubscription?.cancel();
+    _positionStreamSubscription = null;
   }
 
   Future<void> refreshCurrentLocation() async {

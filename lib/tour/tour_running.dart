@@ -4,6 +4,7 @@ import 'dart:math';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:provider/provider.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:sliver_tools/sliver_tools.dart';
@@ -16,6 +17,7 @@ import 'package:tourguide_app/ui/my_layouts.dart';
 import 'package:tourguide_app/ui/tour_rating_bookmark_buttons.dart';
 import 'package:tourguide_app/ui/tourguide_theme.dart';
 import 'package:tourguide_app/utilities/map_utils.dart';
+import 'package:tourguide_app/utilities/providers/location_provider.dart';
 import 'package:tourguide_app/utilities/providers/tour_provider.dart';
 import 'package:visibility_detector/visibility_detector.dart';
 import '../utilities/custom_import.dart';
@@ -51,9 +53,11 @@ class _TourRunningState extends State<TourRunning> {
   bool _initialZoomToFirstWaypointComplete = false;
   List<BitmapDescriptor> _defaultMarkerBitmaps = [];
   List<BitmapDescriptor> _highlightedMarkerBitmaps = [];
+  BitmapDescriptor? _userLocationIcon;
   List<List<LatLng>> _routeSegments = [];
   int thisUsersRating = 0;
   bool _tourFinished = false;
+  LocationProvider? _locationProvider;
 
 
 
@@ -61,20 +65,30 @@ class _TourRunningState extends State<TourRunning> {
   void initState() {
     super.initState();
     TourProvider tourProvider = Provider.of<TourProvider>(context, listen: false);
+    _locationProvider = Provider.of<LocationProvider>(context, listen: false);
+    _locationProvider!.startListeningForLocationContinuous();
     _tour = tourProvider.selectedTour!;
     thisUsersRating = _tour.thisUsersRating ?? 0;
     _addMarkers();
   }
 
+  Future<void> _initUserLocationIcons() async {
+    _userLocationIcon = await MapUtils.createUserPositionIcon();
+    setState(() {});
+  }
+
   @override
   void dispose() {
     _ttsService.stop();
+    _locationProvider!.stopListeningForLocationContinuous();
     super.dispose();
   }
 
 
 
   Future<void> _addMarkers() async {
+    await _initUserLocationIcons();
+
     // Clear previous bitmaps
     _defaultMarkerBitmaps.clear();
     _highlightedMarkerBitmaps.clear();
@@ -508,12 +522,51 @@ class _TourRunningState extends State<TourRunning> {
     _moveCameraToMarkerAndHighlightMarker(_currentStep);
   }
 
+  void _processPositionContinuousUpdate(Position? position){
+    Marker? currentLocationMarker;
+    Marker debugMarker;
+
+    if (position != null && _userLocationIcon != null){
+      logger.t("ValueListenableBuilder: ${position.latitude}, ${position.longitude}");
+      final LatLng currentLatLng = LatLng(position.latitude, position.longitude);
+
+      //double debugRotation = 90;
+
+      // Update the marker with the new location
+      currentLocationMarker = Marker(
+        markerId: MarkerId('current_location'),
+        position: currentLatLng,
+        icon: _userLocationIcon!,
+        rotation: position.heading - 180, // Rotate the marker based on the heading
+        anchor: Offset(0.5, 0.213),
+      );
+
+      /*debugMarker = Marker(
+        markerId: MarkerId('current_location_debug'),
+        position: currentLatLng,
+        rotation: debugRotation, // Rotate the marker based on the heading
+      );*/
+
+
+      //check if the current location marker id is already in the set
+      if (_markers.contains(currentLocationMarker)){
+        _markers.remove(currentLocationMarker);
+        //_markers.remove(debugMarker);
+      }
+
+      // Add the current location marker to the set
+      _markers.add(currentLocationMarker);
+      //_markers.add(debugMarker);
+    }
+  }
+
 
 
   @override
   Widget build(BuildContext context) {
     final tourProvider = Provider.of<TourProvider>(context);
     final tourguideUserProvider = Provider.of<TourguideUserProvider>(context);
+    final locationProvider = Provider.of<LocationProvider>(context);
 
     bool showMap = _tour.latitude != null && _tour.latitude != 0 && _tour.longitude != null && _tour.longitude != 0;
     if (showMap && _currentCameraPosition.target == LatLng(0, 0)) {
@@ -522,6 +575,8 @@ class _TourRunningState extends State<TourRunning> {
         zoom: 14.0,
       );
     }
+
+    logger.t("Tour_Running.build()");
 
     return Scaffold(
       appBar: _isFullScreen ? AppBar(
@@ -667,30 +722,38 @@ class _TourRunningState extends State<TourRunning> {
                             color: Color(0xffe8eaed),
                           ),
                         if (showMap)
-                        GoogleMap(
-                          gestureRecognizers: {
-                            Factory<OneSequenceGestureRecognizer>(() => EagerGestureRecognizer())
-                          },
-                          mapType: MapType.normal,
-                          initialCameraPosition: _currentCameraPosition,
-                          markers: _markers,
-                          polylines: _polylines,
-                          onMapCreated: (GoogleMapController controller) async {
-                            if (!_mapControllerCompleter.isCompleted) {
-                              _mapControllerCompleter.complete(controller);
-                            } else {
-                              final GoogleMapController mapController = await _mapControllerCompleter.future;
-                              mapController.moveCamera(CameraUpdate.newCameraPosition(_currentCameraPosition));
-                            }
-                            await Future.delayed(const Duration(milliseconds: 200)); //avoid flicker
-                            setState(() {
-                              _isLoading = false;
-                            });
-                          },
-                          onCameraMove: (CameraPosition position) {
-                            _currentCameraPosition = position;
-                          },
-                        ),
+                          ValueListenableBuilder<Position?>(
+                            valueListenable: locationProvider.currentPositionContinuous,
+                            builder: (context, position, child) {
+
+                              _processPositionContinuousUpdate(position);
+
+                              return GoogleMap(
+                                gestureRecognizers: {
+                                  Factory<OneSequenceGestureRecognizer>(() => EagerGestureRecognizer())
+                                },
+                                mapType: MapType.normal,
+                                initialCameraPosition: _currentCameraPosition,
+                                markers: _markers,
+                                polylines: _polylines,
+                                onMapCreated: (GoogleMapController controller) async {
+                                  if (!_mapControllerCompleter.isCompleted) {
+                                    _mapControllerCompleter.complete(controller);
+                                  } else {
+                                    final GoogleMapController mapController = await _mapControllerCompleter.future;
+                                    mapController.moveCamera(CameraUpdate.newCameraPosition(_currentCameraPosition));
+                                  }
+                                  await Future.delayed(const Duration(milliseconds: 200)); //avoid flicker
+                                  setState(() {
+                                    _isLoading = false;
+                                  });
+                                },
+                                onCameraMove: (CameraPosition position) {
+                                  _currentCameraPosition = position;
+                                },
+                              );
+                            },
+                          ),
                         if (_isLoading)
                           Container(
                             color: Color(0xffe8eaed),
