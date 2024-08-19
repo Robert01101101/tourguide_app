@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 
 class TourguideTheme {
   //Colors
+  static const Color tourguideColor = Color(0xff006a65);
   static const Color primaryColor = Color(0xff6fece4);
   static const Color textColorDarkTheme = Colors.white;
 
@@ -35,7 +36,7 @@ class TourguideTheme {
       //scaffoldBackgroundColor: backgroundColor,
       extensions: <ThemeExtension<dynamic>>[
         const TourguideColors(        //TODO - this is an example and not in use atm - check necessity and otherwise remove?
-          brandColor: Color(0xFF1E88E5),
+          brandColor: Color(0xFF006a65),
           danger: Color(0xFFE53935),
         ),
       ],
