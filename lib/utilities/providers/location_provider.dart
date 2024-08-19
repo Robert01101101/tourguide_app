@@ -6,6 +6,7 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_compass/flutter_compass.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:flutter_google_places_sdk/flutter_google_places_sdk.dart';
@@ -36,9 +37,15 @@ class LocationProvider with ChangeNotifier {
   String get placeId => _placeId;
   TourguidePlaceImg? get currentPlaceImg => _currentPlaceImg;
   ValueNotifier<Position?> get currentPositionContinuous => _currentPositionContinuous;
+  double _compassHeadingContinuous = 0.0;
+  Position? _positionContinuous;
+  DateTime? _lastUpdate;
+  final Duration _throttleDuration = const Duration(milliseconds: 300);
+
 
   Map<String, TourguidePlaceImg> _imageCache = {};
   StreamSubscription<Position>? _positionStreamSubscription;
+  StreamSubscription<CompassEvent>? _compassStreamSubscription;
 
   LocationProvider() {
     _init();
@@ -112,20 +119,59 @@ class LocationProvider with ChangeNotifier {
     logger.t("LocationProvider.getLocationContinuous()");
     await _ensureLocationPermissions();
 
+    //Listen to compass for orientation updates
+    _compassStreamSubscription = FlutterCompass.events?.listen((CompassEvent event) {
+      if (event.heading != null) _compassHeadingContinuous = event.heading!;
+      //logger.t('Compass heading: ${_compassHeadingContinuous}');
+      _updateCurrentPositionContinuous();
+    });
+
+    //Listen to location with geolocator set to navigation accuracy
     const LocationSettings locationSettings = LocationSettings(
-      accuracy: LocationAccuracy.high,
-      distanceFilter: 100,
+      accuracy: LocationAccuracy.bestForNavigation,
+      distanceFilter: 0,
     );
     _positionStreamSubscription  = Geolocator.getPositionStream(locationSettings: locationSettings).listen(
             (Position? position) {
-          print(position == null ? 'Unknown' : '${position.latitude.toString()}, ${position.longitude.toString()}');
-          _currentPositionContinuous.value = position;
-        });
+          //logger.t(position == null ? 'Unknown' : '${position.latitude.toString()}, ${position.longitude.toString()}');
+          _positionContinuous = position;
+          _updateCurrentPositionContinuous();
+          },
+    );
+  }
+
+  void _updateCurrentPositionContinuous() {
+    final now = DateTime.now();
+    if (_lastUpdate == null || now.difference(_lastUpdate!) > _throttleDuration) {
+      //throttle to updates every 300ms max
+      _lastUpdate = now;
+
+      if (_positionContinuous != null) {
+        // Combine the latest position with the current heading
+        Position updatedPosition = Position(
+          latitude: _positionContinuous!.latitude,
+          longitude: _positionContinuous!.longitude,
+          timestamp: _positionContinuous!.timestamp,
+          accuracy: _positionContinuous!.accuracy,
+          altitude: _positionContinuous!.altitude,
+          heading: _compassHeadingContinuous,
+          speed: _positionContinuous!.speed,
+          speedAccuracy: _positionContinuous!.speedAccuracy,
+          altitudeAccuracy: _positionContinuous!.altitudeAccuracy,
+          headingAccuracy: _positionContinuous!.headingAccuracy,
+        );
+
+        // Update the ValueNotifier
+        _currentPositionContinuous.value = updatedPosition;
+      }
+    }
   }
 
   void stopListeningForLocationContinuous() {
     _positionStreamSubscription?.cancel();
     _positionStreamSubscription = null;
+    _compassStreamSubscription?.cancel();
+    _compassStreamSubscription = null;
   }
 
   Future<void> refreshCurrentLocation() async {

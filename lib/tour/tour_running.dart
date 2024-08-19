@@ -523,40 +523,40 @@ class _TourRunningState extends State<TourRunning> {
   }
 
   void _processPositionContinuousUpdate(Position? position){
-    Marker? currentLocationMarker;
-    Marker debugMarker;
-
-    if (position != null && _userLocationIcon != null){
-      logger.t("ValueListenableBuilder: ${position.latitude}, ${position.longitude}");
+    if (position != null && _userLocationIcon != null) {
+      //logger.t("ValueListenableBuilder: ${position.latitude}, ${position.longitude}");
       final LatLng currentLatLng = LatLng(position.latitude, position.longitude);
 
-      //double debugRotation = 90;
+      // Define the marker ID
+      final markerId = MarkerId('current_location');
 
-      // Update the marker with the new location
-      currentLocationMarker = Marker(
-        markerId: MarkerId('current_location'),
-        position: currentLatLng,
-        icon: _userLocationIcon!,
-        rotation: position.heading - 180, // Rotate the marker based on the heading
-        anchor: Offset(0.5, 0.213),
-      );
+      // If the marker already exists, update its position and rotation
+      if (_markers.any((marker) => marker.markerId == markerId)) {
+        _markers = _markers.map((marker) {
+          if (marker.markerId == markerId) {
+            logger.t('_processPositionContinuousUpdate - updated Marker');
+            return marker.copyWith(
+              positionParam: currentLatLng,
+              rotationParam: position.heading - 180,
+            );
+          }
+          return marker;
+        }).toSet();
+      } else {
+        // If the marker does not exist, create it
+        final currentLocationMarker = Marker(
+          markerId: markerId,
+          position: currentLatLng,
+          icon: _userLocationIcon!,
+          rotation: position.heading - 180, // Rotate the marker based on the heading
+          anchor: const Offset(0.5, 0.266),
+        );
 
-      /*debugMarker = Marker(
-        markerId: MarkerId('current_location_debug'),
-        position: currentLatLng,
-        rotation: debugRotation, // Rotate the marker based on the heading
-      );*/
+        logger.t('_processPositionContinuousUpdate - created new Marker');
 
-
-      //check if the current location marker id is already in the set
-      if (_markers.contains(currentLocationMarker)){
-        _markers.remove(currentLocationMarker);
-        //_markers.remove(debugMarker);
+        // Add the new marker to the set
+        _markers.add(currentLocationMarker);
       }
-
-      // Add the current location marker to the set
-      _markers.add(currentLocationMarker);
-      //_markers.add(debugMarker);
     }
   }
 

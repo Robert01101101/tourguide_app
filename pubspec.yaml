@@ -76,6 +76,9 @@ dependencies:
   firebase_app_check: ^0.3.0+4
   sliver_tools: ^0.2.12
   visibility_detector: ^0.4.0+2
+  flutter_compass:
+    git:
+      url: https://github.com/AlceoMazza/flutter_compass #has fixes to add support for gradle v8
 
 
 dev_dependencies:
@@ -109,6 +112,7 @@ flutter:
     - assets/onboarding/onboard2.png
     - assets/onboarding/onboard3.png
     - assets/onboarding/onboard4.png
+    - assets/others/location_icon.png
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware
