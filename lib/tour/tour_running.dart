@@ -672,6 +672,7 @@ class _TourRunningState extends State<TourRunning> {
                             Factory<OneSequenceGestureRecognizer>(() => EagerGestureRecognizer())
                           },
                           mapType: MapType.normal,
+                          myLocationEnabled: true,
                           initialCameraPosition: _currentCameraPosition,
                           markers: _markers,
                           polylines: _polylines,
