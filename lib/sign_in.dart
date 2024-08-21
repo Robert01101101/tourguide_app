@@ -49,6 +49,7 @@ class _SignInState extends State<SignIn> {
 
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
       authProvider.addListener(() {
+        logger.t("signIn.initState().authProviderListener -> user=${authProvider.user}, googleSignInUser=${authProvider.googleSignInUser}, isAuthorized=${authProvider.isAuthorized}, silentSignInFailed=${authProvider.silentSignInFailed}");
         if (authProvider.googleSignInUser != null && authProvider.user != null && authProvider.isAuthorized && !navigatedAwayFromSignIn) {
           logger.t("signIn.initState().authProviderListener -> user is no longer null");
           navigatedAwayFromSignIn = true;
@@ -62,6 +63,11 @@ class _SignInState extends State<SignIn> {
           FlutterNativeSplash.remove();
         }
       });
+
+      if (kIsWeb){
+        logger.t("signIn.initState() kIsWeb -> remove splash");
+        FlutterNativeSplash.remove();
+      }
       //authProvider.signInSilently();
     });
   }
