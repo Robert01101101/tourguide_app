@@ -13,6 +13,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tourguide_app/main.dart';
 import 'dart:convert';
+import 'package:http/http.dart' as http;
 
 
 import '../../ui/google_places_image.dart';
@@ -93,7 +94,7 @@ class LocationProvider with ChangeNotifier {
       _currentPosition = position; // = testPos;
       notifyListeners();
 
-      await _getLocationDetailsFromCoordinates(position);
+      await kIsWeb ? _getLocationDetailsFromCoordinatesWeb(position) : _getLocationDetailsFromCoordinates(position);
       await _saveLocation();
       notifyListeners();
     } catch (e) {
@@ -131,9 +132,54 @@ class LocationProvider with ChangeNotifier {
         notifyListeners();
       }
 
-    } catch (e) {
-      logger.e(e);
+    } catch (e, stack) {
+      logger.e(e, stackTrace: stack);
     }
+  }
+
+  Future<void> _getLocationDetailsFromCoordinatesWeb(Position position) async {
+    try {
+      double lat = position.latitude;
+      double lng = position.longitude;
+      logger.t("LocationProvider.getAddressFromLatLng()");
+
+      String host = 'https://maps.google.com/maps/api/geocode/json';
+      final url = '$host?key=${remoteConfig.getString('google_api_key')!}&language=en&latlng=$lat,$lng';
+
+      var response = await http.get(Uri.parse(url));
+      if (response.statusCode == 200) {
+        Map<String, dynamic> data = jsonDecode(response.body);
+        logger.i("LocationProvider.getAddressFromLatLng() - data=$data");
+
+        if (data["results"].isNotEmpty) {
+          var firstResult = data["results"][0];
+          var addressComponents = firstResult["address_components"];
+
+          _currentCity = _getComponent(addressComponents, 'locality') ?? '';
+          _currentState = _getComponent(addressComponents, 'administrative_area_level_1') ?? '';
+          _currentCountry = _getComponent(addressComponents, 'country') ?? '';
+          _placeId = firstResult["place_id"] ?? '';
+
+          logger.t("LocationProvider.getAddressFromLatLng() - _currentCity=$_currentCity, _currentState=$_currentState, _currentCountry=$_currentCountry, _placeId=$_placeId");
+          notifyListeners();
+        } else {
+          logger.e("No city results found for the provided coordinates.");
+        }
+      } else {
+        logger.e("Failed to fetch location details. HTTP status: ${response.statusCode}");
+      }
+    } catch (e, stack) {
+      logger.e(e, stackTrace: stack);
+    }
+  }
+
+  String? _getComponent(List<dynamic> components, String type) {
+    for (final component in components) {
+      if (component['types'].contains(type)) {
+        return component['long_name'];
+      }
+    }
+    return null;
   }
 
   Future<Place?> getLocationDetailsFromPlaceId(String placeId, {bool setAsCurrentPlace = false}) async {
