@@ -422,7 +422,7 @@ class _GeminiChatState extends State<GeminiChat> with WidgetsBindingObserver {
           ),
           color: isUser ?
           Theme.of(context).colorScheme.secondary :
-          Theme.of(context).colorScheme.surfaceContainerLow,
+          Theme.of(context).colorScheme.surfaceContainer,
         ),
         child: child
     );

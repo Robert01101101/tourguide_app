@@ -286,40 +286,53 @@ class _BottomNavigationPageState extends State<BottomNavigationPage> {
         hideDirection: Axis.vertical,
         height: 80,
         duration: const Duration(milliseconds: 300),
-        child: NavigationBar(
-          onDestinationSelected: (int index) {
-            widget.child.goBranch(
-              index,
-              initialLocation: index == widget.child.currentIndex,
-            );
-            setState(() {});
-          },
-          indicatorColor: Colors.amber,
-
-          selectedIndex:  widget.child.currentIndex,
-          destinations: const <Widget>[
-            NavigationDestination(
-              selectedIcon: Icon(Icons.home),
-              icon: Icon(Icons.language),
-              label: 'Explore',
+        child: NavigationBarTheme(
+          data: NavigationBarThemeData(
+            labelTextStyle: WidgetStateProperty.resolveWith<TextStyle>(
+                  (Set<WidgetState> states) {
+                if (states.contains(WidgetState.selected)) {
+                  return Theme.of(context).textTheme.labelMedium!.copyWith(
+                    fontWeight: FontWeight.bold,);
+                }
+                return Theme.of(context).textTheme.labelMedium!;
+              },
             ),
-            NavigationDestination(
-              icon: Icon(Icons.chat),
-              label: 'AI Tourguide',
-            ),
-            NavigationDestination(
-              icon: Icon(Icons.library_add),
-              label: 'Contribute',
-            ),
-            NavigationDestination(
-              /*icon: Badge(
-                label: Text('2'),
-                child: Icon(Icons.account_circle),
-              ),*/
-              icon: Icon(Icons.account_circle),
-              label: 'Profile',
-            ),
-          ],
+          ),
+          child: NavigationBar(
+            onDestinationSelected: (int index) {
+              widget.child.goBranch(
+                index,
+                initialLocation: index == widget.child.currentIndex,
+              );
+              setState(() {});
+            },
+            //indicatorColor: Colors.amber,
+          
+            selectedIndex:  widget.child.currentIndex,
+            destinations: const <Widget>[
+              NavigationDestination(
+                selectedIcon: Icon(Icons.home),
+                icon: Icon(Icons.explore),
+                label: 'Explore',
+              ),
+              NavigationDestination(
+                icon: Icon(Icons.chat),
+                label: 'AI Tourguide',
+              ),
+              NavigationDestination(
+                icon: Icon(Icons.library_add),
+                label: 'Contribute',
+              ),
+              NavigationDestination(
+                /*icon: Badge(
+                  label: Text('2'),
+                  child: Icon(Icons.account_circle),
+                ),*/
+                icon: Icon(Icons.account_circle),
+                label: 'Profile',
+              ),
+            ],
+          ),
         ),
       ),
     );
