@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:tourguide_app/main.dart';
@@ -46,13 +47,15 @@ class TourProvider with ChangeNotifier {
       _isLoadingTours = true;
 
       // Step 1: Get tours from Hive
-      _popularTours = _processToursAndUpdateCachedTours(await TourService.getToursFromHive(TourService.popularToursBoxName), userId);
-      _localTours = _processToursAndUpdateCachedTours(await TourService.getToursFromHive(TourService.localToursBoxName), userId);
-      _globalTours = _processToursAndUpdateCachedTours(await TourService.getToursFromHive(TourService.globalToursBoxName), userId);
-      _userCreatedTours = _processToursAndUpdateCachedTours(await TourService.getToursFromHive(TourService.userCreatedToursBoxName), userId);
-      _userSavedTours = _processToursAndUpdateCachedTours(await TourService.getToursFromHive(TourService.userSavedToursBoxName), userId);
-      logger.t("fetchAndSetTours - finished getting tours from Hive ${getFormattedTime()}");
-      notifyListeners();
+      if (!kIsWeb){
+        _popularTours = _processToursAndUpdateCachedTours(await TourService.getToursFromHive(TourService.popularToursBoxName), userId);
+        _localTours = _processToursAndUpdateCachedTours(await TourService.getToursFromHive(TourService.localToursBoxName), userId);
+        _globalTours = _processToursAndUpdateCachedTours(await TourService.getToursFromHive(TourService.globalToursBoxName), userId);
+        _userCreatedTours = _processToursAndUpdateCachedTours(await TourService.getToursFromHive(TourService.userCreatedToursBoxName), userId);
+        _userSavedTours = _processToursAndUpdateCachedTours(await TourService.getToursFromHive(TourService.userSavedToursBoxName), userId);
+        logger.t("fetchAndSetTours - finished getting tours from Hive ${getFormattedTime()}");
+        notifyListeners();
+      }
 
       // Step 2: Fetch updated tours from Firestore
       _popularTours = _processToursAndUpdateCachedTours(await TourService.fetchPopularToursNearYou(userLatitude, userLongitude), userId);
@@ -63,11 +66,13 @@ class TourProvider with ChangeNotifier {
       notifyListeners();
 
       // Step 3: Update Hive with new data  //TODO: optimize
-      await TourService.overwriteToursInHive(TourService.popularToursBoxName, _popularTours);
-      await TourService.overwriteToursInHive(TourService.localToursBoxName, _localTours);
-      await TourService.overwriteToursInHive(TourService.globalToursBoxName, _globalTours);
-      await TourService.overwriteToursInHive(TourService.userCreatedToursBoxName, _userCreatedTours);
-      await TourService.overwriteToursInHive(TourService.userSavedToursBoxName, _userSavedTours);
+      if (!kIsWeb){
+        await TourService.overwriteToursInHive(TourService.popularToursBoxName, _popularTours);
+        await TourService.overwriteToursInHive(TourService.localToursBoxName, _localTours);
+        await TourService.overwriteToursInHive(TourService.globalToursBoxName, _globalTours);
+        await TourService.overwriteToursInHive(TourService.userCreatedToursBoxName, _userCreatedTours);
+        await TourService.overwriteToursInHive(TourService.userSavedToursBoxName, _userSavedTours);
+      }
       _formatListsAndGetTourRatings(userId);
 
       // Step 4: Download images in parallel
@@ -75,11 +80,12 @@ class TourProvider with ChangeNotifier {
       await Future.wait(_allCachedTours.values.map((tour) => _setTourImage(tour)).toList());
       logger.t("fetchAndSetTours - image downloads complete ${getFormattedTime()}");
       notifyListeners();
-    } catch (error) {
-      logger.e('Error fetching tours: $error');
+    } catch (error, stack) {
+      logger.e('Error fetching tours: $error, $stack');
     }
   }
 
+  /// Downloads the tour image, stores the local file, and sets it on the tour object. On web, Network.Image is used instead of the file.
   //TODO: fix that this won't update if image changes
   Future<void> _setTourImage(Tour tour) async {
     final File? localImage = await TourService.getLocalImageFile(tour.id);
@@ -87,10 +93,12 @@ class TourProvider with ChangeNotifier {
       tour.imageFile = localImage;
     } else {
       if (tour.requestMediaRedownload) logger.t('Requesting image redownload: ${tour.id}');
-      await TourService.downloadAndSaveImage(tour.imageUrl, tour.id);
-      final File? downloadedImage = await TourService.getLocalImageFile(tour.id);
-      if (downloadedImage != null) {
-        tour.imageFile = downloadedImage;
+      if (!kIsWeb){
+        await TourService.downloadAndSaveImage(tour.imageUrl, tour.id);
+        final File? downloadedImage = await TourService.getLocalImageFile(tour.id);
+        if (downloadedImage != null) {
+          tour.imageFile = downloadedImage;
+        }
       }
     }
   }

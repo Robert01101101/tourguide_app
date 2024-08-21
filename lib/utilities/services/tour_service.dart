@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:flutter/foundation.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:http/http.dart' as http;
 import 'package:path_provider/path_provider.dart';
@@ -22,36 +23,6 @@ class TourService {
   static String userCreatedToursBoxName = 'userCreatedToursBox';
   static String userSavedToursBoxName = 'userSavedToursBox';
 
-  static Future<Box<Tour>> openPopularToursBox() async {
-    return await Hive.openBox<Tour>('popularToursBox');
-  }
-
-  static Future<Box<Tour>> openLocalToursBox() async {
-    return await Hive.openBox<Tour>('localToursBox');
-  }
-
-  static Future<Box<Tour>> openGlobalToursBox() async {
-    return await Hive.openBox<Tour>('globalToursBox');
-  }
-
-  static Future<Box<Tour>> openUserCreatedToursBox() async {
-    return await Hive.openBox<Tour>('userCreatedToursBox');
-  }
-
-  static Future<Box<Tour>> openUserSavedToursBox() async {
-    return await Hive.openBox<Tour>('userSavedToursBox');
-  }
-
-  // Save tours to a specific box
-  static Future<void> saveToursToHive(String boxName, List<Tour> tours) async {
-    logger.t('Saving tours to Hive box: $boxName');
-    final box = await Hive.openBox<Tour>(boxName);
-    await box.clear(); // Clear existing data if needed
-    for (Tour tour in tours) {
-      await box.put(tour.id, tour);
-    }
-  }
-
   // Retrieve tours from a specific box
   static Future<List<Tour>> getToursFromHive(String boxName) async {
     logger.t('Getting tours from Hive box: $boxName');
@@ -59,13 +30,7 @@ class TourService {
     return box.values.toList();
   }
 
-  // Update a specific tour in the box
-  static Future<void> updateTourInHive(String boxName, Tour tour) async {
-    logger.t('Updating tour in Hive box: $boxName');
-    final box = await Hive.openBox<Tour>(boxName);
-    await box.put(tour.id, tour); // Update by putting the tour with the same id
-  }
-
+  //TODO
   // Delete a specific tour from the box
   static Future<void> deleteTourFromHive(String boxName, String tourId) async {
     logger.t('Deleting tour from Hive box: $boxName');
@@ -292,6 +257,7 @@ class TourService {
   }
 
   static Future<File?> getLocalImageFile(String tourId) async {
+    if (kIsWeb) return null;
     final Directory appDocDir = await getApplicationDocumentsDirectory();
     final List<String> extensions = ['jpg', 'png', 'webp', 'gif', 'bmp', 'tiff'];
     for (String extension in extensions) {

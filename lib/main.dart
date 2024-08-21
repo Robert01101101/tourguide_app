@@ -66,10 +66,12 @@ Future<void> main() async {
   Logger.level = Level.trace;
 
   //HIVE DB
-  await Hive.initFlutter();
-  Hive.registerAdapter(TourAdapter());
-  Hive.registerAdapter(TourguidePlaceAdapter());
-  Hive.registerAdapter(TourguideReportAdapter());
+  if (!kIsWeb){
+    await Hive.initFlutter();
+    Hive.registerAdapter(TourAdapter());
+    Hive.registerAdapter(TourguidePlaceAdapter());
+    Hive.registerAdapter(TourguideReportAdapter());
+  }
 
   //ROUTING
   await TourguideNavigation.instance.initialize();
