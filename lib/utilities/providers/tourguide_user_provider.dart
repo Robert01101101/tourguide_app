@@ -50,7 +50,7 @@ class TourguideUserProvider with ChangeNotifier {
   }
 
   Future<void> _waitForRequiredData() async {
-    const maxWaitTime = Duration(seconds: 20);
+    const maxWaitTime = Duration(seconds: 120);
     const checkInterval = Duration(milliseconds: 100);
     final startTime = DateTime.now();
 

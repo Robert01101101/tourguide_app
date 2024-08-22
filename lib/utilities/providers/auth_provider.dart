@@ -125,7 +125,8 @@ class AuthProvider with ChangeNotifier {
 
 
 
-  // Called when the current auth user changes (google sign in), so we automatically log into Firebase as well
+  // Called when the current auth user changes (google sign in), so we automatically log into Firebase as well.
+  // This is seperate form the google sign in / authorization worfklow and just for access to firebase.
   Future<void> signInWithFirebase(GoogleSignInAccount account) async {
     logger.t('AuthProvider.signInWithFirebase()');
     try {
@@ -134,7 +135,8 @@ class AuthProvider with ChangeNotifier {
         accessToken: googleAuth.accessToken,
         idToken: googleAuth.idToken,
       );
-      UserCredential authResult = await _auth.signInWithCredential(credential);
+      GoogleAuthProvider googleProvider = GoogleAuthProvider();
+      UserCredential authResult = kIsWeb ? await _auth.signInWithPopup(googleProvider) : await _auth.signInWithCredential(credential);
 
       // Access the logged-in user using FirebaseAuth.instance.currentUser
       _user = authResult.user;
