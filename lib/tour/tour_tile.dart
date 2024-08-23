@@ -1,5 +1,6 @@
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:tourguide_app/model/tour.dart';
@@ -66,8 +67,9 @@ class _TourTileState extends State<TourTile> {
   Widget build(BuildContext context) {
     bool textDataReady = widget.tour.name != null && widget.tour.name != "";
     TourProvider tourProvider = Provider.of<TourProvider>(context);
-    bool isLoadingImage = widget.tour.imageFile == null;
+    bool isLoadingImage = widget.tour.imageFile == null && !kIsWeb;
     double tileWidth = 210;
+
 
     return GestureDetector(
       onTap: () => widget.tour.isAddTourTile ? _createTour() : _showOverlay(context),
@@ -109,7 +111,14 @@ class _TourTileState extends State<TourTile> {
                 children: [
                   ShimmerLoading(
                     isLoading: widget.tour.isOfflineCreatedTour ? false : isLoadingImage,
-                    child: widget.tour.imageFile != null
+                    child: kIsWeb
+                        ?
+                    Image.network(widget.tour.imageUrl!,
+                        width: tileWidth,
+                        height: 0.55*tileWidth.ceil(),
+                        fit: BoxFit.cover)
+                        :
+                    widget.tour.imageFile != null
                         ?
                     Image.file(widget.tour.imageFile!,
                         width: tileWidth,
@@ -286,7 +295,14 @@ class _ExpandedTourTileOverlayState extends State<ExpandedTourTileOverlay> {
                   children: [
                     Stack(
                       children: [
-                        widget.tour.imageFile != null  //add null safety for img to upload
+                        kIsWeb
+                            ?
+                        Image.network(widget.tour.imageUrl!,
+                            width: MediaQuery.of(context).size.width,
+                            height: 200.0,
+                            fit: BoxFit.cover)
+                            :
+                        widget.tour.imageFile != null
                             ?
                         Image.file(widget.tour.imageFile!,
                             width: MediaQuery.of(context).size.width,
