@@ -1,6 +1,7 @@
 import 'package:bubble/bubble.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
 import 'package:flutter_chat_ui/flutter_chat_ui.dart' as chatUI;
@@ -315,6 +316,8 @@ class _GeminiChatState extends State<GeminiChat> with WidgetsBindingObserver {
 
   @override
   Widget build(BuildContext context) {
+    double horizontalPadding = (kIsWeb && MediaQuery.of(context).size.width > 1280) ? MediaQuery.of(context).size.width/5 : 10;
+
     return Scaffold(
       appBar: AppBar(
         title: Text('AI Tourguide'),
@@ -329,7 +332,7 @@ class _GeminiChatState extends State<GeminiChat> with WidgetsBindingObserver {
         ],
       ),
       body: Padding(
-        padding: const EdgeInsets.fromLTRB(10, 0, 10, 10),
+        padding: EdgeInsets.fromLTRB(horizontalPadding, 0, horizontalPadding, 10),
         child: Chat(
           messages: _messages,
           onSendPressed: _handleSendPressed,

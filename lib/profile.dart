@@ -1,4 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:tourguide_app/profile/app_settings.dart';
@@ -56,8 +57,9 @@ class _ProfileState extends State<Profile> {
                 SizedBox(height: 8,),
               ],
             ),
-            Column(
-              mainAxisSize: MainAxisSize.min,
+            StandardLayout(
+              enableHorizontalPadding: false,
+              enableVerticalPadding: false,
               children: [
                 ProfileListButton(
                   label: 'Saved Tours',
@@ -185,7 +187,7 @@ class ProfileListButton extends StatelessWidget {
         TextButton(
           onPressed: disabled ?? false ? null : onPressed,
           style: TextButton.styleFrom(
-            padding: EdgeInsets.all(16.0),
+            padding: EdgeInsets.all((kIsWeb && MediaQuery.of(context).size.width > 1280) ? 24 : 16),
             alignment: Alignment.centerLeft,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(0), // Set to 0 for sharp corners

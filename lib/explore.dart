@@ -278,7 +278,7 @@ class ExploreState extends State<Explore> {
                         ),
                         Container(
                           color: Theme.of(context).scaffoldBackgroundColor,
-                          height: 800,  //BAD! Hardcoded, but it's fine for now since it only needs to be enough to cover the google img on scroll
+                          height: MediaQuery.of(context).size.height - 300,
                         )
                       ],
                     ),

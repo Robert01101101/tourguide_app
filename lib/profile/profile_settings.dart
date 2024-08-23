@@ -196,8 +196,7 @@ class _ProfileSettingsState extends State<ProfileSettings> {
                 SizedBox(height: 32,),
               ],
             ),
-            Column(
-              mainAxisSize: MainAxisSize.min,
+            StandardLayout(
               children: [
                 ProfileListButton(
                   label: 'Delete Account',

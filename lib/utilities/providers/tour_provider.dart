@@ -181,7 +181,7 @@ class TourProvider with ChangeNotifier {
   void selectTourById(String id) {
     try {
       _selectedTour = _allCachedTours[id];
-      logger.i(_selectedTour.toString());
+      //logger.i(_selectedTour.toString());
       notifyListeners();
     } catch (e) {
       logger.e('Tour not found: $e');

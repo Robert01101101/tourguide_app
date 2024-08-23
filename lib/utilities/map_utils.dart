@@ -1,5 +1,6 @@
 import 'dart:typed_data';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -29,7 +30,7 @@ class MapUtils {
   }
 
   static Future<BitmapDescriptor> createNumberedMarkerBitmap(int number, {Color color = Colors.lightBlue}) async {
-    final double baseSize = 40.0; // Smaller size for the marker
+    final double baseSize = kIsWeb ? 24 : 40.0; // Smaller size for the marker
     final double circleSize = baseSize * 2; // Circle diameter
     final double textSize = baseSize * 1; // Text size proportional to the marker
 

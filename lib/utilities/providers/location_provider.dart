@@ -48,8 +48,7 @@ class LocationProvider with ChangeNotifier {
     // Wait for remoteConfig to fetch and activate
     //await remoteConfig.fetchAndActivate();
 
-    var key = remoteConfig.getString('google_api_key')!;
-    logger.t("LocationProvider() - key=$key");
+    //logger.t("LocationProvider()");
     _places = FlutterGooglePlacesSdk(remoteConfig.getString('google_api_key')!);
     _loadSavedLocation();
     getCurrentLocation();

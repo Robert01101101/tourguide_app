@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 class StandardLayout extends StatelessWidget {
@@ -18,18 +19,21 @@ class StandardLayout extends StatelessWidget {
   Widget build(BuildContext context) {
     EdgeInsets insets = EdgeInsets.symmetric(vertical: enableVerticalPadding ? 8.0 : 0, horizontal: enableHorizontalPadding ? 16 : 0);
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: children.map((widget) {
-        if (widget is StandardLayoutChild) {
-          return widget;
-        } else {
-          return Padding(
-            padding: insets,
-            child: widget,
-          );
-        }
-      }).toList(),
+    return Padding(
+      padding: kIsWeb && MediaQuery.of(context).size.width > 1280 ? EdgeInsets.symmetric(horizontal: MediaQuery.of(context).size.width/5) : EdgeInsets.zero,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: children.map((widget) {
+          if (widget is StandardLayoutChild) {
+            return widget;
+          } else {
+            return Padding(
+              padding: insets,
+              child: widget,
+            );
+          }
+        }).toList(),
+      ),
     );
   }
 }

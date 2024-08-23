@@ -601,18 +601,26 @@ class _TourRunningState extends State<TourRunning> {
                     fit: StackFit.expand,
                     children: [
                       Container(
-                        height: 230,
+                        height: kIsWeb ? 400 : 230,
                         child: ClipRRect(
-                          child: _tour.imageFile != null  //add null safety for img to upload
-                              ? Image.file(_tour.imageFile!,
+                          child: kIsWeb
+                              ?
+                          Image.network(_tour.imageUrl!,
                               width: MediaQuery.of(context).size.width,
-                              height: 200.0,
+                              height: 400.0,
+                              fit: BoxFit.cover)
+                              :
+                          _tour.imageFile != null
+                              ?  //add null safety for img to upload
+                          Image.file(_tour.imageFile!,
+                              width: MediaQuery.of(context).size.width,
+                              height: 230.0,
                               fit: BoxFit.cover)
                               :
                           Container(
                             color: Colors.grey,
                             width: MediaQuery.of(context).size.width,
-                            height: 200.0,
+                            height: 230.0,
                           ),
                         ),
                       ),
@@ -659,7 +667,7 @@ class _TourRunningState extends State<TourRunning> {
               SliverPinnedHeader(
                 child:
                   Container(
-                    height: 350.0, // Adjust height as needed
+                    height: kIsWeb ? 450 : 350.0, // Adjust height as needed
                     child: Stack(
                       children: [
                         if (showMap)  //TODO - understand why this is necessary - Google Map appears transparent in spots without it
@@ -744,6 +752,8 @@ class _TourRunningState extends State<TourRunning> {
                       fullWidth: true,
                       child: Column( //wrap in columnn to remove gap between stepper and bottom row, since stepper has a lot of margin by default
                         children: [
+                          if (kIsWeb)
+                            const SizedBox(height: 32.0),
                           if (_tour.tourguidePlaces.isNotEmpty)
                             Transform.translate( // Move the stepper up to hide top margin, seems to be the easiest way to achieve it
                               offset: Offset(0, -32),

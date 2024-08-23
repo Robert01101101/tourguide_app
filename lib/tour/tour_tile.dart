@@ -70,141 +70,145 @@ class _TourTileState extends State<TourTile> {
     bool isLoadingImage = widget.tour.imageFile == null && !kIsWeb;
     double tileWidth = 210;
 
+    //logger.t("TourTile: ${widget.tour.name} ${widget.tour.id}, imageUrl: ${widget.tour.imageUrl}, kIsWeb: $kIsWeb, imageFile: ${widget.tour.imageFile}");
 
     return GestureDetector(
       onTap: () => widget.tour.isAddTourTile ? _createTour() : _showOverlay(context),
-      child: Container(
-        width: tileWidth,
-        decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.surfaceContainer,
-          borderRadius: BorderRadius.circular(16.0),
-          boxShadow: const [
-            BoxShadow(
-              color: Colors.black26,
-              blurRadius: 4.0,
-              offset: Offset(0, 4),
-            ),
-          ],
-        ),
-        child: widget.tour.isAddTourTile
-          ? Center(
-              child: Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(Icons.add_circle_outline_sharp, color: Colors.grey),
-                    SizedBox(height: 16),
-                    Text(
-                      "Add Tour",
-                      style: Theme.of(context).textTheme.titleMedium,
-                    ),
-                  ],
-                ),
+      child: MouseRegion(
+        cursor: SystemMouseCursors.click,
+        child: Container(
+          width: tileWidth,
+          decoration: BoxDecoration(
+            color: Theme.of(context).colorScheme.surfaceContainer,
+            borderRadius: BorderRadius.circular(16.0),
+            boxShadow: const [
+              BoxShadow(
+                color: Colors.black26,
+                blurRadius: 4.0,
+                offset: Offset(0, 4),
               ),
-            )
-          : Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            ClipRRect(
-              borderRadius: BorderRadius.vertical(top: Radius.circular(16.0)),
-              child: Stack(
-                children: [
-                  ShimmerLoading(
-                    isLoading: widget.tour.isOfflineCreatedTour ? false : isLoadingImage,
-                    child: kIsWeb
-                        ?
-                    Image.network(widget.tour.imageUrl!,
-                        width: tileWidth,
-                        height: 0.55*tileWidth.ceil(),
-                        fit: BoxFit.cover)
-                        :
-                    widget.tour.imageFile != null
-                        ?
-                    Image.file(widget.tour.imageFile!,
-                        width: tileWidth,
-                        height: 0.55*tileWidth.ceil(),
-                        fit: BoxFit.cover)
-                        :
-                    Container(width: tileWidth, height: 0.55*tileWidth.ceil(), color: Colors.white,),
+            ],
+          ),
+          child: widget.tour.isAddTourTile
+            ? Center(
+                child: Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.add_circle_outline_sharp, color: Colors.grey),
+                      SizedBox(height: 16),
+                      Text(
+                        "Add Tour",
+                        style: Theme.of(context).textTheme.titleMedium,
+                      ),
+                    ],
                   ),
-                  if (tourProvider.isUserCreatedTour(widget.tour))
-                    Align(
-                      alignment: Alignment.topRight,
-                      child: Padding(
-                        padding: EdgeInsets.all(8.0),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.end,
-                          children: [
-                            if (widget.tour.reports.isNotEmpty)
+                ),
+              )
+            : Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              ClipRRect(
+                borderRadius: BorderRadius.vertical(top: Radius.circular(16.0)),
+                child: Stack(
+                  children: [
+                    ShimmerLoading(
+                      isLoading: widget.tour.isOfflineCreatedTour ? false : isLoadingImage,
+                      child: kIsWeb
+                          ?
+                      Image.network(widget.tour.imageUrl!,
+                          width: tileWidth,
+                          height: 0.55*tileWidth.ceil(),
+                          fit: BoxFit.cover)
+                          :
+                      widget.tour.imageFile != null
+                          ?
+                      Image.file(widget.tour.imageFile!,
+                          width: tileWidth,
+                          height: 0.55*tileWidth.ceil(),
+                          fit: BoxFit.cover)
+                          :
+                      Container(width: tileWidth, height: 0.55*tileWidth.ceil(), color: Colors.white,),
+                    ),
+                    if (tourProvider.isUserCreatedTour(widget.tour))
+                      Align(
+                        alignment: Alignment.topRight,
+                        child: Padding(
+                          padding: EdgeInsets.all(8.0),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.end,
+                            children: [
+                              if (widget.tour.reports.isNotEmpty)
+                                const CircleAvatar(
+                                  radius: 16,
+                                  backgroundColor: Colors.black45,
+                                  child: Icon(
+                                    Icons.report_outlined,
+                                    color: Colors.yellow,
+                                    size: 22,),
+                                ),
                               const CircleAvatar(
                                 radius: 16,
                                 backgroundColor: Colors.black45,
                                 child: Icon(
-                                  Icons.report_outlined,
-                                  color: Colors.yellow,
-                                  size: 22,),
+                                  Icons.attribution,
+                                  color: Colors.white,),
                               ),
-                            const CircleAvatar(
-                              radius: 16,
-                              backgroundColor: Colors.black45,
-                              child: Icon(
-                                Icons.attribution,
-                                color: Colors.white,),
-                            ),
-                          ],
-                        ),
-                      )),
-                ],
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 5),
-              child: ShimmerLoading(
-                isLoading: !textDataReady,
-                child: textDataReady ?
-                Text(
-                  widget.tour.name + "\n", //trick to get min 2 lines in combo with maxLines:2
-                  style: Theme.of(context).textTheme.titleSmall,
-                  overflow: TextOverflow.ellipsis,
-                  maxLines: 2,
-                ) :
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 4.0),
-                  child: Container(width: 140, height: 30,  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(10), // Adjust the value to your preference
-                  ),),
+                            ],
+                          ),
+                        )),
+                  ],
                 ),
               ),
-            ),
-            Container(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 2),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 5),
                 child: ShimmerLoading(
                   isLoading: !textDataReady,
                   child: textDataReady ?
-                   Container(
-                     child: Align(
-                       alignment: Alignment.topLeft,
-                       child: Text(
-                        widget.tour.description,
-                         style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant),
-                         overflow: TextOverflow.ellipsis,
-                         maxLines: 4,
-                       ),
-                     ),
-                   ) :
+                  Text(
+                    widget.tour.name + "\n", //trick to get min 2 lines in combo with maxLines:2
+                    style: Theme.of(context).textTheme.titleSmall,
+                    overflow: TextOverflow.ellipsis,
+                    maxLines: 2,
+                  ) :
                   Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 2.0),
-                    child: Container(width: 100, height: 23,  decoration: BoxDecoration(
+                    padding: const EdgeInsets.symmetric(vertical: 4.0),
+                    child: Container(width: 140, height: 30,  decoration: BoxDecoration(
                       color: Colors.white,
                       borderRadius: BorderRadius.circular(10), // Adjust the value to your preference
                     ),),
                   ),
                 ),
               ),
-            ),
-          ],
+              Container(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 2),
+                  child: ShimmerLoading(
+                    isLoading: !textDataReady,
+                    child: textDataReady ?
+                     Container(
+                       child: Align(
+                         alignment: Alignment.topLeft,
+                         child: Text(
+                          widget.tour.description,
+                           style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant),
+                           overflow: TextOverflow.ellipsis,
+                           maxLines: 4,
+                         ),
+                       ),
+                     ) :
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 2.0),
+                      child: Container(width: 100, height: 23,  decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(10), // Adjust the value to your preference
+                      ),),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

@@ -364,10 +364,18 @@ class _FullscreenTourPageState extends State<FullscreenTourPage> {
                         Stack(
                             children: [
                               Container(
-                                height: 200,
+                                height: kIsWeb ? 300 : 200,
                                 child: ClipRRect(
-                                  child: widget.tour.imageFile != null  //add null safety for img to upload
-                                  ? Image.file(widget.tour.imageFile!,
+                                  child: kIsWeb
+                                      ?
+                                  Image.network(widget.tour.imageUrl!,
+                                      width: MediaQuery.of(context).size.width,
+                                      height: 300.0,
+                                      fit: BoxFit.cover)
+                                      :
+                                  widget.tour.imageFile != null
+                                      ?
+                                  Image.file(widget.tour.imageFile!,
                                       width: MediaQuery.of(context).size.width,
                                       height: 200.0,
                                       fit: BoxFit.cover)
@@ -436,7 +444,7 @@ class _FullscreenTourPageState extends State<FullscreenTourPage> {
                     ),
                     if (showMap)
                       Container(
-                        height: 240.0, // Adjust height as needed
+                        height: kIsWeb ? 300 : 240.0, // Adjust height as needed
                         child: Stack(
                           children: [
                             GoogleMap(
