@@ -23,6 +23,16 @@
     ],
     "frameworksBackend": {
       "region": "us-central1"
-    }
+    },
+    "headers": [ {
+    "source": "**/*.@(jpg|jpeg|gif|png|webp|svg|ico)",
+    "headers": [ {
+      "key": "Cache-Control",
+      "value": "max-age=7200"
+    }, {
+      "key": "Access-Control-Allow-Origin",
+      "value": "*"
+    } ]
+  }]
   }
 }

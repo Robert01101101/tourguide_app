@@ -107,7 +107,7 @@ class AuthProvider with ChangeNotifier {
   // Prompts the user to authorize `scopes`.
   //
   // This action is **required** in platforms that don't perform Authentication
-  // and Authorization at the same time (like the web).
+  // and Authorization at the same time (like the web). However, I don't think I need it because I don't need authorization of scopes, and basic ID is enough.
   //
   // On the web, this must be called from an user interaction (button click).
   // #docregion RequestScopes
@@ -117,9 +117,10 @@ class AuthProvider with ChangeNotifier {
     // #enddocregion RequestScopes
     _isAuthorized = isAuthorized;
     logger.t('AuthProvider.handleAuthorizeScopes() - isAuthorized=$isAuthorized');
-    if (isAuthorized) {
-      await signInWithFirebase(_googleSignInUser!);
-    }
+    notifyListeners();
+    //if (isAuthorized) {
+    //  await signInWithFirebase(_googleSignInUser!); //doing this causes pop up to be blocked, instead, we wait for the user to click the button
+    //}
   }
 
 

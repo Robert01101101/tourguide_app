@@ -50,7 +50,7 @@ class _SignInState extends State<SignIn> {
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
       authProvider.addListener(() {
         logger.t("signIn.initState().authProviderListener -> user=${authProvider.user != null}, googleSignInUser=${authProvider.googleSignInUser != null}, isAuthorized=${authProvider.isAuthorized}, silentSignInFailed=${authProvider.silentSignInFailed}");
-        if (authProvider.googleSignInUser != null && authProvider.user != null && authProvider.isAuthorized && !navigatedAwayFromSignIn) {
+        if (authProvider.googleSignInUser != null && authProvider.user != null && !navigatedAwayFromSignIn) {
           logger.t("signIn.initState().authProviderListener -> user is no longer null");
           navigatedAwayFromSignIn = true;
           // Navigate to the new screen once login is complete
@@ -101,9 +101,10 @@ class _SignInState extends State<SignIn> {
 
   Widget _buildButtonBody() {
     my_auth.AuthProvider authProvider = Provider.of(context);
-    final GoogleSignInAccount? user = authProvider.googleSignInUser;
-    if (user != null) {
-      // The user is Authenticated
+    final GoogleSignInAccount? googleSignInAccount = authProvider.googleSignInUser;
+    final User? user = authProvider.user;
+    if (false && googleSignInAccount != null && !authProvider.isAuthorized && user == null) {
+      // The user is Authenticated, but not authorized or signed into firebase
       return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -117,6 +118,20 @@ class _SignInState extends State<SignIn> {
                 child: const Text('REQUEST PERMISSIONS'),
               ),
             ],
+          ],
+        ),
+      );
+    } else if (googleSignInAccount != null && user == null) {
+      // The user is Authenticated and authorized, but not signed into firebase
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          children: [
+            const Text('Sign into the Firebase service for access to Tourguide.'),
+            ElevatedButton(
+              onPressed: () => authProvider.signInWithFirebase(authProvider.googleSignInUser!),
+              child: const Text('SIGN INTO FIREBASE SERVICE'),
+            ),
           ],
         ),
       );
@@ -141,7 +156,6 @@ class _SignInState extends State<SignIn> {
   @override
   Widget build(BuildContext context) {
     my_auth.AuthProvider authProvider = Provider.of(context);
-    final GoogleSignInAccount? user = authProvider.googleSignInUser;
 
     return Scaffold(
       appBar: AppBar(
@@ -154,7 +168,7 @@ class _SignInState extends State<SignIn> {
             Expanded(
               child: ConstrainedBox(
                 constraints: const BoxConstraints.expand(),
-                child: ((user != null && authProvider.isAuthorized) || authProvider.isLoggingOut)
+                child: ((authProvider.googleSignInUser != null && authProvider.isAuthorized && authProvider.user != null) || authProvider.isLoggingOut)
                     ? _buildProcessingBody()
                     : _buildButtonBody(),
               ),

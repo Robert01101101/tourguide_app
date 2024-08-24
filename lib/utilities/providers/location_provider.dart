@@ -9,14 +9,15 @@ import 'package:flutter/material.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:flutter_google_places_sdk/flutter_google_places_sdk.dart';
+import '../../ui/google_places_img.dart'
+  if (dart.library.html) '../../ui/google_places_img_web.dart'
+  as gpi;
 import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tourguide_app/main.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 
-
-import '../../ui/google_places_image.dart';
 
 //TODO: Handle all types of errors as well as permission denied
 /// Global Location Provider so I can access location anywhere in the app
@@ -398,7 +399,7 @@ class LocationProvider with ChangeNotifier {
             height: metadataMap['height'],
             attributions: metadataMap['attributions'],
           );
-          final googlePlacesImg = GooglePlacesImg(
+          final googlePlacesImg = gpi.GooglePlacesImg(
             photoMetadata: metadata,
             placePhotoResponse: FetchPlacePhotoResponse.image(Image.memory(bytes)),
           );
@@ -461,7 +462,7 @@ class LocationProvider with ChangeNotifier {
           await metadataFile!.writeAsString(json.encode(metadataMap));
 
           // Cache the image
-          final googlePlacesImg = GooglePlacesImg(
+          final googlePlacesImg = gpi.GooglePlacesImg(
             photoMetadata: metadata,
             placePhotoResponse: FetchPlacePhotoResponse.image(Image.memory(imageBytes)),
           );
@@ -487,14 +488,14 @@ class LocationProvider with ChangeNotifier {
           imageUrl: (imageUrl) {
               logger.t('imageUrl:' + imageUrl);
               // Cache the image
-              final googlePlacesImg = GooglePlacesImg(
+              final googlePlacesImg = gpi.GooglePlacesImg(
                 photoMetadata: metadata,
                 placePhotoResponse: FetchPlacePhotoResponse.imageUrl(imageUrl),
               );
               final tourguidePlaceImg = TourguidePlaceImg(
                   googlePlacesImg: googlePlacesImg,
                   file: file,
-                  imageUrl: null
+                  imageUrl: imageUrl
               );
               if (setAsCurrentImage){
                 _currentPlaceImg = tourguidePlaceImg;
@@ -583,7 +584,7 @@ class LocationProvider with ChangeNotifier {
 }
 
 class TourguidePlaceImg {
-  final GooglePlacesImg? googlePlacesImg;
+  final gpi.GooglePlacesImg? googlePlacesImg;
   final File? file; /// mobile only
   final String? imageUrl; /// web only
 

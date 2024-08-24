@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter_google_places_sdk/flutter_google_places_sdk.dart';
 import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
@@ -12,7 +13,6 @@ import 'package:tourguide_app/explore_map.dart';
 import 'package:tourguide_app/model/tour.dart';
 import 'package:tourguide_app/sign_in.dart';
 import 'package:tourguide_app/tour/tour_creation.dart';
-import 'package:tourguide_app/ui/google_places_image.dart';
 import 'package:tourguide_app/ui/my_layouts.dart';
 import 'package:tourguide_app/ui/horizontal_scroller.dart';
 import 'package:tourguide_app/tour/tour_tile.dart';
@@ -25,6 +25,9 @@ import 'package:tourguide_app/utilities/providers/tour_provider.dart';
 import 'package:tourguide_app/utilities/providers/tourguide_user_provider.dart';
 import 'main.dart';
 import 'package:tourguide_app/utilities/providers/auth_provider.dart' as myAuth;
+import '../../ui/google_places_img.dart'
+if (dart.library.html) '../../ui/google_places_img_web.dart'
+as gpi;
 import 'dart:ui' as ui;
 
 
@@ -249,7 +252,12 @@ class ExploreState extends State<Explore> {
                                 child: FittedBox(
                                   fit: BoxFit.cover,
                                   alignment: Alignment.center,
-                                  child: currentPlaceImg.googlePlacesImg!.placePhotoResponse.when(
+                                  child: kIsWeb ?
+                                  gpi.GooglePlacesImg(  //prevents CORS error, taken from places sdk example //TODO investigate if also usable on mobile
+                                    photoMetadata: currentPlaceImg.googlePlacesImg!.photoMetadata,
+                                    placePhotoResponse: currentPlaceImg.googlePlacesImg!.placePhotoResponse,
+                                  ) :
+                                  currentPlaceImg.googlePlacesImg!.placePhotoResponse.when(
                                     image: (image) => Image(
                                       image: image.image,
                                       gaplessPlayback: true,
