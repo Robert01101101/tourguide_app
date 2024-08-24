@@ -240,7 +240,7 @@ class ExploreState extends State<Explore> {
                             return const LinearGradient(
                               begin: Alignment.topCenter,
                               end: Alignment.bottomCenter,
-                              colors: [Colors.white, Colors.black45],
+                              colors: [kIsWeb ? Colors.transparent : Colors.white, Colors.black45],
                             ).createShader(Rect.fromLTRB(0, 0, rect.width, rect.height));
                           },
                           blendMode: BlendMode.multiply,
