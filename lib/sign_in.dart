@@ -49,7 +49,7 @@ class _SignInState extends State<SignIn> {
 
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
       authProvider.addListener(() {
-        logger.t("signIn.initState().authProviderListener -> user=${authProvider.user == null}, googleSignInUser=${authProvider.googleSignInUser == null}, isAuthorized=${authProvider.isAuthorized}, silentSignInFailed=${authProvider.silentSignInFailed}");
+        logger.t("signIn.initState().authProviderListener -> user=${authProvider.user != null}, googleSignInUser=${authProvider.googleSignInUser != null}, isAuthorized=${authProvider.isAuthorized}, silentSignInFailed=${authProvider.silentSignInFailed}");
         if (authProvider.googleSignInUser != null && authProvider.user != null && authProvider.isAuthorized && !navigatedAwayFromSignIn) {
           logger.t("signIn.initState().authProviderListener -> user is no longer null");
           navigatedAwayFromSignIn = true;

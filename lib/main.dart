@@ -8,7 +8,8 @@ import 'package:flutter/foundation.dart';
 import 'package:hive/hive.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:intl/intl.dart';
-import 'package:logger/logger.dart';
+import 'package:logger/logger.dart' as logger_mobile;
+import 'package:logger/web.dart' as logger_web;
 import 'package:provider/provider.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -29,7 +30,7 @@ import 'model/tour.dart';
 import 'model/tourguide_place.dart';
 import 'model/tourguide_report.dart';
 
-var logger = Logger();
+var logger = kIsWeb ? logger_web.Logger() : logger_mobile.Logger();
 final FirebaseRemoteConfig remoteConfig = FirebaseRemoteConfig.instance;
 
 Future<void> main() async {
@@ -43,7 +44,7 @@ Future<void> main() async {
   await FirebaseAppCheck.instance.activate(
     // You can also use a `ReCaptchaEnterpriseProvider` provider instance as an
     // argument for `webProvider`
-    webProvider: ReCaptchaV3Provider('recaptcha-v3-site-key'),
+    webProvider: ReCaptchaV3Provider('6LdoBC4qAAAAACZhq3EQuE5vVR8e_7X_2EE67oUp'),
     // Default provider for Android is the Play Integrity provider. You can use the "AndroidProvider" enum to choose
     // your preferred provider. Choose from:
     // 1. Debug provider
@@ -63,7 +64,12 @@ Future<void> main() async {
   await fetchConfig();
 
   //LOGGING
-  Logger.level = Level.trace;
+  if (kIsWeb){
+    logger_web.Logger.level = logger_web.Level.trace;
+  } else {
+    logger_mobile.Logger.level = logger_mobile.Level.debug;
+  }
+
 
   //HIVE DB
   if (!kIsWeb){

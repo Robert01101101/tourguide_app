@@ -62,7 +62,7 @@ class AuthProvider with ChangeNotifier {
       notifyListeners();
 
       //sign in with Firebase if authorized (otherwise user has to press button to authorize first, in which case firebase sign in is done in handleAuthorizeScopes()
-      if (_isAuthorized) {
+      if (_isAuthorized && !kIsWeb) {
         await signInWithFirebase(account!);
       }
     });
@@ -117,7 +117,6 @@ class AuthProvider with ChangeNotifier {
     // #enddocregion RequestScopes
     _isAuthorized = isAuthorized;
     logger.t('AuthProvider.handleAuthorizeScopes() - isAuthorized=$isAuthorized');
-    notifyListeners();
     if (isAuthorized) {
       await signInWithFirebase(_googleSignInUser!);
     }
