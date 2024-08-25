@@ -76,7 +76,7 @@ class ExploreState extends State<Explore> {
         if (!tourProvider.isLoadingTours){
           downloadTours();
         }
-        //FlutterNativeSplash.remove();
+        FlutterNativeSplash.remove();
       }
     });
 
