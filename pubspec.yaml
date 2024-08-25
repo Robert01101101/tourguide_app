@@ -141,14 +141,15 @@ flutter:
 flutter_launcher_icons:
   # dart run flutter_launcher_icons
   android: "launcher_icon"
+  adaptive_icon_background: "#e8f3f3"
   ios: true
   image_path: "assets/icon/icon.png"
   min_sdk_android: 21 # android min sdk min:16, default 21
   web:
     generate: true
     image_path: "assets/icon/icon.png"
-    background_color: "#hexcode"
-    theme_color: "#hexcode"
+    background_color: "#e8f3f3"
+    theme_color: "#e8f3f3"
   windows:
     generate: true
     image_path: "assets/icon/icon.png"
@@ -172,7 +173,7 @@ flutter_native_splash:
   # of your splash screen to a solid color.  Use background_image to set the background of your
   # splash screen to a png image.  This is useful for gradients. The image will be stretch to the
   # size of the app. Only one parameter can be used, color and background_image cannot both be set.
-  color: "#f4fbf9"
+  color: "#e8f3f3"
   #background_image: "assets/background.png"
 
   # Optional parameters are listed below.  To enable a parameter, uncomment the line by removing
@@ -196,9 +197,9 @@ flutter_native_splash:
   # parameters from above. If the image_dark parameter is specified, color_dark or
   # background_image_dark must be specified.  color_dark and background_image_dark cannot both be
   # set.
-  color_dark: "#8A9998"
+  color_dark: "#00201e"
   #background_image_dark: "assets/dark-background.png"
-  #image_dark: assets/splash-invert.png
+  image_dark: assets/icon/splash_dark.png
   #branding_dark: assets/dart_dark.png
 
   # From Android 12 onwards, the splash screen is handled differently than in previous versions.
@@ -215,7 +216,7 @@ flutter_native_splash:
     image: assets/icon/splash_1152.png
 
   # Splash screen background color.
-    color: "#191A19"
+    color: "#e8f3f3"
 
   # App icon background color.
   #icon_background_color: "#111111"
@@ -226,8 +227,8 @@ flutter_native_splash:
   # The image_dark, color_dark, icon_background_color_dark, and branding_dark set values that
   # apply when the device is in dark mode. If they are not specified, the app will use the
   # parameters from above.
-  # image_dark: assets/icon/splash_1152.png
-    color_dark: "#8A9998"
+    image_dark: assets/icon/splash_1152_dark.png
+    color_dark: "#00201e"
   #icon_background_color_dark: "#eeeeee"
 
   # The android, ios and web parameters can be used to disable generating a splash screen on a given

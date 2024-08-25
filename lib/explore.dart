@@ -76,7 +76,7 @@ class ExploreState extends State<Explore> {
         if (!tourProvider.isLoadingTours){
           downloadTours();
         }
-        FlutterNativeSplash.remove();
+        //FlutterNativeSplash.remove();
       }
     });
 
@@ -240,7 +240,7 @@ class ExploreState extends State<Explore> {
                             return const LinearGradient(
                               begin: Alignment.topCenter,
                               end: Alignment.bottomCenter,
-                              colors: [kIsWeb ? Colors.transparent : Colors.white, Colors.black45],
+                              colors: [kIsWeb ? Colors.transparent : Colors.white, kIsWeb ? Colors.black87 : Colors.black45],
                             ).createShader(Rect.fromLTRB(0, 0, rect.width, rect.height));
                           },
                           blendMode: BlendMode.multiply,
