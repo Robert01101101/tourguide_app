@@ -11,7 +11,7 @@ class HorizontalScroller extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: 252,
+      height: 256,
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
         padding: EdgeInsets.fromLTRB(leftPadding ? 16 : 0, 2, 16, 8),

@@ -68,7 +68,7 @@ Future<void> main() async {
   if (kIsWeb){
     logger_web.Logger.level = logger_web.Level.trace;
   } else {
-    logger_mobile.Logger.level = logger_mobile.Level.debug;
+    logger_mobile.Logger.level = logger_mobile.Level.all;
   }
 
 

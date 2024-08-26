@@ -56,6 +56,8 @@ class Explore extends StatefulWidget {
 class ExploreState extends State<Explore> {
   GoogleSignInAccount? _currentUser;
   Future<TourguidePlaceImg?>? _fetchPhotoFuture;
+  final GlobalKey _contentKey = GlobalKey(); // to measure height of page accurately
+  double _contentHeight = 600;
 
   @override
   void initState() {
@@ -93,6 +95,11 @@ class ExploreState extends State<Explore> {
         setState(() {
           _scrollOffset = _scrollController.offset;
         });
+      });
+
+      //to accurately measure height of page
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _measureContentHeight();
       });
     }
   }
@@ -161,6 +168,7 @@ class ExploreState extends State<Explore> {
         authProvider.user!.uid,
         userProvider.user!.savedTourIds,
       );
+      _measureContentHeight();
     } else {
       // Handle the case where currentPosition is still null after timeout
       logger.e('Current position is still null after timeout');
@@ -181,6 +189,17 @@ class ExploreState extends State<Explore> {
     TourProvider tourProvider = Provider.of<TourProvider>(context, listen: false);
     if (!tourProvider.isLoadingTours){
       downloadTours();
+    }
+  }
+
+  void _measureContentHeight() {
+    try {
+      final RenderBox renderBox = _contentKey.currentContext?.findRenderObject() as RenderBox;
+      setState(() {
+        _contentHeight = renderBox.size.height;
+      });
+    } catch (e) {
+      logger.e('Error measuring content height: $e');
     }
   }
 
@@ -210,6 +229,7 @@ class ExploreState extends State<Explore> {
           child: Shimmer(
             linearGradient: MyGlobals.shimmerGradient,
             child: Stack(
+              key: _contentKey,
               children: [
                 Selector<LocationProvider, TourguidePlaceImg?>(
                   selector: (context, locationProvider) => locationProvider.currentPlaceImg,
@@ -291,7 +311,7 @@ class ExploreState extends State<Explore> {
                         ),
                         Container(
                           color: Theme.of(context).scaffoldBackgroundColor,
-                          height: MediaQuery.of(context).size.height - 300,
+                          height: _contentHeight - 300,
                         )
                       ],
                     ),

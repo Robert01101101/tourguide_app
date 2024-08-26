@@ -31,7 +31,7 @@ class MapUtils {
   }
 
   static Future<BitmapDescriptor> createNumberedMarkerBitmap(int number, {Color color = Colors.lightBlue}) async {
-    final double baseSize = CrossplatformUtils.isMobile() ? 24 : 40.0; // Smaller size for the marker
+    final double baseSize = CrossplatformUtils.isMobile() ? 40 : 24; // Smaller size for the marker
     final double circleSize = baseSize * 2; // Circle diameter
     final double textSize = baseSize * 1; // Text size proportional to the marker
 
