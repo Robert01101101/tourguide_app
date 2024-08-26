@@ -164,6 +164,7 @@ class _PublicToursState extends State<PublicTours> {
   @override
   void initState() {
     super.initState();
+    MyGlobals.webRoutingFix(TourguideNavigation.contributePath);
     isPublic = widget.isPublic;
     _firestoreGetPublicTours(widget.isPublic);
   }

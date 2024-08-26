@@ -27,6 +27,8 @@ class _ProfileState extends State<Profile> {
   @override
   void initState() {
     super.initState();
+
+    MyGlobals.webRoutingFix(TourguideNavigation.profilePath);
   }
 
 

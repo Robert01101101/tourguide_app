@@ -54,6 +54,8 @@ class _GeminiChatState extends State<GeminiChat> with WidgetsBindingObserver {
   void initState() {
     super.initState();
 
+    MyGlobals.webRoutingFix(TourguideNavigation.geminiChatPath);
+
     //Register observer to detect app closed
     WidgetsBinding.instance.addObserver(this);
 

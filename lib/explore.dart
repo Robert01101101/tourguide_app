@@ -61,35 +61,40 @@ class ExploreState extends State<Explore> {
   void initState() {
     logger.t('ExploreState.initState() !!!!!!!!!!!!!!!!!!!!');
 
-    _checkIfFirstTimeUserAfterAccountDeletion();
+    if (MyGlobals.webRoutingFix(TourguideNavigation.explorePath)) {
+      super.initState();
+      return;
+    } else {
+      _checkIfFirstTimeUserAfterAccountDeletion();
 
-    //Firebase auth
-    FirebaseAuth.instance
-        .userChanges()
-        .listen((User? user) {
-      if (!mounted) return;
-      final tourProvider = Provider.of<TourProvider>(context, listen: false);
-      if (user == null) {
-        logger.t('ExploreState.initState() - FirabaseAuth listen - FIREBASE AUTH (EXPLORE) - User is currently signed out!');
-      } else {
-        logger.t('ExploreState.initState() - FirabaseAuth listen - FIREBASE AUTH (EXPLORE) - User is signed in!');
-        if (!tourProvider.isLoadingTours){
-          downloadTours();
+      //Firebase auth
+      FirebaseAuth.instance
+          .userChanges()
+          .listen((User? user) {
+        if (!mounted) return;
+        final tourProvider = Provider.of<TourProvider>(context, listen: false);
+        if (user == null) {
+          logger.t('ExploreState.initState() - FirabaseAuth listen - FIREBASE AUTH (EXPLORE) - User is currently signed out!');
+        } else {
+          logger.t('ExploreState.initState() - FirabaseAuth listen - FIREBASE AUTH (EXPLORE) - User is signed in!');
+          if (!tourProvider.isLoadingTours){
+            downloadTours();
+          }
+          FlutterNativeSplash.remove();
         }
-        FlutterNativeSplash.remove();
-      }
-    });
-
-    super.initState();
-
-    _fetchPhotoFuture = context.read<LocationProvider>().fetchPlacePhoto();
-
-    //for parallax
-    _scrollController.addListener(() {
-      setState(() {
-        _scrollOffset = _scrollController.offset;
       });
-    });
+
+      super.initState();
+
+      _fetchPhotoFuture = context.read<LocationProvider>().fetchPlacePhoto();
+
+      //for parallax
+      _scrollController.addListener(() {
+        setState(() {
+          _scrollOffset = _scrollController.offset;
+        });
+      });
+    }
   }
 
   @override

@@ -1,3 +1,4 @@
+import 'dart:core';
 import 'dart:ui';
 
 import 'package:firebase_analytics/firebase_analytics.dart';
@@ -189,7 +190,10 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
 
 
 class MyGlobals {
-  static AutoScrollController? scrollController;
+  ///For web only, as I don't currently have a clean solution for users manually loading to a page other than the root //TODO: fix web routing
+  static bool? userSignedIn;
+  static String? signInReroutePath;
+  static AutoScrollController? scrollController; //TODO fix
   static List<String> processedImageUrls = [];
   static const shimmerGradient = LinearGradient(
     colors: [
@@ -214,6 +218,22 @@ class MyGlobals {
     TourProvider tourProvider = Provider.of(context, listen: false);
     TourguideUserProvider tourguideUserProvider = Provider.of(context, listen: false);
     ThemeProvider themeProvider = Provider.of(context, listen: false);
+  }
+
+  /// Returns true if we have to reroute to sign in.
+  /// For web only, as I don't currently have a clean solution for users manually loading to a page other than the root.
+  /// TODO: fix web routing, looks like it shouldn't be too much work as parts of the app work when loading right into a non-root page
+  static bool webRoutingFix(String currentRoutePath){
+    if (!kIsWeb) return false;
+    if ((userSignedIn ?? false) == false){ //for web
+      signInReroutePath = currentRoutePath;
+      TourguideNavigation.router.go(
+        TourguideNavigation.signInPath,
+      );
+      return true;
+    } else {
+      return false;
+    }
   }
 }
 

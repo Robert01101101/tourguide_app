@@ -53,9 +53,10 @@ class _SignInState extends State<SignIn> {
         if (authProvider.googleSignInUser != null && authProvider.user != null && !navigatedAwayFromSignIn) {
           logger.t("signIn.initState().authProviderListener -> user is no longer null");
           navigatedAwayFromSignIn = true;
+          MyGlobals.userSignedIn = true; //for web
           // Navigate to the new screen once login is complete
           TourguideNavigation.router.go(
-            TourguideNavigation.explorePath,
+            MyGlobals.signInReroutePath ?? TourguideNavigation.explorePath,
           );
           FirebaseAnalytics.instance.logLogin(loginMethod:'google');
         } else if (authProvider.googleSignInUser == null || authProvider.silentSignInFailed){
