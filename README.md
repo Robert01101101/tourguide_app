@@ -2,7 +2,9 @@
 
 [Project Page](https://rmichels.com/tourguide?portfolio_link=gitHubTourguide)
 
-[Google Play Open Testing](https://play.google.com/apps/testing/com.robertmichelsdigitalmedia.tourguideapp)
+[Web App](https://tourguide-firebase.web.app)
+
+[Google Play Open Testing](https://play.google.com/store/apps/details?id=com.robertmichelsdigitalmedia.tourguideapp)
 
 [![Screenshot](https://rmichels.com/assets/img/tourguide.jpg)](https://rmichels.com/tourguide?portfolio_link=gitHubTourguide)
 
@@ -19,13 +21,13 @@ A crossplatform Flutter app that helps users explore tours with navigation, info
 ## Platform Support
 
 ### Android
-- Open Testing on Google Play, MVP
+- [Open Testing](https://play.google.com/store/apps/details?id=com.robertmichelsdigitalmedia.tourguideapp) on Google Play, MVP
 
 ### iOS
 - parked due to iOS publishing costs
 
 ### Web
-- Local testing, planning to host at tourguide.rmichels.com, possibly using Firebase
+- Beta is now available at [tourguide-firebase.web.app](https://tourguide-firebase.web.app)
 
 ## To-Do
 
