@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
+import 'package:image_picker/image_picker.dart';
 
 part 'tourguide_place.g.dart';
 
@@ -17,6 +18,7 @@ class TourguidePlace {
   TextEditingController? descriptionEditingController;  //mutable
   Image? image; //mutable
   File? imageFile; //mutable
+  XFile? imageFileToUploadWeb; //mutable, web, upload only
 
   TourguidePlace({
     required this.latitude,
@@ -28,6 +30,7 @@ class TourguidePlace {
     this.descriptionEditingController,
     this.image,
     this.imageFile,
+    this.imageFileToUploadWeb,
   });
 
   Map<String, dynamic> toMap() {
@@ -51,6 +54,7 @@ class TourguidePlace {
     TextEditingController? descriptionEditingController,
     Image? image,
     File? imageFile,
+    XFile? imageFileToUploadWeb,
   }) {
     return TourguidePlace(
       latitude: latitude ?? this.latitude,
@@ -62,6 +66,7 @@ class TourguidePlace {
       descriptionEditingController: descriptionEditingController ?? this.descriptionEditingController,
       image: image ?? this.image,
       imageFile: imageFile ?? this.imageFile,
+      imageFileToUploadWeb: imageFileToUploadWeb ?? this.imageFileToUploadWeb,
     );
   }
 

@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:tourguide_app/model/tourguide_place.dart';
 import 'package:tourguide_app/model/tourguide_report.dart';
 import 'package:hive/hive.dart';
@@ -35,8 +36,10 @@ class Tour {
   bool isOfflineCreatedTour;
   /// mutable, NOT stored in Firestore, Track this user's rating
   int? thisUsersRating;
-  /// mutable, NOT stored in Firestore, Track this user's rating
+  /// mutable, NOT stored in Firestore, image file downloaded or ready for upload
   File? imageFile;
+  /// mutable, NOT stored in Firestore, image file to upload (web only)
+  XFile? imageFileToUploadWeb;
   /// mutable, NOT stored in Firestore, request media re-downloads for for this tour
   bool requestMediaRedownload = false;
 
@@ -63,6 +66,7 @@ class Tour {
     required this.isOfflineCreatedTour,
     this.thisUsersRating,
     this.imageFile,
+    this.imageFileToUploadWeb,
   });
 
   factory Tour.empty() {
@@ -88,6 +92,7 @@ class Tour {
       isAddTourTile: false,
       isOfflineCreatedTour: false,
       imageFile: null,
+      imageFileToUploadWeb: null,
     );
   }
 
@@ -171,6 +176,7 @@ class Tour {
       isAddTourTile: false,
       isOfflineCreatedTour: false,
       imageFile: null,
+      imageFileToUploadWeb: null,
     );
   }
 
@@ -197,7 +203,8 @@ class Tour {
     bool? isAddTourTile,
     bool? isOfflineCreatedTour,
     int? thisUsersRating,
-    File? imageToUpload,
+    File? imageFile,
+    XFile? imageFileToUploadWeb,
   }) {
     return Tour(
       id: id ?? this.id,
@@ -221,7 +228,8 @@ class Tour {
       isAddTourTile: isAddTourTile ?? this.isAddTourTile,
       isOfflineCreatedTour: isOfflineCreatedTour ?? this.isOfflineCreatedTour,
       thisUsersRating: thisUsersRating ?? this.thisUsersRating,
-      imageFile: imageToUpload ?? this.imageFile,
+      imageFile: imageFile ?? this.imageFile,
+      imageFileToUploadWeb: imageFileToUploadWeb ?? this.imageFileToUploadWeb,
     );
   }
 

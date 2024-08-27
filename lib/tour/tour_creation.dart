@@ -4,10 +4,13 @@ import 'dart:math';
 import 'dart:ui';
 
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:tourguide_app/model/tourguide_place.dart';
 import 'package:tourguide_app/tour/tour_tile.dart';
 import 'package:tourguide_app/ui/add_image_tile.dart';
+import 'package:tourguide_app/ui/add_image_tile_web.dart';
 import 'package:tourguide_app/ui/place_autocomplete.dart';
 import 'package:tourguide_app/ui/shimmer_loading.dart';
 import 'package:tourguide_app/utilities/custom_import.dart';
@@ -52,6 +55,7 @@ class _CreateEditTourState extends State<CreateEditTour> {
   final int _descriptionMaxChars = 250;
   final int _reviewStepIndex = 4;
   File? _image;
+  XFile? _imageWeb;
   Place? _city;
   int _selectedImgIndex = 0;
   int _currentStep = 0;
@@ -275,7 +279,11 @@ class _CreateEditTourState extends State<CreateEditTour> {
             break;
           case 3: // Tour Details
             isValid = _formKeyDetails.currentState!.validate() && skipPermitted;
-            _tour = _tour.copyWith(imageToUpload: _selectedImgIndex == -1 ? _image : _tour.tourguidePlaces[_selectedImgIndex!].imageFile);
+            if (kIsWeb){
+              _tour = _tour.copyWith(imageFileToUploadWeb: _selectedImgIndex == -1 ? _imageWeb : _tour.tourguidePlaces[_selectedImgIndex!].imageFileToUploadWeb);
+            } else {
+              _tour = _tour.copyWith(imageFile: _selectedImgIndex == -1 ? _image : _tour.tourguidePlaces[_selectedImgIndex!].imageFile);
+            }
             logger.i("Reviewing tour: ${_tour.toString()}");
             break;
           default:
@@ -755,8 +763,8 @@ class _CreateEditTourState extends State<CreateEditTour> {
                                 fit: StackFit.expand,
                                 children: [
                                   Container(
-                                    height: 146, // Set the desired height here
-                                    width: 146, // Make it fill the width of its parent
+                                    height: 146,
+                                    width: 146,
                                     child: FittedBox(
                                       fit: BoxFit.cover,
                                       clipBehavior: Clip.hardEdge,
@@ -782,26 +790,46 @@ class _CreateEditTourState extends State<CreateEditTour> {
                             ),
                         GestureDetector(
                           onTap: () {
-                            if (_image != null) {
+                            if (kIsWeb && _imageWeb != null || !kIsWeb && _image != null) {
                               _setTourImageSelection(-1);
                             }
                           },
                           child: Stack(
                             fit: StackFit.expand,
                             children: [
-                              AddImageTile(
-                                initialValue: _image,
-                                onSaved: (value) {
-                                  _image = value;
-                                },
-                                onChanged: (value) {
-                                  setState(() {
-                                    _image = value;
-                                  });
-                                  _setTourImageSelection(-1);
-                                },
-                                enabled: !_isFormSubmitted,
-                              ),
+                              Container(
+                                height: 146,
+                                width: 146,
+                                child: kIsWeb
+                                  ?
+                                  AddImageTileWeb(
+                                    initialValue: _imageWeb,
+                                    onSaved: (value) {
+                                      _imageWeb = value;
+                                    },
+                                    onChanged: (value) {
+                                      setState(() {
+                                        _imageWeb = value;
+                                      });
+                                      _setTourImageSelection(-1);
+                                    },
+                                    enabled: !_isFormSubmitted,
+                                  )
+                                :
+                                  AddImageTile(
+                                    initialValue: _image,
+                                    onSaved: (value) {
+                                      _image = value;
+                                    },
+                                    onChanged: (value) {
+                                      setState(() {
+                                        _image = value;
+                                      });
+                                      _setTourImageSelection(-1);
+                                    },
+                                    enabled: !_isFormSubmitted,
+                                  ),
+                                ),
                               if (_selectedImgIndex == -1)
                                 IgnorePointer(
                                   child: Container(
