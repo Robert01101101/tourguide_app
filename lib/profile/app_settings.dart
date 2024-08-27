@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:profanity_filter/profanity_filter.dart';
 import 'package:tourguide_app/ui/my_layouts.dart';
 import 'package:tourguide_app/utilities/custom_import.dart';
@@ -24,6 +25,14 @@ class _AppSettingsState extends State<AppSettings> {
   bool _savingSettings = false;
   final List<String> themeList = <String>['System', 'Light', 'Dark'];
   late String initialThemeMode;
+  PackageInfo _packageInfo = PackageInfo(
+    appName: 'Unknown',
+    packageName: 'Unknown',
+    version: 'Unknown',
+    buildNumber: 'Unknown',
+    buildSignature: 'Unknown',
+    installerStore: 'Unknown',
+  );
 
   @override
   void initState() {
@@ -31,7 +40,16 @@ class _AppSettingsState extends State<AppSettings> {
     ThemeProvider themeProvider = Provider.of<ThemeProvider>(context, listen: false);
     initialThemeMode = themeProvider.themeMode.toString().split('.').last.capitalize();
     _loadSettings();
+    _initPackageInfo();
   }
+
+  Future<void> _initPackageInfo() async {
+    final info = await PackageInfo.fromPlatform();
+    setState(() {
+      _packageInfo = info;
+    });
+  }
+
 
   Future<void> _loadSettings() async {
     TourguideUserProvider userProvider = Provider.of<TourguideUserProvider>(context, listen: false);
@@ -125,6 +143,17 @@ class _AppSettingsState extends State<AppSettings> {
             dropdownMenuEntries: themeList.map<DropdownMenuEntry<String>>((String value) {
               return DropdownMenuEntry<String>(value: value, label: value);
             }).toList(),
+          ),
+          const SizedBox(height: 32),
+          Text("App Info", style: Theme.of(context).textTheme.headlineSmall),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              Text('Tourguide v', style: Theme.of(context).textTheme.bodyLarge,),
+              Text(_packageInfo!.version, style: Theme.of(context).textTheme.bodyLarge,),
+              Text(', build ', style: Theme.of(context).textTheme.bodyLarge,),
+              Text(_packageInfo!.buildNumber, style: Theme.of(context).textTheme.bodyLarge,),
+            ],
           ),
         ],
       ),
