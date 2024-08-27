@@ -146,14 +146,16 @@ class TourProvider with ChangeNotifier {
   Future<void> _formatListsAndGetTourRatings(String userId) async {
     logger.t('_formatListsAndGetTourRatings ${getFormattedTime()} ');
     //add empty tour if no tours
-    /*if (_popularTours.isEmpty) _popularTours = List.generate(1, (index) => Tour.isAddTourTile());
-    if (_localTours.isEmpty) _localTours = List.generate(1, (index) => Tour.isAddTourTile());
-    if (_globalTours.isEmpty) _globalTours = List.generate(1, (index) => Tour.isAddTourTile());
+    Tour addTourTile = Tour.isAddTourTile();
+    _allCachedTours[addTourTile.id] = addTourTile;
+    if (_popularTours.isEmpty) _popularTours.add(addTourTile.id);
+    if (_localTours.isEmpty) _localTours.add(addTourTile.id);
+    if (_globalTours.isEmpty) _globalTours.add(addTourTile.id);
     if (_userCreatedTours.isEmpty) {
-      _userCreatedTours = List.generate(1, (index) => Tour.isAddTourTile());
+      _userCreatedTours.add(addTourTile.id);
     } else {
-      _userCreatedTours.insert(0,Tour.isAddTourTile());
-    }*/
+      _userCreatedTours.insert(0,addTourTile.id);
+    }
     notifyListeners();
 
     logger.t('_formatListsAndGetTourRatings - get ratings (count: ${_allCachedTours.length})');

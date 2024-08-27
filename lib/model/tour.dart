@@ -92,8 +92,10 @@ class Tour {
   }
 
   factory Tour.isAddTourTile() {
-    Tour addTourTile = Tour.empty();
-    addTourTile.isAddTourTile = true;
+    Tour addTourTile = Tour.empty().copyWith(
+        id: 'addTourTile',
+        name: 'Add Tour',
+        isAddTourTile: true);
     return addTourTile;
   }
 

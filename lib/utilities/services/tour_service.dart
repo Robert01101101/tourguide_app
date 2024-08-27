@@ -278,10 +278,10 @@ class TourService {
     try {
       QuerySnapshot querySnapshot = await db.collection('tours')
           .where('visibility', isEqualTo: 'public')
-          .where('latitude', isGreaterThanOrEqualTo: userLatitude - 0.45 )  // approximately 50km
-          .where('latitude', isLessThanOrEqualTo: userLatitude + 0.45)
-          .where('longitude', isGreaterThanOrEqualTo: userLongitude - 0.45)
-          .where('longitude', isLessThanOrEqualTo: userLongitude + 0.45)
+          .where('latitude', isGreaterThanOrEqualTo: userLatitude - 0.9)  // approximately 50km
+          .where('latitude', isLessThanOrEqualTo: userLatitude + 0.9)
+          .where('longitude', isGreaterThanOrEqualTo: userLongitude - 0.9)
+          .where('longitude', isLessThanOrEqualTo: userLongitude + 0.9)
           .where('upvotes', isGreaterThanOrEqualTo: 1)
           .orderBy('upvotes', descending: true) //sort by upvotes
           .get();
