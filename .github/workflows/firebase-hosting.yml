@@ -36,3 +36,5 @@ jobs:
           firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT_TOURGUIDE_FIREBASE }}'
           channelId: live
           projectId: tourguide-firebase
+        env:
+          FIREBASE_CLI_EXPERIMENTS: webframeworks
