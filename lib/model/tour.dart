@@ -258,7 +258,7 @@ class Tour {
 
   @override
   String toString() {
-    return 'Tour{id: $id, name: $name, description: $description, city: $city, visibility: $visibility, imageUrl: $imageUrl, createdDateTime: $createdDateTime, lastChangedDateTime: $lastChangedDateTime, latitude: $latitude, longitude: $longitude, placeId: $placeId, authorName: $authorName, authorId: $authorId, reports:${reports.toString()}, requestReviewStatus: $requestReviewStatus, upvotes: $upvotes, downvotes: $downvotes, isAddTourTile: $isAddTourTile, isOfflineCreatedTour: $isOfflineCreatedTour, imageToUpload: $imageFile, \ntourguidePlaces: ${tourguidePlaces.toString()}';
+    return 'Tour{id: $id, name: $name, description: $description, city: $city, visibility: $visibility, imageUrl: $imageUrl, createdDateTime: $createdDateTime, lastChangedDateTime: $lastChangedDateTime, latitude: $latitude, longitude: $longitude, placeId: $placeId, authorName: $authorName, authorId: $authorId, reports:${reports.toString()}, requestReviewStatus: $requestReviewStatus, upvotes: $upvotes, downvotes: $downvotes, isAddTourTile: $isAddTourTile, isOfflineCreatedTour: $isOfflineCreatedTour, imageFile: $imageFile, \ntourguidePlaces: ${tourguidePlaces.toString()}';
   }
 }
 

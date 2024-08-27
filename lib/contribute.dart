@@ -102,7 +102,7 @@ class _ContributeState extends State<Contribute> {
                 ),
                 StandardLayoutChild(
                   fullWidth: true,
-                  child: HorizontalScroller(tours: tourProvider.userCreatedTours, leftPadding: true),
+                  child: HorizontalScroller(tours: tourProvider.getTours(tourProvider.userCreatedTours), leftPadding: true),
                 ),
                 /*Text("Review unreviewed tours", style: Theme.of(context).textTheme.headlineSmall),
                 StandardLayoutChild(

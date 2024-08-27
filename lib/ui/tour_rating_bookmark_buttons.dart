@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:tourguide_app/utilities/providers/auth_provider.dart' as myAuth;
+import 'package:tourguide_app/utilities/providers/tour_provider.dart';
 
+import '../main.dart';
 import '../model/tour.dart';
 import '../utilities/providers/tourguide_user_provider.dart';
 import '../utilities/services/tour_service.dart';
@@ -19,12 +21,20 @@ class TourRatingBookmarkButtons extends StatefulWidget {
 }
 
 class _TourRatingBookmarkButtonsState extends State<TourRatingBookmarkButtons> {
-  int _thisUsersRating = 0;
+  late int _thisUsersRating;
+
+  @override
+  void initState() {
+    super.initState();
+    logger.i('upvotes: ${widget.tour.upvotes}, downvotes: ${widget.tour.downvotes}');
+    _thisUsersRating = widget.tour.thisUsersRating ?? 0;
+  }
 
   void toggleThumbsUp() {
     if (widget.tour.isOfflineCreatedTour) return; // Tour creation tile should not have rating
 
     myAuth.AuthProvider authProvider = Provider.of(context, listen: false);
+    TourProvider tourProvider = Provider.of(context, listen: false);
 
     setState(() {
       if (_thisUsersRating == 1) {
@@ -39,6 +49,8 @@ class _TourRatingBookmarkButtonsState extends State<TourRatingBookmarkButtons> {
         _thisUsersRating = 1;
         widget.tour.upvotes++; // Increase upvotes
       }
+      widget.tour.thisUsersRating = _thisUsersRating;
+      tourProvider.updateTour(widget.tour, localUpdateOnly: true);
       TourService.addOrUpdateRating(widget.tour.id, _thisUsersRating, authProvider.user!.uid);
     });
   }
@@ -47,6 +59,7 @@ class _TourRatingBookmarkButtonsState extends State<TourRatingBookmarkButtons> {
     if (widget.tour.isOfflineCreatedTour) return; // Tour creation tile should not have rating
 
     myAuth.AuthProvider authProvider = Provider.of(context, listen: false);
+    TourProvider tourProvider = Provider.of(context, listen: false);
 
     setState(() {
       if (_thisUsersRating == -1) {
@@ -61,6 +74,8 @@ class _TourRatingBookmarkButtonsState extends State<TourRatingBookmarkButtons> {
         _thisUsersRating = -1;
         widget.tour.downvotes++; // Increase downvotes
       }
+      widget.tour.thisUsersRating = _thisUsersRating;
+      tourProvider.updateTour(widget.tour, localUpdateOnly: true);
       TourService.addOrUpdateRating(widget.tour.id, _thisUsersRating, authProvider.user!.uid);
     });
   }
@@ -109,7 +124,7 @@ class _TourRatingBookmarkButtonsState extends State<TourRatingBookmarkButtons> {
                   height: 35,
                   child: IconButton(
                     onPressed: toggleThumbsUp,
-                    icon: Icon(Icons.thumb_up, color: _thisUsersRating == 1 ? Theme.of(context).colorScheme.primary : Colors.grey),
+                    icon: Icon(Icons.thumb_up, color: (widget.tour.thisUsersRating ?? 0) == 1 ? Theme.of(context).colorScheme.primary : Colors.grey),
                     iconSize: 18,
                     padding: EdgeInsets.all(0),
                     constraints: BoxConstraints(),
@@ -126,7 +141,7 @@ class _TourRatingBookmarkButtonsState extends State<TourRatingBookmarkButtons> {
                   height: 35,
                   child: IconButton(
                     onPressed: toggleThumbsDown,
-                    icon: Icon(Icons.thumb_down, color: _thisUsersRating == -1 ? Theme.of(context).colorScheme.primary : Colors.grey),
+                    icon: Icon(Icons.thumb_down, color: (widget.tour.thisUsersRating ?? 0) == -1 ? Theme.of(context).colorScheme.primary : Colors.grey),
                     iconSize: 18,
                     padding: EdgeInsets.all(0),
                     constraints: BoxConstraints(),

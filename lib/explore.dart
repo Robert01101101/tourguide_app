@@ -372,14 +372,14 @@ class ExploreState extends State<Explore> {
                               IconButton(onPressed: (){
                                 Navigator.push(
                                    context,
-                                   MaterialPageRoute(builder: (context) => ExploreMap(tours: tourProvider.popularTours)),
+                                   MaterialPageRoute(builder: (context) => ExploreMap(tours: tourProvider.getTours(tourProvider.popularTours))),
                                 );
                               }, icon: Icon(Icons.map))
                             ],
                           ),
                           StandardLayoutChild(
                             fullWidth: true,
-                            child: HorizontalScroller(tours: tourProvider.popularTours),
+                            child: HorizontalScroller(tours: tourProvider.getTours(tourProvider.popularTours)),
                           ),
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -388,14 +388,14 @@ class ExploreState extends State<Explore> {
                               IconButton(onPressed: (){
                                 Navigator.push(
                                   context,
-                                  MaterialPageRoute(builder: (context) => ExploreMap(tours: tourProvider.localTours)),
+                                  MaterialPageRoute(builder: (context) => ExploreMap(tours: tourProvider.getTours((tourProvider.localTours)))),
                                 );
                               }, icon: Icon(Icons.map))
                             ],
                           ),
                           StandardLayoutChild(
                             fullWidth: true,
-                            child: HorizontalScroller(tours: tourProvider.localTours),
+                            child: HorizontalScroller(tours: tourProvider.getTours(tourProvider.localTours)),
                           ),
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -404,14 +404,14 @@ class ExploreState extends State<Explore> {
                               IconButton(onPressed: (){
                                 Navigator.push(
                                   context,
-                                  MaterialPageRoute(builder: (context) => ExploreMap(tours: tourProvider.globalTours)),
+                                  MaterialPageRoute(builder: (context) => ExploreMap(tours: tourProvider.getTours(tourProvider.globalTours))),
                                 );
                               }, icon: Icon(Icons.map))
                             ],
                           ),
                           StandardLayoutChild(
                             fullWidth: true,
-                            child: HorizontalScroller(tours: tourProvider.globalTours),
+                            child: HorizontalScroller(tours: tourProvider.getTours((tourProvider.globalTours))),
                           ),
                           /*Text("Debug", style: Theme.of(context).textTheme.headlineSmall),
                           Row(
