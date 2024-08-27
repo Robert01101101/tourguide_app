@@ -278,10 +278,10 @@ class TourService {
     try {
       QuerySnapshot querySnapshot = await db.collection('tours')
           .where('visibility', isEqualTo: 'public')
-          .where('latitude', isGreaterThanOrEqualTo: userLatitude - 0.45 )  // approximately 50km
-          .where('latitude', isLessThanOrEqualTo: userLatitude + 0.45)
-          .where('longitude', isGreaterThanOrEqualTo: userLongitude - 0.45)
-          .where('longitude', isLessThanOrEqualTo: userLongitude + 0.45)
+          .where('latitude', isGreaterThanOrEqualTo: userLatitude - 0.9)  // approximately 50km
+          .where('latitude', isLessThanOrEqualTo: userLatitude + 0.9)
+          .where('longitude', isGreaterThanOrEqualTo: userLongitude - 0.9)
+          .where('longitude', isLessThanOrEqualTo: userLongitude + 0.9)
           .where('upvotes', isGreaterThanOrEqualTo: 1)
           .orderBy('upvotes', descending: true) //sort by upvotes
           .get();
@@ -467,16 +467,40 @@ class TourService {
           .child(tour.authorId)
           .child(tour.id);  // Use the tourId to associate the image with the tour
 
-      // Upload the file to Firebase Storage
-      UploadTask uploadTask = ref.putFile(tour.imageFile!);
+      // Handle the upload based on platform
+      if (kIsWeb) {
+        // Web platform
+        if (tour.imageFileToUploadWeb != null) {
+          // Convert XFile to Uint8List
+          final Uint8List imageData = await tour.imageFileToUploadWeb!.readAsBytes();
+          UploadTask uploadTask = ref.putData(imageData);
 
-      // Await the completion of the upload task
-      TaskSnapshot taskSnapshot = await uploadTask;
+          // Await the completion of the upload task
+          TaskSnapshot taskSnapshot = await uploadTask;
 
-      // Upon completion, get the download URL for the image
-      String imageUrl = await taskSnapshot.ref.getDownloadURL();
+          // Upon completion, get the download URL for the image
+          String imageUrl = await taskSnapshot.ref.getDownloadURL();
 
-      return imageUrl;
+          return imageUrl;
+        } else {
+          throw ArgumentError('No image file provided for upload.');
+        }
+      } else {
+        // Mobile or other non-web platforms
+        if (tour.imageFile != null) {
+          UploadTask uploadTask = ref.putFile(File(tour.imageFile!.path));
+
+          // Await the completion of the upload task
+          TaskSnapshot taskSnapshot = await uploadTask;
+
+          // Upon completion, get the download URL for the image
+          String imageUrl = await taskSnapshot.ref.getDownloadURL();
+
+          return imageUrl;
+        } else {
+          throw ArgumentError('No image file provided for upload.');
+        }
+      }
     } catch (e, stack) {
       // Handle errors, if any
       logger.e('Error uploading image: $e, stack: $stack');

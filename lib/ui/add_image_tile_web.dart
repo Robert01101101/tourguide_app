@@ -1,32 +1,34 @@
 import 'dart:io';
-
+import 'dart:typed_data';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'dart:io' if (dart.library.html) 'dart:html' as html;
 
-import '../main.dart';
+import '../main.dart';  // Conditional import
 
-class AddImageTile extends FormField<File?> {
+class AddImageTileWeb extends FormField<XFile?> {  // Use XFile instead of File
   final bool enabled;
 
-  AddImageTile({
+  AddImageTileWeb({
     Key? key,
-    File? initialValue,
-    FormFieldSetter<File?>? onSaved,
-    FormFieldValidator<File?>? validator,
-    ValueChanged<File?>? onChanged,
+    XFile? initialValue,  // Change initialValue type to XFile
+    FormFieldSetter<XFile?>? onSaved,
+    FormFieldValidator<XFile?>? validator,
+    ValueChanged<XFile?>? onChanged,
     required this.enabled,
   }) : super(
     key: key,
     initialValue: initialValue,
     onSaved: onSaved,
     validator: validator,
-    builder: (FormFieldState<File?> state) {
-      return _AddImageTileContent(
+    builder: (FormFieldState<XFile?> state) {
+      return _AddImageTileWebContent(
         initialValue: initialValue,
         state: state,
         onChanged: onChanged != null
-            ? (File? file) {
+            ? (XFile? file) {
           state.didChange(file);
           onChanged(file);
         }
@@ -37,13 +39,13 @@ class AddImageTile extends FormField<File?> {
   );
 }
 
-class _AddImageTileContent extends StatefulWidget {
-  final File? initialValue;
-  final FormFieldState<File?> state;
-  final ValueChanged<File?> onChanged;
+class _AddImageTileWebContent extends StatefulWidget {
+  final XFile? initialValue;
+  final FormFieldState<XFile?> state;
+  final ValueChanged<XFile?> onChanged;
   final bool enabled;
 
-  const _AddImageTileContent({
+  const _AddImageTileWebContent({
     Key? key,
     required this.initialValue,
     required this.state,
@@ -52,11 +54,11 @@ class _AddImageTileContent extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  _AddImageTileContentState createState() => _AddImageTileContentState();
+  _AddImageTileWebContentState createState() => _AddImageTileWebContentState();
 }
 
-class _AddImageTileContentState extends State<_AddImageTileContent> {
-  File? _imageFile;
+class _AddImageTileWebContentState extends State<_AddImageTileWebContent> {
+  XFile? _imageFile;
 
   @override
   void initState() {
@@ -85,10 +87,9 @@ class _AddImageTileContentState extends State<_AddImageTileContent> {
           children: [
             if (_imageFile != null)
               ClipRRect(
-                child: Image.file(
-                  _imageFile!,
-                  fit: BoxFit.cover,
-                ),
+                child: kIsWeb
+                    ? Image.network(_imageFile!.path)  // Use Image.network for web
+                    : Image.file(File(_imageFile!.path)),  // Use Image.file for mobile
               ),
             if (_imageFile != null)
               Container(
@@ -173,7 +174,7 @@ class _AddImageTileContentState extends State<_AddImageTileContent> {
       final pickedFile = await ImagePicker().pickImage(source: source);
       if (pickedFile != null) {
         setState(() {
-          _imageFile = File(pickedFile.path);
+          _imageFile = pickedFile;
         });
         widget.onChanged(_imageFile);
       }

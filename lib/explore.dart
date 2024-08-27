@@ -214,7 +214,6 @@ class ExploreState extends State<Explore> {
     TourProvider tourProvider = Provider.of<TourProvider>(context);
 
     Future<void> refresh() async {
-      LocationProvider locationProvider = Provider.of<LocationProvider>(context, listen: false);
       if (!tourProvider.isLoadingTours){
         await locationProvider.refreshCurrentLocation();
         await downloadTours();
@@ -231,30 +230,37 @@ class ExploreState extends State<Explore> {
             child: Stack(
               key: _contentKey,
               children: [
-                Selector<LocationProvider, TourguidePlaceImg?>(
-                  selector: (context, locationProvider) => locationProvider.currentPlaceImg,
-                  builder: (context, currentPlaceImg, child) {
+                Consumer<LocationProvider>(
+                  builder: (context, locationProvider, child) {
+                    final currentPlaceImg = locationProvider.currentPlaceImg;
+                    final permissionStatus = locationProvider.permissionStatus;
                     if (currentPlaceImg == null) {
                       return Stack(
                         children: [
                           Container(
                             height: 300,
                             width: double.infinity,
-                            decoration: const BoxDecoration(
+                            color: Colors.black,
+                          ),
+                          Container(
+                            height: 300,
+                            width: double.infinity,
+                            decoration: BoxDecoration(
                               gradient: LinearGradient(
-                                colors: [Color(0xffebebf4), Color(0xff7b7b80)],
+                                colors: [Theme.of(context).colorScheme.surfaceDim.withOpacity(.6), Theme.of(context).colorScheme.surfaceBright.withOpacity(.6)],
                                 begin: Alignment.topCenter,
                                 end: Alignment.bottomCenter,
                               ),
                             ),
                           ),
-                          const Positioned.fill(
-                            child: Center(
-                              child: CircularProgressIndicator(
-                                color: Color(0xffebebf4),
+                          if (permissionStatus == PermissionStatus.granted)
+                            const Positioned.fill(
+                              child: Center(
+                                child: CircularProgressIndicator(
+                                  color: Color(0xffebebf4),
+                                ),
                               ),
                             ),
-                          ),
                         ],
                       );
                     } else {
@@ -340,9 +346,9 @@ class ExploreState extends State<Explore> {
                                           style: Theme.of(context).textTheme.displayMedium,
                                           children: <TextSpan>[
                                             const TextSpan(text: 'Welcome'),
-                                            if (locationProvider.currentCity != null)
+                                            if (locationProvider.currentCity != null && locationProvider.currentCity.isNotEmpty)
                                               TextSpan(text: ' to \r'),
-                                            if (locationProvider.currentCity != null)
+                                            if (locationProvider.currentCity != null && locationProvider.currentCity.isNotEmpty)
                                               TextSpan(
                                                 text: locationProvider.currentCity,
                                                 style: GoogleFonts.vollkorn(  //need to explicitly specify font for weight setting to work for some reason
@@ -356,6 +362,28 @@ class ExploreState extends State<Explore> {
                                                 }
                                               ),
                                             if (displayName != null && displayName.isNotEmpty) TextSpan(text: ', ${displayName.split(' ').first}'),
+                                            if (locationProvider.permissionStatus != PermissionStatus.granted)
+                                              TextSpan(
+                                                text: '\n\nPlease enable location services',
+                                                style: Theme.of(context).textTheme.titleMedium),
+                                            if (locationProvider.permissionStatus != PermissionStatus.granted && locationProvider.currentCity != null && locationProvider.currentCity.isNotEmpty)
+                                              TextSpan(
+                                                  text: ' for full functionality',
+                                                  style: Theme.of(context).textTheme.titleMedium),
+                                            if (locationProvider.permissionStatus != PermissionStatus.granted && locationProvider.currentCity == null || locationProvider.currentCity.isEmpty)
+                                              TextSpan(
+                                                text: ', or ',
+                                                style: Theme.of(context).textTheme.titleMedium),
+                                            if (locationProvider.permissionStatus != PermissionStatus.granted && locationProvider.currentCity == null || locationProvider.currentCity.isEmpty)
+                                              TextSpan(
+                                                  text: 'set your location',
+                                                  style: Theme.of(context).textTheme.titleMedium!.copyWith(
+                                                    decoration: TextDecoration.underline,
+                                                  ),
+                                                  recognizer: TapGestureRecognizer()..onTap = () {
+                                                    logger.t('Tapped set your location');
+                                                    _showOptionsDialog(context);
+                                                  },),
                                           ],
                                         ),
                                       ),
