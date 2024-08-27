@@ -81,7 +81,7 @@ class LocationProvider with ChangeNotifier {
       _currentPosition = position; // = testPos;
       notifyListeners();
 
-      await kIsWeb ? _getLocationDetailsFromCoordinatesWeb(position) : _getLocationDetailsFromCoordinates(position);
+      kIsWeb ? await _getLocationDetailsFromCoordinatesWeb(position) : await _getLocationDetailsFromCoordinates(position);
       await _saveLocation();
       notifyListeners();
     } catch (e) {
@@ -370,7 +370,7 @@ class LocationProvider with ChangeNotifier {
   //from https://pub.dev/packages/flutter_google_places_sdk/example, with modifications for simplification & integration to location_provider
   Future<TourguidePlaceImg?> fetchPlacePhoto({String? placeId, bool setAsCurrentImage = true}) async {
     try {
-      logger.t("locationProvider._fetchPlacePhoto()");
+      logger.t("locationProvider._fetchPlacePhoto($placeId, setAsCurrentImage=$setAsCurrentImage)");
       if (placeId == null) {
         //Ensure id is loaded
         //TODO: Fix bad code for waiting for placeId, improve approach to caching
