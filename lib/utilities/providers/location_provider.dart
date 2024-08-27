@@ -10,13 +10,21 @@ import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:flutter_google_places_sdk/flutter_google_places_sdk.dart';
 import '../../ui/google_places_img.dart'
-  if (dart.library.html) '../../ui/google_places_img_web.dart'
-  as gpi;
+if (dart.library.html) '../../ui/google_places_img_web.dart'
+as gpi;
 import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tourguide_app/main.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+
+enum PermissionStatus {
+  granted,
+  locationServicesDisabled,
+  permissionDenied,
+  permissionDeniedForever,
+}
+
 
 
 //TODO: Handle all types of errors as well as permission denied
@@ -29,6 +37,7 @@ class LocationProvider with ChangeNotifier {
   String _placeId = '';
   late FlutterGooglePlacesSdk _places;
   TourguidePlaceImg? _currentPlaceImg;
+  PermissionStatus _permissionStatus = PermissionStatus.locationServicesDisabled;
 
   Position? get currentPosition => _currentPosition;
   String get currentCity => _currentCity;
@@ -36,6 +45,7 @@ class LocationProvider with ChangeNotifier {
   String get currentCountry => _currentCountry;
   String get placeId => _placeId;
   TourguidePlaceImg? get currentPlaceImg => _currentPlaceImg;
+  PermissionStatus get permissionStatus => _permissionStatus;
 
   Map<String, TourguidePlaceImg> _imageCache = {};
 
@@ -57,35 +67,11 @@ class LocationProvider with ChangeNotifier {
 
   Future<void> getCurrentLocation() async {
     logger.t("LocationProvider.getCurrentLocation()");
-    bool serviceEnabled;
-    LocationPermission permission;
 
-    // Test if location services are enabled.
-    serviceEnabled = await Geolocator.isLocationServiceEnabled();
-    if (!serviceEnabled) {
-      // Location services are not enabled don't continue
-      // accessing the position and request users of the
-      // App to enable the location services.
-      return Future.error('Location services are disabled.');
-    }
-
-    permission = await Geolocator.checkPermission();
-    if (permission == LocationPermission.denied) {
-      permission = await Geolocator.requestPermission();
-      if (permission == LocationPermission.denied) {
-        // Permissions are denied, next time you could try
-        // requesting permissions again (this is also where
-        // Android's shouldShowRequestPermissionRationale
-        // returned true. According to Android guidelines
-        // your App should show an explanatory UI now.
-        return Future.error('Location permissions are denied');
-      }
-    }
-
-    if (permission == LocationPermission.deniedForever) {
-      // Permissions are denied forever, handle appropriately.
-      return Future.error(
-          'Location permissions are permanently denied, we cannot request permissions.');
+    PermissionStatus status = await _checkForPermissionSettings();
+    if (status != PermissionStatus.granted) {
+      logger.e("Location permission not granted: $status");
+      return;
     }
 
     try {
@@ -101,6 +87,36 @@ class LocationProvider with ChangeNotifier {
     } catch (e) {
       logger.e(e);
     }
+  }
+
+  Future<PermissionStatus> _checkForPermissionSettings() async {
+    bool serviceEnabled;
+    LocationPermission permission;
+
+    // Test if location services are enabled.
+    serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    if (!serviceEnabled) {
+      _permissionStatus = PermissionStatus.locationServicesDisabled;
+      return PermissionStatus.locationServicesDisabled;
+    }
+
+    permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+      if (permission == LocationPermission.denied) {
+        _permissionStatus = PermissionStatus.permissionDenied;
+        return PermissionStatus.permissionDenied;
+      }
+    }
+
+    if (permission == LocationPermission.deniedForever) {
+      _permissionStatus = PermissionStatus.permissionDeniedForever;
+      return PermissionStatus.permissionDeniedForever;
+    }
+
+    _permissionStatus = PermissionStatus.granted;
+    notifyListeners();
+    return PermissionStatus.granted;
   }
 
   Future<void> refreshCurrentLocation() async {
@@ -244,7 +260,8 @@ class LocationProvider with ChangeNotifier {
           altitudeAccuracy: 0
       );
       _placeId = place.id!;
-      _currentPlaceImg = await fetchPlacePhoto();
+      await fetchPlacePhoto(setAsCurrentImage: true);
+      _saveLocation();
       notifyListeners();
       logger.t("LocationProvider.setCurrentPlace() - _currentCity=${_currentCity}");
     } catch (e) {
@@ -258,15 +275,17 @@ class LocationProvider with ChangeNotifier {
       return null;
     }
     try {
+      LatLng? location;
+      LatLngBounds? locationBias;
+
       if (_currentPosition == null) {
-        logger.w("_currentPosition is null");
-        return null;
+        logger.w("_currentPosition is null, autocomplete suggestions may not be accurate.");
+      } else {
+        location = LatLng(lat: _currentPosition!.latitude, lng: _currentPosition!.longitude);
+        locationBias = _createBounds(location, 50);
       }
 
       // Get the Place ID using FlutterGooglePlacesSdk
-      LatLng location = LatLng(lat: _currentPosition!.latitude, lng: _currentPosition!.longitude);
-      LatLngBounds locationBias = _createBounds(location, 50);
-
       final result = await _places.findAutocompletePredictions(
         query,
         placeTypesFilter: restrictToCities ? [PlaceTypeFilter.CITIES] : [],
@@ -276,7 +295,7 @@ class LocationProvider with ChangeNotifier {
 
       List<AutocompletePrediction> resultSorted = List.from(result.predictions);
 
-      resultSorted.sort((a, b) => (a.distanceMeters ?? 0).compareTo(b.distanceMeters ?? 0));
+      //resultSorted.sort((a, b) => (a.distanceMeters ?? 0).compareTo(b.distanceMeters ?? 0));
       logger.t("resultSorted.toString()=${resultSorted.toString()},   result.predictions.first.placeId=${resultSorted.first.placeId}");
 
       return resultSorted;
@@ -431,10 +450,6 @@ class LocationProvider with ChangeNotifier {
       );
       final place = result.place;
 
-
-      var debug = remoteConfig.getString('google_api_key');
-      logger.t("locationProvider._fetchPlacePhoto() - debug=$debug, _places.isInitialized();=${isInitialized} placeId=$placeId, place=$place, place.photoMetadatas=${place?.photoMetadatas}");
-
       if (place?.photoMetadatas == null) {
         throw Exception("place or place.photoMetadatas is null");
       }
@@ -483,7 +498,7 @@ class LocationProvider with ChangeNotifier {
         }
       } else {
         //on web,
-        final imageBytes = await response.when(
+        response.when(
           image: (image) { logger.t('image:' + image.toString()); return _imageToBytes(image); },
           imageUrl: (imageUrl) {
               logger.t('imageUrl:' + imageUrl);
@@ -504,10 +519,9 @@ class LocationProvider with ChangeNotifier {
 
               _imageCache[placeId!] = tourguidePlaceImg;
 
-              return tourguidePlaceImg;//_fetchImageBytesFromUrl(imageUrl);
+              return tourguidePlaceImg;
             },
         );
-        return null;
       }
     } catch (err, stack) {
       logger.e("locationProvider._fetchPlacePhoto() - Exception occured: $err, placeId=$placeId, setAsCurrentImage=$setAsCurrentImage \n$stack");
