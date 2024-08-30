@@ -72,7 +72,7 @@ class AuthProvider with ChangeNotifier {
     // It is recommended by Google Identity Services to render both the One Tap UX
     // and the Google Sign In button together to "reduce friction and improve
     // sign-in rates" ([docs](https://developers.google.com/identity/gsi/web/guides/display-button#html)).
-    if (!kIsWeb) _googleSignIn.signInSilently();
+    if (!kIsWeb) _signInSilently();
     // TODO - check for fixes to the google_sign_in package. This code is an example taken from the example application linked there.
     // TODO - however, it does not work as intended. The signInSilently() method triggers an error with FedCM / GIS on web.
     // TODO - it seems like it's no longer best practice to use this method on web.
@@ -86,6 +86,17 @@ class AuthProvider with ChangeNotifier {
     }
     super.dispose();
   }
+
+
+  void _signInSilently() async {
+    GoogleSignInAccount? silentlySignedInUser = await _googleSignIn.signInSilently();
+    logger.t('AuthProvider.signInSilently() - silentlySignedInUser=$silentlySignedInUser');
+    if (silentlySignedInUser == null) {
+      _silentSignInFailed = true;
+      notifyListeners();
+    }
+  }
+
 
 
 

@@ -331,11 +331,11 @@ class LocationProvider with ChangeNotifier {
     if (_currentPosition != null) {
       prefs.setDouble('latitude', _currentPosition!.latitude);
       prefs.setDouble('longitude', _currentPosition!.longitude);
+      prefs.setString('city', _currentCity);
+      prefs.setString('state', _currentState);
+      prefs.setString('country', _currentCountry);
+      prefs.setString('placeId', _placeId);
     }
-    prefs.setString('city', _currentCity);
-    prefs.setString('state', _currentState);
-    prefs.setString('country', _currentCountry);
-    prefs.setString('placeId', _placeId);
   }
 
   Future<void> _loadSavedLocation() async {

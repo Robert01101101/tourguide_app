@@ -43,6 +43,7 @@ class _SignInState extends State<SignIn> {
   void initState() {
     super.initState();
 
+    logger.t("signIn.initState()");
     // Init providers
     MyGlobals.initProviders(context);
     my_auth.AuthProvider authProvider = Provider.of(context, listen: false);
