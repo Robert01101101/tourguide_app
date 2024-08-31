@@ -54,6 +54,15 @@ class _TourRunningState extends State<TourRunning> {
   List<List<LatLng>> _routeSegments = [];
   int thisUsersRating = 0;
   bool _tourFinished = false;
+  bool _mapCurrentlyPinnedAtTop = false;
+  double _mapYposition = 0;
+  final GlobalKey _mapKey = GlobalKey();
+  final Set<Factory<OneSequenceGestureRecognizer>> _gestureRecognizersEager = {
+    Factory<OneSequenceGestureRecognizer>(() => EagerGestureRecognizer())
+  };
+  final Set<Factory<OneSequenceGestureRecognizer>> _gestureRecognizersPan = {
+    Factory<PanGestureRecognizer>(() => PanGestureRecognizer())
+  };
 
 
 
@@ -64,12 +73,58 @@ class _TourRunningState extends State<TourRunning> {
     _tour = tourProvider.selectedTour!;
     thisUsersRating = _tour.thisUsersRating ?? 0;
     _addMarkers();
+    _scrollController.addListener(_handleScroll);
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _getMapPosition();
+    });
   }
 
   @override
   void dispose() {
     _ttsService.stop();
     super.dispose();
+  }
+
+  void _handleScroll() {
+    // Get the scroll offset
+    final scrollOffset = _scrollController.offset;
+
+    // Determine the height of the SliverPinnedHeader
+    //final pinnedHeaderHeight = kIsWeb ? 450.0 : 350.0;
+    // Get the render box of the map widget
+    final RenderBox renderBox = _mapKey.currentContext?.findRenderObject() as RenderBox;
+
+    // Get the offset of the map widget relative to the screen
+    final Offset position = renderBox.localToGlobal(Offset.zero);
+
+    // Get the vertical position (Y-coordinate)
+    final double yPosition = position.dy;
+
+    // Check if the scroll offset has reached the point where the header is pinned
+    final isPinned = scrollOffset >= _mapYposition;//pinnedHeaderHeight;
+
+    // Update the state if the pinned state has changed
+    if (_mapCurrentlyPinnedAtTop != isPinned) {
+      logger.i('Map pinned at top: $isPinned, scrollOffset: $scrollOffset, yPosition: $yPosition');// pinnedHeaderHeight: $pinnedHeaderHeight');
+      setState(() {
+        _mapCurrentlyPinnedAtTop = isPinned;
+      });
+    }
+  }
+
+  void _getMapPosition() {
+    // Get the render box of the map widget
+    final RenderBox renderBox = _mapKey.currentContext?.findRenderObject() as RenderBox;
+
+    // Get the offset of the map widget relative to the screen
+    final Offset position = renderBox.localToGlobal(Offset.zero);
+
+    // Get the vertical position (Y-coordinate)
+    _mapYposition = position.dy;
+
+    // Now you can use yPosition as needed
+    //logger.t("Map Y Position: $_mapYposition");
   }
 
 
@@ -394,7 +449,7 @@ class _TourRunningState extends State<TourRunning> {
 
   void _scrollToTarget(int placeIndex, {bool delay = false}) {
     if (delay) {
-      Future.delayed(Duration(milliseconds: 500), () {
+      Future.delayed(const Duration(milliseconds: 350), () {
         _scrollToTarget(placeIndex);
       });
     } else {
@@ -405,7 +460,7 @@ class _TourRunningState extends State<TourRunning> {
         });
         Scrollable.ensureVisible(
           context,
-          duration: Duration(milliseconds: 500),
+          duration: const Duration(milliseconds: 500),
           curve: Curves.easeInOut,
         );
       }
@@ -676,9 +731,8 @@ class _TourRunningState extends State<TourRunning> {
                           ),
                         if (showMap)
                         GoogleMap(
-                          gestureRecognizers: {
-                            Factory<OneSequenceGestureRecognizer>(() => EagerGestureRecognizer())
-                          },
+                          key: _mapKey,
+                          gestureRecognizers: _mapCurrentlyPinnedAtTop ? _gestureRecognizersEager : _gestureRecognizersPan,
                           mapType: MapType.normal,
                           myLocationEnabled: true,
                           initialCameraPosition: _currentCameraPosition,
@@ -759,7 +813,7 @@ class _TourRunningState extends State<TourRunning> {
                               offset: Offset(0, -32),
                               child: Stepper(
                                 currentStep: _currentStep,
-                                physics: ClampingScrollPhysics(),
+                                physics: NeverScrollableScrollPhysics(),
                                 onStepTapped: (step) {
                                   _setStep(step);
                                 },
@@ -781,7 +835,6 @@ class _TourRunningState extends State<TourRunning> {
                                     _moveCameraToMarkerAndHighlightMarker(_currentStep);
                                   }
                                 },
-                                controller: _scrollController,
                                 controlsBuilder: (BuildContext context, ControlsDetails controlsDetails) {
                                   return Stack(
                                     children: [
