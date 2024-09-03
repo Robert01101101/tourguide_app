@@ -9,6 +9,7 @@ import 'package:tourguide_app/tour/tour_creation.dart';
 import 'package:tourguide_app/tour/tour_details.dart';
 import 'package:tourguide_app/tour/tour_running.dart';
 import 'package:tourguide_app/ui/shimmer_loading.dart';
+import 'package:tourguide_app/ui/tag.dart';
 import 'package:tourguide_app/utilities/providers/tour_provider.dart';
 import 'package:tourguide_app/utilities/providers/tourguide_user_provider.dart';
 import 'package:tourguide_app/utilities/services/tour_service.dart';
@@ -221,7 +222,7 @@ class _TourTileState extends State<TourTile> {
                             widget.tour.description,
                             style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant),
                             overflow: TextOverflow.ellipsis,
-                            maxLines: 4,
+                            maxLines: 2,
                           ),
                         ),
                       ) :
@@ -233,6 +234,36 @@ class _TourTileState extends State<TourTile> {
                         ),),
                       ),
                     ),
+                  ),
+                ),
+                Spacer(),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+                  child: Row(
+                    children: [
+                      Expanded(child: TagsRow(tags: ['1 Day', 'Historic', 'Scenic'])),
+                      SizedBox(width: 4),
+                      Material(
+                        elevation: 1,
+                        color: Theme.of(context).colorScheme.secondaryContainer,//surfaceContainer,
+                        borderRadius: BorderRadius.circular(32.0),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+                          child: Row(
+                            children: [
+                              Icon((widget.tour.upvotes + 1 - widget.tour.downvotes).sign == 1 ? Icons.thumb_up_outlined : Icons.thumb_down_outlined, color: Theme.of(context).colorScheme.onSecondaryContainer, size: 14),
+                              SizedBox(width: 3),
+                              Text(
+                                '${(widget.tour.upvotes - widget.tour.downvotes).sign == 1 ? '+' : ''}${widget.tour.upvotes - widget.tour.downvotes}',
+                                style: Theme.of(context).textTheme.labelMedium!.copyWith(color: Theme.of(context).colorScheme.onSecondaryContainer),
+                                overflow: TextOverflow.visible,
+                                maxLines: 1,
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ],
