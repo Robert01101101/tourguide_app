@@ -641,12 +641,15 @@ class _TourRunningState extends State<TourRunning> {
                   centerTitle: true,
                   title: Transform.translate(
                     offset: Offset(0, -32),
-                    child: Text(
-                      textAlign: TextAlign.center,
-                      _tour.name,
-                      style: Theme.of(context).textTheme.displaySmall!.copyWith(
-                        color: Theme.of(context).brightness == Brightness.light ? Theme.of(context).scaffoldBackgroundColor : Colors.white,
-                      )
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 56.0),
+                      child: Text(
+                        textAlign: TextAlign.left,
+                        _tour.name,
+                        style: Theme.of(context).textTheme.displaySmall!.copyWith(
+                          color: Theme.of(context).brightness == Brightness.light ? Theme.of(context).scaffoldBackgroundColor : Colors.white,
+                        )
+                      ),
                     ),
                   ),
                   titlePadding: EdgeInsets.only(bottom: 0.0),
