@@ -9,6 +9,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:sliver_tools/sliver_tools.dart';
 import 'package:tourguide_app/model/tour.dart';
 import 'package:tourguide_app/model/tourguide_place.dart';
+import 'package:tourguide_app/tour/tag.dart';
 import 'package:tourguide_app/tour/tour_creation.dart';
 import 'package:tourguide_app/tour/tour_details_options.dart';
 import 'package:tourguide_app/tour/tourguide_user_profile_view.dart';
@@ -26,7 +27,7 @@ import '../utilities/singletons/tts_service.dart';
 import 'package:tourguide_app/utilities/providers/auth_provider.dart' as myAuth;
 
 class TourRunning extends StatefulWidget {
-  const TourRunning({Key? key}) : super(key: key);
+  const TourRunning({super.key});
 
   @override
   State<TourRunning> createState() => _TourRunningState();
@@ -700,7 +701,7 @@ class _TourRunningState extends State<TourRunning> {
                 ),
               ),
               SliverToBoxAdapter(
-                child: Stack(
+                child: /*Stack(
                   children: [
                     StandardLayout(
                       children: [
@@ -715,12 +716,29 @@ class _TourRunningState extends State<TourRunning> {
                                 style: Theme.of(context).textTheme.bodyMedium,
                               ),
                             ),
+                            TourTagsRow(
+                                tags: TourTagsAndRatingRow.parseTags(_tour.tags!)
+                            ),
                             const SizedBox(height: 16.0),
                           ],
                         ),
                       ],
                     ),
                   ],
+                ),*/
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 16.0),
+                  child: StandardLayout(
+                    children: [
+                      Text(
+                        _tour.description,
+                        style: Theme.of(context).textTheme.bodyMedium,
+                      ),
+                      TourTagsRow(
+                          tags: TourTagsAndRatingRow.parseTags(_tour.tags!)
+                      ),
+                    ],
+                  ),
                 ),
               ),
               SliverPinnedHeader(

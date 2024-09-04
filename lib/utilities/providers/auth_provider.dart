@@ -59,6 +59,7 @@ class AuthProvider with ChangeNotifier {
 
       _googleSignInUser = account;
       _isAuthorized = isAuthorized;
+      logger.t("AuthProvider._googleSignIn.onCurrentUserChanged -> isAuthorized=${_isAuthorized}, _googleSignInUser=$_googleSignInUser, _user=$_user");
       notifyListeners();
 
       //sign in with Firebase if authorized (otherwise user has to press button to authorize first, in which case firebase sign in is done in handleAuthorizeScopes()
@@ -108,7 +109,8 @@ class AuthProvider with ChangeNotifier {
   Future<void> handleSignIn() async {
     logger.t('AuthProvider.handleSignIn()');
     try {
-      await _googleSignIn.signIn();
+      GoogleSignInAccount? googleSignInAccount = await _googleSignIn.signIn();
+      logger.t('AuthProvider.handleSignIn() - googleSignInAccount=$googleSignInAccount');
     } catch (error) {
       print(error);
     }

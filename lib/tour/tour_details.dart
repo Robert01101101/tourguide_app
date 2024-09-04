@@ -7,6 +7,7 @@ import 'package:provider/provider.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:tourguide_app/model/tour.dart';
 import 'package:tourguide_app/model/tourguide_place.dart';
+import 'package:tourguide_app/tour/tag.dart';
 import 'package:tourguide_app/tour/tour_creation.dart';
 import 'package:tourguide_app/tour/tour_details_options.dart';
 import 'package:tourguide_app/tour/tourguide_user_profile_view.dart';
@@ -417,35 +418,20 @@ class _FullscreenTourPageState extends State<FullscreenTourPage> {
                             ],
                           ),
                         const SizedBox(height: 16.0),
-                        Container(
-                          height: 105,
-                          child: Text(
-                            widget.tour.description,
-                            style: Theme.of(context).textTheme.bodyMedium,
-                          ),
+                        Text(
+                          widget.tour.description,
+                          style: Theme.of(context).textTheme.bodyMedium,
                         ),
-                      ],
-                    ),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Container(
-                          width: MediaQuery.of(context).size.width * 0.5,
-                          child:
-                            ElevatedButton(
-                              onPressed: isOfflineCreatedTour ? null : startTour,
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Theme.of(context).colorScheme.primary,
-                                foregroundColor: Theme.of(context).colorScheme.surfaceContainerLow,
-                              ),
-                              child: Text("Start"),),
+                        const SizedBox(height: 16.0),
+                        TourTagsRow(
+                            tags: TourTagsAndRatingRow.parseTags(widget.tour.tags!)
                         ),
-                        TourRatingBookmarkButtons(tour: widget.tour),
+                        const SizedBox(height: 8.0),
                       ],
                     ),
                     if (showMap)
                       Container(
-                        height: kIsWeb ? 300 : 240.0, // Adjust height as needed
+                        height: kIsWeb ? 300 : 240.0,
                         child: Stack(
                           children: [
                             GoogleMap(
@@ -554,6 +540,30 @@ class _FullscreenTourPageState extends State<FullscreenTourPage> {
                           );
                         }).toList(),
                       ),
+                    StandardLayoutChild(
+                      enableHorizontalPadding: true,
+                      enableVerticalPadding: false,
+                      child: Padding(
+                        padding: const EdgeInsets.only(bottom: 8),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Container(
+                              width: MediaQuery.of(context).size.width * 0.39,
+                              child:
+                              ElevatedButton(
+                                onPressed: isOfflineCreatedTour ? null : startTour,
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Theme.of(context).colorScheme.primary,
+                                  foregroundColor: Theme.of(context).colorScheme.surfaceContainerLow,
+                                ),
+                                child: Text("Start"),),
+                            ),
+                            TourRatingBookmarkButtons(tour: widget.tour),
+                          ],
+                        ),
+                      ),
+                    ),
                     if (!isOfflineCreatedTour && widget.tour.createdDateTime != null)
                       Row(
                         mainAxisAlignment: MainAxisAlignment.start,

@@ -8,6 +8,7 @@ import 'package:tourguide_app/model/tourguide_user.dart';
 import 'package:tourguide_app/tour/tour_creation.dart';
 import 'package:tourguide_app/tour/tour_details.dart';
 import 'package:tourguide_app/tour/tour_running.dart';
+import 'package:tourguide_app/ui/my_layouts.dart';
 import 'package:tourguide_app/ui/shimmer_loading.dart';
 import 'package:tourguide_app/tour/tag.dart';
 import 'package:tourguide_app/utilities/providers/tour_provider.dart';
@@ -26,7 +27,7 @@ class TourTile extends StatefulWidget {
   const TourTile({super.key, required this.tour});
 
   @override
-  _TourTileState createState() => _TourTileState();
+  State<TourTile>  createState() => _TourTileState();
 }
 
 class _TourTileState extends State<TourTile> {
@@ -40,9 +41,10 @@ class _TourTileState extends State<TourTile> {
   void _showOverlay(BuildContext context) {
     showModalBottomSheet(
       context: context,
+      clipBehavior: Clip.antiAlias,
       isScrollControlled: true,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(32.0)),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24.0)),
       ),
       builder: (BuildContext context) {
         // Adjust the height based on screen size
@@ -52,7 +54,7 @@ class _TourTileState extends State<TourTile> {
         return Container(
           width: MediaQuery.of(context).size.width, // Full width
           height: desiredHeight,
-          padding: EdgeInsets.all(8.0),
+          padding: EdgeInsets.zero,
           child: ExpandedTourTileOverlay(tour: widget.tour),
         );
       },
@@ -244,7 +246,7 @@ class _TourTileState extends State<TourTile> {
                 Padding(
                   padding: const EdgeInsets.only(left: 8, top: 6, right: 8, bottom: 10),
                   child: TourTagsAndRatingRow(
-                    tags: TourTagsAndRatingRow.parseTags(widget.tour.tags!) /*?? ['1 Day', 'Historic', 'Scenic', 'Test']*/,
+                    tags: TourTagsAndRatingRow.parseTags(widget.tour.tags!),
                     rating: (widget.tour.upvotes - widget.tour.downvotes),
                   ),
                 ),
@@ -261,7 +263,7 @@ class _TourTileState extends State<TourTile> {
 class ExpandedTourTileOverlay extends StatefulWidget {
   final Tour tour;
 
-  const ExpandedTourTileOverlay({Key? key, required this.tour}) : super(key: key);
+  const ExpandedTourTileOverlay({super.key, required this.tour});
 
   @override
   _ExpandedTourTileOverlayState createState() => _ExpandedTourTileOverlayState();
@@ -307,13 +309,13 @@ class _ExpandedTourTileOverlayState extends State<ExpandedTourTileOverlay> {
     bool isOfflineCreatedTour = widget.tour.isOfflineCreatedTour ?? false;
 
     return Padding(
-      padding: const EdgeInsets.fromLTRB(0, 8, 0, 0),
+      padding: const EdgeInsets.fromLTRB(0, 12, 0, 0),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               Expanded(
                 child: Container(
@@ -326,6 +328,7 @@ class _ExpandedTourTileOverlayState extends State<ExpandedTourTileOverlay> {
                   ),
                 ),
               ),
+              const SizedBox(width: 16,),
               IconButton(
                 onPressed: () => Navigator.of(context).pop(),
                 icon: Icon(Icons.close),
@@ -333,67 +336,71 @@ class _ExpandedTourTileOverlayState extends State<ExpandedTourTileOverlay> {
             ],
           ),
           Expanded(
-            child: SingleChildScrollView(
-              child: Container(
-                padding: EdgeInsets.all(16.0),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Stack(
-                      children: [
-                        kIsWeb
-                            ?
-                        Image.network(widget.tour.imageUrl!,
-                            width: MediaQuery.of(context).size.width,
-                            height: 200.0,
-                            fit: BoxFit.cover)
-                            :
-                        widget.tour.imageFile != null
-                            ?
-                        Image.file(widget.tour.imageFile!,
-                            width: MediaQuery.of(context).size.width,
-                            height: 200.0,
-                            fit: BoxFit.cover)
-                            :
-                        Container(width: MediaQuery.of(context).size.width, height: 200, color: Colors.white,),
-                        if (tourProvider.isUserCreatedTour(widget.tour))
-                          Align(
-                              alignment: Alignment.topRight,
-                              child: Padding(
-                                padding: EdgeInsets.all(8.0),
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.end,
-                                  children: [
-                                    if (widget.tour.reports.isNotEmpty)
-                                      const CircleAvatar(
-                                        radius: 16,
-                                        backgroundColor: Colors.black45,
-                                        child: Icon(
-                                          Icons.report_outlined,
-                                          color: Colors.yellow,
-                                          size: 22,),
-                                      ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.only(left: 16, top: 12, right: 16, bottom: 8),
+                  child: Stack(
+                    children: [
+                      kIsWeb
+                          ?
+                      Image.network(widget.tour.imageUrl!,
+                          width: MediaQuery.of(context).size.width,
+                          height: 200.0,
+                          fit: BoxFit.cover)
+                          :
+                      widget.tour.imageFile != null
+                          ?
+                      Image.file(widget.tour.imageFile!,
+                          width: MediaQuery.of(context).size.width,
+                          height: 200.0,
+                          fit: BoxFit.cover)
+                          :
+                      Container(width: MediaQuery.of(context).size.width, height: 200, color: Colors.white,),
+                      if (tourProvider.isUserCreatedTour(widget.tour))
+                        Align(
+                            alignment: Alignment.topRight,
+                            child: Padding(
+                              padding: EdgeInsets.all(8.0),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.end,
+                                children: [
+                                  if (widget.tour.reports.isNotEmpty)
                                     const CircleAvatar(
                                       radius: 16,
                                       backgroundColor: Colors.black45,
                                       child: Icon(
-                                        Icons.attribution,
-                                        color: Colors.white,),
+                                        Icons.report_outlined,
+                                        color: Colors.yellow,
+                                        size: 22,),
                                     ),
-                                  ],
-                                ),
-                              )),
-                      ],
-                    ),
-                    SizedBox(height: 16.0),
+                                  const CircleAvatar(
+                                    radius: 16,
+                                    backgroundColor: Colors.black45,
+                                    child: Icon(
+                                      Icons.attribution,
+                                      color: Colors.white,),
+                                  ),
+                                ],
+                              ),
+                            )),
+                    ],
+                  ),
+                ),
+                StandardLayout(
+                  children: [
                     Text(
                       widget.tour.description,
                       style: Theme.of(context).textTheme.bodyMedium,
                     ),
+                    TourTagsRow(
+                      tags: TourTagsAndRatingRow.parseTags(widget.tour.tags!)
+                    ),
                   ],
                 ),
-              ),
+              ],
             ),
           ),
           Padding(

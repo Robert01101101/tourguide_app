@@ -2,6 +2,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 class StandardLayout extends StatelessWidget {
+  static const double defaultGap = 16.0;
+
   final List<Widget> children;
   final double gap;
   final bool enableVerticalPadding;
@@ -10,7 +12,7 @@ class StandardLayout extends StatelessWidget {
   const StandardLayout({
     Key? key,
     required this.children,
-    this.gap = 16.0,
+    this.gap = defaultGap,
     this.enableVerticalPadding = true,
     this.enableHorizontalPadding = true,
   }) : super(key: key);
@@ -42,17 +44,21 @@ class StandardLayout extends StatelessWidget {
 class StandardLayoutChild extends StatelessWidget {
   final Widget child;
   final bool fullWidth;
+  final bool enableHorizontalPadding;
+  final bool enableVerticalPadding;
 
   const StandardLayoutChild({
-    Key? key,
+    super.key,
     required this.child,
     this.fullWidth = false,
-  }) : super(key: key);
+    this.enableHorizontalPadding = false,
+    this.enableVerticalPadding = true,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: EdgeInsets.symmetric(vertical: 8.0),
+      padding: EdgeInsets.symmetric(vertical: enableVerticalPadding ? 8 : 0, horizontal: enableHorizontalPadding ? 16 : 0),
       child: fullWidth
           ? SizedBox(
         width: double.infinity,

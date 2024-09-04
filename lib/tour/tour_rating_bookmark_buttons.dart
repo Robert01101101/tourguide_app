@@ -26,7 +26,7 @@ class _TourRatingBookmarkButtonsState extends State<TourRatingBookmarkButtons> {
   @override
   void initState() {
     super.initState();
-    logger.i('upvotes: ${widget.tour.upvotes}, downvotes: ${widget.tour.downvotes}');
+    //logger.i('upvotes: ${widget.tour.upvotes}, downvotes: ${widget.tour.downvotes}');
     _thisUsersRating = widget.tour.thisUsersRating ?? 0;
   }
 
