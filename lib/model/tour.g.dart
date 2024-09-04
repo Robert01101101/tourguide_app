@@ -35,15 +35,14 @@ class TourAdapter extends TypeAdapter<Tour> {
       reports: (fields[15] as List).cast<TourguideReport>(),
       upvotes: fields[16] as int,
       downvotes: fields[17] as int,
-      isAddTourTile: false,
-      isOfflineCreatedTour: false,
+      tags: (fields[18] as Map?)?.cast<String, dynamic>(),
     );
   }
 
   @override
   void write(BinaryWriter writer, Tour obj) {
     writer
-      ..writeByte(18)
+      ..writeByte(19)
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
@@ -76,6 +75,8 @@ class TourAdapter extends TypeAdapter<Tour> {
       ..write(obj.tourguidePlaces)
       ..writeByte(15)
       ..write(obj.reports)
+      ..writeByte(18)
+      ..write(obj.tags)
       ..writeByte(16)
       ..write(obj.upvotes)
       ..writeByte(17)

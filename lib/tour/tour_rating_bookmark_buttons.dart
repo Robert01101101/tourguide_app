@@ -31,7 +31,7 @@ class _TourRatingBookmarkButtonsState extends State<TourRatingBookmarkButtons> {
   }
 
   void toggleThumbsUp() {
-    if (widget.tour.isOfflineCreatedTour) return; // Tour creation tile should not have rating
+    if (widget.tour.isOfflineCreatedTour ?? false) return; // Tour creation tile should not have rating
 
     myAuth.AuthProvider authProvider = Provider.of(context, listen: false);
     TourProvider tourProvider = Provider.of(context, listen: false);
@@ -56,7 +56,7 @@ class _TourRatingBookmarkButtonsState extends State<TourRatingBookmarkButtons> {
   }
 
   void toggleThumbsDown() {
-    if (widget.tour.isOfflineCreatedTour) return; // Tour creation tile should not have rating
+    if (widget.tour.isOfflineCreatedTour ?? false) return; // Tour creation tile should not have rating
 
     myAuth.AuthProvider authProvider = Provider.of(context, listen: false);
     TourProvider tourProvider = Provider.of(context, listen: false);
@@ -81,7 +81,7 @@ class _TourRatingBookmarkButtonsState extends State<TourRatingBookmarkButtons> {
   }
 
   void saveTour() {
-    if (widget.tour.isOfflineCreatedTour) return; // Tour creation tile should not have rating
+    if (widget.tour.isOfflineCreatedTour ?? false) return; // Tour creation tile should not have rating
 
     TourguideUserProvider tourguideUserProvider = Provider.of(context, listen: false);
 
@@ -100,7 +100,7 @@ class _TourRatingBookmarkButtonsState extends State<TourRatingBookmarkButtons> {
     return Row(
       children: [
         ElevatedButton(
-          onPressed: widget.tour.isOfflineCreatedTour ? null : saveTour,
+          onPressed: (widget.tour.isOfflineCreatedTour ?? false) ? null : saveTour,
           style: ElevatedButton.styleFrom(
             shape: CircleBorder(),
             padding: EdgeInsets.all(0),

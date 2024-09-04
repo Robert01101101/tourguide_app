@@ -13,7 +13,7 @@ import 'package:tourguide_app/tour/tourguide_user_profile_view.dart';
 import 'package:tourguide_app/ui/my_layouts.dart';
 import 'package:tourguide_app/utilities/map_utils.dart';
 import 'package:tourguide_app/utilities/providers/tour_provider.dart';
-import '../ui/tour_rating_bookmark_buttons.dart';
+import 'tour_rating_bookmark_buttons.dart';
 import '../utilities/custom_import.dart';
 import 'package:http/http.dart' as http;
 import '../utilities/providers/tourguide_user_provider.dart';
@@ -306,6 +306,7 @@ class _FullscreenTourPageState extends State<FullscreenTourPage> {
   Widget build(BuildContext context) {
     final tourProvider = Provider.of<TourProvider>(context);
     final tourguideUserProvider = Provider.of<TourguideUserProvider>(context);
+    bool isOfflineCreatedTour = (widget.tour.isOfflineCreatedTour ?? false);
 
     bool showMap = widget.tour.latitude != null && widget.tour.latitude != 0 && widget.tour.longitude != null && widget.tour.longitude != 0;
     if (showMap && _currentCameraPosition.target == LatLng(0, 0)) {
@@ -320,7 +321,7 @@ class _FullscreenTourPageState extends State<FullscreenTourPage> {
         title: Text(widget.tour.name),
         actions:
           [
-            if (!widget.tour.isOfflineCreatedTour)
+            if (!isOfflineCreatedTour)
               IconButton(
               icon: Icon(Icons.more_vert),
               onPressed: () {
@@ -432,7 +433,7 @@ class _FullscreenTourPageState extends State<FullscreenTourPage> {
                           width: MediaQuery.of(context).size.width * 0.5,
                           child:
                             ElevatedButton(
-                              onPressed: widget.tour.isOfflineCreatedTour ? null : startTour,
+                              onPressed: isOfflineCreatedTour ? null : startTour,
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: Theme.of(context).colorScheme.primary,
                                 foregroundColor: Theme.of(context).colorScheme.surfaceContainerLow,
@@ -553,7 +554,7 @@ class _FullscreenTourPageState extends State<FullscreenTourPage> {
                           );
                         }).toList(),
                       ),
-                    if (!widget.tour.isOfflineCreatedTour && widget.tour.createdDateTime != null)
+                    if (!isOfflineCreatedTour && widget.tour.createdDateTime != null)
                       Row(
                         mainAxisAlignment: MainAxisAlignment.start,
                         children: [

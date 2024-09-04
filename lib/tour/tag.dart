@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 
-class Tag extends StatelessWidget {
+class TourTag extends StatelessWidget {
   final String label;
   bool leftPadding;
 
-  Tag({super.key, required this.label, this.leftPadding = true});
+  TourTag({super.key, required this.label, this.leftPadding = true});
 
   @override
   Widget build(BuildContext context) {
@@ -27,18 +27,34 @@ class Tag extends StatelessWidget {
   }
 }
 
-class TagsAndRatingRow extends StatelessWidget {
+class TourTagsAndRatingRow extends StatelessWidget {
   final List<String> tags;
   final int rating;
 
-  const TagsAndRatingRow({super.key, required this.tags, required this.rating});
+  const TourTagsAndRatingRow({super.key, required this.tags, required this.rating});
+
+  static List<String> parseTags(Map<String, dynamic> tagsMap) {
+    List<String> result = [];
+
+    // Add duration first
+    if (tagsMap.containsKey("duration")) {
+      result.add(tagsMap["duration"]);
+    }
+
+    // Add descriptive array elements
+    if (tagsMap.containsKey("descriptive") && tagsMap["descriptive"] is List) {
+      result.addAll(List<String>.from(tagsMap["descriptive"]));
+    }
+
+    return result;
+  }
 
   @override
   Widget build(BuildContext context) {
     return Row(
       children: [
         Expanded(
-          child: TagsRow(tags: tags),
+          child: TourTagsRow(tags: tags),
         ),
         SizedBox(width: 4),
         Material(
@@ -66,10 +82,10 @@ class TagsAndRatingRow extends StatelessWidget {
   }
 }
 
-class TagsRow extends StatelessWidget {
+class TourTagsRow extends StatelessWidget {
   final List<String> tags;
 
-  const TagsRow({super.key, required this.tags});
+  const TourTagsRow({super.key, required this.tags});
 
   @override
   Widget build(BuildContext context) {
@@ -97,7 +113,7 @@ class TagsRow extends StatelessWidget {
 
           if (usedWidth + tagWidth <= availableWidth) {
             usedWidth += tagWidth;
-            visibleTags.add(Tag(label: tag, leftPadding: leftPadding));
+            visibleTags.add(TourTag(label: tag, leftPadding: leftPadding));
             leftPadding = true;
           } else {
             break; // Stop adding tags if they overflow

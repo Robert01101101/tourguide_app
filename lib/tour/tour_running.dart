@@ -13,7 +13,7 @@ import 'package:tourguide_app/tour/tour_creation.dart';
 import 'package:tourguide_app/tour/tour_details_options.dart';
 import 'package:tourguide_app/tour/tourguide_user_profile_view.dart';
 import 'package:tourguide_app/ui/my_layouts.dart';
-import 'package:tourguide_app/ui/tour_rating_bookmark_buttons.dart';
+import 'package:tourguide_app/tour/tour_rating_bookmark_buttons.dart';
 import 'package:tourguide_app/ui/tourguide_theme.dart';
 import 'package:tourguide_app/utilities/map_utils.dart';
 import 'package:tourguide_app/utilities/providers/tour_provider.dart';
@@ -569,6 +569,7 @@ class _TourRunningState extends State<TourRunning> {
   Widget build(BuildContext context) {
     final tourProvider = Provider.of<TourProvider>(context);
     final tourguideUserProvider = Provider.of<TourguideUserProvider>(context);
+    bool isOfflineCreatedTour = (_tour.isOfflineCreatedTour ?? false);
 
     bool showMap = _tour.latitude != null && _tour.latitude != 0 && _tour.longitude != null && _tour.longitude != 0;
     if (showMap && _currentCameraPosition.target == LatLng(0, 0)) {
@@ -583,7 +584,7 @@ class _TourRunningState extends State<TourRunning> {
         title: Text(_tour.name),
         actions:
         [
-          if (!_tour.isOfflineCreatedTour)
+          if (!isOfflineCreatedTour)
             IconButton(
               icon: Icon(Icons.more_vert),
               onPressed: () {
@@ -617,7 +618,7 @@ class _TourRunningState extends State<TourRunning> {
               SliverAppBar(
                 //title: Center(child: Text(_tour.name)),
                 actions: [
-                  if (!_tour.isOfflineCreatedTour)
+                  if (!isOfflineCreatedTour)
                     IconButton(
                       icon: const Icon(Icons.more_vert),
                       onPressed: () {
@@ -987,7 +988,7 @@ class _TourRunningState extends State<TourRunning> {
                               ],
                             ),
                           ),
-                          if (!_tour.isOfflineCreatedTour)
+                          if (!isOfflineCreatedTour)
                             Padding(
                               padding: const EdgeInsets.symmetric(horizontal: 16.0),
                               child: Row(

@@ -26,14 +26,16 @@ class Tour {
   @HiveField(13) final String requestReviewStatus;
   @HiveField(14) final List<TourguidePlace> tourguidePlaces;
   @HiveField(15) final List<TourguideReport> reports;
+  @HiveField(18) final Map<String, dynamic>? tags;
   /// mutable AND stored in Firestore
   @HiveField(16) int upvotes;
   /// mutable AND stored in Firestore
   @HiveField(17) int downvotes;
+
   /// mutable, NOT stored in Firestore, indicates add tour button (dirty)
-  bool isAddTourTile;
+  bool? isAddTourTile;
   /// mutable, NOT stored in Firestore, indicates this is an offline tour about to be uploaded
-  bool isOfflineCreatedTour;
+  bool? isOfflineCreatedTour;
   /// mutable, NOT stored in Firestore, Track this user's rating
   int? thisUsersRating;
   /// mutable, NOT stored in Firestore, image file downloaded or ready for upload
@@ -62,8 +64,9 @@ class Tour {
     required this.reports,
     required this.upvotes,
     required this.downvotes,
-    required this.isAddTourTile,
-    required this.isOfflineCreatedTour,
+    required this.tags,
+    this.isAddTourTile,
+    this.isOfflineCreatedTour,
     this.thisUsersRating,
     this.imageFile,
     this.imageFileToUploadWeb,
@@ -89,6 +92,7 @@ class Tour {
       reports: [],
       upvotes: 0,
       downvotes: 0,
+      tags: {},
       isAddTourTile: false,
       isOfflineCreatedTour: false,
       imageFile: null,
@@ -173,6 +177,7 @@ class Tour {
       reports: reports,
       upvotes: data['upvotes'] ?? 0,
       downvotes: data['downvotes'] ?? 0,
+      tags: data['tags'] != null ? Map<String, dynamic>.from(data['tags']) : {},
       isAddTourTile: false,
       isOfflineCreatedTour: false,
       imageFile: null,
@@ -200,6 +205,7 @@ class Tour {
     List<TourguideReport>? reports,
     int? upvotes,
     int? downvotes,
+    Map<String, dynamic>? tags,
     bool? isAddTourTile,
     bool? isOfflineCreatedTour,
     int? thisUsersRating,
@@ -225,6 +231,7 @@ class Tour {
       reports: reports ?? this.reports,
       upvotes: upvotes ?? this.upvotes,
       downvotes: downvotes ?? this.downvotes,
+      tags: tags ?? this.tags,
       isAddTourTile: isAddTourTile ?? this.isAddTourTile,
       isOfflineCreatedTour: isOfflineCreatedTour ?? this.isOfflineCreatedTour,
       thisUsersRating: thisUsersRating ?? this.thisUsersRating,
@@ -263,12 +270,13 @@ class Tour {
       'reports': reports.map((report) => report.toMap()).toList(),
       'upvotes': upvotes,
       'downvotes': downvotes,
+      'tags': tags,
     };
   }
 
   @override
   String toString() {
-    return 'Tour{id: $id, name: $name, description: $description, city: $city, visibility: $visibility, imageUrl: $imageUrl, createdDateTime: $createdDateTime, lastChangedDateTime: $lastChangedDateTime, latitude: $latitude, longitude: $longitude, placeId: $placeId, authorName: $authorName, authorId: $authorId, reports:${reports.toString()}, requestReviewStatus: $requestReviewStatus, upvotes: $upvotes, downvotes: $downvotes, isAddTourTile: $isAddTourTile, isOfflineCreatedTour: $isOfflineCreatedTour, imageFile: $imageFile, \ntourguidePlaces: ${tourguidePlaces.toString()}';
+    return 'Tour{id: $id, name: $name, description: $description, city: $city, visibility: $visibility, imageUrl: $imageUrl, createdDateTime: $createdDateTime, lastChangedDateTime: $lastChangedDateTime, latitude: $latitude, longitude: $longitude, placeId: $placeId, authorName: $authorName, authorId: $authorId, reports:${reports.toString()}, requestReviewStatus: $requestReviewStatus, upvotes: $upvotes, downvotes: $downvotes, isAddTourTile: $isAddTourTile, isOfflineCreatedTour: $isOfflineCreatedTour, imageFile: $imageFile, tags: $tags, \ntourguidePlaces: ${tourguidePlaces.toString()}';
   }
 }
 

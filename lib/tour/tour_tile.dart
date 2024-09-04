@@ -9,14 +9,14 @@ import 'package:tourguide_app/tour/tour_creation.dart';
 import 'package:tourguide_app/tour/tour_details.dart';
 import 'package:tourguide_app/tour/tour_running.dart';
 import 'package:tourguide_app/ui/shimmer_loading.dart';
-import 'package:tourguide_app/ui/tag.dart';
+import 'package:tourguide_app/tour/tag.dart';
 import 'package:tourguide_app/utilities/providers/tour_provider.dart';
 import 'package:tourguide_app/utilities/providers/tourguide_user_provider.dart';
 import 'package:tourguide_app/utilities/services/tour_service.dart';
 import 'package:tourguide_app/utilities/tourguide_navigation.dart';
 
 import '../main.dart';
-import '../ui/tour_rating_bookmark_buttons.dart';
+import 'tour_rating_bookmark_buttons.dart';
 
 class TourTile extends StatefulWidget {
   static const double height = 300.0;
@@ -71,6 +71,8 @@ class _TourTileState extends State<TourTile> {
     bool textDataReady = widget.tour.name != null && widget.tour.name != "";
     TourProvider tourProvider = Provider.of<TourProvider>(context);
     bool isLoadingImage = widget.tour.imageFile == null && !kIsWeb;
+    bool isOfflineCreatedTour = widget.tour.isOfflineCreatedTour ?? false;
+    bool isAddTourTile = widget.tour.isAddTourTile ?? false;
     
 
     //logger.t("TourTile: ${widget.tour.name} ${widget.tour.id}, imageUrl: ${widget.tour.imageUrl}, kIsWeb: $kIsWeb, imageFile: ${widget.tour.imageFile}");
@@ -83,8 +85,8 @@ class _TourTileState extends State<TourTile> {
           clipBehavior: Clip.hardEdge,
           child: InkWell(
               splashColor: Theme.of(context).colorScheme.primary.withAlpha(10),
-            onTap: () => widget.tour.isAddTourTile ? _createTour() : _showOverlay(context),
-            child: widget.tour.isAddTourTile
+            onTap: () => isAddTourTile ? _createTour() : _showOverlay(context),
+            child: isAddTourTile
                 ? Center(
               child: Center(
                 child: Column(
@@ -108,7 +110,7 @@ class _TourTileState extends State<TourTile> {
                   child: Stack(
                     children: [
                       ShimmerLoading(
-                        isLoading: widget.tour.isOfflineCreatedTour ? false : isLoadingImage,
+                        isLoading: isOfflineCreatedTour ? false : isLoadingImage,
                         child: kIsWeb
                             ?
                         Stack(
@@ -241,7 +243,10 @@ class _TourTileState extends State<TourTile> {
                 Spacer(),
                 Padding(
                   padding: const EdgeInsets.only(left: 8, top: 6, right: 8, bottom: 10),
-                  child: TagsAndRatingRow(tags: ['1 Day', 'Historic', 'Scenic', 'Test'], rating: (widget.tour.upvotes - widget.tour.downvotes),),
+                  child: TourTagsAndRatingRow(
+                    tags: TourTagsAndRatingRow.parseTags(widget.tour.tags!) /*?? ['1 Day', 'Historic', 'Scenic', 'Test']*/,
+                    rating: (widget.tour.upvotes - widget.tour.downvotes),
+                  ),
                 ),
               ],
             ),
@@ -299,6 +304,7 @@ class _ExpandedTourTileOverlayState extends State<ExpandedTourTileOverlay> {
   @override
   Widget build(BuildContext context) {
     TourProvider tourProvider = Provider.of<TourProvider>(context);
+    bool isOfflineCreatedTour = widget.tour.isOfflineCreatedTour ?? false;
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(0, 8, 0, 0),
@@ -398,7 +404,7 @@ class _ExpandedTourTileOverlayState extends State<ExpandedTourTileOverlay> {
                 Row(
                   children: [
                     ElevatedButton(
-                      onPressed: widget.tour.isOfflineCreatedTour ? null : startTour,
+                      onPressed: isOfflineCreatedTour ? null : startTour,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Theme.of(context).colorScheme.primary,
                         foregroundColor: Theme.of(context).colorScheme.surfaceContainerLow,
