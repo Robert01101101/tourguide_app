@@ -19,6 +19,8 @@ import '../main.dart';
 import '../ui/tour_rating_bookmark_buttons.dart';
 
 class TourTile extends StatefulWidget {
+  static const double height = 300.0;
+  static const double width = 230.0;
   final Tour tour;
 
   const TourTile({super.key, required this.tour});
@@ -69,14 +71,14 @@ class _TourTileState extends State<TourTile> {
     bool textDataReady = widget.tour.name != null && widget.tour.name != "";
     TourProvider tourProvider = Provider.of<TourProvider>(context);
     bool isLoadingImage = widget.tour.imageFile == null && !kIsWeb;
-    double tileWidth = 210;
+    
 
     //logger.t("TourTile: ${widget.tour.name} ${widget.tour.id}, imageUrl: ${widget.tour.imageUrl}, kIsWeb: $kIsWeb, imageFile: ${widget.tour.imageFile}");
 
     return MouseRegion(
       cursor: SystemMouseCursors.click,
       child: Container(
-        width: tileWidth,
+        width: TourTile.width,
         child: Card(
           clipBehavior: Clip.hardEdge,
           child: InkWell(
@@ -112,12 +114,12 @@ class _TourTileState extends State<TourTile> {
                         Stack(
                           children: [
                             Image.network(widget.tour.imageUrl!,
-                                width: tileWidth,
-                                height: 0.55*tileWidth.ceil(),
+                                width: TourTile.width,
+                                height: 0.55*TourTile.width.ceil(),
                                 fit: BoxFit.cover),
                             Container(
-                              width: tileWidth,
-                              height: 0.55*tileWidth.ceil(),
+                              width: TourTile.width,
+                              height: 0.55*TourTile.width.ceil(),
                               decoration: BoxDecoration(
                                 gradient: LinearGradient(
                                   begin: Alignment.topCenter,
@@ -137,12 +139,12 @@ class _TourTileState extends State<TourTile> {
                         Stack(
                           children: [
                             Image.file(widget.tour.imageFile!,
-                                width: tileWidth,
-                                height: 0.55*tileWidth.ceil(),
+                                width: TourTile.width,
+                                height: 0.55*TourTile.width.ceil(),
                                 fit: BoxFit.cover),
                             Container(
-                              width: tileWidth,
-                              height: 0.55*tileWidth.ceil(),
+                              width: TourTile.width,
+                              height: 0.55*TourTile.width.ceil(),
                               decoration: BoxDecoration(
                                 gradient: LinearGradient(
                                   begin: Alignment.topCenter,
@@ -157,7 +159,7 @@ class _TourTileState extends State<TourTile> {
                           ],
                         )
                             :
-                        Container(width: tileWidth, height: 0.55*tileWidth.ceil(), color: Colors.white,),
+                        Container(width: TourTile.width, height: 0.55*TourTile.width.ceil(), color: Colors.white,),
                       ),
                       if (tourProvider.isUserCreatedTour(widget.tour))
                         Align(
@@ -190,7 +192,7 @@ class _TourTileState extends State<TourTile> {
                   ),
                 ),
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 5),
+                  padding: const EdgeInsets.only(left: 8.0, right: 8, top: 5, bottom: 4),
                   child: ShimmerLoading(
                     isLoading: !textDataReady,
                     child: textDataReady ?
@@ -222,7 +224,7 @@ class _TourTileState extends State<TourTile> {
                             widget.tour.description,
                             style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant),
                             overflow: TextOverflow.ellipsis,
-                            maxLines: 2,
+                            maxLines: 4,
                           ),
                         ),
                       ) :
@@ -238,33 +240,8 @@ class _TourTileState extends State<TourTile> {
                 ),
                 Spacer(),
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
-                  child: Row(
-                    children: [
-                      Expanded(child: TagsRow(tags: ['1 Day', 'Historic', 'Scenic'])),
-                      SizedBox(width: 4),
-                      Material(
-                        elevation: 1,
-                        color: Theme.of(context).colorScheme.secondaryContainer,//surfaceContainer,
-                        borderRadius: BorderRadius.circular(32.0),
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
-                          child: Row(
-                            children: [
-                              Icon((widget.tour.upvotes + 1 - widget.tour.downvotes).sign == 1 ? Icons.thumb_up_outlined : Icons.thumb_down_outlined, color: Theme.of(context).colorScheme.onSecondaryContainer, size: 14),
-                              SizedBox(width: 3),
-                              Text(
-                                '${(widget.tour.upvotes - widget.tour.downvotes).sign == 1 ? '+' : ''}${widget.tour.upvotes - widget.tour.downvotes}',
-                                style: Theme.of(context).textTheme.labelMedium!.copyWith(color: Theme.of(context).colorScheme.onSecondaryContainer),
-                                overflow: TextOverflow.visible,
-                                maxLines: 1,
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
+                  padding: const EdgeInsets.only(left: 8, top: 6, right: 8, bottom: 10),
+                  child: TagsAndRatingRow(tags: ['1 Day', 'Historic', 'Scenic', 'Test'], rating: (widget.tour.upvotes - widget.tour.downvotes),),
                 ),
               ],
             ),

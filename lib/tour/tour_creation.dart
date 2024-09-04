@@ -871,7 +871,7 @@ class _CreateEditTourState extends State<CreateEditTour> {
                     child: Text('Here\'s what your tour will look like', style: Theme.of(context).textTheme.bodyMedium),
                   ),
                   SizedBox(
-                    height: 256,
+                    height: TourTile.height,
                     child: Shimmer(
                         linearGradient: MyGlobals.shimmerGradient,
                         child: TourTile(tour: _tour)

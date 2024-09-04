@@ -4,7 +4,7 @@ class Tag extends StatelessWidget {
   final String label;
   bool leftPadding;
 
-  Tag({required this.label, this.leftPadding = true});
+  Tag({super.key, required this.label, this.leftPadding = true});
 
   @override
   Widget build(BuildContext context) {
@@ -27,10 +27,49 @@ class Tag extends StatelessWidget {
   }
 }
 
+class TagsAndRatingRow extends StatelessWidget {
+  final List<String> tags;
+  final int rating;
+
+  const TagsAndRatingRow({super.key, required this.tags, required this.rating});
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Expanded(
+          child: TagsRow(tags: tags),
+        ),
+        SizedBox(width: 4),
+        Material(
+          elevation: 1,
+          color: Theme.of(context).colorScheme.secondaryContainer,//surfaceContainer,
+          borderRadius: BorderRadius.circular(6.0),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+            child: Row(
+              children: [
+                Icon((rating+1).sign == 1 ? Icons.thumb_up_outlined : Icons.thumb_down_outlined, color: Theme.of(context).colorScheme.secondary, size: 14),
+                SizedBox(width: 3),
+                Text(
+                  '${(rating).sign == 1 ? '+' : ''}$rating',
+                  style: Theme.of(context).textTheme.labelMedium!.copyWith(color: Theme.of(context).colorScheme.onSecondaryContainer),
+                  overflow: TextOverflow.visible,
+                  maxLines: 1,
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
 class TagsRow extends StatelessWidget {
   final List<String> tags;
 
-  TagsRow({required this.tags});
+  const TagsRow({super.key, required this.tags});
 
   @override
   Widget build(BuildContext context) {
