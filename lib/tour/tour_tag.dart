@@ -6,6 +6,28 @@ class TourTag extends StatelessWidget {
 
   TourTag({super.key, required this.label, this.leftPadding = true});
 
+  static List<String> parseTags(Map<String, dynamic> tagsMap, {bool shorten = false}) {
+    List<String> result = [];
+
+    // Add duration first
+    if (tagsMap.containsKey("duration")) {
+      String parsedDuration = tagsMap["duration"];
+      // Convert 1 day to 1d, 2 days to 2d, 3 days to 3d
+      if (shorten && parsedDuration.contains("day")) {
+        parsedDuration = parsedDuration.replaceAll(" days", "d");
+        parsedDuration = parsedDuration.replaceAll(" day", "d");
+      }
+      result.add(parsedDuration);
+    }
+
+    // Add descriptive array elements
+    if (tagsMap.containsKey("descriptive") && tagsMap["descriptive"] is List) {
+      result.addAll(List<String>.from(tagsMap["descriptive"]));
+    }
+
+    return result;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -32,22 +54,6 @@ class TourTagsAndRatingRow extends StatelessWidget {
   final int rating;
 
   const TourTagsAndRatingRow({super.key, required this.tags, required this.rating});
-
-  static List<String> parseTags(Map<String, dynamic> tagsMap) {
-    List<String> result = [];
-
-    // Add duration first
-    if (tagsMap.containsKey("duration")) {
-      result.add(tagsMap["duration"]);
-    }
-
-    // Add descriptive array elements
-    if (tagsMap.containsKey("descriptive") && tagsMap["descriptive"] is List) {
-      result.addAll(List<String>.from(tagsMap["descriptive"]));
-    }
-
-    return result;
-  }
 
   @override
   Widget build(BuildContext context) {

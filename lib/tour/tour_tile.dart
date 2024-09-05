@@ -48,8 +48,8 @@ class _TourTileState extends State<TourTile> {
       ),
       builder: (BuildContext context) {
         // Adjust the height based on screen size
-        final double screenHeight = MediaQuery.of(context).size.height;
-        final double desiredHeight = screenHeight * 0.6;
+        //final double screenHeight = MediaQuery.of(context).size.height;
+        final double desiredHeight = 540;//screenHeight * 0.6;
 
         return Container(
           width: MediaQuery.of(context).size.width, // Full width
@@ -246,7 +246,7 @@ class _TourTileState extends State<TourTile> {
                 Padding(
                   padding: const EdgeInsets.only(left: 8, top: 6, right: 8, bottom: 10),
                   child: TourTagsAndRatingRow(
-                    tags: TourTagsAndRatingRow.parseTags(widget.tour.tags!),
+                    tags: TourTag.parseTags(widget.tour.tags!, shorten: true),
                     rating: (widget.tour.upvotes - widget.tour.downvotes),
                   ),
                 ),
@@ -397,7 +397,7 @@ class _ExpandedTourTileOverlayState extends State<ExpandedTourTileOverlay> {
                       style: Theme.of(context).textTheme.bodyMedium,
                     ),
                     TourTagsRow(
-                      tags: TourTagsAndRatingRow.parseTags(widget.tour.tags!)
+                      tags: TourTag.parseTags(widget.tour.tags!)
                     ),
                   ],
                 ),

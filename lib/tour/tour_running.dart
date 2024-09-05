@@ -735,7 +735,7 @@ class _TourRunningState extends State<TourRunning> {
                         style: Theme.of(context).textTheme.bodyMedium,
                       ),
                       TourTagsRow(
-                          tags: TourTagsAndRatingRow.parseTags(_tour.tags!)
+                          tags: TourTag.parseTags(_tour.tags!)
                       ),
                     ],
                   ),

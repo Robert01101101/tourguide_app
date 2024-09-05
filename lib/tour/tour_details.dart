@@ -424,7 +424,7 @@ class _FullscreenTourPageState extends State<FullscreenTourPage> {
                         ),
                         const SizedBox(height: 16.0),
                         TourTagsRow(
-                            tags: TourTagsAndRatingRow.parseTags(widget.tour.tags!)
+                            tags: TourTag.parseTags(widget.tour.tags!)
                         ),
                         const SizedBox(height: 8.0),
                       ],
