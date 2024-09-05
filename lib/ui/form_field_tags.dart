@@ -54,7 +54,7 @@ class _FormFieldTagsContent extends StatefulWidget {
 class _FormFieldTagsContentState extends State<_FormFieldTagsContent> {
   String? _duration;
   List<String> _descriptiveTags = [];
-  final List<String> _durationPresets = ['1h','3h','6h','1 Day', '2 Days', '3 Days'];
+  final List<String> _durationPresets = ['1h','3h','6h','1D', '2D', '3D'];
   final List<String> _descriptiveTagsPresets = ['Scenic', 'Historic', 'Urban', 'Cultural', 'Natural',
     'Sporty', 'Relaxing', 'Educational', 'Family', 'Romantic', 'Adventurous', 'Foodie', 'Shopping',
     'Nightlife', 'Festive', 'Seasonal', 'Budget','Pet-friendly', 'Eco-friendly', 'Sustainable', 'LGBTQ+'];
