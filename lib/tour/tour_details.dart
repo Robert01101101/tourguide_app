@@ -12,7 +12,7 @@ import 'package:tourguide_app/tour/tour_creation.dart';
 import 'package:tourguide_app/tour/tour_details_options.dart';
 import 'package:tourguide_app/tour/tourguide_user_profile_view.dart';
 import 'package:tourguide_app/ui/my_layouts.dart';
-import 'package:tourguide_app/utilities/map_utils.dart';
+import 'package:tourguide_app/utilities/maps/map_utils.dart';
 import 'package:tourguide_app/utilities/providers/tour_provider.dart';
 import 'tour_rating_bookmark_buttons.dart';
 import '../utilities/custom_import.dart';
@@ -360,7 +360,72 @@ class _FullscreenTourPageState extends State<FullscreenTourPage> {
                 controller: _scrollController,
                 child: StandardLayout(
                   children: [
-                    Column(
+                    StandardLayoutChild(
+                      enableHorizontalPadding: true,
+                      enableVerticalPadding: false,
+                      child: Stack(
+                        children: [
+                          Container(
+                            height: kIsWeb ? 300 : 200,
+                            child: ClipRRect(
+                              child: kIsWeb
+                                  ?
+                              Image.network(widget.tour.imageUrl!,
+                                  width: MediaQuery.of(context).size.width,
+                                  height: 300.0,
+                                  fit: BoxFit.cover)
+                                  :
+                              widget.tour.imageFile != null
+                                  ?
+                              Image.file(widget.tour.imageFile!,
+                                  width: MediaQuery.of(context).size.width,
+                                  height: 200.0,
+                                  fit: BoxFit.cover)
+                                  : Container(
+                                color: Colors.grey,
+                                width: MediaQuery.of(context).size.width,
+                                height: 200.0,
+                              ),
+                            ),
+                          ),
+                          if (tourProvider.isUserCreatedTour(widget.tour))
+                            Align(
+                                alignment: Alignment.topRight,
+                                child: Padding(
+                                  padding: EdgeInsets.all(8.0),
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.end,
+                                    children: [
+                                      if (widget.tour.reports.isNotEmpty)
+                                        const CircleAvatar(
+                                          radius: 16,
+                                          backgroundColor: Colors.black45,
+                                          child: Icon(
+                                            Icons.report_outlined,
+                                            color: Colors.yellow,
+                                            size: 22,),
+                                        ),
+                                      const CircleAvatar(
+                                        radius: 16,
+                                        backgroundColor: Colors.black45,
+                                        child: Icon(
+                                          Icons.attribution,
+                                          color: Colors.white,),
+                                      ),
+                                    ],
+                                  ),
+                                )),
+                        ],
+                      ),
+                    ),
+                    Text(
+                      widget.tour.description,
+                      style: Theme.of(context).textTheme.bodyMedium,
+                    ),
+                    TourTagsRow(
+                        tags: TourTag.parseTags(widget.tour.tags!)
+                    ),
+                    /*Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Stack(
@@ -428,7 +493,7 @@ class _FullscreenTourPageState extends State<FullscreenTourPage> {
                         ),
                         const SizedBox(height: 8.0),
                       ],
-                    ),
+                    ),*/
                     if (showMap)
                       Container(
                         height: kIsWeb ? 300 : 240.0,
