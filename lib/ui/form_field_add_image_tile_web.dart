@@ -76,116 +76,112 @@ class _AddImageTileWebContentState extends State<_AddImageTileWebContent> {
   Widget build(BuildContext context) {
     return IgnorePointer(
       ignoring: !widget.enabled,
-      child: Stack(
-        fit: StackFit.passthrough,
-        children: [
-          Stack(
-            fit: StackFit.expand,
-            children: [
+      child: SizedBox(
+        width: 146,
+        height: 146,
+        child: Stack(
+          children: [
+            IgnorePointer(
+              child: Container(
+                color: Theme.of(context).colorScheme.surfaceContainerHighest,
+              ),
+            ),
+            if (_imageFile != null)
+              ClipRRect(
+                child: kIsWeb
+                    ? Image.network(_imageFile!.path, fit: BoxFit.cover)
+                    : Image.file(File(_imageFile!.path), fit: BoxFit.cover),  // Use Image.file for mobile
+              ),
+            if (_imageFile != null)
+              Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: widget.enabled ? [
+                      Colors.black.withOpacity(0.4),
+                      Colors.black.withOpacity(0.2),
+                    ] : [
+                      Colors.grey.withOpacity(0.7),
+                      Colors.grey.withOpacity(0.5),
+                    ],
+                  ),
+                ),
+              ),
+            if (widget.isSelected)
               IgnorePointer(
                 child: Container(
-                  color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                  color: Theme.of(context).scaffoldBackgroundColor.withOpacity(0.4), // Adjust the opacity to make it darker or lighter
                 ),
               ),
-              if (_imageFile != null)
-                ClipRRect(
-                  child: kIsWeb
-                      ? Image.network(_imageFile!.path)  // Use Image.network for web
-                      : Image.file(File(_imageFile!.path)),  // Use Image.file for mobile
-                ),
-              if (_imageFile != null)
-                Container(
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
-                      colors: widget.enabled ? [
-                        Colors.black.withOpacity(0.4),
-                        Colors.black.withOpacity(0.2),
-                      ] : [
-                        Colors.grey.withOpacity(0.7),
-                        Colors.grey.withOpacity(0.5),
-                      ],
-                    ),
-                  ),
-                ),
-              if (widget.isSelected)
-                IgnorePointer(
-                  child: Container(
-                    color: Theme.of(context).scaffoldBackgroundColor.withOpacity(0.4), // Adjust the opacity to make it darker or lighter
-                  ),
-                ),
-              Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    if (_imageFile == null)
-                      const Text('Add an image'),
-                    if (_imageFile != null)
-                      const Text('Replace image', style: TextStyle(color: Colors.white)),
-                    SizedBox(height: 15),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        ElevatedButton(
-                          onPressed: widget.enabled ? () => _pickImage(ImageSource.camera) : () => logger.e("Clicked take image after form submit"),
-                          style: ElevatedButton.styleFrom(
-                            shape: CircleBorder(),
-                            padding: EdgeInsets.all(15),
-                          ),
-                          child: Icon(Icons.camera_alt, color: widget.enabled ? Theme.of(context).colorScheme.primary : Colors.grey),
+            Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  if (_imageFile == null)
+                    const Text('Add an image'),
+                  if (_imageFile != null)
+                    const Text('Replace image', style: TextStyle(color: Colors.white)),
+                  SizedBox(height: 15),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      ElevatedButton(
+                        onPressed: widget.enabled ? () => _pickImage(ImageSource.camera) : () => logger.e("Clicked take image after form submit"),
+                        style: ElevatedButton.styleFrom(
+                          shape: CircleBorder(),
+                          padding: EdgeInsets.all(15),
                         ),
-                        SizedBox(width: 15),
-                        ElevatedButton(
-                          onPressed: widget.enabled ? () => _pickImage(ImageSource.gallery) : () => logger.e("Clicked pick image after form submit"),
-                          style: ElevatedButton.styleFrom(
-                            shape: CircleBorder(),
-                            padding: EdgeInsets.all(15),
-                          ),
-                          child: Icon(Icons.collections, color: widget.enabled ? Theme.of(context).colorScheme.primary : Colors.grey),
+                        child: Icon(Icons.camera_alt, color: widget.enabled ? Theme.of(context).colorScheme.primary : Colors.grey),
+                      ),
+                      /*SizedBox(width: 15),
+                      ElevatedButton(
+                        onPressed: widget.enabled ? () => _pickImage(ImageSource.gallery) : () => logger.e("Clicked pick image after form submit"),
+                        style: ElevatedButton.styleFrom(
+                          shape: CircleBorder(),
+                          padding: EdgeInsets.all(15),
                         ),
-                      ],
-                    ),
-                    if (widget.state.hasError)
-                      Padding(
-                        padding: const EdgeInsets.only(top: 8.0),
-                        child: Text(
-                          widget.state.errorText!,
-                          style: TextStyle(
-                            color: Theme.of(context).colorScheme.error,
-                            fontSize: 12,
-                          ),
+                        child: Icon(Icons.collections, color: widget.enabled ? Theme.of(context).colorScheme.primary : Colors.grey),
+                      ),*/
+                    ],
+                  ),
+                  if (widget.state.hasError)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 8.0),
+                      child: Text(
+                        widget.state.errorText!,
+                        style: TextStyle(
+                          color: Theme.of(context).colorScheme.error,
+                          fontSize: 12,
                         ),
                       ),
-                  ],
+                    ),
+                ],
+              ),
+            ),
+            IgnorePointer(
+              child: Container(
+                decoration:  BoxDecoration(
+                  border: widget.isSelected ? Border.all(
+                    width: 2.0,
+                    color: !widget.state.hasError
+                        ? widget.enabled ? Theme.of(context).colorScheme.primary : Colors.grey
+                        : Theme.of(context).colorScheme.error,) : null,
                 ),
               ),
-            ],
-          ),
-          IgnorePointer(
-            child: Container(
-              decoration:  BoxDecoration(
-                border: widget.isSelected ? Border.all(
-                  width: 2.0,
-                  color: !widget.state.hasError
-                      ? widget.enabled ? Theme.of(context).colorScheme.primary : Colors.grey
-                      : Theme.of(context).colorScheme.error,) : null,
-              ),
-              height: 146,
-              width: 146,
             ),
-          ),
-          if (widget.isSelected)
-            Positioned(
-              top: 4,
-              right: 4,
-              child: Icon(
-                Icons.check_circle,
-                color: Theme.of(context).colorScheme.primary,
-                size: 24,
+            if (widget.isSelected)
+              Positioned(
+                top: 4,
+                right: 4,
+                child: Icon(
+                  Icons.check_circle,
+                  color: Theme.of(context).colorScheme.primary,
+                  size: 24,
+                ),
               ),
-            ),
-        ],
+          ],
+        ),
       ),
     );
   }

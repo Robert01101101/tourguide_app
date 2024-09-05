@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 class FormFieldTags<T> extends FormField<Map<String, dynamic>> {
@@ -72,10 +73,12 @@ class _FormFieldTagsContentState extends State<_FormFieldTagsContent> {
         mainAxisAlignment: MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          const SizedBox(height: 8),
           Text('Duration',
             style: Theme.of(context).textTheme.labelMedium!.copyWith(
                 color: Theme.of(context).colorScheme.onSurfaceVariant),
           ),
+          const SizedBox(height: 8),
           Wrap(
             spacing: 8,
             runSpacing: 0,
@@ -96,14 +99,15 @@ class _FormFieldTagsContentState extends State<_FormFieldTagsContent> {
                 );
               }),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 16),
           Text('Descriptive Tags (${_descriptiveTags.length}/5)',
             style: Theme.of(context).textTheme.labelMedium!.copyWith(
                 color: Theme.of(context).colorScheme.onSurfaceVariant),
           ),
+          const SizedBox(height: 8),
           Wrap(
             spacing: 8,
-            runSpacing: 0,
+            runSpacing: kIsWeb && MediaQuery.of(context).size.width > 1280 ? 8 : 0,
             children:
             List<Widget>.generate(_descriptiveTagsPresets.length, (index) {
               String descriptiveTag = _descriptiveTagsPresets[index];

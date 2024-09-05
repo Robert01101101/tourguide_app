@@ -446,451 +446,454 @@ class _CreateEditTourState extends State<CreateEditTour> {
       appBar: AppBar(
         title: Text(widget.isEditMode ? 'Edit Tour' : 'Create a new Tour'),
       ),
-      body: Stepper(
-        currentStep: _currentStep,
-        onStepContinue: () => _tryToGoToStep(_currentStep + 1),
-        onStepCancel:() => _tryToGoToStep(_currentStep - 1),
-        onStepTapped: (int step) => _tryToGoToStep(step),
-        controlsBuilder: (BuildContext context, ControlsDetails controlsDetails) {
-          return Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Row(
-              children: <Widget>[
-                if (_currentStep > 0)
-                  const SizedBox(width: 8),
-                if (_currentStep > 0)
+      body: Padding(
+        padding: kIsWeb && MediaQuery.of(context).size.width > 1280 ? EdgeInsets.symmetric(horizontal: MediaQuery.of(context).size.width/5) : EdgeInsets.zero,
+        child: Stepper(
+          currentStep: _currentStep,
+          onStepContinue: () => _tryToGoToStep(_currentStep + 1),
+          onStepCancel:() => _tryToGoToStep(_currentStep - 1),
+          onStepTapped: (int step) => _tryToGoToStep(step),
+          controlsBuilder: (BuildContext context, ControlsDetails controlsDetails) {
+            return Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Row(
+                children: <Widget>[
+                  if (_currentStep > 0)
+                    const SizedBox(width: 8),
+                  if (_currentStep > 0)
+                    TextButton(
+                      onPressed: controlsDetails.onStepCancel,
+                      style: ElevatedButton.styleFrom(
+                        elevation: 0,
+                        backgroundColor: Colors.transparent,
+                        foregroundColor: Theme.of(context).colorScheme.onSecondaryContainer,
+                        //primary: Colors.blue, // Custom color for "Continue" button
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(3.0), // Custom radius
+                        ),
+                      ),
+                      child: const Text('Back'),
+                    ),
+                  const SizedBox(width: 24), // Add spacing between buttons if needed
                   TextButton(
-                    onPressed: controlsDetails.onStepCancel,
+                    onPressed: _isFormSubmitted ? null : controlsDetails.onStepContinue,
                     style: ElevatedButton.styleFrom(
-                      elevation: 0,
-                      backgroundColor: Colors.transparent,
-                      foregroundColor: Theme.of(context).colorScheme.onSecondaryContainer,
-                      //primary: Colors.blue, // Custom color for "Continue" button
+                      backgroundColor: Theme.of(context).colorScheme.primary,
+                      foregroundColor: Theme.of(context).colorScheme.surfaceContainerLow,
+                      //primary: Colors.grey, // Custom color for "Back" button
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(3.0), // Custom radius
                       ),
                     ),
-                    child: const Text('Back'),
+                    child: _currentStep != _reviewStepIndex ? const Text('Next') : widget.isEditMode ? const Text('Update Tour') : const Text('Create Tour'),
                   ),
-                const SizedBox(width: 24), // Add spacing between buttons if needed
-                TextButton(
-                  onPressed: _isFormSubmitted ? null : controlsDetails.onStepContinue,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Theme.of(context).colorScheme.primary,
-                    foregroundColor: Theme.of(context).colorScheme.surfaceContainerLow,
-                    //primary: Colors.grey, // Custom color for "Back" button
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(3.0), // Custom radius
-                    ),
-                  ),
-                  child: _currentStep != _reviewStepIndex ? const Text('Next') : widget.isEditMode ? const Text('Update Tour') : const Text('Create Tour'),
-                ),
-                Spacer(),
-                /*if (_currentStep == 1) //TODO Map view
-                  IconButton(
-                      padding: EdgeInsets.all(10),
-                      onPressed: (){},
-                      icon: Icon(Icons.map))*/
-              ],
-            ),
-          );
-        },
-        steps: [
-          Step(
-            title: const Text('Basic Info'),
-            isActive: _currentStep >= 0,
-            state: _maxStepReached > 0 ? StepState.complete : StepState.indexed,
-            content: Form(
-              autovalidateMode: _formValidateMode,
-              key: _formKey,
-              child: Column(
-                children: [
-                  TextFormField(
-                    controller: _nameController,
-                    decoration: const InputDecoration(
-                      labelText: 'Name',
-                    ),
-                    validator: (String? value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Please enter a name for your tour';
-                      }
-                      return null;
-                    },
-                    enabled: !_isFormSubmitted,
-                  ),
-                  PlaceAutocomplete(
-                    textEditingController: _cityController,
-                    isFormSubmitted: _isFormSubmitted,
-                    onItemSelected: (AutocompletePrediction prediction) {
-                      logger.t("Selected city: ${prediction.primaryText}");
-                    },
-                    onPlaceInfoFetched: (Place? place) {
-                      if (place != null) {
-                        _city = place;
-                      }
-                    },
-                  ),
-                  TextFormField(
-                    controller: _descriptionController,
-                    keyboardType: TextInputType.multiline,
-                    minLines: 4,
-                    maxLines: 8,
-                    maxLength: _descriptionMaxChars,
-                    decoration: InputDecoration(
-                      labelText: 'Description',
-                    ),
-                    validator: (String? value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Please enter a description for your tour';
-                      }
-                      if (value != null && value.characters.length > _descriptionMaxChars) {
-                        return 'Please enter a maximum of $_descriptionMaxChars characters';
-                      }
-                      return null;
-                    },
-                    onChanged: (value) {
-                      setState(() {}); // Trigger a rebuild to update the character counter
-                    },
-                    enabled: !_isFormSubmitted,
-                  ),
-                  FormFieldTags(
-                    key: _formFieldTagsKey,
-                    enabled: !_isFormSubmitted,
-                    validator: (Map<String, dynamic>? value) {
-                      if (value == null || value['duration'] == null) {
-                        return 'Please select a duration';
-                      }
-                      if (value['descriptive'] == null || (value['descriptive'] as List).isEmpty) {
-                        return 'Please select at least 1 descriptive tag';
-                      }
-                      if ((value['descriptive'] as List).length > 5) {
-                        return 'You can select up to 5 descriptive tags';
-                      }
-                      return null;
-                    },
-                  ),
-                  /*
-                  SwitchListTile(
-                    title: const Text('Make Public'), // Text label for the switch
-                    value: _tourIsPublic, // The boolean value
-                    onChanged: !_isFormSubmitted
-                        ? (newValue) {
-                      setState(() {
-                        _tourIsPublic = newValue; // Update the boolean value
-                      });
-                    }
-                        : null, // Disable switch if form is submitted
-                    secondary: const Icon(Icons.public),
-                    inactiveThumbColor: _isFormSubmitted ? Colors.grey : null,
-                    inactiveTrackColor: _isFormSubmitted ? Colors.grey[300] : null,
-                  ),*/
+                  Spacer(),
+                  /*if (_currentStep == 1) //TODO Map view
+                    IconButton(
+                        padding: EdgeInsets.all(10),
+                        onPressed: (){},
+                        icon: Icon(Icons.map))*/
                 ],
               ),
-            ),
-          ),
-          Step(
-            title: const Text('Places'),
-            isActive: _currentStep >= 1,
-            state: _maxStepReached > 1 ? StepState.complete : StepState.indexed,
-            content: Form(
-              autovalidateMode: _formPlacesValidateMode,
-              key: _formKeyPlaces,
-              child: FormField(
-                validator: (value) {
-                  if (_tour.tourguidePlaces.length < 2) {
-                    return 'Please add at least two places.';
-                  }
-                  return null;
-                },
-                builder: (FormFieldState<dynamic> state) {
-                  return Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      ReorderableListView(
-                        buildDefaultDragHandles: false,
-                        physics: ClampingScrollPhysics(),
-                        shrinkWrap: true,
-                        proxyDecorator: (child, index, animation) {
-                          return AnimatedBuilder(
-                            animation: animation,
-                            builder: (BuildContext context, Widget? child) {
-                              final double animValue = Curves.easeInOut.transform(animation.value);
-                              final double scale = lerpDouble(1, 1.05, animValue)!;
-                              return Transform.scale(
-                                scale: scale,
-                                child: Material(
-                                  color: Colors.white,
-                                  elevation: 8,
-                                  child: child,
-                                ),
-                              );
-                            },
-                            child: child,
-                          );
-                        },
-                        onReorder: (int oldIndex, int newIndex) {
-                          setState(() {
-                            if (newIndex > oldIndex) {
-                              newIndex -= 1;
-                            }
-                            final TourguidePlace place = _tour.tourguidePlaces.removeAt(oldIndex);
-                            _tour.tourguidePlaces.insert(newIndex, place);
-
-                            final TextEditingController controller = _placeControllers.removeAt(oldIndex);
-                            _placeControllers.insert(newIndex, controller);
-                          });
-                        },
-                        children: [
-                          for (int index = 0; index < _tour.tourguidePlaces.length; index++)
-                            Container(
-                              key: ValueKey(_placeControllers[index]),
-                              width: double.infinity,
-                              child: ListTile(
-                                contentPadding: EdgeInsets.symmetric(vertical: 0.0, horizontal: 0),
-                                leading: ReorderableDragStartListener(
-                                  index: index,
-                                  child: Icon(Icons.drag_handle),
-                                ),
-                                title: PlaceAutocomplete(
-                                  textEditingController: _placeControllers[index],
-                                  restrictToCities: false,
-                                  isFormSubmitted: _isFormSubmitted,
-                                  decoration: InputDecoration(
-                                    labelText: 'Place ${index + 1}',
-                                    border: const UnderlineInputBorder(),
-                                    suffixIcon: IconButton(
-                                      icon: const Icon(Icons.remove_circle_outline),
-                                      onPressed: () {
-                                        _removePlace(index);
-                                      },
-                                    ),
-                                  ),
-                                  customLabel: true,
-                                  onItemSelected: (AutocompletePrediction prediction) {
-                                    _updateTourguidePlaceDetails(index, prediction);
-                                  },
-                                ),
-                              ),
-                            ),
-                        ],
+            );
+          },
+          steps: [
+            Step(
+              title: const Text('Basic Info'),
+              isActive: _currentStep >= 0,
+              state: _maxStepReached > 0 ? StepState.complete : StepState.indexed,
+              content: Form(
+                autovalidateMode: _formValidateMode,
+                key: _formKey,
+                child: Column(
+                  children: [
+                    TextFormField(
+                      controller: _nameController,
+                      decoration: const InputDecoration(
+                        labelText: 'Name',
                       ),
-                      SizedBox(height: 16,),
-                      SizedBox(
-                        width: double.infinity,
-                        child: ElevatedButton.icon(
-                          onPressed: _addPlace,
-                          icon: Icon(Icons.add),
-                          label: const Text('Add Place'),
-                        ),
+                      validator: (String? value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Please enter a name for your tour';
+                        }
+                        return null;
+                      },
+                      enabled: !_isFormSubmitted,
+                    ),
+                    PlaceAutocomplete(
+                      textEditingController: _cityController,
+                      isFormSubmitted: _isFormSubmitted,
+                      onItemSelected: (AutocompletePrediction prediction) {
+                        logger.t("Selected city: ${prediction.primaryText}");
+                      },
+                      onPlaceInfoFetched: (Place? place) {
+                        if (place != null) {
+                          _city = place;
+                        }
+                      },
+                    ),
+                    TextFormField(
+                      controller: _descriptionController,
+                      keyboardType: TextInputType.multiline,
+                      minLines: 4,
+                      maxLines: 8,
+                      maxLength: _descriptionMaxChars,
+                      decoration: InputDecoration(
+                        labelText: 'Description',
                       ),
-                      SizedBox(height: 16,),
-                      if (state.hasError)
-                        Text(
-                          state.errorText ?? '',
-                          style: TextStyle(color: Theme.of(context).colorScheme.error),
-                        ),
-                    ],
-                  );
-                },
+                      validator: (String? value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Please enter a description for your tour';
+                        }
+                        if (value != null && value.characters.length > _descriptionMaxChars) {
+                          return 'Please enter a maximum of $_descriptionMaxChars characters';
+                        }
+                        return null;
+                      },
+                      onChanged: (value) {
+                        setState(() {}); // Trigger a rebuild to update the character counter
+                      },
+                      enabled: !_isFormSubmitted,
+                    ),
+                    FormFieldTags(
+                      key: _formFieldTagsKey,
+                      enabled: !_isFormSubmitted,
+                      validator: (Map<String, dynamic>? value) {
+                        if (value == null || value['duration'] == null) {
+                          return 'Please select a duration';
+                        }
+                        if (value['descriptive'] == null || (value['descriptive'] as List).isEmpty) {
+                          return 'Please select at least 1 descriptive tag';
+                        }
+                        if ((value['descriptive'] as List).length > 5) {
+                          return 'You can select up to 5 descriptive tags';
+                        }
+                        return null;
+                      },
+                    ),
+                    /*
+                    SwitchListTile(
+                      title: const Text('Make Public'), // Text label for the switch
+                      value: _tourIsPublic, // The boolean value
+                      onChanged: !_isFormSubmitted
+                          ? (newValue) {
+                        setState(() {
+                          _tourIsPublic = newValue; // Update the boolean value
+                        });
+                      }
+                          : null, // Disable switch if form is submitted
+                      secondary: const Icon(Icons.public),
+                      inactiveThumbColor: _isFormSubmitted ? Colors.grey : null,
+                      inactiveTrackColor: _isFormSubmitted ? Colors.grey[300] : null,
+                    ),*/
+                  ],
+                ),
               ),
             ),
-          ),
-          Step(
-            title: const Text('Places Details'),
-            isActive: _currentStep >= 2,
-            state: _maxStepReached > 2 ? StepState.complete : StepState.indexed,
-            content: Form(
-              autovalidateMode: _formPlacesDetailsValidateMode,
-              key: _formKeyPlacesDetails,
-              child: Column(
-                children: [
-                  for (int index = 0; index < _tour.tourguidePlaces.length; index++)
-                  Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 8.0),
-                    child: Column(
+            Step(
+              title: const Text('Places'),
+              isActive: _currentStep >= 1,
+              state: _maxStepReached > 1 ? StepState.complete : StepState.indexed,
+              content: Form(
+                autovalidateMode: _formPlacesValidateMode,
+                key: _formKeyPlaces,
+                child: FormField(
+                  validator: (value) {
+                    if (_tour.tourguidePlaces.length < 2) {
+                      return 'Please add at least two places.';
+                    }
+                    return null;
+                  },
+                  builder: (FormFieldState<dynamic> state) {
+                    return Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          (index+1).toString() + ")  " + _tour.tourguidePlaces[index].title, // Assuming _places[index] has a 'name' field
-                          style: Theme.of(context).textTheme.titleMedium,
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.only(left: 20.0, top: 8.0),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              if (_tour.tourguidePlaces[index].image != null)
-                                Container(
-                                  height: 100, // Set the desired height here
-                                  width: double.infinity, // Make it fill the width of its parent
-                                  child: FittedBox(
-                                    fit: BoxFit.cover,
-                                    clipBehavior: Clip.hardEdge,
-                                    child: _tour.tourguidePlaces[index].image!,
+                        ReorderableListView(
+                          buildDefaultDragHandles: false,
+                          physics: ClampingScrollPhysics(),
+                          shrinkWrap: true,
+                          proxyDecorator: (child, index, animation) {
+                            return AnimatedBuilder(
+                              animation: animation,
+                              builder: (BuildContext context, Widget? child) {
+                                final double animValue = Curves.easeInOut.transform(animation.value);
+                                final double scale = lerpDouble(1, 1.05, animValue)!;
+                                return Transform.scale(
+                                  scale: scale,
+                                  child: Material(
+                                    color: Colors.white,
+                                    elevation: 8,
+                                    child: child,
+                                  ),
+                                );
+                              },
+                              child: child,
+                            );
+                          },
+                          onReorder: (int oldIndex, int newIndex) {
+                            setState(() {
+                              if (newIndex > oldIndex) {
+                                newIndex -= 1;
+                              }
+                              final TourguidePlace place = _tour.tourguidePlaces.removeAt(oldIndex);
+                              _tour.tourguidePlaces.insert(newIndex, place);
+
+                              final TextEditingController controller = _placeControllers.removeAt(oldIndex);
+                              _placeControllers.insert(newIndex, controller);
+                            });
+                          },
+                          children: [
+                            for (int index = 0; index < _tour.tourguidePlaces.length; index++)
+                              Container(
+                                key: ValueKey(_placeControllers[index]),
+                                width: double.infinity,
+                                child: ListTile(
+                                  contentPadding: EdgeInsets.symmetric(vertical: 0.0, horizontal: 0),
+                                  leading: ReorderableDragStartListener(
+                                    index: index,
+                                    child: Icon(Icons.drag_handle),
+                                  ),
+                                  title: PlaceAutocomplete(
+                                    textEditingController: _placeControllers[index],
+                                    restrictToCities: false,
+                                    isFormSubmitted: _isFormSubmitted,
+                                    decoration: InputDecoration(
+                                      labelText: 'Place ${index + 1}',
+                                      border: const UnderlineInputBorder(),
+                                      suffixIcon: IconButton(
+                                        icon: const Icon(Icons.remove_circle_outline),
+                                        onPressed: () {
+                                          _removePlace(index);
+                                        },
+                                      ),
+                                    ),
+                                    customLabel: true,
+                                    onItemSelected: (AutocompletePrediction prediction) {
+                                      _updateTourguidePlaceDetails(index, prediction);
+                                    },
                                   ),
                                 ),
-                              SizedBox(height: 2,),
-                              TextFormField(
-                                controller: _tour.tourguidePlaces[index].descriptionEditingController, // Assuming each place has a description controller
-                                decoration: InputDecoration(
-                                  labelText: 'Description',
-                                ),
-                                minLines: 3,
-                                maxLines: 20,
-                                validator: (value) {
-                                  if (value == null || value.isEmpty) {
-                                    return 'Please enter a description';
-                                  }
-                                  return null;
-                                },
                               ),
-                              if (index < _tour.tourguidePlaces.length - 1)
-                                SizedBox(height: 30,),
-                            ],
+                          ],
+                        ),
+                        SizedBox(height: 16,),
+                        SizedBox(
+                          width: double.infinity,
+                          child: ElevatedButton.icon(
+                            onPressed: _addPlace,
+                            icon: Icon(Icons.add),
+                            label: const Text('Add Place'),
                           ),
                         ),
+                        SizedBox(height: 16,),
+                        if (state.hasError)
+                          Text(
+                            state.errorText ?? '',
+                            style: TextStyle(color: Theme.of(context).colorScheme.error),
+                          ),
                       ],
-                    ),
-                  )
-                ],
+                    );
+                  },
+                ),
               ),
             ),
-          ),
-          Step(
-            title: const Text('Details'),
-            isActive: _currentStep >= 3,
-            state: _maxStepReached > 3 ? StepState.complete : StepState.indexed,
-            content: Form(
-              autovalidateMode: _formDetailsValidateMode,
-              key: _formKeyDetails,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text('Select an image for your tour', style: Theme.of(context).textTheme.titleMedium),
-                  SizedBox(height: 16,),
-                  SizedBox(
-                    height: ((_tour.tourguidePlaces.length+1)/2).ceil() * 167,
-                    child: GridView.count(
-                      crossAxisCount: 2,
-                      physics: NeverScrollableScrollPhysics(),
-                      crossAxisSpacing: 8.0,
-                      mainAxisSpacing: 8.0,
-                      childAspectRatio: 1.0, // Adjust as needed
-                      children: [
-                        for (int i = 0; i < _tour.tourguidePlaces.length; i++)
-                          if (_tour.tourguidePlaces[i].image != null)
-                            GestureDetector(
-                              onTap: () {
-                                _setTourImageSelection(i);
-                              },
-                              child: Stack(
-                                fit: StackFit.expand,
-                                children: [
-                                  FittedBox(
-                                    fit: BoxFit.cover,
-                                    clipBehavior: Clip.hardEdge,
-                                    child: _tour.tourguidePlaces[i].image!,
+            Step(
+              title: const Text('Places Details'),
+              isActive: _currentStep >= 2,
+              state: _maxStepReached > 2 ? StepState.complete : StepState.indexed,
+              content: Form(
+                autovalidateMode: _formPlacesDetailsValidateMode,
+                key: _formKeyPlacesDetails,
+                child: Column(
+                  children: [
+                    for (int index = 0; index < _tour.tourguidePlaces.length; index++)
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 8.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            (index+1).toString() + ")  " + _tour.tourguidePlaces[index].title, // Assuming _places[index] has a 'name' field
+                            style: Theme.of(context).textTheme.titleMedium,
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.only(left: 20.0, top: 8.0),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                if (_tour.tourguidePlaces[index].image != null)
+                                  Container(
+                                    height: 100, // Set the desired height here
+                                    width: double.infinity, // Make it fill the width of its parent
+                                    child: FittedBox(
+                                      fit: BoxFit.cover,
+                                      clipBehavior: Clip.hardEdge,
+                                      child: _tour.tourguidePlaces[index].image!,
+                                    ),
                                   ),
-                                  if (_selectedImgIndex == i)
-                                    Container(
-                                      height: 146,
-                                      width: 146,
-                                      decoration: BoxDecoration(
-                                          color: Theme.of(context).scaffoldBackgroundColor.withOpacity(0.4),
-                                          border: _selectedImgIndex == i ? Border.all(
-                                              width: 2,
-                                              color: Theme.of(context).colorScheme.primary) : null
-                                      ),
-                                    ),
-                                  if (_selectedImgIndex == i)
-                                    Positioned(
-                                      top: 4,
-                                      right: 4,
-                                      child: Icon(
-                                        Icons.check_circle,
-                                        color: Theme.of(context).colorScheme.primary,
-                                        size: 24,
-                                      ),
-                                    ),
-                                ],
-                              ),
+                                SizedBox(height: 2,),
+                                TextFormField(
+                                  controller: _tour.tourguidePlaces[index].descriptionEditingController, // Assuming each place has a description controller
+                                  decoration: InputDecoration(
+                                    labelText: 'Description',
+                                  ),
+                                  minLines: 3,
+                                  maxLines: 20,
+                                  validator: (value) {
+                                    if (value == null || value.isEmpty) {
+                                      return 'Please enter a description';
+                                    }
+                                    return null;
+                                  },
+                                ),
+                                if (index < _tour.tourguidePlaces.length - 1)
+                                  SizedBox(height: 30,),
+                              ],
                             ),
-                        GestureDetector(
-                          onTap: () {
-                            if (kIsWeb && _imageWeb != null || !kIsWeb && _image != null) {
-                              _setTourImageSelection(-1);
-                            }
-                          },
-                          child: Container(
-                            height: 146,
-                            width: 146,
-                            child: kIsWeb
-                              ?
-                              AddImageTileWeb(
-                                initialValue: _imageWeb,
-                                onSaved: (value) {
-                                  _imageWeb = value;
+                          ),
+                        ],
+                      ),
+                    )
+                  ],
+                ),
+              ),
+            ),
+            Step(
+              title: const Text('Details'),
+              isActive: _currentStep >= 3,
+              state: _maxStepReached > 3 ? StepState.complete : StepState.indexed,
+              content: Form(
+                autovalidateMode: _formDetailsValidateMode,
+                key: _formKeyDetails,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('Select an image for your tour', style: Theme.of(context).textTheme.titleMedium),
+                    const SizedBox(height: 16,),
+                    SizedBox(
+                      height: kIsWeb ? 438 : ((_tour.tourguidePlaces.length+1)/2).ceil() * 167,
+                      child: GridView.count(
+                        crossAxisCount: kIsWeb ? 4 : 2,
+                        physics: const NeverScrollableScrollPhysics(),
+                        crossAxisSpacing: 8.0,
+                        mainAxisSpacing: 8.0,
+                        childAspectRatio: 1.0, // Adjust as needed
+                        children: [
+                          for (int i = 0; i < _tour.tourguidePlaces.length; i++)
+                            if (!kIsWeb && _tour.tourguidePlaces[i].image != null)
+                              GestureDetector(
+                                onTap: () {
+                                  _setTourImageSelection(i);
                                 },
-                                onChanged: (value) {
-                                  setState(() {
+                                child: Stack(
+                                  fit: StackFit.expand,
+                                  children: [
+                                    FittedBox(
+                                      fit: BoxFit.cover,
+                                      clipBehavior: Clip.hardEdge,
+                                      child: _tour.tourguidePlaces[i].image!,
+                                    ),
+                                    if (_selectedImgIndex == i)
+                                      Container(
+                                        height: 146,
+                                        width: 146,
+                                        decoration: BoxDecoration(
+                                            color: Theme.of(context).scaffoldBackgroundColor.withOpacity(0.4),
+                                            border: _selectedImgIndex == i ? Border.all(
+                                                width: 2,
+                                                color: Theme.of(context).colorScheme.primary) : null
+                                        ),
+                                      ),
+                                    if (_selectedImgIndex == i)
+                                      Positioned(
+                                        top: 4,
+                                        right: 4,
+                                        child: Icon(
+                                          Icons.check_circle,
+                                          color: Theme.of(context).colorScheme.primary,
+                                          size: 24,
+                                        ),
+                                      ),
+                                  ],
+                                ),
+                              ),
+                          GestureDetector(
+                            onTap: () {
+                              if (kIsWeb && _imageWeb != null || !kIsWeb && _image != null) {
+                                _setTourImageSelection(-1);
+                              }
+                            },
+                            child: Container(
+                              height: kIsWeb ? 64 : 146,
+                              width: kIsWeb ? 64 : 146,
+                              child: kIsWeb
+                                ?
+                                AddImageTileWeb(
+                                  initialValue: _imageWeb,
+                                  onSaved: (value) {
                                     _imageWeb = value;
-                                  });
-                                  _setTourImageSelection(-1);
-                                },
-                                enabled: !_isFormSubmitted,
-                                isSelected: _selectedImgIndex == -1,
-                              )
-                            :
-                              AddImageTile(
-                                initialValue: _image,
-                                onSaved: (value) {
-                                  _image = value;
-                                },
-                                onChanged: (value) {
-                                  setState(() {
+                                  },
+                                  onChanged: (value) {
+                                    setState(() {
+                                      _imageWeb = value;
+                                    });
+                                    _setTourImageSelection(-1);
+                                  },
+                                  enabled: !_isFormSubmitted,
+                                  isSelected: _selectedImgIndex == -1,
+                                )
+                              :
+                                AddImageTile(
+                                  initialValue: _image,
+                                  onSaved: (value) {
                                     _image = value;
-                                  });
-                                  _setTourImageSelection(-1);
-                                },
-                                enabled: !_isFormSubmitted,
-                                isSelected: _selectedImgIndex == -1,
+                                  },
+                                  onChanged: (value) {
+                                    setState(() {
+                                      _image = value;
+                                    });
+                                    _setTourImageSelection(-1);
+                                  },
+                                  enabled: !_isFormSubmitted,
+                                  isSelected: _selectedImgIndex == -1,
+                                ),
                               ),
-                            ),
-                        ),
-                      ],
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
-          ),
-          Step(
-            title: const Text('Review'),
-            isActive: _currentStep >= 4,
-            state: _maxStepReached > 4 ? StepState.complete : StepState.indexed,
-            content: Container(
-              width: double.infinity,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Padding(
-                    padding: EdgeInsets.only(bottom: 16.0),
-                    // small body text
-                    child: Text('Here\'s what your tour will look like', style: Theme.of(context).textTheme.bodyMedium),
-                  ),
-                  SizedBox(
-                    height: TourTile.height,
-                    child: Shimmer(
-                        linearGradient: MyGlobals.shimmerGradient,
-                        child: TourTile(tour: _tour)
+            Step(
+              title: const Text('Review'),
+              isActive: _currentStep >= 4,
+              state: _maxStepReached > 4 ? StepState.complete : StepState.indexed,
+              content: Container(
+                width: double.infinity,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Padding(
+                      padding: EdgeInsets.only(bottom: 16.0),
+                      // small body text
+                      child: Text('Here\'s what your tour will look like', style: Theme.of(context).textTheme.bodyMedium),
                     ),
-                  ),
-                  SizedBox(height: 32,),
-                ],
+                    SizedBox(
+                      height: TourTile.height,
+                      child: Shimmer(
+                          linearGradient: MyGlobals.shimmerGradient,
+                          child: TourTile(tour: _tour)
+                      ),
+                    ),
+                    SizedBox(height: 32,),
+                  ],
+                ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
