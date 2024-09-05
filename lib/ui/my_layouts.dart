@@ -8,6 +8,7 @@ class StandardLayout extends StatelessWidget {
   final double gap;
   final bool enableVerticalPadding;
   final bool enableHorizontalPadding;
+  final bool disableAdaptiveHorizontalPadding;
 
   const StandardLayout({
     Key? key,
@@ -15,6 +16,7 @@ class StandardLayout extends StatelessWidget {
     this.gap = defaultGap,
     this.enableVerticalPadding = true,
     this.enableHorizontalPadding = true,
+    this.disableAdaptiveHorizontalPadding = false,
   }) : super(key: key);
 
   @override
@@ -22,7 +24,7 @@ class StandardLayout extends StatelessWidget {
     EdgeInsets insets = EdgeInsets.symmetric(vertical: enableVerticalPadding ? 8.0 : 0, horizontal: enableHorizontalPadding ? 16 : 0);
 
     return Padding(
-      padding: kIsWeb && MediaQuery.of(context).size.width > 1280 ? EdgeInsets.symmetric(horizontal: MediaQuery.of(context).size.width/5) : EdgeInsets.zero,
+      padding: kIsWeb && MediaQuery.of(context).size.width > 1280 && !disableAdaptiveHorizontalPadding ? EdgeInsets.symmetric(horizontal: MediaQuery.of(context).size.width/5) : EdgeInsets.zero,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: children.map((widget) {

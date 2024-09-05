@@ -390,6 +390,7 @@ class _ExpandedTourTileOverlayState extends State<ExpandedTourTileOverlay> {
                   ),
                 ),
                 StandardLayout(
+                  disableAdaptiveHorizontalPadding: true,
                   children: [
                     Text(
                       widget.tour.description,
