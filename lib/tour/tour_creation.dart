@@ -9,8 +9,9 @@ import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:tourguide_app/model/tourguide_place.dart';
 import 'package:tourguide_app/tour/tour_tile.dart';
-import 'package:tourguide_app/ui/add_image_tile.dart';
-import 'package:tourguide_app/ui/add_image_tile_web.dart';
+import 'package:tourguide_app/ui/form_field_add_image_tile.dart';
+import 'package:tourguide_app/ui/form_field_add_image_tile_web.dart';
+import 'package:tourguide_app/ui/form_field_tags.dart';
 import 'package:tourguide_app/ui/place_autocomplete.dart';
 import 'package:tourguide_app/ui/shimmer_loading.dart';
 import 'package:tourguide_app/utilities/custom_import.dart';
@@ -43,6 +44,7 @@ class _CreateEditTourState extends State<CreateEditTour> {
   final GlobalKey<FormState> _formKeyPlaces = GlobalKey<FormState>();
   final GlobalKey<FormState> _formKeyPlacesDetails = GlobalKey<FormState>();
   final GlobalKey<FormState> _formKeyDetails = GlobalKey<FormState>();
+  final GlobalKey<FormFieldState> _formFieldTagsKey = GlobalKey<FormFieldState>();
   AutovalidateMode _formValidateMode = AutovalidateMode.disabled;
   AutovalidateMode _formPlacesValidateMode = AutovalidateMode.disabled;
   AutovalidateMode _formPlacesDetailsValidateMode = AutovalidateMode.disabled;
@@ -236,6 +238,8 @@ class _CreateEditTourState extends State<CreateEditTour> {
           case 0: // Basic Info
             isValid = _formKey.currentState!.validate() && skipPermitted;
             if (isValid){
+              final selectedTags = _formFieldTagsKey.currentState?.value;
+              //logger.i("Selected tags: $selectedTags");
               setState(() {
                 if (!widget.isEditMode){
                   _tour = _tour.copyWith(
@@ -244,12 +248,15 @@ class _CreateEditTourState extends State<CreateEditTour> {
                       city: _cityController.text,
                       latitude: _city!.latLng!.lat,
                       longitude: _city!.latLng!.lng,
-                      placeId: _city!.id);
+                      placeId: _city!.id,
+                      tags: selectedTags);
                 } else {
                   _tour = _tour.copyWith(
                       name: filter.censor(_nameController.text),
                       description: filter.censor(_descriptionController.text),
-                      city: _cityController.text);
+                      city: _cityController.text,
+                      tags: selectedTags);
+                  //TODO: why not update city lat/lng here in edit mode? investigate...
                 }
               });
             }
@@ -451,12 +458,13 @@ class _CreateEditTourState extends State<CreateEditTour> {
               children: <Widget>[
                 if (_currentStep > 0)
                   const SizedBox(width: 8),
+                if (_currentStep > 0)
                   TextButton(
                     onPressed: controlsDetails.onStepCancel,
                     style: ElevatedButton.styleFrom(
                       elevation: 0,
                       backgroundColor: Colors.transparent,
-                      foregroundColor: Colors.grey[700],
+                      foregroundColor: Theme.of(context).colorScheme.onSecondaryContainer,
                       //primary: Colors.blue, // Custom color for "Continue" button
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(3.0), // Custom radius
@@ -478,11 +486,11 @@ class _CreateEditTourState extends State<CreateEditTour> {
                   child: _currentStep != _reviewStepIndex ? const Text('Next') : widget.isEditMode ? const Text('Update Tour') : const Text('Create Tour'),
                 ),
                 Spacer(),
-                if (_currentStep == 1)
+                /*if (_currentStep == 1) //TODO Map view
                   IconButton(
                       padding: EdgeInsets.all(10),
                       onPressed: (){},
-                      icon: Icon(Icons.map))
+                      icon: Icon(Icons.map))*/
               ],
             ),
           );
@@ -544,6 +552,22 @@ class _CreateEditTourState extends State<CreateEditTour> {
                       setState(() {}); // Trigger a rebuild to update the character counter
                     },
                     enabled: !_isFormSubmitted,
+                  ),
+                  FormFieldTags(
+                    key: _formFieldTagsKey,
+                    enabled: !_isFormSubmitted,
+                    validator: (Map<String, dynamic>? value) {
+                      if (value == null || value['duration'] == null) {
+                        return 'Please select a duration';
+                      }
+                      if (value['descriptive'] == null || (value['descriptive'] as List).isEmpty) {
+                        return 'Please select at least 1 descriptive tag';
+                      }
+                      if ((value['descriptive'] as List).length > 5) {
+                        return 'You can select up to 5 descriptive tags';
+                      }
+                      return null;
+                    },
                   ),
                   /*
                   SwitchListTile(
@@ -762,18 +786,21 @@ class _CreateEditTourState extends State<CreateEditTour> {
                               child: Stack(
                                 fit: StackFit.expand,
                                 children: [
-                                  Container(
-                                    height: 146,
-                                    width: 146,
-                                    child: FittedBox(
-                                      fit: BoxFit.cover,
-                                      clipBehavior: Clip.hardEdge,
-                                      child: _tour.tourguidePlaces[i].image!,
-                                    ),
+                                  FittedBox(
+                                    fit: BoxFit.cover,
+                                    clipBehavior: Clip.hardEdge,
+                                    child: _tour.tourguidePlaces[i].image!,
                                   ),
                                   if (_selectedImgIndex == i)
                                     Container(
-                                      color: Colors.white.withOpacity(0.3), // Adjust the opacity to make it darker or lighter
+                                      height: 146,
+                                      width: 146,
+                                      decoration: BoxDecoration(
+                                          color: Theme.of(context).scaffoldBackgroundColor.withOpacity(0.4),
+                                          border: _selectedImgIndex == i ? Border.all(
+                                              width: 2,
+                                              color: Theme.of(context).colorScheme.primary) : null
+                                      ),
                                     ),
                                   if (_selectedImgIndex == i)
                                     Positioned(
@@ -794,60 +821,41 @@ class _CreateEditTourState extends State<CreateEditTour> {
                               _setTourImageSelection(-1);
                             }
                           },
-                          child: Stack(
-                            fit: StackFit.expand,
-                            children: [
-                              Container(
-                                height: 146,
-                                width: 146,
-                                child: kIsWeb
-                                  ?
-                                  AddImageTileWeb(
-                                    initialValue: _imageWeb,
-                                    onSaved: (value) {
-                                      _imageWeb = value;
-                                    },
-                                    onChanged: (value) {
-                                      setState(() {
-                                        _imageWeb = value;
-                                      });
-                                      _setTourImageSelection(-1);
-                                    },
-                                    enabled: !_isFormSubmitted,
-                                  )
-                                :
-                                  AddImageTile(
-                                    initialValue: _image,
-                                    onSaved: (value) {
-                                      _image = value;
-                                    },
-                                    onChanged: (value) {
-                                      setState(() {
-                                        _image = value;
-                                      });
-                                      _setTourImageSelection(-1);
-                                    },
-                                    enabled: !_isFormSubmitted,
-                                  ),
-                                ),
-                              if (_selectedImgIndex == -1)
-                                IgnorePointer(
-                                  child: Container(
-                                    color: Colors.white.withOpacity(0.1), // Adjust the opacity to make it darker or lighter
-                                  ),
-                                ),
-                              if (_selectedImgIndex == -1)
-                                Positioned(
-                                  top: 4,
-                                  right: 4,
-                                  child: Icon(
-                                    Icons.check_circle,
-                                    color: Theme.of(context).colorScheme.primary,
-                                    size: 24,
-                                  ),
-                                ),
-                            ],
-                          ),
+                          child: Container(
+                            height: 146,
+                            width: 146,
+                            child: kIsWeb
+                              ?
+                              AddImageTileWeb(
+                                initialValue: _imageWeb,
+                                onSaved: (value) {
+                                  _imageWeb = value;
+                                },
+                                onChanged: (value) {
+                                  setState(() {
+                                    _imageWeb = value;
+                                  });
+                                  _setTourImageSelection(-1);
+                                },
+                                enabled: !_isFormSubmitted,
+                                isSelected: _selectedImgIndex == -1,
+                              )
+                            :
+                              AddImageTile(
+                                initialValue: _image,
+                                onSaved: (value) {
+                                  _image = value;
+                                },
+                                onChanged: (value) {
+                                  setState(() {
+                                    _image = value;
+                                  });
+                                  _setTourImageSelection(-1);
+                                },
+                                enabled: !_isFormSubmitted,
+                                isSelected: _selectedImgIndex == -1,
+                              ),
+                            ),
                         ),
                       ],
                     ),

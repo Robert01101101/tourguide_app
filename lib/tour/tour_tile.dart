@@ -10,7 +10,7 @@ import 'package:tourguide_app/tour/tour_details.dart';
 import 'package:tourguide_app/tour/tour_running.dart';
 import 'package:tourguide_app/ui/my_layouts.dart';
 import 'package:tourguide_app/ui/shimmer_loading.dart';
-import 'package:tourguide_app/tour/tag.dart';
+import 'package:tourguide_app/tour/tour_tag.dart';
 import 'package:tourguide_app/utilities/providers/tour_provider.dart';
 import 'package:tourguide_app/utilities/providers/tourguide_user_provider.dart';
 import 'package:tourguide_app/utilities/services/tour_service.dart';
