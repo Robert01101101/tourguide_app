@@ -3,7 +3,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:sliver_tools/sliver_tools.dart';
 import 'package:tourguide_app/model/tour.dart';
 import 'package:tourguide_app/tour/tour_tag.dart';
@@ -17,7 +16,6 @@ import 'package:tourguide_app/utilities/maps/tour_map.dart';
 import 'package:tourguide_app/utilities/providers/tour_provider.dart';
 import 'package:visibility_detector/visibility_detector.dart';
 import '../utilities/custom_import.dart';
-import '../utilities/providers/tourguide_user_provider.dart';
 import '../utilities/singletons/tts_service.dart';
 
 class TourRunning extends StatefulWidget {
@@ -29,15 +27,6 @@ class TourRunning extends StatefulWidget {
 
 class _TourRunningState extends State<TourRunning> {
   final TourMapController _tourMapController = TourMapController();
-  final Completer<GoogleMapController> _mapControllerCompleter = Completer<GoogleMapController>();
-  bool _isFullScreen = false;
-  bool _isLoading = true, _isLoadingFullscreen = true;
-  CameraPosition _currentCameraPosition = CameraPosition(
-    target: LatLng(0, 0),
-    zoom: 14.0,
-  );
-  Set<Marker> _markers = Set<Marker>();
-  Set<Polyline> _polylines = Set<Polyline>();
   final TtsService _ttsService = TtsService();
   final ScrollController _scrollController = ScrollController();
   List<GlobalKey> _targetKeys = [];
@@ -59,7 +48,6 @@ class _TourRunningState extends State<TourRunning> {
     TourProvider tourProvider = Provider.of<TourProvider>(context, listen: false);
     _tour = tourProvider.selectedTour!;
     thisUsersRating = _tour.thisUsersRating ?? 0;
-    //_addMarkers();
     //add global keys for each place, as well as one extra for the final scroll
     for (int i = 0; i <= _tour.tourguidePlaces.length; i++) _targetKeys.add(GlobalKey());
     _scrollController.addListener(_handleScroll);
@@ -207,9 +195,7 @@ class _TourRunningState extends State<TourRunning> {
     } else {
       final context = _targetKeys[placeIndex].currentContext;
       if (context != null) {
-        setState(() {
-          _isFullScreen = false;
-        });
+        _tourMapController.setFullScreen(false);
         Scrollable.ensureVisible(
           context,
           duration: const Duration(milliseconds: 500),
