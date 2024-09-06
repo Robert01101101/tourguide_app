@@ -11,12 +11,13 @@ import 'package:tourguide_app/tour/tour_details_options.dart';
 import 'package:tourguide_app/tour/tourguide_user_profile_view.dart';
 import 'package:tourguide_app/ui/my_layouts.dart';
 import 'package:tourguide_app/tour/tour_rating_bookmark_buttons.dart';
+import 'package:tourguide_app/ui/tts_text.dart';
 import 'package:tourguide_app/utilities/maps/map_utils.dart';
 import 'package:tourguide_app/utilities/maps/tour_map.dart';
 import 'package:tourguide_app/utilities/providers/tour_provider.dart';
 import 'package:visibility_detector/visibility_detector.dart';
 import '../utilities/custom_import.dart';
-import '../utilities/singletons/tts_service.dart';
+import '../utilities/services/tts_service.dart';
 
 class TourRunning extends StatefulWidget {
   const TourRunning({super.key});
@@ -500,12 +501,18 @@ class _TourRunningState extends State<TourRunning> {
                                               }
                                             }
                                           },
-                                          child: Text(
+                                          child: /*Text(
                                             place.description, // Assuming each place has a 'description' field
                                             style: Theme.of(context).textTheme.bodyMedium,
                                             softWrap: true,
                                             maxLines: null,
                                             overflow: TextOverflow.visible,
+                                          ),*/
+                                          TtsText(
+                                            text: place.description,
+                                            ttsService: _ttsService,
+                                            index: index,
+                                            currentlyPlayingItem: currentlyPlayingIndex == index,
                                           ),
                                         ),
                                       ],

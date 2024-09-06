@@ -137,12 +137,14 @@ class TourMapFullscreen extends StatefulWidget {
   final TourMapController tourMapController;
   final Tour tour;
   final Widget child;
+  final bool? alwaysShowAppBar;
 
   const TourMapFullscreen({
     super.key,
     required this.tourMapController,
     required this.tour,
     required this.child,
+    this.alwaysShowAppBar
   });
 
   @override
@@ -161,7 +163,7 @@ class _TourMapFullscreenState extends State<TourMapFullscreen> {
         builder: (context, tourMapController, child) {
           //logger.t('TourMapFullscreen - Consumer');
           return Scaffold(
-            appBar: widget.tourMapController.isFullScreen ? AppBar(
+            appBar: widget.tourMapController.isFullScreen || (widget.alwaysShowAppBar ?? false) ? AppBar(
               title: Text(widget.tour.name),
               actions:
               [
@@ -174,15 +176,16 @@ class _TourMapFullscreenState extends State<TourMapFullscreen> {
                     },
                   ),
               ],
-              leading: IconButton(
+              leading: widget.tourMapController.isFullScreen ? IconButton(
                 icon: const Icon(Icons.arrow_back),
                 onPressed: () {
+                  logger.t('onPressed - isFullScreen=${widget.tourMapController.isFullScreen}');
                   widget.tourMapController.setFullScreen(false);
                 },
-              ),
+              ) : null,
             ) : null,
             body: PopScope(
-                canPop: !widget.tourMapController.isFullScreen,
+                canPop: !widget.tourMapController.isFullScreen || !(widget.alwaysShowAppBar ?? false),
                 onPopInvoked: (bool didPop) {
                   if (!didPop && widget.tourMapController.isFullScreen){
                     widget.tourMapController.setFullScreen(false);

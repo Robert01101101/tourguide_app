@@ -4,6 +4,8 @@ import 'dart:io' show Platform;
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter_tts/flutter_tts.dart';
 
+import '../../main.dart';
+
 enum TtsState { playing, stopped, paused, continued }
 
 class TtsService {
@@ -12,6 +14,9 @@ class TtsService {
   factory TtsService() => _instance;
 
   final FlutterTts _flutterTts = FlutterTts();
+  final StreamController<Map<String, dynamic>> _progressController = StreamController.broadcast();
+  Stream<Map<String, dynamic>> get progressStream => _progressController.stream;
+
   TtsState _ttsState = TtsState.stopped;
 
   String? _newVoiceText;
@@ -59,6 +64,16 @@ class TtsService {
     _flutterTts.setErrorHandler((msg) {
       _ttsState = TtsState.stopped;
     });
+
+    _flutterTts.setProgressHandler((String text, int startOffset, int endOffset, String word) {
+      //logger.t("Progress: $text, $startOffset, $endOffset, $word");
+      _progressController.add({
+        'text': text,
+        'startOffset': startOffset,
+        'endOffset': endOffset,
+        'word': word,
+      });
+    });
   }
 
   Future<void> speak(String text) async {
@@ -79,5 +94,9 @@ class TtsService {
   Future<void> pause() async {
     var result = await _flutterTts.pause();
     if (result == 1) _ttsState = TtsState.paused;
+  }
+
+  void dispose() {
+    _progressController.close();
   }
 }
