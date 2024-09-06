@@ -1,14 +1,10 @@
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:google_sign_in/google_sign_in.dart';
+import 'package:android_intent_plus/android_intent.dart';
 import 'package:package_info_plus/package_info_plus.dart';
-import 'package:profanity_filter/profanity_filter.dart';
 import 'package:tourguide_app/ui/my_layouts.dart';
+import 'package:tourguide_app/ui/tts_settings.dart';
 import 'package:tourguide_app/utilities/custom_import.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:tourguide_app/utilities/providers/auth_provider.dart' as myAuth;
 import 'package:tourguide_app/utilities/providers/theme_provider.dart';
 import 'package:tourguide_app/utilities/providers/tourguide_user_provider.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 class AppSettings extends StatefulWidget {
   const AppSettings({super.key});
@@ -70,16 +66,17 @@ class _AppSettingsState extends State<AppSettings> {
     userProvider.user!.setEmailSubscriptionEnabled('reports', !_emailReportsNotificationsEnabled);
     await userProvider.updateUser(userProvider.user!);
     setState(() {
+      _emailGeneralNotificationsEnabledInitialState = _emailGeneralNotificationsEnabled;
+      _emailReportsNotificationsEnabledInitialState = _emailReportsNotificationsEnabled;
       _savingSettings = false;
     });
     if (mounted){
       ScaffoldMessenger.of(context).hideCurrentSnackBar();
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Updated App Settings.')),
+        const SnackBar(content: Text('Updated Notification Settings.')),
       );
     }
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -90,72 +87,92 @@ class _AppSettingsState extends State<AppSettings> {
       appBar: AppBar(
         title: const Text('App Settings'),
       ),
-      body: StandardLayout(
-        children: [
-          const SizedBox(height: 0),
-          Text("Notification Settings", style: Theme.of(context).textTheme.headlineSmall),
-          ListTile(
-            leading: Checkbox(
-              value: _emailGeneralNotificationsEnabled,
-              onChanged: (bool? value) {
-                setState(() {
-                  _emailGeneralNotificationsEnabled = value ?? false;
-                });
-              },
-            ),
-            title: const Text('Receive general email notifications'),
-            onTap: () {
-              setState(() {
-                _emailGeneralNotificationsEnabled = !_emailGeneralNotificationsEnabled;
-              });
-            },
-          ),
-          ListTile(
-            leading: Checkbox(
-              value: _emailReportsNotificationsEnabled,
-              onChanged: (bool? value) {
-                setState(() {
-                  _emailReportsNotificationsEnabled = value ?? false;
-                });
-              },
-            ),
-            title: const Text('Receive email notifications when users report your tours'),
-            onTap: () {
-              setState(() {
-                _emailReportsNotificationsEnabled = !_emailReportsNotificationsEnabled;
-              });
-            },
-          ),
-          ElevatedButton(
-            onPressed: _emailGeneralNotificationsEnabledInitialState != _emailGeneralNotificationsEnabled ||
-                _emailReportsNotificationsEnabledInitialState != _emailReportsNotificationsEnabled ? _saveSettings : null,
-            child: _savingSettings ? const Text('Saving Settings') : const Text('Save Settings'),
-          ),
-          const SizedBox(height: 32),
-          Text("Theme Settings", style: Theme.of(context).textTheme.headlineSmall),
-          DropdownMenu<String>(
-            initialSelection: initialThemeMode,
-            onSelected: (String? value) {
-              // This is called when the user selects an item.
-              String themeModeString = 'ThemeMode.' + value!.toLowerCase();
-              themeProvider.setThemeModeWithString(themeModeString);
-            },
-            dropdownMenuEntries: themeList.map<DropdownMenuEntry<String>>((String value) {
-              return DropdownMenuEntry<String>(value: value, label: value);
-            }).toList(),
-          ),
-          const SizedBox(height: 32),
-          Text("App Info", style: Theme.of(context).textTheme.headlineSmall),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.start,
+      body: Scrollbar(
+        thumbVisibility: true,
+        child: SingleChildScrollView(
+          child: StandardLayout(
             children: [
-              Text('Tourguide v', style: Theme.of(context).textTheme.bodyLarge,),
-              Text(_packageInfo!.version, style: Theme.of(context).textTheme.bodyLarge,),
-              Text(', build ', style: Theme.of(context).textTheme.bodyLarge,),
-              Text(_packageInfo!.buildNumber, style: Theme.of(context).textTheme.bodyLarge,),
+              const SizedBox(height: 0),
+              Text("Notifications", style: Theme.of(context).textTheme.titleLarge),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  ListTile(
+                    leading: Checkbox(
+                      value: _emailGeneralNotificationsEnabled,
+                      onChanged: (bool? value) {
+                        setState(() {
+                          _emailGeneralNotificationsEnabled = value ?? false;
+                        });
+                      },
+                    ),
+                    title: const Text('Receive general email notifications'),
+                    onTap: () {
+                      setState(() {
+                        _emailGeneralNotificationsEnabled = !_emailGeneralNotificationsEnabled;
+                      });
+                    },
+                  ),
+                  ListTile(
+                    leading: Checkbox(
+                      value: _emailReportsNotificationsEnabled,
+                      onChanged: (bool? value) {
+                        setState(() {
+                          _emailReportsNotificationsEnabled = value ?? false;
+                        });
+                      },
+                    ),
+                    title: const Text('Receive email notifications when users report your tours'),
+                    onTap: () {
+                      setState(() {
+                        _emailReportsNotificationsEnabled = !_emailReportsNotificationsEnabled;
+                      });
+                    },
+                  ),
+                  ElevatedButton(
+                    onPressed: _emailGeneralNotificationsEnabledInitialState != _emailGeneralNotificationsEnabled ||
+                        _emailReportsNotificationsEnabledInitialState != _emailReportsNotificationsEnabled ? _saveSettings : null,
+                    child: _savingSettings ? const Text('Saving Notification Settings') : const Text('Save Notification Settings'),
+                  ),
+                ],
+              ),
+          
+              const SizedBox(height: 16),
+              Text("Theme", style: Theme.of(context).textTheme.titleLarge),
+              DropdownMenu<String>(
+                initialSelection: initialThemeMode,
+                onSelected: (String? value) {
+                  // This is called when the user selects an item.
+                  String themeModeString = 'ThemeMode.' + value!.toLowerCase();
+                  themeProvider.setThemeModeWithString(themeModeString);
+                },
+                dropdownMenuEntries: themeList.map<DropdownMenuEntry<String>>((String value) {
+                  return DropdownMenuEntry<String>(value: value, label: value);
+                }).toList(),
+              ),
+              const SizedBox(height: 16),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text("Text to Speech", style: Theme.of(context).textTheme.titleLarge),
+                  TtsSettings(),
+                ],
+              ),
+              const SizedBox(height: 16),
+              Text("App Info", style: Theme.of(context).textTheme.titleLarge),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  Text('Tourguide v', style: Theme.of(context).textTheme.bodyLarge,),
+                  Text(_packageInfo!.version, style: Theme.of(context).textTheme.bodyLarge,),
+                  Text(', build ', style: Theme.of(context).textTheme.bodyLarge,),
+                  Text(_packageInfo!.buildNumber, style: Theme.of(context).textTheme.bodyLarge,),
+                ],
+              ),
+              const SizedBox(height: 0),
             ],
           ),
-        ],
+        ),
       ),
     );
   }

@@ -29,6 +29,7 @@ class TourRunning extends StatefulWidget {
 class _TourRunningState extends State<TourRunning> {
   final TourMapController _tourMapController = TourMapController();
   final TtsService _ttsService = TtsService();
+  StreamSubscription<TtsState>? _ttsSubscription;
   final ScrollController _scrollController = ScrollController();
   List<GlobalKey> _targetKeys = [];
   Tour _tour = Tour.empty();
@@ -67,11 +68,21 @@ class _TourRunningState extends State<TourRunning> {
       );
       _getMapPosition();
     });
+
+    //Listen to tts state changes
+    _ttsSubscription = _ttsService.ttsStateStream.listen((TtsState state) {
+      if (state == TtsState.stopped) {
+        setState(() {
+          currentlyPlayingIndex = null;
+        });
+      }
+    });
   }
 
   @override
   void dispose() {
     _ttsService.stop();
+    _ttsSubscription?.cancel();
     super.dispose();
   }
 
@@ -484,7 +495,7 @@ class _TourRunningState extends State<TourRunning> {
                                             ),
                                             IconButton(
                                               onPressed: () => _toggleTTS(place.description, index),
-                                              icon: Icon(currentlyPlayingIndex == index ? Icons.stop : Icons.play_circle,),
+                                              icon: Icon(currentlyPlayingIndex == index ? Icons.stop : Icons.play_circle),
                                             ),
                                           ],
                                         ),
@@ -501,18 +512,10 @@ class _TourRunningState extends State<TourRunning> {
                                               }
                                             }
                                           },
-                                          child: /*Text(
-                                            place.description, // Assuming each place has a 'description' field
-                                            style: Theme.of(context).textTheme.bodyMedium,
-                                            softWrap: true,
-                                            maxLines: null,
-                                            overflow: TextOverflow.visible,
-                                          ),*/
-                                          TtsText(
+                                          child: TtsText(
                                             text: place.description,
                                             ttsService: _ttsService,
-                                            index: index,
-                                            currentlyPlayingItem: currentlyPlayingIndex == index,
+                                            currentlyPlayingItem: currentlyPlayingIndex== index,
                                           ),
                                         ),
                                       ],

@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_tts/flutter_tts.dart';
 import 'package:tourguide_app/utilities/services/tts_service.dart';
 
 import '../main.dart';
@@ -9,14 +8,12 @@ import '../main.dart';
 class TtsText extends StatefulWidget {
   final String text;
   final TtsService ttsService;
-  final int index;
   final bool currentlyPlayingItem;
 
   const TtsText({
     Key? key,
     required this.text,
     required this.ttsService,
-    required this.index,
     required this.currentlyPlayingItem,
   }) : super(key: key);
 
@@ -100,6 +97,11 @@ class _TtsTextState extends State<TtsText> {
 
   @override
   Widget build(BuildContext context) {
+    if (!widget.currentlyPlayingItem) {
+      startOffset = 0;
+      endOffset = 0;
+    }
+
     return GestureDetector(
       onTapUp: (details) {
         logger.t('Tapped at ${details.localPosition}');
@@ -118,6 +120,10 @@ class _TtsTextState extends State<TtsText> {
     //logger.t('Building text spans: $text, startOffset=$startOffset, endOffset=$endOffset');
     List<TextSpan> spans = [];
 
+    // add horizontal 'padding'
+    if (startOffset > 0) startOffset--;
+    if (endOffset < text.length-1 && endOffset > 0) endOffset++;
+
     if (startOffset > 0) {
       // Add the part of the text before the currently spoken word
       spans.add(
@@ -133,7 +139,9 @@ class _TtsTextState extends State<TtsText> {
       TextSpan(
         text: text.substring(startOffset, endOffset),
         style: Theme.of(context).textTheme.bodyMedium!.copyWith(
-          fontWeight: FontWeight.bold,
+          fontWeight: FontWeight.w900,
+          background: Paint()..color = Theme.of(context).colorScheme.tertiaryContainer,
+          //color: Theme.of(context).colorScheme.onTertiaryContainer,
         ),
       ),
     );
