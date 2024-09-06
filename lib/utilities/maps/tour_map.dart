@@ -23,22 +23,29 @@ class TourMapController with ChangeNotifier {
     logger.t('TourMapController() - hashCode=$hashCode');
   }
 
+  @override
+  void dispose() {
+    super.dispose();
+    logger.t('dispose - hashCode=$hashCode');
+    resetTourMapController();
+  }
+
   void triggerMoveCameraToMarkerAndHighlightMarker(int step) {
-    logger.t('triggerMoveCameraToMarkerAndHighlightMarker - step=$step');
+    //logger.t('triggerMoveCameraToMarkerAndHighlightMarker - step=$step');
     if (moveCameraToMarkerAndHighlightMarker != null) {
       moveCameraToMarkerAndHighlightMarker!(step);
     }
   }
 
   void triggerShowOptionsDialog(BuildContext context) {
-    logger.t('triggerShowOptionsDialog');
+    //logger.t('triggerShowOptionsDialog');
     if (showOptionsDialog != null) {
       showOptionsDialog!(context);
     }
   }
 
   void triggerOnInfoTapped(int step) {
-    logger.t('triggerOnInfoTapped - step=$step');
+    //logger.t('triggerOnInfoTapped - step=$step');
     if (_onInfoTapped != null) {
       _onInfoTapped!(step);
     }
@@ -94,6 +101,10 @@ class TourMapController with ChangeNotifier {
     target: LatLng(0, 0),
     zoom: 14.0,
   );
+  CameraPosition _lastCameraPosition = CameraPosition(
+    target: LatLng(0, 0),
+    zoom: 14.0,
+  );
   Set<Marker> _markers = Set<Marker>();
   Set<Polyline> _polylines = Set<Polyline>();
   List<BitmapDescriptor> _defaultMarkerBitmaps = [];
@@ -116,27 +127,35 @@ class TourMapController with ChangeNotifier {
   CameraPosition get currentCameraPosition => _currentCameraPosition;
 
   void setFullScreen(bool isFullScreen) {
-    logger.t('setFullScreen - isFullScreen=$isFullScreen');
+    //logger.t('setFullScreen - isFullScreen=$isFullScreen');
     _isFullScreen = isFullScreen;
     notifyListeners();
   }
 
   void setLoading(bool isLoading) {
-    logger.t('setLoading - isLoading=$isLoading');
+    //logger.t('setLoading - isLoading=$isLoading');
     _isLoading = isLoading;
     notifyListeners();
   }
 
   void setLoadingFullscreen(bool isLoadingFullscreen) {
-    logger.t('setLoadingFullscreen - isLoadingFullscreen=$isLoadingFullscreen');
+    //logger.t('setLoadingFullscreen - isLoadingFullscreen=$isLoadingFullscreen');
     _isLoadingFullscreen = isLoadingFullscreen;
     notifyListeners();
   }
 
   void setCurrentCameraPosition(CameraPosition position) {
-    logger.t('setCurrentCameraPosition - position=$position');
+    //logger.t('setCurrentCameraPosition - position=$position');
     _currentCameraPosition = position;
-    notifyListeners();
+    //notifyListeners();
+  }
+
+  void notifyCurrentCameraPosition() {
+    if (_currentCameraPosition != _lastCameraPosition) {
+      //logger.t('notifyCurrentCameraPosition - _currentCameraPosition=$_currentCameraPosition');
+      _lastCameraPosition = _currentCameraPosition;
+      notifyListeners();
+    }
   }
 
 
@@ -161,7 +180,6 @@ class TourMapController with ChangeNotifier {
         _defaultMarkerBitmaps.add(defaultIcon);
         _highlightedMarkerBitmaps.add(highlightedIcon);
 
-        logger.t('_addMarkers - 1');
 
         _markers.add(
           Marker(
@@ -181,12 +199,6 @@ class TourMapController with ChangeNotifier {
           ),
         );
       }
-
-      logger.t('_addMarkers - 2');
-
-      //setState(() {
-      //_markers = _markers;
-      //});
 
       //set zoom
       LatLngBounds bounds = MapUtils.createLatLngBounds(_tour.tourguidePlaces.map((place) => LatLng(place.latitude, place.longitude)).toList());
@@ -493,6 +505,8 @@ class TourMapController with ChangeNotifier {
   }
 }
 
+/// NOTE: not using ChangeNotifierProvider atm, because nesting it was causing problems as it's not how it's intended to be used
+/// as a result, I'm not sure whether this is safe to use without nesting inside a TourMapFullscreen atm
 class TourMap extends StatefulWidget {
   final TourMapController tourMapController;
   final Tour tour;
@@ -521,88 +535,95 @@ class _TourMapState extends State<TourMap> {
     Factory<PanGestureRecognizer>(() => PanGestureRecognizer())
   };
 
+
+  @override
+  void dispose() {
+    //widget.tourMapController.dispose(); // Make sure to dispose the controller
+    super.dispose();
+  }
   
   
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (_) => widget.tourMapController,
-      child: Consumer<TourMapController>(
-        builder: (context, tourMapController, child) {
-          logger.t('TourMap - Consumer');
-          return Container(
-            height: kIsWeb ? 450 : 350.0, // Adjust height as needed
-            child: Stack(
-              children: [
-                  Container( //backdrop TODO - investigate why this is needed, otherwise sometimes I can see thru the map
-                    color: Color(0xffe8eaed),
+    //logger.t('TourMap - build');
+    return Consumer<TourMapController>(
+      builder: (context, tourMapController, child) {
+        //logger.t('TourMap - Consumer');
+        return Container(
+          height: kIsWeb ? 450 : 350.0, // Adjust height as needed
+          child: Stack(
+            children: [
+                Container( //backdrop TODO - investigate why this is needed, otherwise sometimes I can see thru the map
+                  color: Color(0xffe8eaed),
+                ),
+                GoogleMap(
+                  key: widget.mapKey,
+                  gestureRecognizers: widget.mapCurrentlyPinnedAtTop ? _gestureRecognizersEager : _gestureRecognizersPan,
+                  mapType: MapType.normal,
+                  myLocationEnabled: true,
+                  initialCameraPosition: widget.tourMapController.currentCameraPosition,
+                  markers: widget.tourMapController.markers,
+                  polylines: widget.tourMapController.polylines,
+                  onMapCreated: (GoogleMapController controller) async {
+                    if (!widget.tourMapController.mapControllerCompleter.isCompleted) {
+                      widget.tourMapController.mapControllerCompleter.complete(controller);
+                    } else {
+                      final GoogleMapController mapController = await widget.tourMapController.mapControllerCompleter.future;
+                      mapController.moveCamera(CameraUpdate.newCameraPosition(widget.tourMapController.currentCameraPosition));
+                    }
+                    await Future.delayed(const Duration(milliseconds: 200)); //avoid flicker
+                    widget.tourMapController.setLoading(false);
+                  },
+                  onCameraMove: (CameraPosition position) {
+                    widget.tourMapController.setCurrentCameraPosition(position);
+                  },
+                  onCameraIdle: () {
+                    widget.tourMapController.notifyCurrentCameraPosition();
+                  },
+                ),
+                if (widget.tourMapController.isLoading)
+                Container(
+                  color: Color(0xffe8eaed),
+                  child: Center(
+                    child: CircularProgressIndicator(),
                   ),
-                  GoogleMap(
-                    key: widget.mapKey,
-                    gestureRecognizers: widget.mapCurrentlyPinnedAtTop ? _gestureRecognizersEager : _gestureRecognizersPan,
-                    mapType: MapType.normal,
-                    myLocationEnabled: true,
-                    initialCameraPosition: widget.tourMapController.currentCameraPosition,
-                    markers: widget.tourMapController.markers,
-                    polylines: widget.tourMapController.polylines,
-                    onMapCreated: (GoogleMapController controller) async {
-                      if (!widget.tourMapController.mapControllerCompleter.isCompleted) {
-                        widget.tourMapController.mapControllerCompleter.complete(controller);
-                      } else {
-                        final GoogleMapController mapController = await widget.tourMapController.mapControllerCompleter.future;
-                        mapController.moveCamera(CameraUpdate.newCameraPosition(widget.tourMapController.currentCameraPosition));
-                      }
-                      await Future.delayed(const Duration(milliseconds: 200)); //avoid flicker
-                      widget.tourMapController.setLoading(false);
-                    },
-                    onCameraMove: (CameraPosition position) {
-                      widget.tourMapController.setCurrentCameraPosition(position);
-                    },
-                  ),
-                  if (widget.tourMapController.isLoading)
-                  Container(
-                    color: Color(0xffe8eaed),
-                    child: Center(
-                      child: CircularProgressIndicator(),
-                    ),
-                  ),
-                if (!widget.tourMapController.isLoading)
-                  Positioned(
-                    bottom: 120,
-                    right: 10,
-                    child: SizedBox(
-                      width: 42,
-                      height: 42,
-                      child: RawMaterialButton(
-                        onPressed: () async {
-                          final controller = await widget.tourMapController.mapControllerCompleter.future;
-                          widget.tourMapController.setFullScreen(!widget.tourMapController.isFullScreen);
-                          widget.tourMapController.setLoadingFullscreen(true);
-                          controller.moveCamera(
-                            CameraUpdate.newCameraPosition(widget.tourMapController.currentCameraPosition),
-                          );
-                        },
-                        elevation: 1.0,
-                        fillColor: Colors.white.withOpacity(0.9),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8.0), // Adjust the radius as needed
-                        ),
-                        child: Padding(
-                          padding: const EdgeInsets.all(1.0), // Adjust inner padding as needed
-                          child: Icon(
-                            widget.tourMapController.isFullScreen ? Icons.fullscreen_exit : Icons.fullscreen,
-                            color: const Color(0xff666666),
-                            size: 32.0, // Adjust the size of the icon as needed
-                          ),
+                ),
+              if (!widget.tourMapController.isLoading)
+                Positioned(
+                  bottom: 120,
+                  right: 10,
+                  child: SizedBox(
+                    width: 42,
+                    height: 42,
+                    child: RawMaterialButton(
+                      onPressed: () async {
+                        final controller = await widget.tourMapController.mapControllerCompleter.future;
+                        widget.tourMapController.setFullScreen(!widget.tourMapController.isFullScreen);
+                        widget.tourMapController.setLoadingFullscreen(true);
+                        controller.moveCamera(
+                          CameraUpdate.newCameraPosition(widget.tourMapController.currentCameraPosition),
+                        );
+                      },
+                      elevation: 1.0,
+                      fillColor: Colors.white.withOpacity(0.9),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8.0), // Adjust the radius as needed
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.all(1.0), // Adjust inner padding as needed
+                        child: Icon(
+                          widget.tourMapController.isFullScreen ? Icons.fullscreen_exit : Icons.fullscreen,
+                          color: const Color(0xff666666),
+                          size: 32.0, // Adjust the size of the icon as needed
                         ),
                       ),
                     ),
                   ),
-              ],
-            ),
-          );
-        },
-      ),
+                ),
+            ],
+          ),
+        );
+      },
     );
   }
 }
@@ -628,15 +649,21 @@ class _TourMapFullscreenState extends State<TourMapFullscreen> {
   int thisUsersRating = 0;
 
 
+  @override
+  void dispose() {
+    //widget.tourMapController.dispose(); // Make sure to dispose the controller
+    super.dispose();
+  }
+
 
   @override
   Widget build(BuildContext context) {
-
+    //logger.t('TourMapFullscreen - build');
     return ChangeNotifierProvider(
       create: (_) => widget.tourMapController,
       child: Consumer<TourMapController>(
         builder: (context, tourMapController, child) {
-          logger.t('TourMapFullscreen - Consumer');
+          //logger.t('TourMapFullscreen - Consumer');
           return Scaffold(
             appBar: widget.tourMapController.isFullScreen ? AppBar(
               title: Text(widget.tour.name),
@@ -689,6 +716,9 @@ class _TourMapFullscreenState extends State<TourMapFullscreen> {
                             },
                             onCameraMove: (CameraPosition position) {
                               widget.tourMapController.setCurrentCameraPosition(position);
+                            },
+                            onCameraIdle: () {
+                              widget.tourMapController.notifyCurrentCameraPosition();
                             },
                           ),
                           if (widget.tourMapController.isLoadingFullscreen)

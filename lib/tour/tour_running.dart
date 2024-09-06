@@ -83,7 +83,6 @@ class _TourRunningState extends State<TourRunning> {
   @override
   void dispose() {
     _ttsService.stop();
-    _tourMapController.resetTourMapController();
     super.dispose();
   }
 
@@ -130,10 +129,7 @@ class _TourRunningState extends State<TourRunning> {
 
 
 
-
-
   void _showOptionsDialog(BuildContext context) {
-    final tourProvider = Provider.of<TourProvider>(context, listen: false);
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -251,10 +247,9 @@ class _TourRunningState extends State<TourRunning> {
 
   @override
   Widget build(BuildContext context) {
-    final tourProvider = Provider.of<TourProvider>(context);
-    final tourguideUserProvider = Provider.of<TourguideUserProvider>(context);
     bool isOfflineCreatedTour = (_tour.isOfflineCreatedTour ?? false);
 
+    //logger.t('TourRunning.build()');
 
 
     return TourMapFullscreen(
@@ -264,7 +259,6 @@ class _TourRunningState extends State<TourRunning> {
           controller: _scrollController,
           slivers: [
             SliverAppBar(
-              //title: Center(child: Text(_tour.name)),
               actions: [
                 if (!isOfflineCreatedTour)
                   IconButton(
@@ -274,14 +268,6 @@ class _TourRunningState extends State<TourRunning> {
                     },
                   ),
               ],
-              /*leading: IconButton(
-                icon: const Icon(Icons.arrow_back, color: Colors.white),
-                onPressed: () {
-                  setState(() {
-                    Navigator.of(context).pop();
-                  });
-                },
-              ),*/
               foregroundColor: Theme.of(context).brightness == Brightness.light ? Theme.of(context).scaffoldBackgroundColor : Colors.white,
               floating: false,
               pinned: false,
@@ -348,32 +334,7 @@ class _TourRunningState extends State<TourRunning> {
               ),
             ),
             SliverToBoxAdapter(
-              child: /*Stack(
-                children: [
-                  StandardLayout(
-                    children: [
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const SizedBox(height: 16.0),
-                          Container(
-                            height: 105,
-                            child: Text(
-                              _tour.description,
-                              style: Theme.of(context).textTheme.bodyMedium,
-                            ),
-                          ),
-                          TourTagsRow(
-                              tags: TourTagsAndRatingRow.parseTags(_tour.tags!)
-                          ),
-                          const SizedBox(height: 16.0),
-                        ],
-                      ),
-                    ],
-                  ),
-                ],
-              ),*/
-              Padding(
+              child: Padding(
                 padding: const EdgeInsets.symmetric(vertical: 16.0),
                 child: StandardLayout(
                   children: [
@@ -609,7 +570,6 @@ class _TourRunningState extends State<TourRunning> {
                       ],
                     ),
                   )
-
                 ],
               ),
             )
