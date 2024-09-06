@@ -14,7 +14,7 @@ import 'package:tourguide_app/utilities/providers/tour_provider.dart';
 import 'tour_rating_bookmark_buttons.dart';
 import '../utilities/custom_import.dart';
 import '../utilities/providers/tourguide_user_provider.dart';
-import '../utilities/singletons/tts_service.dart';
+import '../utilities/services/tts_service.dart';
 
 class FullscreenTourPage extends StatefulWidget {
   final Tour tour;
