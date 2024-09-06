@@ -168,6 +168,7 @@ class _FullscreenTourPageState extends State<FullscreenTourPage> {
     return TourMapFullscreen(
       tour: widget.tour,
       tourMapController: _tourMapController,
+      alwaysShowAppBar: true,
       child: Scrollbar(
         thumbVisibility: true,
         controller: _scrollController,
