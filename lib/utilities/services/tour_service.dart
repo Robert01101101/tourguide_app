@@ -103,11 +103,23 @@ class TourService {
     FirebaseFirestore db = FirebaseFirestore.instance;
 
     try {
-      // Delete the tour document
-      await db.collection('tours').doc(tour.id).delete();
-      logger.t('Tour with ID ${tour.id} successfully deleted');
+      // Reference to the tour document
+      DocumentReference tourRef = db.collection('tours').doc(tour.id);
+
+      // Get ratings sub-collection
+      QuerySnapshot ratingsSnapshot = await tourRef.collection('ratings').get();
+
+      // Delete all documents in the ratings sub-collection
+      for (QueryDocumentSnapshot doc in ratingsSnapshot.docs) {
+        await doc.reference.delete();
+      }
+
+      // After deleting sub-collections, delete the tour document
+      await tourRef.delete();
+
+      logger.t('Tour with ID ${tour.id} and its sub-collections successfully deleted');
     } catch (e) {
-      logger.e('Error deleting tour with ID  ${tour.id}: $e');
+      logger.e('Error deleting tour with ID ${tour.id}: $e');
     }
   }
 

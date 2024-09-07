@@ -101,6 +101,7 @@ class TtsService {
       languageNotifier.value = prefs.getString('tts_language')!;
       logger.t("Language from prefs: ${languageNotifier.value}");
       hasSavedSettings.value = true;
+      setLanguage(languageNotifier.value!, saveSettings: false);
     }
   }
 
@@ -147,6 +148,7 @@ class TtsService {
   }
 
   void dispose() {
+    stop();
     _progressController.close();
     _ttsStateController.close();
   }

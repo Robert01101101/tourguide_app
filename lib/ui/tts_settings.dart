@@ -187,6 +187,7 @@ class _TtsSettingsState extends State<TtsSettings> {
         SizedBox(height: 16.0),
         Wrap(
           children: [
+            if (!kIsWeb)
             ElevatedButton.icon(
               onPressed: openTtsSettings,
               label: const Text('Open System TTS Settings'),
