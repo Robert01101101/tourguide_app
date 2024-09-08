@@ -39,13 +39,18 @@ class _TourguideOnboardState extends State<TourguideOnboard> {
 
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
       authProvider.addListener(() {
-        if (authProvider.user != null && authProvider.isAuthorized) {
-          logger.t("signIn.initState().authProviderListener -> user is no longer null, will skip signIn page");
-          pathToGoToNext = TourguideNavigation.explorePath;
-        }
+        _refreshRedirectPath(authProvider);
       });
     });
+    _refreshRedirectPath(authProvider);
     FirebaseAnalytics.instance.logTutorialBegin(parameters: {'tutorialName': 'onboarding',},);
+  }
+
+  void _refreshRedirectPath(my_auth.AuthProvider authProvider){
+    if (authProvider.user != null && authProvider.isAuthorized) {
+      logger.t("signIn.initState().authProviderListener -> user is no longer null, will skip signIn page");
+      pathToGoToNext = TourguideNavigation.explorePath;
+    }
   }
 
   void _completeOnboarding() async {

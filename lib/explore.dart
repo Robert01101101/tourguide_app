@@ -148,11 +148,11 @@ class ExploreState extends State<Explore> {
         // Check if the currentPosition is null
         if (locationProvider.currentPosition == null || userProvider.user == null) {
           // Wait for a short duration before checking again
-          await Future.delayed(Duration(milliseconds: 100));
+          await Future.delayed(const Duration(milliseconds: 100));
           return true; // Continue looping
         }
         return false; // Exit loop if currentPosition is not null
-      }).timeout(Duration(seconds: 3));
+      }).timeout(const Duration(seconds: 3));
     } catch (e) {
       // Handle timeout
       logger.e('Timeout waiting for location or user provider');
@@ -194,7 +194,9 @@ class ExploreState extends State<Explore> {
 
   void _measureContentHeight() {
     try {
-      final RenderBox renderBox = _contentKey.currentContext?.findRenderObject() as RenderBox;
+      var renderObject = _contentKey.currentContext?.findRenderObject();
+      if (renderObject == null) return;
+      final RenderBox renderBox = renderObject as RenderBox;
       setState(() {
         _contentHeight = renderBox.size.height;
       });

@@ -143,7 +143,17 @@ class _SignInState extends State<SignIn> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: <Widget>[
-            const Text('You are signed out.'),
+            const SizedBox(
+              width: 240,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Text('You are signed out.'),
+                  SizedBox(height: 20),
+                  Text('To continue, please create or sign into your account.', textAlign: TextAlign.center,),
+                ],
+              ),
+            ),
             // This method is used to separate mobile from web code with conditional exports.
             // See: src/sign_in_button.dart
             buildSignInButton(
