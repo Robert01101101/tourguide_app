@@ -41,6 +41,7 @@ class _TourRunningState extends State<TourRunning> {
   bool _mapCurrentlyPinnedAtTop = false;
   double _mapYposition = 0;
   final GlobalKey _mapKey = GlobalKey();
+  bool _ignoreStopEvent = false; //rly scrappy solution TODO: better fix
 
 
 
@@ -71,9 +72,15 @@ class _TourRunningState extends State<TourRunning> {
 
     //Listen to tts state changes
     _ttsSubscription = _ttsService.ttsStateStream.listen((TtsState state) {
+      if (_ignoreStopEvent) {
+        _ignoreStopEvent = false;
+        return;
+      }
       if (state == TtsState.stopped) {
         setState(() {
+
           currentlyPlayingIndex = null;
+          logger.t('TTS stopped, currentlyPlayingIndex: $currentlyPlayingIndex');
         });
       }
     });
@@ -185,18 +192,31 @@ class _TourRunningState extends State<TourRunning> {
 
   int? currentlyPlayingIndex; // Track the index of the currently playing place
 
-  void _toggleTTS(String description, int index) {
+  Future<void> _toggleTTS(String description, int index) async {
+    logger.t('Toggling TTS for place $index, currentlyPlayingIndex: $currentlyPlayingIndex, description: $description');
+    await _ttsService.stop();
     if (currentlyPlayingIndex == index) {
-      _ttsService.stop(); // Stop the TTS service if the same button is pressed
+      //stop
       setState(() {
         currentlyPlayingIndex = null; // Reset the index
       });
     } else {
-      _ttsService.speak(description); // Start speaking
+      //play
+      await Future.delayed(const Duration(milliseconds: 100)); //TODO: better fix
       setState(() {
         currentlyPlayingIndex = index; // Set the currently playing index
       });
+      _ttsService.speak(description); // Start speaking
     }
+    logger.t('Toggling TTS for place $index, currentlyPlayingIndex: $currentlyPlayingIndex, description: $description AFTER');
+  }
+
+  Future<void> _changeTtsSpeakPosition(String newSubstring) async {
+    _ignoreStopEvent = true;
+    await _ttsService.stop();
+    await Future.delayed(const Duration(milliseconds: 100)); //TODO: better fix
+    _ttsService.speak(newSubstring);
+    logger.t('Changing TTS speak position to: $newSubstring, currentlyPlayingIndex: $currentlyPlayingIndex');
   }
 
   void _scrollToTarget(int placeIndex, {bool delay = false}) {
@@ -516,6 +536,9 @@ class _TourRunningState extends State<TourRunning> {
                                             text: place.description,
                                             ttsService: _ttsService,
                                             currentlyPlayingItem: currentlyPlayingIndex== index,
+                                            onWordTapped: (String remainingString) {
+                                              _changeTtsSpeakPosition(remainingString);
+                                            },
                                           ),
                                         ),
                                       ],
