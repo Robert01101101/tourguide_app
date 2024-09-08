@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
@@ -48,8 +50,8 @@ class _TourTileState extends State<TourTile> {
       ),
       builder: (BuildContext context) {
         // Adjust the height based on screen size
-        //final double screenHeight = MediaQuery.of(context).size.height;
-        final double desiredHeight = 540;//screenHeight * 0.6;
+        final double screenHeightPortion = MediaQuery.of(context).size.height * 0.4;
+        final double desiredHeight = max(540, screenHeightPortion);
 
         return Container(
           width: MediaQuery.of(context).size.width, // Full width

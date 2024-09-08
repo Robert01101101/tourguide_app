@@ -129,7 +129,7 @@ class _SignInState extends State<SignIn> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
-            const Text('Sign into the Firebase service for access to Tourguide.'),
+            const Text('Sign into the Google Firebase Cloud service for access to Tourguide.'),
             ElevatedButton(
               onPressed: () => authProvider.signInWithFirebase(authProvider.googleSignInUser!),
               child: const Text('SIGN INTO FIREBASE SERVICE'),
@@ -143,14 +143,16 @@ class _SignInState extends State<SignIn> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: <Widget>[
-            const SizedBox(
+            SizedBox(
               width: 240,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  Text('You are signed out.'),
+                  Text('You are signed out.',
+                      style: Theme.of(context).textTheme.bodyLarge),
                   SizedBox(height: 20),
-                  Text('To continue, please create or sign into your account.', textAlign: TextAlign.center,),
+                  Text('To continue, please sign in or create an account with Google.', textAlign: TextAlign.center,
+                      style: Theme.of(context).textTheme.bodyMedium!.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant)),
                 ],
               ),
             ),
@@ -190,12 +192,12 @@ class _SignInState extends State<SignIn> {
               child: RichText(
                 textAlign: TextAlign.center,
                 text: TextSpan(
-                  style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant),
+                  style: Theme.of(context).textTheme.bodyMedium!.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant),
                   children: [
                     const TextSpan(text: 'By signing in, you agree to the \n'),
                     TextSpan(
                       text: 'Terms of Service',
-                      style: TextStyle(decoration: TextDecoration.underline, color: Theme.of(context).colorScheme.primary),
+                      style: Theme.of(context).textTheme.bodyMedium!.copyWith(decoration: TextDecoration.underline, color: Theme.of(context).colorScheme.primary),
                       recognizer: TapGestureRecognizer()
                         ..onTap = () {
                           launchUrl(Uri.parse("https://tourguide.rmichels.com/termsOfService.html"));
@@ -204,7 +206,7 @@ class _SignInState extends State<SignIn> {
                     const TextSpan(text: ' and '),
                     TextSpan(
                       text: 'Privacy Policy',
-                      style: TextStyle(decoration: TextDecoration.underline, color: Theme.of(context).colorScheme.primary),
+                      style: Theme.of(context).textTheme.bodyMedium!.copyWith(decoration: TextDecoration.underline, color: Theme.of(context).colorScheme.primary),
                       recognizer: TapGestureRecognizer()
                         ..onTap = () {
                           launchUrl(Uri.parse("https://tourguide.rmichels.com/privacyPolicy.html"));
