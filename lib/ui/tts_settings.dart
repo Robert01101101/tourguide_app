@@ -118,6 +118,7 @@ class _TtsSettingsState extends State<TtsSettings> {
           mainAxisAlignment: MainAxisAlignment.start,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            if (!kIsWeb)
             Column(
               mainAxisAlignment: MainAxisAlignment.start,
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -156,6 +157,7 @@ class _TtsSettingsState extends State<TtsSettings> {
                 ),
               ],
             ),
+            if (!kIsWeb)
             SizedBox(width: 16.0),
             Column(
               mainAxisAlignment: MainAxisAlignment.start,
@@ -197,7 +199,7 @@ class _TtsSettingsState extends State<TtsSettings> {
                 valueListenable: _ttsService.hasSavedSettings,
                 builder: (context, hasSavedSettings, child) {
                 return Visibility(
-                  visible: hasSavedSettings && !kIsWeb,
+                  visible: hasSavedSettings,
                   child: ElevatedButton.icon(
                     onPressed: _ttsService.clearSettings,
                     label: const Text('Clear App TTS Preferences'),
