@@ -41,9 +41,7 @@ class TtsService {
 
 
   void _initTts() async {
-    if (isAndroid) {
-      await _getDefaultVoice();
-    }
+    await _getDefaultVoice();
     await _loadSettings();
 
     _flutterTts.setStartHandler(() {
@@ -117,10 +115,7 @@ class TtsService {
     prefs.remove('tts_rate');
     prefs.remove('tts_language');
     hasSavedSettings.value = false;
-    if (isAndroid) {
-      await _getDefaultVoice();
-      setLanguage(languageNotifier.value!, saveSettings: false);
-    }
+    await _getDefaultVoice();
     double newRate = kIsWeb ? 0.9 : 0.6;
     rate = newRate;
     _flutterTts.setSpeechRate(rate);
@@ -157,12 +152,22 @@ class TtsService {
   // ----
 
   Future<void> _getDefaultVoice() async {
-    var voice = await _flutterTts.getDefaultVoice;
-    if (voice != null) {
-      logger.t(voice);
-      languageNotifier.value = voice['locale'];
-      isCurrentLanguageInstalledNotifier.value = await _flutterTts.isLanguageInstalled(languageNotifier.value!);
+    if (isAndroid){
+      var voice = await _flutterTts.getDefaultVoice;
+      if (voice != null) {
+        logger.t(voice);
+        languageNotifier.value = voice['locale'];
+        isCurrentLanguageInstalledNotifier.value = await _flutterTts.isLanguageInstalled(languageNotifier.value!);
+        setLanguage(languageNotifier.value!, saveSettings: false);
+      }
+    } else {
+      var defaultLanguages = await getLanguages();
+      var defaultLanguageVoice = defaultLanguages[0] as String;
+      logger.t(defaultLanguageVoice);
+      languageNotifier.value = defaultLanguageVoice;
+      setLanguage(languageNotifier.value!, saveSettings: false);
     }
+
   }
 
   void setLanguage(String selectedLanguage, {bool saveSettings = true}){

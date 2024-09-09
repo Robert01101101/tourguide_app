@@ -197,7 +197,7 @@ class _TtsSettingsState extends State<TtsSettings> {
                 valueListenable: _ttsService.hasSavedSettings,
                 builder: (context, hasSavedSettings, child) {
                 return Visibility(
-                  visible: hasSavedSettings,
+                  visible: hasSavedSettings && !kIsWeb,
                   child: ElevatedButton.icon(
                     onPressed: _ttsService.clearSettings,
                     label: const Text('Clear App TTS Preferences'),

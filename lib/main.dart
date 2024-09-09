@@ -10,6 +10,7 @@ import 'package:hive/hive.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:logger/logger.dart' as logger_mobile;
+import 'package:logger/logger.dart';
 import 'package:logger/web.dart' as logger_web;
 import 'package:provider/provider.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
@@ -31,7 +32,11 @@ import 'model/tour.dart';
 import 'model/tourguide_place.dart';
 import 'model/tourguide_report.dart';
 
-var logger = kIsWeb ? logger_web.Logger() : logger_mobile.Logger();
+var logger = kIsWeb
+    ? logger_web.Logger(level: logger_web.Level.all,)
+                        //filter: ProductionFilter())
+    : logger_mobile.Logger(level: logger_mobile.Level.all,);
+                        //filter: ProductionFilter());
 final FirebaseRemoteConfig remoteConfig = FirebaseRemoteConfig.instance;
 
 Future<void> main() async {
@@ -63,14 +68,6 @@ Future<void> main() async {
 
   //LOAD ENVIRONMENT (SECURE VARS)
   await fetchConfig();
-
-  //LOGGING
-  if (kIsWeb){
-    logger_web.Logger.level = logger_web.Level.trace;
-  } else {
-    logger_mobile.Logger.level = logger_mobile.Level.all;
-  }
-
 
   //HIVE DB
   if (!kIsWeb){
