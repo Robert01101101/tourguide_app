@@ -2,7 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:provider/provider.dart';
-import 'package:tourguide_app/utilities/maps/map_utils.dart';
+import 'package:tourguide_app/utilities/map_utils.dart';
 import 'package:tourguide_app/utilities/providers/tour_provider.dart';
 
 import 'main.dart';

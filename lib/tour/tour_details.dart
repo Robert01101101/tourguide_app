@@ -9,12 +9,13 @@ import 'package:tourguide_app/tour/tour_creation.dart';
 import 'package:tourguide_app/tour/tour_details_options.dart';
 import 'package:tourguide_app/tour/tourguide_user_profile_view.dart';
 import 'package:tourguide_app/ui/my_layouts.dart';
-import 'package:tourguide_app/utilities/maps/tour_map.dart';
+import 'package:tourguide_app/tour/tour_map.dart';
 import 'package:tourguide_app/utilities/providers/tour_provider.dart';
 import 'tour_rating_bookmark_buttons.dart';
 import '../utilities/custom_import.dart';
 import '../utilities/providers/tourguide_user_provider.dart';
 import '../utilities/services/tts_service.dart';
+import 'package:tourguide_app/utilities/providers/auth_provider.dart' as my_auth;
 
 class FullscreenTourPage extends StatefulWidget {
   final Tour tour;
@@ -47,6 +48,8 @@ class _FullscreenTourPageState extends State<FullscreenTourPage> {
     thisUsersRating = widget.tour.thisUsersRating ?? 0;
     super.initState();
 
+    my_auth.AuthProvider authProvider = Provider.of(context, listen: false);
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _tourMapController.initTourMapController(
         tour: widget.tour,
@@ -58,6 +61,7 @@ class _FullscreenTourPageState extends State<FullscreenTourPage> {
         showOptionsDialog: (BuildContext context) {
           _showOptionsDialog(context);
         },
+        idToken: authProvider.user!.uid,
       );
     });
   }
@@ -234,7 +238,7 @@ class _FullscreenTourPageState extends State<FullscreenTourPage> {
                   ],
                 ),
               ),
-              Text(
+              SelectableText(
                 widget.tour.description,
                 style: Theme.of(context).textTheme.bodyMedium,
               ),
@@ -318,7 +322,7 @@ class _FullscreenTourPageState extends State<FullscreenTourPage> {
               ),
               Padding(
                 padding: const EdgeInsets.only(top: 12.0),
-                child: Text(
+                child: SelectableText(
                     'Places you\'ll visit',
                     style: Theme.of(context).textTheme.titleLarge
                 ),
@@ -335,19 +339,16 @@ class _FullscreenTourPageState extends State<FullscreenTourPage> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
+                          SelectableText(
                             "${index+1}.  ${place.title}",
-                            style: Theme.of(context).textTheme.titleMedium,
+                            style: Theme.of(context).textTheme.titleMedium!.copyWith(overflow: TextOverflow.ellipsis,),
                             maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
                           ),
                           SizedBox(height: 6.0),
-                          Text(
+                          SelectableText(
                             place.description, // Assuming each place has a 'description' field
-                            style: Theme.of(context).textTheme.bodyMedium,
-                            softWrap: true,
+                            style: Theme.of(context).textTheme.titleMedium!.copyWith(overflow: TextOverflow.ellipsis,),
                             maxLines: 3,
-                            overflow: TextOverflow.ellipsis,
                           ),
                         ],
                       ),

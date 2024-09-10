@@ -82,15 +82,17 @@ Future<void> main() async {
 
   //CRASHLYTICS
   FirebaseAnalytics analytics = FirebaseAnalytics.instance;
-  // Pass all uncaught "fatal" errors from the framework to Crashlytics
-  FlutterError.onError = (errorDetails) {
-    FirebaseCrashlytics.instance.recordFlutterFatalError(errorDetails);
-  };
-  // Pass all uncaught asynchronous errors that aren't handled by the Flutter framework to Crashlytics
-  PlatformDispatcher.instance.onError = (error, stack) {
-    FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
-    return true;
-  };
+  // Pass all uncaught "fatal" errors from the framework to Crashlytics (except for web, which doesn't support it)
+  if (!kIsWeb){
+    FlutterError.onError = (errorDetails) {
+      FirebaseCrashlytics.instance.recordFlutterFatalError(errorDetails);
+    };
+    // Pass all uncaught asynchronous errors that aren't handled by the Flutter framework to Crashlytics
+    PlatformDispatcher.instance.onError = (error, stack) {
+      FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
+      return true;
+    };
+  }
 
   //Splash
   FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);

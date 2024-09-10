@@ -9,7 +9,7 @@ import 'package:provider/provider.dart';
 import 'package:tourguide_app/main.dart';
 import 'package:tourguide_app/model/tour.dart';
 import 'package:tourguide_app/model/tourguide_place.dart';
-import 'package:tourguide_app/utilities/maps/map_utils.dart';
+import 'package:tourguide_app/utilities/map_utils.dart';
 import 'package:http/http.dart' as http;
 
 /// NOTE: not using ChangeNotifierProvider atm, because nesting it was causing problems as it's not how it's intended to be used
@@ -317,6 +317,7 @@ class TourMapController with ChangeNotifier {
   void Function(BuildContext context)? _showOptionsDialog;
   Function(int step)? _onInfoTapped;
   Color? _primaryColor;
+  String _idToken = '';
   //# endregion
 
   //# region CORE
@@ -329,12 +330,14 @@ class TourMapController with ChangeNotifier {
     required Color primaryColor,
     required Function(int step)
     onInfoTapped,
-    required Function(BuildContext context) showOptionsDialog
+    required Function(BuildContext context) showOptionsDialog,
+    required String idToken,
   }) {
     logger.t('initTourMapController - hashCode=$hashCode');
     _tour = tour;
     _primaryColor = primaryColor;
     _onInfoTapped = onInfoTapped;
+    _idToken = idToken;
     _addMarkers();
 
     _currentCameraPosition = CameraPosition(
@@ -475,6 +478,7 @@ class TourMapController with ChangeNotifier {
     List<String> waypoints = [];
     String waypointsString = "";
     String apiKey = remoteConfig.getString('google_api_key');
+
     try {
       // Prepare waypoints for directions API request
       for (var tourguidePlace in _tour.tourguidePlaces) {
@@ -501,61 +505,62 @@ class TourMapController with ChangeNotifier {
 
     //TODO: Sometimes placeId works better, sometimes lat long, with placeIds it seems walking mode can be tricky -> address
 
-    // Construct directions API URL
-    int attempt = 0;
-    while (attempt < 2) {
-      logger.t('attempt: ${attempt}');
-      try {
-        String url = 'https://maps.googleapis.com/maps/api/directions/json?'
-        //'origin=${waypoints.first.latitude},${waypoints.last.longitude}&'
-        //'destination=${waypoints.last.latitude},${waypoints.last.longitude}&'
-            'origin=place_id:${waypoints.first}&'
-            'destination=place_id:${waypoints.last}&'
-            '${waypointsString.isNotEmpty ? 'waypoints=$waypointsString&' : waypointsString}'
-            'mode=${attempt == 0 ? 'walking&' : 'driving&'}'
-            'key=$apiKey';
 
-        //logger.i(url);
+    try {
+      /*const String functionUrl = 'https://fetchdirections-cmlu32z3qq-uc.a.run.app';
+      String url = '$functionUrl?waypointsRequestString=https://maps.googleapis.com/maps/api/directions/json?'
+          'origin=place_id:${waypoints.first}&destination=place_id:${waypoints.last}&${waypointsString.isNotEmpty ? 'waypoints=$waypointsString&' : waypointsString}'
+          'mode=driving&key=AIzaSyDoBVyvKAzhDHD1hdeDFkv_MosFj2PS_YM';*/
 
-        final response = await http.get(Uri.parse(url));
-        logger.t('response: ${response}');
+      const String functionUrl = 'https://fetchdirections-cmlu32z3qq-uc.a.run.app';
+      final Uri uri = Uri.parse(functionUrl).replace(
+        queryParameters: {
+          'originPlaceId': waypoints.first,
+          'destinationPlaceId': waypoints.last,
+          if (waypointsString.isNotEmpty) 'waypoints': waypointsString,
+        },
+      );
 
-        //logger.i(response.body);
+      logger.t('url: $uri');
 
-        if (response.statusCode == 200) {
-          attempt++;
-          Map<String, dynamic> data = jsonDecode(response.body);
-          // Check the status field
-          String status = data['status'];
+      final response = await http.get(
+        uri,
+        headers: {
+          'Authorization': 'Bearer $_idToken',
+        },
+      );
 
-          if (status == 'ZERO_RESULTS') {
-            // Handle case where no results were found
-            logger.w('No results found for the given waypoints. Trying again with driving directions.');
-            continue;
-          }
-          List<LatLng> points = _decodePolyline(data['routes'][0]['overview_polyline']['points']);
 
-          // Convert waypoints to LatLng
-          logger.t('convert:');
-          List<LatLng> waypointLatLngs = _tour.tourguidePlaces
-              .map((place) => LatLng(place.latitude, place.longitude))
-              .toList();
+      logger.t('response: ${response}');
+      logger.i(response.body);
 
-          // Segment the polyline based on the waypoints
-          logger.t('segment:');
-          _routeSegments = _createRouteSegments(points, waypointLatLngs);
+      if (response.statusCode == 200) {
+        //Map<String, dynamic> data = jsonDecode(response.body);
+        // Check the status field
+        // String status = data['status'];
+        Map<String, dynamic> data = jsonDecode(response.body);
+        String pointsResult = data['points'];
+        logger.i('pointsResult: ${pointsResult}');
+        List<LatLng> points = _decodePolyline(pointsResult);
 
-          logger.t('polyline:');
-          // Initially add the full polyline
-          _addPolyline(points);
-          break;
-        } else {
-          throw Exception('Failed to load directions');
-        }
-      } catch (e, stack) {
-        logger.e('Failed to get directions: $e \n $stack');
-        attempt++;
+        // Convert waypoints to LatLng
+        logger.t('convert:');
+        List<LatLng> waypointLatLngs = _tour.tourguidePlaces
+            .map((place) => LatLng(place.latitude, place.longitude))
+            .toList();
+
+        // Segment the polyline based on the waypoints
+        logger.t('segment:');
+        _routeSegments = _createRouteSegments(points, waypointLatLngs);
+
+        logger.t('polyline points:' + points.toString());
+        // Initially add the full polyline
+        _addPolyline(points);
+      } else {
+        throw Exception('Failed to load directions');
       }
+    } catch (e, stack) {
+      logger.e('Failed to get directions: $e \n $stack');
     }
   }
 
@@ -631,36 +636,81 @@ class TourMapController with ChangeNotifier {
   List<LatLng> _decodePolyline(String encoded) {
     try {
       logger.t('_decodePolyline');
-      List<LatLng> points = [];
-      int index = 0;
-      int len = encoded.length;
-      int lat = 0, lng = 0;
+      if (kIsWeb){
+        List<LatLng> poly = [];
+        int index = 0, len = encoded.length;
+        int lat = 0, lng = 0;
+        BigInt Big0 = BigInt.from(0);
+        BigInt Big0x1f = BigInt.from(0x1f);
+        BigInt Big0x20 = BigInt.from(0x20);
 
-      while (index < len) {
-        int b, shift = 0, result = 0;
-        do {
-          b = encoded.codeUnitAt(index++) - 63;
-          result |= (b & 0x1f) << shift;
-          shift += 5;
-        } while (b >= 0x20);
-        int dlat = ((result & 1) != 0 ? ~(result >> 1) : (result >> 1));
-        lat += dlat;
+        while (index < len) {
+          int shift = 0;
+          BigInt b, result;
+          result = Big0;
+          do {
+            b = BigInt.from(encoded.codeUnitAt(index++) - 63);
+            result |= (b & Big0x1f) << shift;
+            shift += 5;
+          } while (b >= Big0x20);
+          BigInt rshifted = result >> 1;
+          int dlat;
+          if (result.isOdd)
+            dlat = (~rshifted).toInt();
+          else
+            dlat = rshifted.toInt();
+          lat += dlat;
 
-        shift = 0;
-        result = 0;
-        do {
-          b = encoded.codeUnitAt(index++) - 63;
-          result |= (b & 0x1f) << shift;
-          shift += 5;
-        } while (b >= 0x20);
-        int dlng = ((result & 1) != 0 ? ~(result >> 1) : (result >> 1));
-        lng += dlng;
+          shift = 0;
+          result = Big0;
+          do {
+            b = BigInt.from(encoded.codeUnitAt(index++) - 63);
+            result |= (b & Big0x1f) << shift;
+            shift += 5;
+          } while (b >= Big0x20);
+          rshifted = result >> 1;
+          int dlng;
+          if (result.isOdd)
+            dlng = (~rshifted).toInt();
+          else
+            dlng = rshifted.toInt();
+          lng += dlng;
 
-        double latitude = lat / 1E5;
-        double longitude = lng / 1E5;
-        points.add(LatLng(latitude, longitude));
+          poly.add(LatLng((lat / 1E5).toDouble(), (lng / 1E5).toDouble()));
+        }
+        return poly;
+      } else {
+        List<LatLng> points = [];
+        int index = 0;
+        int len = encoded.length;
+        int lat = 0, lng = 0;
+
+        while (index < len) {
+          int b, shift = 0, result = 0;
+          do {
+            b = encoded.codeUnitAt(index++) - 63;
+            result |= (b & 0x1f) << shift;
+            shift += 5;
+          } while (b >= 0x20);
+          int dlat = ((result & 1) != 0 ? ~(result >> 1) : (result >> 1));
+          lat += dlat;
+
+          shift = 0;
+          result = 0;
+          do {
+            b = encoded.codeUnitAt(index++) - 63;
+            result |= (b & 0x1f) << shift;
+            shift += 5;
+          } while (b >= 0x20);
+          int dlng = ((result & 1) != 0 ? ~(result >> 1) : (result >> 1));
+          lng += dlng;
+
+          double latitude = lat / 1E5;
+          double longitude = lng / 1E5;
+          points.add(LatLng(latitude, longitude));
+        }
+        return points;
       }
-      return points;
     } catch (e, stack) {
       logger.e('Failed to decode polyline: $e \n $stack');
       return [];

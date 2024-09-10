@@ -322,10 +322,9 @@ class _ExpandedTourTileOverlayState extends State<ExpandedTourTileOverlay> {
               Expanded(
                 child: Container(
                   padding: EdgeInsets.fromLTRB(16, 0, 0, 0),
-                  child: Text(
+                  child: SelectableText(
                     widget.tour.name,
-                    style: Theme.of(context).textTheme.headlineSmall,
-                    overflow: TextOverflow.ellipsis,
+                    style: Theme.of(context).textTheme.headlineSmall!.copyWith(overflow: TextOverflow.ellipsis,),
                     maxLines: 2,
                   ),
                 ),
@@ -394,7 +393,7 @@ class _ExpandedTourTileOverlayState extends State<ExpandedTourTileOverlay> {
                 StandardLayout(
                   disableAdaptiveHorizontalPadding: true,
                   children: [
-                    Text(
+                    SelectableText(
                       widget.tour.description,
                       style: Theme.of(context).textTheme.bodyMedium,
                     ),

@@ -2,9 +2,10 @@ import 'package:flutter/material.dart';
 
 class TourTag extends StatelessWidget {
   final String label;
+  final bool selectable;
   bool leftPadding;
 
-  TourTag({super.key, required this.label, this.leftPadding = true});
+  TourTag({super.key, required this.label, required this.selectable, this.leftPadding = true});
 
   static List<String> parseTags(Map<String, dynamic> tagsMap, {bool shorten = false}) {
     List<String> result = [];
@@ -33,17 +34,24 @@ class TourTag extends StatelessWidget {
     return Padding(
       padding: EdgeInsets.only(left: leftPadding ? 3 : 0),
       child: Container(
-        padding: EdgeInsets.symmetric(vertical: 3, horizontal: 6),
+        padding: const EdgeInsets.symmetric(vertical: 3, horizontal: 6),
         decoration: BoxDecoration(
           color: Theme.of(context).colorScheme.tertiaryContainer,
           borderRadius: BorderRadius.circular(6),
         ),
-        child: Text(
-          label,
-          style: Theme.of(context).textTheme.bodySmall!.copyWith(
-            color: Theme.of(context).colorScheme.onTertiaryContainer,
+        child: selectable
+          ? SelectableText(
+              label,
+              style: Theme.of(context).textTheme.bodySmall!.copyWith(
+                color: Theme.of(context).colorScheme.onTertiaryContainer,
+              ),
+            )
+          : Text(
+            label,
+            style: Theme.of(context).textTheme.bodySmall!.copyWith(
+              color: Theme.of(context).colorScheme.onTertiaryContainer,
+            ),
           ),
-        ),
       ),
     );
   }
@@ -60,7 +68,7 @@ class TourTagsAndRatingRow extends StatelessWidget {
     return Row(
       children: [
         Expanded(
-          child: TourTagsRow(tags: tags),
+          child: TourTagsRow(tags: tags, selectable: false),
         ),
         SizedBox(width: 4),
         Material(
@@ -90,8 +98,9 @@ class TourTagsAndRatingRow extends StatelessWidget {
 
 class TourTagsRow extends StatelessWidget {
   final List<String> tags;
+  bool selectable;
 
-  const TourTagsRow({super.key, required this.tags});
+  TourTagsRow({super.key, required this.tags, this.selectable = true});
 
   @override
   Widget build(BuildContext context) {
@@ -119,7 +128,7 @@ class TourTagsRow extends StatelessWidget {
 
           if (usedWidth + tagWidth <= availableWidth) {
             usedWidth += tagWidth;
-            visibleTags.add(TourTag(label: tag, leftPadding: leftPadding));
+            visibleTags.add(TourTag(label: tag, leftPadding: leftPadding, selectable: selectable));
             leftPadding = true;
           } else {
             break; // Stop adding tags if they overflow

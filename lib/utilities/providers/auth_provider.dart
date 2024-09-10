@@ -34,7 +34,9 @@ class AuthProvider with ChangeNotifier {
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
   ////// PUBLIC /////
+  /// Firebase User
   User? get user => _user;
+  /// Google Sign In User
   GoogleSignInAccount? get googleSignInUser => _googleSignInUser;
   bool get isAuthorized => _isAuthorized;
   bool get isLoggingOut => _isLoggingOut;
@@ -176,7 +178,7 @@ class AuthProvider with ChangeNotifier {
       _isAuthorized = false;
       _silentSignInFailed = false;
       _isLoggingOut = false;
-      SnackBarService.showSnackBar(content: 'You\'re signed out!');
+      //SnackBarService.showSnackBar(content: 'You\'re signed out!');
     } catch (e){
       logger.e(e);
       _isLoggingOut = false;

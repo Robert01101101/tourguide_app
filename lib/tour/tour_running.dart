@@ -12,12 +12,13 @@ import 'package:tourguide_app/tour/tourguide_user_profile_view.dart';
 import 'package:tourguide_app/ui/my_layouts.dart';
 import 'package:tourguide_app/tour/tour_rating_bookmark_buttons.dart';
 import 'package:tourguide_app/ui/tts_text.dart';
-import 'package:tourguide_app/utilities/maps/map_utils.dart';
-import 'package:tourguide_app/utilities/maps/tour_map.dart';
+import 'package:tourguide_app/utilities/map_utils.dart';
+import 'package:tourguide_app/tour/tour_map.dart';
 import 'package:tourguide_app/utilities/providers/tour_provider.dart';
 import 'package:visibility_detector/visibility_detector.dart';
 import '../utilities/custom_import.dart';
 import '../utilities/services/tts_service.dart';
+import 'package:tourguide_app/utilities/providers/auth_provider.dart' as my_auth;
 
 class TourRunning extends StatefulWidget {
   const TourRunning({super.key});
@@ -55,6 +56,8 @@ class _TourRunningState extends State<TourRunning> {
     for (int i = 0; i <= _tour.tourguidePlaces.length; i++) _targetKeys.add(GlobalKey());
     _scrollController.addListener(_handleScroll);
 
+    my_auth.AuthProvider authProvider = Provider.of(context, listen: false);
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _tourMapController.initTourMapController(
           tour: _tour,
@@ -66,6 +69,7 @@ class _TourRunningState extends State<TourRunning> {
         showOptionsDialog: (BuildContext context) {
           _showOptionsDialog(context);
         },
+        idToken: authProvider.user!.uid,
       );
       _getMapPosition();
     });
@@ -296,7 +300,7 @@ class _TourRunningState extends State<TourRunning> {
                   offset: Offset(0, -32),
                   child: Padding(
                     padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 56.0),
-                    child: Text(
+                    child: SelectableText(
                       textAlign: TextAlign.left,
                       _tour.name,
                       style: Theme.of(context).textTheme.displaySmall!.copyWith(
@@ -356,7 +360,7 @@ class _TourRunningState extends State<TourRunning> {
                 padding: const EdgeInsets.symmetric(vertical: 16.0),
                 child: StandardLayout(
                   children: [
-                    Text(
+                    SelectableText(
                       _tour.description,
                       style: Theme.of(context).textTheme.bodyMedium,
                     ),
@@ -486,19 +490,17 @@ class _TourRunningState extends State<TourRunning> {
                                             Flexible(
                                               child: Row(
                                                 children: [
-                                                  Text(
+                                                  SelectableText(
                                                     "${index+1}. ",
-                                                    style: Theme.of(context).textTheme.titleMedium,
+                                                    style: Theme.of(context).textTheme.titleMedium!.copyWith(overflow: TextOverflow.ellipsis,),
                                                     maxLines: 2,
-                                                    overflow: TextOverflow.ellipsis,
                                                   ),
-                                                  SizedBox(width: 8.0),
+                                                  const SizedBox(width: 8.0),
                                                   Flexible(
-                                                    child: Text(
+                                                    child: SelectableText(
                                                       "${place.title}",
-                                                      style: Theme.of(context).textTheme.titleMedium,
+                                                      style: Theme.of(context).textTheme.titleMedium!.copyWith(overflow: TextOverflow.ellipsis,),
                                                       maxLines: 2,
-                                                      overflow: TextOverflow.ellipsis,
                                                     ),
                                                   ),
                                                 ],

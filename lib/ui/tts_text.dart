@@ -129,14 +129,25 @@ class _TtsTextState extends State<TtsText> {
       endOffset = 0;
     }
 
-    return GestureDetector(
-      onTapUp: (details) {
-        if (widget.currentlyPlayingItem) _detectWordTapped(details.globalPosition);
-      },
-      child: RichText(
-        key: _richTextKey,
-        text: TextSpan(
-          children: _buildTextSpans(widget.text, startOffset + tappedStringCharacterOffset, endOffset + tappedStringCharacterOffset),
+    return MouseRegion(
+      cursor: widget.currentlyPlayingItem ? SystemMouseCursors.click : SystemMouseCursors.text,
+      child: GestureDetector(
+        onTapUp: (details) {
+          if (widget.currentlyPlayingItem) _detectWordTapped(details.globalPosition);
+        },
+        child: Container(
+          key: _richTextKey,
+          child: widget.currentlyPlayingItem
+              ? RichText(
+                  text: TextSpan(
+                    children:  _buildTextSpans(widget.text, startOffset + tappedStringCharacterOffset, endOffset + tappedStringCharacterOffset)
+                  )
+                )
+              : SelectableText.rich(
+                  TextSpan(
+                    children: _buildTextSpans(widget.text, startOffset + tappedStringCharacterOffset, endOffset + tappedStringCharacterOffset),
+                  ),
+                ),
         ),
       ),
     );
@@ -171,6 +182,7 @@ class _TtsTextState extends State<TtsText> {
         TextSpan(
           text: text.substring(endOffset),
           style: Theme.of(context).textTheme.bodyMedium,
+
         ),
       );
     }
