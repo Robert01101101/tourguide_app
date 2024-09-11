@@ -509,11 +509,6 @@ class TourMapController with ChangeNotifier {
 
 
     try {
-      /*const String functionUrl = 'https://fetchdirections-cmlu32z3qq-uc.a.run.app';
-      String url = '$functionUrl?waypointsRequestString=https://maps.googleapis.com/maps/api/directions/json?'
-          'origin=place_id:${waypoints.first}&destination=place_id:${waypoints.last}&${waypointsString.isNotEmpty ? 'waypoints=$waypointsString&' : waypointsString}'
-          'mode=driving&key=AIzaSyDoBVyvKAzhDHD1hdeDFkv_MosFj2PS_YM';*/
-
       const String functionUrl = 'https://fetchdirections-cmlu32z3qq-uc.a.run.app';
       final Uri uri = Uri.parse(functionUrl).replace(
         queryParameters: {
