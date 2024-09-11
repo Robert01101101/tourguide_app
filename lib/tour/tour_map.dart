@@ -12,6 +12,8 @@ import 'package:tourguide_app/model/tourguide_place.dart';
 import 'package:tourguide_app/utilities/map_utils.dart';
 import 'package:http/http.dart' as http;
 
+import '../utilities/crossplatform_utils.dart';
+
 /// NOTE: not using ChangeNotifierProvider atm, because nesting it was causing problems as it's not how it's intended to be used
 /// as a result, I'm not sure whether this is safe to use without nesting inside a TourMapFullscreen atm
 class TourMap extends StatefulWidget {
@@ -52,7 +54,7 @@ class _TourMapState extends State<TourMap> {
       builder: (context, tourMapController, child) {
         //logger.t('TourMap - Consumer');
         return SizedBox(
-          height: kIsWeb ? (widget.heightWeb ?? 450) : (widget.height ?? 350), // Adjust height as needed
+          height: kIsWeb && !CrossplatformUtils.isMobile() ? (widget.heightWeb ?? 450) : (widget.height ?? 350), // Adjust height as needed
           child: Stack(
             children: [
               Container( //backdrop TODO - investigate why this is needed, otherwise sometimes I can see thru the map
