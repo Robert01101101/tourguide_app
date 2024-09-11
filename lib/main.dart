@@ -33,8 +33,8 @@ import 'model/tourguide_place.dart';
 import 'model/tourguide_report.dart';
 
 var logger = kIsWeb
-    ? logger_web.Logger(level: logger_web.Level.all,//)
-                        filter: ProductionFilter())
+    ? logger_web.Logger(level: logger_web.Level.all,)
+                        //filter: ProductionFilter())
     : logger_mobile.Logger(level: logger_mobile.Level.all,);
                         //filter: ProductionFilter());
 final FirebaseRemoteConfig remoteConfig = FirebaseRemoteConfig.instance;
