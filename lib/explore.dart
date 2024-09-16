@@ -402,7 +402,7 @@ class ExploreState extends State<Explore> {
                               IconButton(onPressed: (){
                                 Navigator.push(
                                    context,
-                                   MaterialPageRoute(builder: (context) => ExploreMap(tours: tourProvider.getTours(tourProvider.popularTours))),
+                                   MaterialPageRoute(builder: (context) => ExploreMap(tours: tourProvider.getTours(tourProvider.popularTours), name: "Popular tours near you")),
                                 );
                               }, icon: Icon(Icons.map))
                             ],
@@ -418,7 +418,7 @@ class ExploreState extends State<Explore> {
                               IconButton(onPressed: (){
                                 Navigator.push(
                                   context,
-                                  MaterialPageRoute(builder: (context) => ExploreMap(tours: tourProvider.getTours((tourProvider.localTours)))),
+                                  MaterialPageRoute(builder: (context) => ExploreMap(tours: tourProvider.getTours(tourProvider.localTours), name: "Local tours")),
                                 );
                               }, icon: Icon(Icons.map))
                             ],
@@ -434,7 +434,7 @@ class ExploreState extends State<Explore> {
                               IconButton(onPressed: (){
                                 Navigator.push(
                                   context,
-                                  MaterialPageRoute(builder: (context) => ExploreMap(tours: tourProvider.getTours(tourProvider.globalTours))),
+                                  MaterialPageRoute(builder: (context) => ExploreMap(tours: tourProvider.getTours(tourProvider.globalTours), name: "Tours around the world")),
                                 );
                               }, icon: Icon(Icons.map))
                             ],

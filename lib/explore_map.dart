@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:provider/provider.dart';
+import 'package:tourguide_app/tour/tour_details.dart';
 import 'package:tourguide_app/utilities/map_utils.dart';
 import 'package:tourguide_app/utilities/providers/tour_provider.dart';
 
@@ -10,11 +11,12 @@ import 'model/tour.dart';
 
 class ExploreMap extends StatefulWidget {
   final List<Tour> tours;
+  final String name;
 
-  const ExploreMap({Key? key, required this.tours}) : super(key: key);
+  const ExploreMap({super.key, required this.tours, required this.name});
 
   @override
-  _ExploreMapState createState() => _ExploreMapState();
+  State<ExploreMap> createState() => _ExploreMapState();
 }
 
 class _ExploreMapState extends State<ExploreMap> {
@@ -49,6 +51,11 @@ class _ExploreMapState extends State<ExploreMap> {
           infoWindow: InfoWindow(
             title: tour.name,
             snippet: tour.description,
+            onTap: () {
+              // Handle marker tap
+              tourDetails(tour.id);
+              logger.i('Marker tapped: ${tour.name}');
+            },
           ),
         ),
       );
@@ -64,12 +71,24 @@ class _ExploreMapState extends State<ExploreMap> {
     controller.moveCamera(CameraUpdate.newLatLngBounds(bounds, 50));
   }
 
+  void tourDetails(String tourId) {
+    TourProvider tourProvider = Provider.of<TourProvider>(context, listen: false);
+    tourProvider.selectTourById(tourId);
+    // Navigate to the fullscreen tour page
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => FullscreenTourPage(tour: tourProvider.selectedTour!),
+      ),
+    );
+  }
+
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Explore Map'),
+        title: Text(widget.name),
       ),
       body: Stack(
         children: [
@@ -95,8 +114,8 @@ class _ExploreMapState extends State<ExploreMap> {
           ),
           if (_isLoading)
             Container(
-              color: Color(0xffe8eaed),
-              child: Center(
+              color: const Color(0xffe8eaed),
+              child: const Center(
                 child: CircularProgressIndicator(),
               ),
             ),
