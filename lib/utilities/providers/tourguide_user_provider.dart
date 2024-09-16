@@ -32,15 +32,15 @@ class TourguideUserProvider with ChangeNotifier {
   }
 
   Future<void> _onAuthStateChanged(auth.User? firebaseUser) async {
+    logger.t("UserProvider() - _onAuthStateChanged()");
     if (firebaseUser != null) {
       await _waitForRequiredData();
       await _loadUser();
       logger.t("UserProvider() - _onAuthStateChanged() - User is loaded");
-      if (_user == null) {
+      if (_user == null && _authProvider != null && !_authProvider!.isAnonymous) {
         // New user, create an entry in Firestore
         await _createUser();
         _sendWelcomeEmail();
-
       }
     } else {
       logger.t("UserProvider() - _onAuthStateChanged() - User is null");
@@ -58,11 +58,12 @@ class TourguideUserProvider with ChangeNotifier {
     auth.User? firebaseUser;
     while (DateTime.now().difference(startTime) < maxWaitTime) {
       firebaseUser = auth.FirebaseAuth.instance.currentUser;
-      if (firebaseUser != null && _authProvider != null && _authProvider!.googleSignInUser != null) break;
+      if (firebaseUser != null && _authProvider != null && _authProvider!.googleSignInUser != null ||
+          _authProvider != null && _authProvider!.isAnonymous) break;
       await Future.delayed(checkInterval);
     }
 
-    if (firebaseUser == null || _authProvider == null || _authProvider!.googleSignInUser == null) {
+    if ((firebaseUser == null || _authProvider == null || _authProvider!.googleSignInUser == null) && (_authProvider != null && !_authProvider!.isAnonymous)) {
       logger.e('Tourguide User Provider() might run into issues because firebaseUser or googleSignInUser is null');
     }
   }

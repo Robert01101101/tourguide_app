@@ -68,6 +68,7 @@ class _ContributeState extends State<Contribute> {
   @override
   Widget build(BuildContext context) {
     TourProvider tourProvider = Provider.of<TourProvider>(context);
+    myAuth.AuthProvider authProvider = Provider.of(context);
 
     Future<void> refresh() async {
       if (!tourProvider.isLoadingTours){
@@ -79,14 +80,27 @@ class _ContributeState extends State<Contribute> {
       appBar: AppBar(
         title: const Text('Contribute'),
       ),
-      body: RefreshIndicator(
+      body: authProvider.isAnonymous
+          ?
+          const StandardLayout(
+            children: [
+              SizedBox(height: 0,),
+              Padding(
+                padding: EdgeInsets.all(16.0),
+                child: Text('You are signed in as a guest. \n\nSign in with Google to create tours and access more features.'),
+              ),
+            ],
+          )
+          :
+      RefreshIndicator(
         onRefresh: refresh,
         child: SingleChildScrollView(
           controller: _scrollController,
           physics: const AlwaysScrollableScrollPhysics(),
           child: Shimmer(
             linearGradient: MyGlobals.shimmerGradient,
-            child: StandardLayout(
+            child:
+            StandardLayout(
               children: [
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,

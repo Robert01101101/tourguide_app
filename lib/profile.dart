@@ -50,6 +50,10 @@ class _ProfileState extends State<Profile> {
             StandardLayout(
               children: [
                 SizedBox(height: 0,),
+                authProvider.isAnonymous ? const Padding(
+                  padding: EdgeInsets.all(16.0),
+                  child: Text('You are signed in as a guest. \n\nSign in with Google to save tours and access more features.'),
+                ) :
                 ListTile(
                   leading: GoogleUserCircleAvatar(
                     identity: authProvider.googleSignInUser!,
@@ -77,6 +81,7 @@ class _ProfileState extends State<Profile> {
                       ),
                     );
                   },
+                  disabled: authProvider.isAnonymous,
                 ),
                 ProfileListButton(
                   label: 'Profile Settings',
@@ -91,6 +96,7 @@ class _ProfileState extends State<Profile> {
                       ),
                     );
                   },
+                  disabled: authProvider.isAnonymous,
                 ),
                 ProfileListButton(
                   label: 'App Settings',
@@ -135,17 +141,19 @@ class _ProfileState extends State<Profile> {
                     launchUrl(Uri.parse("https://tourguide.rmichels.com/privacyPolicy.html"));
                   },
                 ),
-                ProfileListButton(
-                  label: 'Rate Tourguide',
-                  leftIcon: Icons.star_border,
-                  onPressed: (){},
-                  disabled: true,
-                ),
+                if (!kIsWeb)
+                  ProfileListButton(
+                    label: 'Rate Tourguide',
+                    leftIcon: Icons.star_border,
+                    onPressed: () {
+                      launchUrl(Uri.parse("https://tourguide.rmichels.com/privacyPolicy.html"));
+                    },
+                  ),
                 ProfileListButton(
                   label: 'Provide Feedback',
                   leftIcon: Icons.feedback_outlined,
                   onPressed: () {
-                    launchUrl(Uri.parse("mailto:feedback@tourguide.rmichels.com?subject=Tourguide%20Feedback"));
+                    launchUrl(Uri.parse("https://play.google.com/store/apps/details?id=com.robertmichelsdigitalmedia.tourguideapp"));
                   },
                 ),
                 ProfileListButton(

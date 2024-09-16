@@ -121,19 +121,6 @@ class ExploreState extends State<Explore> {
   }
 
 
-  //TODO: fix bad code
-  Future<GoogleSignInAccount> _handleSignIn() async {
-    try {
-      _currentUser = await _googleSignIn.signInSilently();
-      if (_currentUser == null) logger.t("USER IS SIGNED OUT WHEN THEY SHOULDN'T BE!");
-      return _currentUser!;
-    } catch (error) {
-      // Handle sign-in errors
-      logger.t("Error during Google Sign-In: $error");
-      return _currentUser!;
-    }
-  }
-
   //TODO: Move
   Future<void> downloadTours() async {
     logger.t('downloadTours');
@@ -146,7 +133,7 @@ class ExploreState extends State<Explore> {
     try {
       await Future.doWhile(() async {
         // Check if the currentPosition is null
-        if (locationProvider.currentPosition == null || userProvider.user == null) {
+        if (locationProvider.currentPosition == null || (userProvider.user == null && !authProvider.isAnonymous)) {
           // Wait for a short duration before checking again
           await Future.delayed(const Duration(milliseconds: 100));
           return true; // Continue looping
@@ -166,7 +153,7 @@ class ExploreState extends State<Explore> {
         locationProvider.currentPosition!.latitude,
         locationProvider.currentPosition!.longitude,
         authProvider.user!.uid,
-        userProvider.user!.savedTourIds,
+        authProvider.isAnonymous ? [] : userProvider.user!.savedTourIds,
       );
       _measureContentHeight();
     } else {
@@ -214,6 +201,7 @@ class ExploreState extends State<Explore> {
     myAuth.AuthProvider authProvider = Provider.of(context);
     LocationProvider locationProvider = Provider.of<LocationProvider>(context);
     TourProvider tourProvider = Provider.of<TourProvider>(context);
+    String displayName = authProvider.user?.displayName ?? '';
 
     Future<void> refresh() async {
       if (!tourProvider.isLoadingTours){
@@ -325,76 +313,67 @@ class ExploreState extends State<Explore> {
                     ),
                     StandardLayout(
                         children: [
-                          FutureBuilder(
-                            future: _handleSignIn(),
-                            builder: (context, snapshot) {
-                              //Assemble welcome string
-                              String displayName = authProvider.googleSignInUser!.displayName!;
-
-                              // Stylized Welcome Banner text
-                              return SizedBox(
-                                height: 290,
-                                child: Padding(
-                                  padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 0),
-                                  child: Align(
-                                    alignment: Alignment.bottomCenter,
-                                    child: GradientText(
-                                      gradient: const LinearGradient(colors: [
-                                        Color(0xeeF2F8F8),
-                                        Color(0xeeE4F0EF),
-                                      ]),
-                                      richText: RichText(
-                                        text: TextSpan(
-                                          style: Theme.of(context).textTheme.displayMedium,
-                                          children: <TextSpan>[
-                                            const TextSpan(text: 'Welcome'),
-                                            if (locationProvider.currentCity != null && locationProvider.currentCity.isNotEmpty)
-                                              TextSpan(text: ' to \r'),
-                                            if (locationProvider.currentCity != null && locationProvider.currentCity.isNotEmpty)
-                                              TextSpan(
-                                                text: locationProvider.currentCity,
-                                                style: GoogleFonts.vollkorn(  //need to explicitly specify font for weight setting to work for some reason
-                                                  textStyle: Theme.of(context).textTheme.displayMedium,
-                                                  fontWeight: FontWeight.w600,
-                                                  fontStyle: FontStyle.italic,
-                                                ),
-                                                recognizer: TapGestureRecognizer()..onTap = () {
-                                                  logger.t('Tapped city name');
-                                                  _showOptionsDialog(context);
-                                                }
-                                              ),
-                                            if (displayName != null && displayName.isNotEmpty) TextSpan(text: ', ${displayName.split(' ').first}'),
-                                            if (locationProvider.permissionStatus != PermissionStatus.granted)
-                                              TextSpan(
-                                                text: '\n\nPlease enable location services',
-                                                style: Theme.of(context).textTheme.titleMedium),
-                                            if (locationProvider.permissionStatus != PermissionStatus.granted && locationProvider.currentCity != null && locationProvider.currentCity.isNotEmpty)
-                                              TextSpan(
-                                                  text: ' for full functionality',
-                                                  style: Theme.of(context).textTheme.titleMedium),
-                                            if (locationProvider.permissionStatus != PermissionStatus.granted && locationProvider.currentCity == null || locationProvider.currentCity.isEmpty)
-                                              TextSpan(
-                                                text: ', or ',
-                                                style: Theme.of(context).textTheme.titleMedium),
-                                            if (locationProvider.permissionStatus != PermissionStatus.granted && locationProvider.currentCity == null || locationProvider.currentCity.isEmpty)
-                                              TextSpan(
-                                                  text: 'set your location',
-                                                  style: Theme.of(context).textTheme.titleMedium!.copyWith(
-                                                    decoration: TextDecoration.underline,
-                                                  ),
-                                                  recognizer: TapGestureRecognizer()..onTap = () {
-                                                    logger.t('Tapped set your location');
-                                                    _showOptionsDialog(context);
-                                                  },),
-                                          ],
+                          SizedBox(
+                          height: 290,
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 0),
+                            child: Align(
+                              alignment: Alignment.bottomCenter,
+                              child: GradientText(
+                                gradient: const LinearGradient(colors: [
+                                  Color(0xeeF2F8F8),
+                                  Color(0xeeE4F0EF),
+                                ]),
+                                richText: RichText(
+                                  text: TextSpan(
+                                    style: Theme.of(context).textTheme.displayMedium,
+                                    children: <TextSpan>[
+                                      const TextSpan(text: 'Welcome'),
+                                      if (locationProvider.currentCity != null && locationProvider.currentCity.isNotEmpty)
+                                        TextSpan(text: ' to \r'),
+                                      if (locationProvider.currentCity != null && locationProvider.currentCity.isNotEmpty)
+                                        TextSpan(
+                                            text: locationProvider.currentCity,
+                                            style: GoogleFonts.vollkorn(  //need to explicitly specify font for weight setting to work for some reason
+                                              textStyle: Theme.of(context).textTheme.displayMedium,
+                                              fontWeight: FontWeight.w600,
+                                              fontStyle: FontStyle.italic,
+                                            ),
+                                            recognizer: TapGestureRecognizer()..onTap = () {
+                                              logger.t('Tapped city name');
+                                              _showOptionsDialog(context);
+                                            }
                                         ),
-                                      ),
-                                    ),
+                                      if (displayName != null && displayName.isNotEmpty) TextSpan(text: ', ${displayName.split(' ').first}'),
+                                      if (locationProvider.permissionStatus != PermissionStatus.granted)
+                                        TextSpan(
+                                            text: '\n\nPlease enable location services',
+                                            style: Theme.of(context).textTheme.titleMedium),
+                                      if (locationProvider.permissionStatus != PermissionStatus.granted && locationProvider.currentCity != null && locationProvider.currentCity.isNotEmpty)
+                                        TextSpan(
+                                            text: ' for full functionality',
+                                            style: Theme.of(context).textTheme.titleMedium),
+                                      if (locationProvider.permissionStatus != PermissionStatus.granted && locationProvider.currentCity == null || locationProvider.currentCity.isEmpty)
+                                        TextSpan(
+                                            text: ', or ',
+                                            style: Theme.of(context).textTheme.titleMedium),
+                                      if (locationProvider.permissionStatus != PermissionStatus.granted && locationProvider.currentCity == null || locationProvider.currentCity.isEmpty)
+                                        TextSpan(
+                                          text: 'set your location',
+                                          style: Theme.of(context).textTheme.titleMedium!.copyWith(
+                                            decoration: TextDecoration.underline,
+                                          ),
+                                          recognizer: TapGestureRecognizer()..onTap = () {
+                                            logger.t('Tapped set your location');
+                                            _showOptionsDialog(context);
+                                          },),
+                                    ],
                                   ),
                                 ),
-                              );
-                            }
+                              ),
+                            ),
                           ),
+                        ),
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [

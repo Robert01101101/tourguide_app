@@ -5,6 +5,7 @@ import 'package:tourguide_app/ui/tts_settings.dart';
 import 'package:tourguide_app/utilities/custom_import.dart';
 import 'package:tourguide_app/utilities/providers/theme_provider.dart';
 import 'package:tourguide_app/utilities/providers/tourguide_user_provider.dart';
+import 'package:tourguide_app/utilities/providers/auth_provider.dart' as myAuth;
 
 class AppSettings extends StatefulWidget {
   const AppSettings({super.key});
@@ -82,6 +83,7 @@ class _AppSettingsState extends State<AppSettings> {
   Widget build(BuildContext context) {
     TourguideUserProvider userProvider = Provider.of<TourguideUserProvider>(context);
     ThemeProvider themeProvider = Provider.of<ThemeProvider>(context);
+    myAuth.AuthProvider authProvider = Provider.of(context);
 
     return Scaffold(
       appBar: AppBar(
@@ -93,7 +95,9 @@ class _AppSettingsState extends State<AppSettings> {
           child: StandardLayout(
             children: [
               const SizedBox(height: 0),
+              if (!authProvider.isAnonymous)
               Text("Notifications", style: Theme.of(context).textTheme.titleLarge),
+              if (!authProvider.isAnonymous)
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [

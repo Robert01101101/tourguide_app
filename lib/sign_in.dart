@@ -14,6 +14,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:http/http.dart' as http;
+import 'package:tourguide_app/ui/my_layouts.dart';
 import 'package:tourguide_app/utilities/providers/location_provider.dart';
 import 'package:tourguide_app/utilities/providers/tour_provider.dart';
 import 'package:tourguide_app/utilities/providers/tourguide_user_provider.dart';
@@ -50,8 +51,8 @@ class _SignInState extends State<SignIn> {
 
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
       authProvider.addListener(() {
-        logger.t("signIn.initState().authProviderListener -> user=${authProvider.user != null}, googleSignInUser=${authProvider.googleSignInUser != null}, isAuthorized=${authProvider.isAuthorized}, silentSignInFailed=${authProvider.silentSignInFailed}");
-        if (authProvider.googleSignInUser != null && authProvider.user != null && !navigatedAwayFromSignIn) {
+        logger.t("signIn.initState().authProviderListener -> user=${authProvider.user != null}, googleSignInUser=${authProvider.googleSignInUser != null}, isAuthorized=${authProvider.isAuthorized}, silentSignInFailed=${authProvider.silentSignInFailed}, isAnonymous=${authProvider.isAnonymous}");
+        if (authProvider.user != null && (authProvider.googleSignInUser != null || authProvider.isAnonymous) && !navigatedAwayFromSignIn) {
           logger.t("signIn.initState().authProviderListener -> user is no longer null");
           navigatedAwayFromSignIn = true;
           MyGlobals.userSignedIn = true; //for web
@@ -158,8 +159,19 @@ class _SignInState extends State<SignIn> {
             ),
             // This method is used to separate mobile from web code with conditional exports.
             // See: src/sign_in_button.dart
-            buildSignInButton(
-              onPressed: authProvider.handleSignIn,
+            Column(
+              children: [
+                buildSignInButton(
+                  onPressed: authProvider.handleSignIn,
+                ),
+                SizedBox(height: StandardLayout.defaultGap),
+                TextButton(
+                    onPressed: () => authProvider.signInWithFirebaseAnonymously(),
+                    child: Text('SIGN IN AS GUEST',
+                        style: Theme.of(context).textTheme.labelMedium!.copyWith(
+                            color: Theme.of(context).colorScheme.primary,
+                            fontWeight: FontWeight.bold))),
+              ],
             ),
           ],
         ),

@@ -31,9 +31,13 @@ class _TourRatingBookmarkButtonsState extends State<TourRatingBookmarkButtons> {
   }
 
   void toggleThumbsUp() {
+    myAuth.AuthProvider authProvider = Provider.of(context, listen: false);
+    if (authProvider.isAnonymous) {
+      _showSignupDialog('rate tours');
+      return;
+    }
     if (widget.tour.isOfflineCreatedTour ?? false) return; // Tour creation tile should not have rating
 
-    myAuth.AuthProvider authProvider = Provider.of(context, listen: false);
     TourProvider tourProvider = Provider.of(context, listen: false);
 
     setState(() {
@@ -56,9 +60,13 @@ class _TourRatingBookmarkButtonsState extends State<TourRatingBookmarkButtons> {
   }
 
   void toggleThumbsDown() {
+    myAuth.AuthProvider authProvider = Provider.of(context, listen: false);
+    if (authProvider.isAnonymous) {
+      _showSignupDialog('rate tours');
+      return;
+    }
     if (widget.tour.isOfflineCreatedTour ?? false) return; // Tour creation tile should not have rating
 
-    myAuth.AuthProvider authProvider = Provider.of(context, listen: false);
     TourProvider tourProvider = Provider.of(context, listen: false);
 
     setState(() {
@@ -80,7 +88,48 @@ class _TourRatingBookmarkButtonsState extends State<TourRatingBookmarkButtons> {
     });
   }
 
+  Future<void> _showSignupDialog(String action) async {
+    myAuth.AuthProvider authProvider = Provider.of(context, listen: false);
+    TourProvider tourProvider = Provider.of(context, listen: false);
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false, // user must tap button!
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Sign in to $action'),
+          content: SingleChildScrollView(
+            child: ListBody(
+              children: <Widget>[
+                Text('You are signed in as a guest. \n\nSign in with Google to $action and access more features.'),
+              ],
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('Sign In'),
+              onPressed: () {
+                tourProvider.resetTourProvider();
+                authProvider.signOut();
+              },
+            ),
+            TextButton(
+              child: const Text('Cancel'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   void saveTour() {
+    myAuth.AuthProvider authProvider = Provider.of(context, listen: false);
+    if (authProvider.isAnonymous) {
+      _showSignupDialog('save tours');
+      return;
+    }
     if (widget.tour.isOfflineCreatedTour ?? false) return; // Tour creation tile should not have rating
 
     TourguideUserProvider tourguideUserProvider = Provider.of(context, listen: false);

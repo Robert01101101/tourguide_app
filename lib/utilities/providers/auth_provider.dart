@@ -31,6 +31,7 @@ class AuthProvider with ChangeNotifier {
   bool _isAuthorized = false;
   bool _isLoggingOut = false;
   bool _silentSignInFailed = false;
+  bool _isAnonymous = false;
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
   ////// PUBLIC /////
@@ -41,6 +42,7 @@ class AuthProvider with ChangeNotifier {
   bool get isAuthorized => _isAuthorized;
   bool get isLoggingOut => _isLoggingOut;
   bool get silentSignInFailed => _silentSignInFailed;
+  bool get isAnonymous => _isAnonymous;
 
 
   AuthProvider() {
@@ -61,6 +63,7 @@ class AuthProvider with ChangeNotifier {
 
       _googleSignInUser = account;
       _isAuthorized = isAuthorized;
+      _isAnonymous = _isAuthorized;
       logger.t("AuthProvider._googleSignIn.onCurrentUserChanged -> isAuthorized=${_isAuthorized}, _googleSignInUser=$_googleSignInUser, _user=$_user");
       notifyListeners();
 
@@ -155,6 +158,24 @@ class AuthProvider with ChangeNotifier {
 
       // Access the logged-in user using FirebaseAuth.instance.currentUser
       _user = authResult.user;
+      if (_user != null) {
+        _isAnonymous = false;
+      }
+      notifyListeners();
+      logger.t('AuthProvider.signInWithFirebase() - Firebase User Info: ${_user?.displayName}, ${_user?.email}');
+    } catch (error) {
+      logger.e('AuthProvider.signInWithFirebase() - Error signing in with Firebase: $error');
+    }
+  }
+
+  Future<void> signInWithFirebaseAnonymously() async {
+    logger.t('AuthProvider.signInWithFirebaseAnonymously()');
+    try {
+      UserCredential authResult = await _auth.signInAnonymously();
+
+      // Access the logged-in user using FirebaseAuth.instance.currentUser
+      _user = authResult.user;
+      _isAnonymous = true;
       notifyListeners();
       logger.t('AuthProvider.signInWithFirebase() - Firebase User Info: ${_user?.displayName}, ${_user?.email}');
     } catch (error) {
@@ -172,7 +193,7 @@ class AuthProvider with ChangeNotifier {
         TourguideNavigation.signInPath,
       );
       await FirebaseAuth.instance.signOut();
-      await _googleSignIn.disconnect();
+      if (_googleSignInUser != null) await _googleSignIn.disconnect();
       _user = null;
       _googleSignInUser = null;
       _isAuthorized = false;
