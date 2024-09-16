@@ -315,90 +315,94 @@ class _ExpandedTourTileOverlayState extends State<ExpandedTourTileOverlay> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.start,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Expanded(
-                child: Container(
-                  padding: EdgeInsets.fromLTRB(16, 0, 0, 0),
-                  child: SelectableText(
-                    widget.tour.name,
-                    style: Theme.of(context).textTheme.headlineSmall!.copyWith(overflow: TextOverflow.ellipsis,),
-                    maxLines: 2,
-                  ),
-                ),
-              ),
-              const SizedBox(width: 16,),
-              IconButton(
-                onPressed: () => Navigator.of(context).pop(),
-                icon: Icon(Icons.close),
-              ),
-            ],
-          ),
-          Expanded(
+          SelectionArea(
             child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Padding(
-                  padding: const EdgeInsets.only(left: 16, top: 12, right: 16, bottom: 8),
-                  child: Stack(
-                    children: [
-                      kIsWeb
-                          ?
-                      Image.network(widget.tour.imageUrl!,
-                          width: MediaQuery.of(context).size.width,
-                          height: 200.0,
-                          fit: BoxFit.cover)
-                          :
-                      widget.tour.imageFile != null
-                          ?
-                      Image.file(widget.tour.imageFile!,
-                          width: MediaQuery.of(context).size.width,
-                          height: 200.0,
-                          fit: BoxFit.cover)
-                          :
-                      Container(width: MediaQuery.of(context).size.width, height: 200, color: Colors.white,),
-                      if (tourProvider.isUserCreatedTour(widget.tour))
-                        Align(
-                            alignment: Alignment.topRight,
-                            child: Padding(
-                              padding: EdgeInsets.all(8.0),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.end,
-                                children: [
-                                  if (widget.tour.reports.isNotEmpty)
-                                    const CircleAvatar(
-                                      radius: 16,
-                                      backgroundColor: Colors.black45,
-                                      child: Icon(
-                                        Icons.report_outlined,
-                                        color: Colors.yellow,
-                                        size: 22,),
-                                    ),
-                                  const CircleAvatar(
-                                    radius: 16,
-                                    backgroundColor: Colors.black45,
-                                    child: Icon(
-                                      Icons.attribution,
-                                      color: Colors.white,),
-                                  ),
-                                ],
-                              ),
-                            )),
-                    ],
-                  ),
-                ),
-                StandardLayout(
-                  disableAdaptiveHorizontalPadding: true,
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    SelectableText(
-                      widget.tour.description,
-                      style: Theme.of(context).textTheme.bodyMedium,
+                    Expanded(
+                      child: Container(
+                        padding: EdgeInsets.fromLTRB(16, 0, 0, 0),
+                        child: Text(
+                          widget.tour.name,
+                          style: Theme.of(context).textTheme.headlineSmall!.copyWith(overflow: TextOverflow.ellipsis,),
+                          maxLines: 2,
+                        ),
+                      ),
                     ),
-                    TourTagsRow(
-                      tags: TourTag.parseTags(widget.tour.tags!)
+                    const SizedBox(width: 16,),
+                    IconButton(
+                      onPressed: () => Navigator.of(context).pop(),
+                      icon: Icon(Icons.close),
+                    ),
+                  ],
+                ),
+                Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.only(left: 16, top: 12, right: 16, bottom: 8),
+                      child: Stack(
+                        children: [
+                          kIsWeb
+                              ?
+                          Image.network(widget.tour.imageUrl!,
+                              width: MediaQuery.of(context).size.width,
+                              height: 200.0,
+                              fit: BoxFit.cover)
+                              :
+                          widget.tour.imageFile != null
+                              ?
+                          Image.file(widget.tour.imageFile!,
+                              width: MediaQuery.of(context).size.width,
+                              height: 200.0,
+                              fit: BoxFit.cover)
+                              :
+                          Container(width: MediaQuery.of(context).size.width, height: 200, color: Colors.white,),
+                          if (tourProvider.isUserCreatedTour(widget.tour))
+                            Align(
+                                alignment: Alignment.topRight,
+                                child: Padding(
+                                  padding: EdgeInsets.all(8.0),
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.end,
+                                    children: [
+                                      if (widget.tour.reports.isNotEmpty)
+                                        const CircleAvatar(
+                                          radius: 16,
+                                          backgroundColor: Colors.black45,
+                                          child: Icon(
+                                            Icons.report_outlined,
+                                            color: Colors.yellow,
+                                            size: 22,),
+                                        ),
+                                      const CircleAvatar(
+                                        radius: 16,
+                                        backgroundColor: Colors.black45,
+                                        child: Icon(
+                                          Icons.attribution,
+                                          color: Colors.white,),
+                                      ),
+                                    ],
+                                  ),
+                                )),
+                        ],
+                      ),
+                    ),
+                    StandardLayout(
+                      disableAdaptiveHorizontalPadding: true,
+                      children: [
+                        Text(
+                          widget.tour.description,
+                          style: Theme.of(context).textTheme.bodyMedium,
+                        ),
+                        TourTagsRow(
+                          tags: TourTag.parseTags(widget.tour.tags!)
+                        ),
+                      ],
                     ),
                   ],
                 ),

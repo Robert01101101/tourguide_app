@@ -238,122 +238,69 @@ class _FullscreenTourPageState extends State<FullscreenTourPage> {
                   ],
                 ),
               ),
-              SelectableText(
-                widget.tour.description,
-                style: Theme.of(context).textTheme.bodyMedium,
+              SelectionArea(
+                child: Column(
+                  children: [
+                    Text(
+                      widget.tour.description,
+                      style: Theme.of(context).textTheme.bodyMedium,
+                    ),
+                    const SizedBox(height: StandardLayout.defaultGap),
+                    TourTagsRow(
+                        tags: TourTag.parseTags(widget.tour.tags!)
+                    ),
+                  ],
+                ),
               ),
-              TourTagsRow(
-                  tags: TourTag.parseTags(widget.tour.tags!)
-              ),
-              /*Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Stack(
-                              children: [
-                                Container(
-                                  height: kIsWeb ? 300 : 200,
-                                  child: ClipRRect(
-                                    child: kIsWeb
-                                        ?
-                                    Image.network(widget.tour.imageUrl!,
-                                        width: MediaQuery.of(context).size.width,
-                                        height: 300.0,
-                                        fit: BoxFit.cover)
-                                        :
-                                    widget.tour.imageFile != null
-                                        ?
-                                    Image.file(widget.tour.imageFile!,
-                                        width: MediaQuery.of(context).size.width,
-                                        height: 200.0,
-                                        fit: BoxFit.cover)
-                                    : Container(
-                                      color: Colors.grey,
-                                      width: MediaQuery.of(context).size.width,
-                                      height: 200.0,
-                                    ),
-                                  ),
-                                ),
-                                if (tourProvider.isUserCreatedTour(widget.tour))
-                                  Align(
-                                      alignment: Alignment.topRight,
-                                      child: Padding(
-                                        padding: EdgeInsets.all(8.0),
-                                        child: Row(
-                                          mainAxisAlignment: MainAxisAlignment.end,
-                                          children: [
-                                            if (widget.tour.reports.isNotEmpty)
-                                              const CircleAvatar(
-                                                radius: 16,
-                                                backgroundColor: Colors.black45,
-                                                child: Icon(
-                                                  Icons.report_outlined,
-                                                  color: Colors.yellow,
-                                                  size: 22,),
-                                              ),
-                                            const CircleAvatar(
-                                              radius: 16,
-                                              backgroundColor: Colors.black45,
-                                              child: Icon(
-                                                Icons.attribution,
-                                                color: Colors.white,),
-                                            ),
-                                          ],
-                                        ),
-                                      )),
-                              ],
-                            ),
-                          const SizedBox(height: 16.0),
-                          Text(
-                            widget.tour.description,
-                            style: Theme.of(context).textTheme.bodyMedium,
-                          ),
-                          const SizedBox(height: 16.0),
-                          TourTagsRow(
-                              tags: TourTag.parseTags(widget.tour.tags!)
-                          ),
-                          const SizedBox(height: 8.0),
-                        ],
-                      ),*/
               TourMap(
                   tourMapController: _tourMapController,
                   tour: widget.tour,
                   height: 220,
                   heightWeb: 320,
               ),
-              Padding(
-                padding: const EdgeInsets.only(top: 12.0),
-                child: SelectableText(
-                    'Places you\'ll visit',
-                    style: Theme.of(context).textTheme.titleLarge
-                ),
-              ),
+
               if (widget.tour.tourguidePlaces.isNotEmpty)
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: widget.tour.tourguidePlaces.asMap().entries.map((entry) {
-                    int index = entry.key;
-                    var place = entry.value;
-                    return Padding(
-                      key: _targetKeys.isNotEmpty ? _targetKeys[index] : null,
-                      padding: index != 0 ? const EdgeInsets.symmetric(vertical: 12.0) : const EdgeInsets.only(bottom: 12.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          SelectableText(
-                            "${index+1}.  ${place.title}",
-                            style: Theme.of(context).textTheme.titleMedium!.copyWith(overflow: TextOverflow.ellipsis,),
-                            maxLines: 2,
-                          ),
-                          SizedBox(height: 6.0),
-                          SelectableText(
-                            place.description, // Assuming each place has a 'description' field
-                            style: Theme.of(context).textTheme.titleMedium!.copyWith(overflow: TextOverflow.ellipsis,),
-                            maxLines: 3,
-                          ),
-                        ],
+                SelectionArea(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.only(top: 12.0),
+                        child: Text(
+                            'Places you\'ll visit',
+                            style: Theme.of(context).textTheme.titleLarge
+                        ),
                       ),
-                    );
-                  }).toList(),
+                      const SizedBox(height: StandardLayout.defaultGap),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: widget.tour.tourguidePlaces.asMap().entries.map((entry) {
+                          int index = entry.key;
+                          var place = entry.value;
+                          return Padding(
+                            key: _targetKeys.isNotEmpty ? _targetKeys[index] : null,
+                            padding: index != 0 ? const EdgeInsets.symmetric(vertical: 12.0) : const EdgeInsets.only(bottom: 12.0),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  "${index+1}.  ${place.title}",
+                                  style: Theme.of(context).textTheme.titleMedium!.copyWith(overflow: TextOverflow.ellipsis,),
+                                  maxLines: 2,
+                                ),
+                                SizedBox(height: 6),
+                                Text(
+                                  place.description, // Assuming each place has a 'description' field
+                                  style: Theme.of(context).textTheme.bodyMedium!.copyWith(overflow: TextOverflow.ellipsis,),
+                                  maxLines: 3,
+                                ),
+                              ],
+                            ),
+                          );
+                        }).toList(),
+                      ),
+                    ],
+                  ),
                 ),
               StandardLayoutChild(
                 enableHorizontalPadding: true,

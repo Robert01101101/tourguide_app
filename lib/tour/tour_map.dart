@@ -109,7 +109,7 @@ class _TourMapState extends State<TourMap> {
                         );
                       },
                       elevation: 1.0,
-                      fillColor: Colors.white.withOpacity(0.9),
+                      fillColor: Colors.white.withOpacity(0.8),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(8.0), // Adjust the radius as needed
                       ),

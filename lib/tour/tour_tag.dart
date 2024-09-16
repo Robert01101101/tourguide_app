@@ -2,10 +2,9 @@ import 'package:flutter/material.dart';
 
 class TourTag extends StatelessWidget {
   final String label;
-  final bool selectable;
   bool leftPadding;
 
-  TourTag({super.key, required this.label, required this.selectable, this.leftPadding = true});
+  TourTag({super.key, required this.label, this.leftPadding = true});
 
   static List<String> parseTags(Map<String, dynamic> tagsMap, {bool shorten = false}) {
     List<String> result = [];
@@ -39,14 +38,7 @@ class TourTag extends StatelessWidget {
           color: Theme.of(context).colorScheme.tertiaryContainer,
           borderRadius: BorderRadius.circular(6),
         ),
-        child: selectable
-          ? SelectableText(
-              label,
-              style: Theme.of(context).textTheme.bodySmall!.copyWith(
-                color: Theme.of(context).colorScheme.onTertiaryContainer,
-              ),
-            )
-          : Text(
+        child: Text(
             label,
             style: Theme.of(context).textTheme.bodySmall!.copyWith(
               color: Theme.of(context).colorScheme.onTertiaryContainer,
@@ -128,7 +120,7 @@ class TourTagsRow extends StatelessWidget {
 
           if (usedWidth + tagWidth <= availableWidth) {
             usedWidth += tagWidth;
-            visibleTags.add(TourTag(label: tag, leftPadding: leftPadding, selectable: selectable));
+            visibleTags.add(TourTag(label: tag, leftPadding: leftPadding));
             leftPadding = true;
           } else {
             break; // Stop adding tags if they overflow

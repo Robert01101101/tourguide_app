@@ -137,17 +137,12 @@ class _TtsTextState extends State<TtsText> {
         },
         child: Container(
           key: _richTextKey,
-          child: widget.currentlyPlayingItem
-              ? RichText(
-                  text: TextSpan(
+          child: Text.rich(
+                  softWrap: true,
+                  TextSpan(
                     children:  _buildTextSpans(widget.text, startOffset + tappedStringCharacterOffset, endOffset + tappedStringCharacterOffset)
                   )
                 )
-              : SelectableText.rich(
-                  TextSpan(
-                    children: _buildTextSpans(widget.text, startOffset + tappedStringCharacterOffset, endOffset + tappedStringCharacterOffset),
-                  ),
-                ),
         ),
       ),
     );
