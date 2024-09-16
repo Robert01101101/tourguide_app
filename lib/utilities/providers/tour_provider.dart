@@ -112,7 +112,7 @@ class TourProvider with ChangeNotifier {
     try {
       List<String> updatedTours = [];
       for (Tour tour in tours) {
-        logger.t('Processing tour: ${tour.id}');
+        //logger.t('Processing tour: ${tour.id}');
         if (tour.reports.length > 0 && tour.authorId != userId) {
           logger.w('Tour has reports, removing: ${tour.id}');
           continue; // Skip tours with reports

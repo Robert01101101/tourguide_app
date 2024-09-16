@@ -154,7 +154,7 @@ class TourService {
 
         // Fetch ratings for the current batch
         await Future.wait(batchTourIds.map((tourId) async {
-          logger.t('Fetching user ratings for tour: $tourId');
+          //logger.t('Fetching user ratings for tour: $tourId');
           CollectionReference ratingsCollection = FirebaseFirestore.instance
               .collection('tours')
               .doc(tourId)

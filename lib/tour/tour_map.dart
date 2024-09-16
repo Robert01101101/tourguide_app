@@ -518,7 +518,7 @@ class TourMapController with ChangeNotifier {
         },
       );
 
-      logger.t('url: $uri');
+      //logger.t('url: $uri');
 
       final response = await http.get(
         uri,
@@ -527,9 +527,7 @@ class TourMapController with ChangeNotifier {
         },
       );
 
-
-      logger.t('response: ${response}');
-      logger.i(response.body);
+      //logger.i(response.body);
 
       if (response.statusCode == 200) {
         //Map<String, dynamic> data = jsonDecode(response.body);
@@ -537,20 +535,20 @@ class TourMapController with ChangeNotifier {
         // String status = data['status'];
         Map<String, dynamic> data = jsonDecode(response.body);
         String pointsResult = data['points'];
-        logger.i('pointsResult: ${pointsResult}');
+        //logger.i('pointsResult: ${pointsResult}');
         List<LatLng> points = _decodePolyline(pointsResult);
 
         // Convert waypoints to LatLng
-        logger.t('convert:');
+        //logger.t('convert:');
         List<LatLng> waypointLatLngs = _tour.tourguidePlaces
             .map((place) => LatLng(place.latitude, place.longitude))
             .toList();
 
         // Segment the polyline based on the waypoints
-        logger.t('segment:');
+        //logger.t('segment:');
         _routeSegments = _createRouteSegments(points, waypointLatLngs);
 
-        logger.t('polyline points:' + points.toString());
+        //logger.t('polyline points:' + points.toString());
         // Initially add the full polyline
         _addPolyline(points);
       } else {

@@ -155,7 +155,7 @@ class TtsService {
     if (isAndroid){
       var voice = await _flutterTts.getDefaultVoice;
       if (voice != null) {
-        logger.t(voice);
+        //logger.t(voice);
         languageNotifier.value = voice['locale'];
         isCurrentLanguageInstalledNotifier.value = await _flutterTts.isLanguageInstalled(languageNotifier.value!);
         setLanguage(languageNotifier.value!, saveSettings: false);

@@ -61,7 +61,7 @@ class ExploreState extends State<Explore> {
 
   @override
   void initState() {
-    logger.t('ExploreState.initState() !!!!!!!!!!!!!!!!!!!!');
+    logger.t('ExploreState.initState()');
 
     if (MyGlobals.webRoutingFix(TourguideNavigation.explorePath)) {
       super.initState();
