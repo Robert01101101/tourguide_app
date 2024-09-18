@@ -83,6 +83,7 @@ dependencies:
   package_info_plus: ^8.0.2
   android_intent_plus: ^5.1.0
   font_awesome_flutter: ^10.7.0
+  google_maps_custom_marker: ^1.0.3
 
 
 dev_dependencies:

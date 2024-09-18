@@ -4,6 +4,7 @@ import 'dart:math';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:google_maps_custom_marker/google_maps_custom_marker.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:tourguide_app/main.dart';
@@ -437,8 +438,26 @@ class TourMapController with ChangeNotifier {
         TourguidePlace tourguidePlace = _tour.tourguidePlaces[i];
 
         // Create default and highlighted bitmaps
-        final BitmapDescriptor defaultIcon = await MapUtils.createNumberedMarkerBitmap(i + 1);
-        final BitmapDescriptor highlightedIcon = await MapUtils.createNumberedMarkerBitmap(i + 1, color: _primaryColor!);
+        final BitmapDescriptorWithAnchor defaultIconWithAnchor = await GoogleMapsCustomMarker.createCustomBitmap(
+          shape: MarkerShape.circle,
+          title: '${i + 1}',
+          textSize: 32,
+          backgroundColor: Colors.blue,
+          circleOptions: CircleMarkerOptions(diameter: 52),
+          imagePixelRatio: 2,
+        );
+        final BitmapDescriptorWithAnchor defaultIconWithAnchorHighlighted = await GoogleMapsCustomMarker.createCustomBitmap(
+          shape: MarkerShape.circle,
+          title: '${i + 1}',
+          backgroundColor: _primaryColor!,
+          textSize: 48,
+          shadowColor: Colors.black.withOpacity(0.7),
+          shadowBlur: 24,
+          circleOptions: CircleMarkerOptions(diameter: 64),
+          imagePixelRatio: 2,
+        );
+        final BitmapDescriptor defaultIcon = defaultIconWithAnchor.bitmapDescriptor;
+        final BitmapDescriptor highlightedIcon = defaultIconWithAnchorHighlighted.bitmapDescriptor;
 
         // Store the bitmaps in the lists
         _defaultMarkerBitmaps.add(defaultIcon);
@@ -449,6 +468,7 @@ class TourMapController with ChangeNotifier {
             markerId: MarkerId(tourguidePlace.googleMapPlaceId),
             position: LatLng(tourguidePlace.latitude, tourguidePlace.longitude),
             icon: defaultIcon,
+            anchor: defaultIconWithAnchor.anchorOffset,
             infoWindow: InfoWindow(
               title: tourguidePlace.title,
               snippet: tourguidePlace.description,

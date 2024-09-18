@@ -30,64 +30,11 @@ class MapUtils {
     }
   }
 
-  static Future<BitmapDescriptor> createNumberedMarkerBitmap(int number, {Color color = Colors.lightBlue}) async {
-    final double baseSize = kIsWeb ? (CrossplatformUtils.isMobile() ? 10 : 24) : 40; // Smaller size for the marker
-    final double circleSize = baseSize * 2; // Circle diameter
-    final double textSize = baseSize * (kIsWeb && CrossplatformUtils.isMobile() ? 0.5 : 1); // Text size proportional to the marker
-
-    final ui.PictureRecorder pictureRecorder = ui.PictureRecorder();
-    final Canvas canvas = Canvas(pictureRecorder);
-
-    // Draw a shadow (a blurred circle behind the main circle)
-    final Paint shadowPaint = Paint()
-      ..color = Colors.black.withOpacity(0.3) // Shadow color with some transparency
-      ..maskFilter = const ui.MaskFilter.blur(ui.BlurStyle.normal, 2.0); // Adjust blur radius
-
-    canvas.drawCircle(
-      Offset(circleSize / 2, circleSize / 2),
-      circleSize / 2 - 2, // Make the shadow slightly larger
-      shadowPaint,
-    );
-
-    // Draw the main circle
-    final Paint paint = Paint()..color = color;
-    canvas.drawCircle(
-      Offset(circleSize / 2, circleSize / 2),
-      circleSize / 2 - 6,
-      paint,
-    );
-
-    // Draw the number with appropriate size
-    final TextPainter textPainter = TextPainter(
-      textDirection: TextDirection.ltr,
-    );
-    textPainter.text = TextSpan(
-      text: number.toString(),
-      style: TextStyle(
-        fontSize: textSize,
-        color: Colors.white,
-        fontWeight: FontWeight.bold,
-      ),
-    );
-    textPainter.layout();
-    textPainter.paint(
-      canvas,
-      Offset(
-        (circleSize - textPainter.width) / 2,
-        (circleSize - textPainter.height) / 2,
-      ),
-    );
-
-    // Convert the canvas to an image at the original size
-    final ui.Image img = await pictureRecorder.endRecording().toImage(circleSize.toInt(), circleSize.toInt());
-
-    // Convert to ByteData directly from the original image
-    final ByteData? byteData = await img.toByteData(format: ui.ImageByteFormat.png);
-    if (byteData == null) {
-      throw Exception('Failed to convert image to ByteData');
-    }
-
-    return BitmapDescriptor.fromBytes(byteData.buffer.asUint8List());
+  static double calculateDistance(LatLng point1, LatLng point2) {
+    // You can use Haversine formula or simple Euclidean distance for close points
+    double dx = point1.latitude - point2.latitude;
+    double dy = point1.longitude - point2.longitude;
+    return dx * dx + dy * dy;
   }
 
   static LatLngBounds createLatLngBounds(List<LatLng> points) {
@@ -107,12 +54,5 @@ class MapUtils {
       southwest: LatLng(south, west),
       northeast: LatLng(north, east),
     );
-  }
-
-  static double calculateDistance(LatLng point1, LatLng point2) {
-    // You can use Haversine formula or simple Euclidean distance for close points
-    double dx = point1.latitude - point2.latitude;
-    double dy = point1.longitude - point2.longitude;
-    return dx * dx + dy * dy;
   }
 }

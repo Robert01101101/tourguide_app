@@ -1,8 +1,10 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:google_maps_custom_marker/google_maps_custom_marker.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:tourguide_app/tour/tour_details.dart';
+import 'package:tourguide_app/ui/tourguide_theme.dart';
 import 'package:tourguide_app/utilities/map_utils.dart';
 import 'package:tourguide_app/utilities/providers/tour_provider.dart';
 
@@ -43,8 +45,8 @@ class _ExploreMapState extends State<ExploreMap> {
     for (int i = 0; i < widget.tours.length; i++) {
       logger.t("Adding marker for tour ${widget.tours[i].name}");
       Tour tour = widget.tours[i];
-      _markers.add(
-        Marker(
+      Marker marker = await GoogleMapsCustomMarker.createCustomMarker(
+        marker: Marker(
           markerId: MarkerId(tour.placeId),
           position: LatLng(tour.latitude, tour.longitude),
           //icon: icon,
@@ -58,7 +60,17 @@ class _ExploreMapState extends State<ExploreMap> {
             },
           ),
         ),
+        shape: MarkerShape.bubble,
+        title: tour.name,
+        backgroundColor: TourguideTheme.tourguideColor,
+        textSize: 32,
+        shadowBlur: 16,
+        padding: 48,
+        shadowColor: Colors.black.withOpacity(.1),
+        imagePixelRatio: 2,
+        bubbleOptions: BubbleMarkerOptions(anchorTriangleWidth: 24, anchorTriangleHeight: 24)
       );
+      _markers.add(marker);
     }
 
     setState(() {

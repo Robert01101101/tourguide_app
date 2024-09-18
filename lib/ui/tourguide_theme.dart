@@ -5,7 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 class TourguideTheme {
   //Colors
   static const Color tourguideColor = Color(0xff006a65);
-  static const Color primaryColor = Color(0xff6fece4);
+  static const Color seedColor = Color(0xff6fece4);
   static const Color textColorDarkTheme = Colors.white;
 
   //Themes
@@ -25,7 +25,7 @@ class TourguideTheme {
       useMaterial3: true,
       brightness: brightness,
       colorScheme: ColorScheme.fromSeed(
-        seedColor: primaryColor,
+        seedColor: seedColor,
         brightness: brightness,
       ),
     );
