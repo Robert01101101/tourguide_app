@@ -5,14 +5,13 @@ import 'package:flutter/services.dart';
 import 'package:flutter_google_places_sdk/flutter_google_places_sdk.dart';
 import 'package:tourguide_app/main.dart';
 
-
-
 /// Main home page
 class FlutterGooglePlacesSample extends StatefulWidget {
   const FlutterGooglePlacesSample({super.key});
 
   @override
-  State<FlutterGooglePlacesSample> createState() => _FlutterGooglePlacesSampleState();
+  State<FlutterGooglePlacesSample> createState() =>
+      _FlutterGooglePlacesSampleState();
 }
 
 class _FlutterGooglePlacesSampleState extends State<FlutterGooglePlacesSample> {
@@ -130,11 +129,11 @@ class _FlutterGooglePlacesSampleState extends State<FlutterGooglePlacesSample> {
         .split(",")
         .map((part) => part.trim())
         .map((part) {
-      if (part.length != 2) {
-        return "Country part '${part}' must be 2 characters";
-      }
-      return null;
-    })
+          if (part.length != 2) {
+            return "Country part '${part}' must be 2 characters";
+          }
+          return null;
+        })
         .where((item) => item != null)
         .firstOrNull;
   }
@@ -143,9 +142,9 @@ class _FlutterGooglePlacesSampleState extends State<FlutterGooglePlacesSample> {
     _countries = (countries == "")
         ? []
         : countries
-        .split(",")
-        .map((item) => item.trim())
-        .toList(growable: false);
+            .split(",")
+            .map((item) => item.trim())
+            .toList(growable: false);
   }
 
   void _onPredictTextChanged(String value) {
@@ -210,7 +209,7 @@ class _FlutterGooglePlacesSampleState extends State<FlutterGooglePlacesSample> {
         origin: LatLng(lat: 43.12, lng: 95.20),
         locationBias: _locationBiasEnabled ? _locationBias : null,
         locationRestriction:
-        _locationRestrictionEnabled ? _locationRestriction : null,
+            _locationRestrictionEnabled ? _locationRestriction : null,
       );
 
       setState(() {
@@ -244,7 +243,8 @@ class _FlutterGooglePlacesSampleState extends State<FlutterGooglePlacesSample> {
     final theme = Theme.of(context);
     final errorText = err == null ? '' : err.toString();
     return Text(errorText,
-        style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.error));
+        style: theme.textTheme.bodySmall
+            ?.copyWith(color: theme.colorScheme.error));
   }
 
   List<Widget> _buildFetchPlacePhotoWidgets() {
@@ -342,7 +342,7 @@ class _FlutterGooglePlacesSampleState extends State<FlutterGooglePlacesSample> {
       // -- Countries
       _buildEnabledOption(
         _countriesEnabled,
-            (value) => _countriesEnabled = value,
+        (value) => _countriesEnabled = value,
         TextFormField(
           enabled: _countriesEnabled,
           onChanged: _onCountriesTextChanged,
@@ -356,7 +356,7 @@ class _FlutterGooglePlacesSampleState extends State<FlutterGooglePlacesSample> {
       DropdownButton<PlaceTypeFilter>(
         items: PlaceTypeFilter.values
             .map((item) => DropdownMenuItem<PlaceTypeFilter>(
-            child: Text(item.value), value: item))
+                child: Text(item.value), value: item))
             .toList(growable: false),
         value: _placeTypesFilter.isEmpty ? null : _placeTypesFilter[0],
         onChanged: _onPlaceTypeFilterChanged,
@@ -364,7 +364,7 @@ class _FlutterGooglePlacesSampleState extends State<FlutterGooglePlacesSample> {
       // -- Location Bias
       _buildEnabledOption(
         _locationBiasEnabled,
-            (value) => _locationBiasEnabled = value,
+        (value) => _locationBiasEnabled = value,
         LocationField(
           label: "Location Bias",
           enabled: _locationBiasEnabled,
@@ -379,7 +379,7 @@ class _FlutterGooglePlacesSampleState extends State<FlutterGooglePlacesSample> {
       // -- Location Restrictions
       _buildEnabledOption(
         _locationRestrictionEnabled,
-            (value) => _locationRestrictionEnabled = value,
+        (value) => _locationRestrictionEnabled = value,
         LocationField(
           label: "Location Restriction",
           enabled: _locationRestrictionEnabled,
@@ -449,10 +449,10 @@ class LocationField extends StatefulWidget {
   /// Create a LocationField
   const LocationField(
       {Key? key,
-        required this.label,
-        required this.enabled,
-        required this.value,
-        required this.onChanged})
+      required this.label,
+      required this.enabled,
+      required this.value,
+      required this.onChanged})
       : super(key: key);
 
   @override
@@ -506,7 +506,7 @@ class _LocationFieldState extends State<LocationField> {
       child: TextFormField(
         enabled: widget.enabled,
         keyboardType:
-        TextInputType.numberWithOptions(signed: true, decimal: true),
+            TextInputType.numberWithOptions(signed: true, decimal: true),
         inputFormatters: [
           FilteringTextInputFormatter.allow(RegExp(r'[\d.]')),
         ],

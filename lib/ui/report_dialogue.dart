@@ -20,13 +20,16 @@ class ReportDialogue extends StatelessWidget {
       children: [
         Padding(
           padding: const EdgeInsets.all(20.0),
-          child: Center(child: Text("Please select the reason why you are reporting this $reportItem. Your feedback is important to us and will help us maintain a safe and respectful community.")),
+          child: Center(
+              child: Text(
+                  "Please select the reason why you are reporting this $reportItem. Your feedback is important to us and will help us maintain a safe and respectful community.")),
         ),
         Divider(),
         SizedBox(height: 16.0),
         ReportOption(
           title: 'Nudity or Sexual Content',
-          description: 'Contains nudity, sexual activity, or other sexually explicit material.',
+          description:
+              'Contains nudity, sexual activity, or other sexually explicit material.',
           groupValue: selectedReportOption,
           onChanged: onChanged,
         ),
@@ -74,7 +77,8 @@ class ReportDialogue extends StatelessWidget {
         ),
         TextField(
           controller: reportDetailsController,
-          decoration: InputDecoration(labelText: 'Additional details (optional)'),
+          decoration:
+              InputDecoration(labelText: 'Additional details (optional)'),
           minLines: 3,
           maxLines: 6,
           maxLength: 2000,
@@ -90,7 +94,11 @@ class ReportOption extends StatelessWidget {
   final String groupValue;
   final ValueChanged<String?> onChanged;
 
-  ReportOption({required this.title, required this.description, required this.groupValue, required this.onChanged});
+  ReportOption(
+      {required this.title,
+      required this.description,
+      required this.groupValue,
+      required this.onChanged});
 
   @override
   Widget build(BuildContext context) {

@@ -21,9 +21,7 @@ class Profile extends StatefulWidget {
 }
 
 class _ProfileState extends State<Profile> {
-
   final TextEditingController _usernameController = TextEditingController();
-
 
   @override
   void initState() {
@@ -32,11 +30,11 @@ class _ProfileState extends State<Profile> {
     MyGlobals.webRoutingFix(TourguideNavigation.profilePath);
   }
 
-
   //db = FirebaseFirestore.instance;
   @override
   Widget build(BuildContext context) {
-    logger.t('FirebaseAuth.instance.currentUser=${FirebaseAuth.instance.currentUser}');
+    logger.t(
+        'FirebaseAuth.instance.currentUser=${FirebaseAuth.instance.currentUser}');
     myAuth.AuthProvider authProvider = Provider.of(context);
     TourProvider tourProvider = Provider.of(context);
 
@@ -49,19 +47,26 @@ class _ProfileState extends State<Profile> {
           children: [
             StandardLayout(
               children: [
-                SizedBox(height: 0,),
-                authProvider.isAnonymous ? const Padding(
-                  padding: EdgeInsets.all(16.0),
-                  child: Text('You are signed in as a guest. \n\nSign in with Google to save tours and access more features.'),
-                ) :
-                ListTile(
-                  leading: GoogleUserCircleAvatar(
-                    identity: authProvider.googleSignInUser!,
-                  ),
-                  title: Text(authProvider.googleSignInUser!.displayName ?? ''),
-                  subtitle: Text(authProvider.googleSignInUser!.email),
+                const SizedBox(
+                  height: 0,
                 ),
-                SizedBox(height: 8,),
+                authProvider.isAnonymous
+                    ? const Padding(
+                        padding: EdgeInsets.all(16.0),
+                        child: Text(
+                            'You are signed in as a guest. \n\nSign in with Google to save tours and access more features.'),
+                      )
+                    : ListTile(
+                        leading: GoogleUserCircleAvatar(
+                          identity: authProvider.googleSignInUser!,
+                        ),
+                        title: Text(
+                            authProvider.googleSignInUser!.displayName ?? ''),
+                        subtitle: Text(authProvider.googleSignInUser!.email),
+                      ),
+                const SizedBox(
+                  height: 8,
+                ),
               ],
             ),
             StandardLayout(
@@ -117,28 +122,32 @@ class _ProfileState extends State<Profile> {
                     label: 'Get the Android App on Google Play',
                     leftIcon: FontAwesomeIcons.googlePlay,
                     onPressed: () {
-                      launchUrl(Uri.parse("https://play.google.com/store/apps/details?id=com.robertmichelsdigitalmedia.tourguideapp"));
+                      launchUrl(Uri.parse(
+                          "https://play.google.com/store/apps/details?id=com.robertmichelsdigitalmedia.tourguideapp"));
                     },
                   ),
                 ProfileListButton(
                   label: 'Community Guidelines',
                   leftIcon: Icons.local_library_outlined,
                   onPressed: () {
-                    launchUrl(Uri.parse("https://tourguide.rmichels.com/communityGuidelines.html"));
+                    launchUrl(Uri.parse(
+                        "https://tourguide.rmichels.com/communityGuidelines.html"));
                   },
                 ),
                 ProfileListButton(
                   label: 'Terms of Service',
                   leftIcon: Icons.description_outlined,
                   onPressed: () {
-                    launchUrl(Uri.parse("https://tourguide.rmichels.com/termsOfService.html"));
+                    launchUrl(Uri.parse(
+                        "https://tourguide.rmichels.com/termsOfService.html"));
                   },
                 ),
                 ProfileListButton(
                   label: 'Privacy Policy',
                   leftIcon: Icons.privacy_tip_outlined,
                   onPressed: () {
-                    launchUrl(Uri.parse("https://tourguide.rmichels.com/privacyPolicy.html"));
+                    launchUrl(Uri.parse(
+                        "https://tourguide.rmichels.com/privacyPolicy.html"));
                   },
                 ),
                 if (!kIsWeb)
@@ -146,14 +155,16 @@ class _ProfileState extends State<Profile> {
                     label: 'Rate Tourguide',
                     leftIcon: Icons.star_border,
                     onPressed: () {
-                      launchUrl(Uri.parse("https://tourguide.rmichels.com/privacyPolicy.html"));
+                      launchUrl(Uri.parse(
+                          "https://tourguide.rmichels.com/privacyPolicy.html"));
                     },
                   ),
                 ProfileListButton(
                   label: 'Provide Feedback',
                   leftIcon: Icons.feedback_outlined,
                   onPressed: () {
-                    launchUrl(Uri.parse("https://play.google.com/store/apps/details?id=com.robertmichelsdigitalmedia.tourguideapp"));
+                    launchUrl(Uri.parse(
+                        "https://play.google.com/store/apps/details?id=com.robertmichelsdigitalmedia.tourguideapp"));
                   },
                 ),
                 ProfileListButton(
@@ -195,7 +206,6 @@ class ProfileListButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -206,12 +216,15 @@ class ProfileListButton extends StatelessWidget {
         TextButton(
           onPressed: disabled ?? false ? null : onPressed,
           style: TextButton.styleFrom(
-            padding: EdgeInsets.all((kIsWeb && MediaQuery.of(context).size.width > 1280) ? 24 : 16),
+            padding: EdgeInsets.all(
+                (kIsWeb && MediaQuery.of(context).size.width > 1280) ? 24 : 16),
             alignment: Alignment.centerLeft,
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(0), // Set to 0 for sharp corners
+              borderRadius:
+                  BorderRadius.circular(0), // Set to 0 for sharp corners
             ),
-            foregroundColor: color != null ? color : Theme.of(context).colorScheme.primary,
+            foregroundColor:
+                color != null ? color : Theme.of(context).colorScheme.primary,
           ),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -220,14 +233,20 @@ class ProfileListButton extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Icon(leftIcon), // Left icon
-                  SizedBox(width: 16), // Adjust spacing between icon and text as needed
+                  SizedBox(
+                      width:
+                          16), // Adjust spacing between icon and text as needed
                   Text(
                     label,
                     style: TextStyle(fontWeight: FontWeight.bold),
                   ),
                 ],
               ),
-              if (rightIcon != null) Icon(rightIcon, size: 20,), // Right icon if provided
+              if (rightIcon != null)
+                Icon(
+                  rightIcon,
+                  size: 20,
+                ), // Right icon if provided
             ],
           ),
         ),

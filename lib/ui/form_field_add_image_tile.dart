@@ -19,25 +19,25 @@ class AddImageTile extends FormField<File?> {
     required this.enabled,
     required this.isSelected,
   }) : super(
-    key: key,
-    initialValue: initialValue,
-    onSaved: onSaved,
-    validator: validator,
-    builder: (FormFieldState<File?> state) {
-      return _AddImageTileContent(
-        initialValue: initialValue,
-        state: state,
-        onChanged: onChanged != null
-            ? (File? file) {
-          state.didChange(file);
-          onChanged(file);
-        }
-            : state.didChange,
-        enabled: enabled,
-        isSelected: isSelected,
-      );
-    },
-  );
+          key: key,
+          initialValue: initialValue,
+          onSaved: onSaved,
+          validator: validator,
+          builder: (FormFieldState<File?> state) {
+            return _AddImageTileContent(
+              initialValue: initialValue,
+              state: state,
+              onChanged: onChanged != null
+                  ? (File? file) {
+                      state.didChange(file);
+                      onChanged(file);
+                    }
+                  : state.didChange,
+              enabled: enabled,
+              isSelected: isSelected,
+            );
+          },
+        );
 }
 
 class _AddImageTileContent extends StatefulWidget {
@@ -97,50 +97,65 @@ class _AddImageTileContentState extends State<_AddImageTileContent> {
                     gradient: LinearGradient(
                       begin: Alignment.topCenter,
                       end: Alignment.bottomCenter,
-                      colors: widget.enabled ? [
-                        Colors.black.withOpacity(0.4),
-                        Colors.black.withOpacity(0.2),
-                      ] : [
-                        Colors.grey.withOpacity(0.7),
-                        Colors.grey.withOpacity(0.5),
-                      ],
+                      colors: widget.enabled
+                          ? [
+                              Colors.black.withOpacity(0.4),
+                              Colors.black.withOpacity(0.2),
+                            ]
+                          : [
+                              Colors.grey.withOpacity(0.7),
+                              Colors.grey.withOpacity(0.5),
+                            ],
                     ),
                   ),
                 ),
               if (widget.isSelected)
                 IgnorePointer(
                   child: Container(
-                    color: Theme.of(context).scaffoldBackgroundColor.withOpacity(0.4), // Adjust the opacity to make it darker or lighter
+                    color: Theme.of(context).scaffoldBackgroundColor.withOpacity(
+                        0.4), // Adjust the opacity to make it darker or lighter
                   ),
                 ),
               Center(
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    if (_imageFile == null)
-                      const Text('Add an image'),
+                    if (_imageFile == null) const Text('Add an image'),
                     if (_imageFile != null)
-                      const Text('Replace image', style: TextStyle(color: Colors.white)),
+                      const Text('Replace image',
+                          style: TextStyle(color: Colors.white)),
                     SizedBox(height: 15),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         ElevatedButton(
-                          onPressed: widget.enabled ? () => _pickImage(ImageSource.camera) : () => logger.e("Clicked take image after form submit"),
+                          onPressed: widget.enabled
+                              ? () => _pickImage(ImageSource.camera)
+                              : () => logger
+                                  .e("Clicked take image after form submit"),
                           style: ElevatedButton.styleFrom(
                             shape: CircleBorder(),
                             padding: EdgeInsets.all(15),
                           ),
-                          child: Icon(Icons.camera_alt, color: widget.enabled ? Theme.of(context).colorScheme.primary : Colors.grey),
+                          child: Icon(Icons.camera_alt,
+                              color: widget.enabled
+                                  ? Theme.of(context).colorScheme.primary
+                                  : Colors.grey),
                         ),
                         SizedBox(width: 15),
                         ElevatedButton(
-                          onPressed: widget.enabled ? () => _pickImage(ImageSource.gallery) : () => logger.e("Clicked pick image after form submit"),
+                          onPressed: widget.enabled
+                              ? () => _pickImage(ImageSource.gallery)
+                              : () => logger
+                                  .e("Clicked pick image after form submit"),
                           style: ElevatedButton.styleFrom(
                             shape: CircleBorder(),
                             padding: EdgeInsets.all(15),
                           ),
-                          child: Icon(Icons.collections, color: widget.enabled ? Theme.of(context).colorScheme.primary : Colors.grey),
+                          child: Icon(Icons.collections,
+                              color: widget.enabled
+                                  ? Theme.of(context).colorScheme.primary
+                                  : Colors.grey),
                         ),
                       ],
                     ),
@@ -163,11 +178,16 @@ class _AddImageTileContentState extends State<_AddImageTileContent> {
           IgnorePointer(
             child: Container(
               decoration: BoxDecoration(
-                border: widget.isSelected ? Border.all(
-                  width: 2.0,
-                  color: !widget.state.hasError
-                      ? widget.enabled ? Theme.of(context).colorScheme.primary : Colors.grey
-                      : Theme.of(context).colorScheme.error,) : null,
+                border: widget.isSelected
+                    ? Border.all(
+                        width: 2.0,
+                        color: !widget.state.hasError
+                            ? widget.enabled
+                                ? Theme.of(context).colorScheme.primary
+                                : Colors.grey
+                            : Theme.of(context).colorScheme.error,
+                      )
+                    : null,
               ),
               height: 146,
               width: 146,

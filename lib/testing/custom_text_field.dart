@@ -8,8 +8,6 @@ class CustomTextField extends StatefulWidget {
     required this.labelText,
   }) : super(key: key);
 
-
-
   @override
   CustomTextFieldState createState() => CustomTextFieldState();
 }

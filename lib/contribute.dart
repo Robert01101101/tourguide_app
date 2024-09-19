@@ -14,7 +14,6 @@ import 'package:tourguide_app/utilities/providers/tourguide_user_provider.dart';
 
 import 'main.dart';
 
-
 class Contribute extends StatefulWidget {
   const Contribute({super.key});
 
@@ -30,9 +29,12 @@ class _ContributeState extends State<Contribute> {
     logger.t('downloadTours');
 
     final tourProvider = Provider.of<TourProvider>(context, listen: false);
-    final locationProvider = Provider.of<LocationProvider>(context, listen: false);
-    final myAuth.AuthProvider authProvider = Provider.of(context, listen: false);
-    TourguideUserProvider userProvider = Provider.of<TourguideUserProvider>(context, listen: false);
+    final locationProvider =
+        Provider.of<LocationProvider>(context, listen: false);
+    final myAuth.AuthProvider authProvider =
+        Provider.of(context, listen: false);
+    TourguideUserProvider userProvider =
+        Provider.of<TourguideUserProvider>(context, listen: false);
 
     try {
       await Future.doWhile(() async {
@@ -71,7 +73,7 @@ class _ContributeState extends State<Contribute> {
     myAuth.AuthProvider authProvider = Provider.of(context);
 
     Future<void> refresh() async {
-      if (!tourProvider.isLoadingTours){
+      if (!tourProvider.isLoadingTours) {
         await downloadTours();
       }
     }
@@ -81,44 +83,48 @@ class _ContributeState extends State<Contribute> {
         title: const Text('Contribute'),
       ),
       body: authProvider.isAnonymous
-          ?
-          const StandardLayout(
-            children: [
-              SizedBox(height: 0,),
-              Padding(
-                padding: EdgeInsets.all(16.0),
-                child: Text('You are signed in as a guest. \n\nSign in with Google to create tours and access more features.'),
-              ),
-            ],
-          )
-          :
-      RefreshIndicator(
-        onRefresh: refresh,
-        child: SingleChildScrollView(
-          controller: _scrollController,
-          physics: const AlwaysScrollableScrollPhysics(),
-          child: Shimmer(
-            linearGradient: MyGlobals.shimmerGradient,
-            child:
-            StandardLayout(
+          ? const StandardLayout(
               children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text("Tours you created", style: Theme.of(context).textTheme.headlineSmall),
-                    /*IconButton(onPressed: (){
+                SizedBox(
+                  height: 0,
+                ),
+                Padding(
+                  padding: EdgeInsets.all(16.0),
+                  child: Text(
+                      'You are signed in as a guest. \n\nSign in with Google to create tours and access more features.'),
+                ),
+              ],
+            )
+          : RefreshIndicator(
+              onRefresh: refresh,
+              child: SingleChildScrollView(
+                controller: _scrollController,
+                physics: const AlwaysScrollableScrollPhysics(),
+                child: Shimmer(
+                  linearGradient: MyGlobals.shimmerGradient,
+                  child: StandardLayout(
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text("Tours you created",
+                              style: Theme.of(context).textTheme.headlineSmall),
+                          /*IconButton(onPressed: (){
                       Navigator.push(
                         context,
                         MaterialPageRoute(builder: (context) => const CreateEditTour()),
                       );
                     }, icon: Icon(Icons.add_circle_outline_sharp),),*/
-                  ],
-                ),
-                StandardLayoutChild(
-                  fullWidth: true,
-                  child: HorizontalScroller(tours: tourProvider.getTours(tourProvider.userCreatedTours), leftPadding: true),
-                ),
-                /*Text("Review unreviewed tours", style: Theme.of(context).textTheme.headlineSmall),
+                        ],
+                      ),
+                      StandardLayoutChild(
+                        fullWidth: true,
+                        child: HorizontalScroller(
+                            tours: tourProvider
+                                .getTours(tourProvider.userCreatedTours),
+                            leftPadding: true),
+                      ),
+                      /*Text("Review unreviewed tours", style: Theme.of(context).textTheme.headlineSmall),
                 StandardLayoutChild(
                   fullWidth: true,
                   child: SizedBox(
@@ -126,7 +132,7 @@ class _ContributeState extends State<Contribute> {
                     child: HorizontalScroller(tours: tourProvider.userCreatedTours, leftPadding: true),
                   ),
                 ),*/
-                /*
+                      /*
                 Row(
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: [
@@ -145,16 +151,14 @@ class _ContributeState extends State<Contribute> {
                     }, child: const Text("Your private tours")),
                   ],
                 ),*/
-              ],
+                    ],
+                  ),
+                ),
+              ),
             ),
-          ),
-        ),
-      ),
     );
   }
 }
-
-
 
 //_________________________________________________________________________ PUBLIC TOURS
 class PublicTours extends StatefulWidget {
@@ -165,7 +169,6 @@ class PublicTours extends StatefulWidget {
   @override
   State<PublicTours> createState() => _PublicToursState();
 }
-
 
 class _PublicToursState extends State<PublicTours> {
   FirebaseFirestore db = FirebaseFirestore.instance;
@@ -183,7 +186,6 @@ class _PublicToursState extends State<PublicTours> {
     _firestoreGetPublicTours(widget.isPublic);
   }
 
-
   _firestoreGetPublicTours(bool isPublic) async {
     FirebaseFirestore db = FirebaseFirestore.instance;
     FirebaseAuth auth = FirebaseAuth.instance;
@@ -194,7 +196,7 @@ class _PublicToursState extends State<PublicTours> {
 
     // get public tours
     QuerySnapshot querySnapshot;
-    if (isPublic){
+    if (isPublic) {
       querySnapshot = await db
           .collection("tours")
           .where("visibility", isEqualTo: "public")
@@ -206,7 +208,6 @@ class _PublicToursState extends State<PublicTours> {
           .where("uid", isEqualTo: uid)
           .get();
     }
-    
 
     // populate tours list
     setState(() {
@@ -220,7 +221,6 @@ class _PublicToursState extends State<PublicTours> {
       }));
     });
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -243,4 +243,3 @@ class _PublicToursState extends State<PublicTours> {
     );
   }
 }
-

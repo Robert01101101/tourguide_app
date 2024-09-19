@@ -30,23 +30,22 @@ import 'package:shared_preferences/shared_preferences.dart';
 //  ),
 //);
 class TourguideNavigation {
-  static final TourguideNavigation _instance =
-  TourguideNavigation._internal();
+  static final TourguideNavigation _instance = TourguideNavigation._internal();
 
   static TourguideNavigation get instance => _instance;
 
   static late final GoRouter router;
 
   static final GlobalKey<NavigatorState> parentNavigatorKey =
-  GlobalKey<NavigatorState>();
+      GlobalKey<NavigatorState>();
   static final GlobalKey<NavigatorState> exploreTabNavigatorKey =
-  GlobalKey<NavigatorState>();
+      GlobalKey<NavigatorState>();
   static final GlobalKey<NavigatorState> contributeTabNavigatorKey =
-  GlobalKey<NavigatorState>();
+      GlobalKey<NavigatorState>();
   static final GlobalKey<NavigatorState> profileTabNavigatorKey =
-  GlobalKey<NavigatorState>();
+      GlobalKey<NavigatorState>();
   static final GlobalKey<NavigatorState> geminiChatTabNavigatorKey =
-  GlobalKey<NavigatorState>();
+      GlobalKey<NavigatorState>();
 
   BuildContext get context =>
       router.routerDelegate.navigatorKey.currentContext!;
@@ -144,10 +143,10 @@ class TourguideNavigation {
           ),
         ],
         pageBuilder: (
-            BuildContext context,
-            GoRouterState state,
-            StatefulNavigationShell navigationShell,
-            ) {
+          BuildContext context,
+          GoRouterState state,
+          StatefulNavigationShell navigationShell,
+        ) {
           return getPage(
             child: BottomNavigationPage(
               child: navigationShell,
@@ -203,7 +202,6 @@ class TourguideNavigation {
     );
   }
 
-
   static Page getPage({
     required Widget child,
     required GoRouterState state,
@@ -221,9 +219,7 @@ class TourguideNavigation {
     isFirstTime = _prefs.getBool('firstTimeUser') ?? true;
     logger.i('isFirstTime: $isFirstTime');
   }
-
 }
-
 
 class SlideTransitionRoute extends PageRouteBuilder {
   final Widget page;
@@ -231,22 +227,19 @@ class SlideTransitionRoute extends PageRouteBuilder {
 
   SlideTransitionRoute({required this.page, required this.beginOffset})
       : super(
-    pageBuilder: (context, animation, secondaryAnimation) => page,
-    transitionsBuilder: (context, animation, secondaryAnimation, child) {
-      var tween = Tween(begin: beginOffset, end: Offset.zero)
-          .chain(CurveTween(curve: Curves.easeInOut));
-      var offsetAnimation = animation.drive(tween);
+          pageBuilder: (context, animation, secondaryAnimation) => page,
+          transitionsBuilder: (context, animation, secondaryAnimation, child) {
+            var tween = Tween(begin: beginOffset, end: Offset.zero)
+                .chain(CurveTween(curve: Curves.easeInOut));
+            var offsetAnimation = animation.drive(tween);
 
-      return SlideTransition(
-        position: offsetAnimation,
-        child: child,
-      );
-    },
-  );
+            return SlideTransition(
+              position: offsetAnimation,
+              child: child,
+            );
+          },
+        );
 }
-
-
-
 
 //______________________________________________________________________________________________ BottomNavigationPage
 class BottomNavigationPage extends StatefulWidget {
@@ -262,7 +255,6 @@ class BottomNavigationPage extends StatefulWidget {
 }
 
 class _BottomNavigationPageState extends State<BottomNavigationPage> {
-
   @override
   void initState() {
     super.initState();
@@ -271,7 +263,8 @@ class _BottomNavigationPageState extends State<BottomNavigationPage> {
 
   @override
   void dispose() {
-    if (MyGlobals.scrollController != null) MyGlobals.scrollController!.dispose();
+    if (MyGlobals.scrollController != null)
+      MyGlobals.scrollController!.dispose();
     super.dispose();
   }
 
@@ -281,7 +274,7 @@ class _BottomNavigationPageState extends State<BottomNavigationPage> {
       body: SafeArea(
         child: widget.child,
       ),
-      bottomNavigationBar: ScrollToHide (
+      bottomNavigationBar: ScrollToHide(
         scrollController: MyGlobals.scrollController!,
         hideDirection: Axis.vertical,
         height: 80,
@@ -289,10 +282,11 @@ class _BottomNavigationPageState extends State<BottomNavigationPage> {
         child: NavigationBarTheme(
           data: NavigationBarThemeData(
             labelTextStyle: WidgetStateProperty.resolveWith<TextStyle>(
-                  (Set<WidgetState> states) {
+              (Set<WidgetState> states) {
                 if (states.contains(WidgetState.selected)) {
                   return Theme.of(context).textTheme.labelMedium!.copyWith(
-                    fontWeight: FontWeight.bold,);
+                        fontWeight: FontWeight.bold,
+                      );
                 }
                 return Theme.of(context).textTheme.labelMedium!;
               },
@@ -307,8 +301,8 @@ class _BottomNavigationPageState extends State<BottomNavigationPage> {
               setState(() {});
             },
             //indicatorColor: Colors.amber,
-          
-            selectedIndex:  widget.child.currentIndex,
+
+            selectedIndex: widget.child.currentIndex,
             destinations: const <Widget>[
               NavigationDestination(
                 selectedIcon: Icon(Icons.home),

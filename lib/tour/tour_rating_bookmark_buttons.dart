@@ -17,7 +17,8 @@ class TourRatingBookmarkButtons extends StatefulWidget {
   });
 
   @override
-  State<TourRatingBookmarkButtons> createState() => _TourRatingBookmarkButtonsState();
+  State<TourRatingBookmarkButtons> createState() =>
+      _TourRatingBookmarkButtonsState();
 }
 
 class _TourRatingBookmarkButtonsState extends State<TourRatingBookmarkButtons> {
@@ -36,7 +37,8 @@ class _TourRatingBookmarkButtonsState extends State<TourRatingBookmarkButtons> {
       _showSignupDialog('rate tours');
       return;
     }
-    if (widget.tour.isOfflineCreatedTour ?? false) return; // Tour creation tile should not have rating
+    if (widget.tour.isOfflineCreatedTour ?? false)
+      return; // Tour creation tile should not have rating
 
     TourProvider tourProvider = Provider.of(context, listen: false);
 
@@ -55,7 +57,8 @@ class _TourRatingBookmarkButtonsState extends State<TourRatingBookmarkButtons> {
       }
       widget.tour.thisUsersRating = _thisUsersRating;
       tourProvider.updateTour(widget.tour, localUpdateOnly: true);
-      TourService.addOrUpdateRating(widget.tour.id, _thisUsersRating, authProvider.user!.uid);
+      TourService.addOrUpdateRating(
+          widget.tour.id, _thisUsersRating, authProvider.user!.uid);
     });
   }
 
@@ -65,7 +68,8 @@ class _TourRatingBookmarkButtonsState extends State<TourRatingBookmarkButtons> {
       _showSignupDialog('rate tours');
       return;
     }
-    if (widget.tour.isOfflineCreatedTour ?? false) return; // Tour creation tile should not have rating
+    if (widget.tour.isOfflineCreatedTour ?? false)
+      return; // Tour creation tile should not have rating
 
     TourProvider tourProvider = Provider.of(context, listen: false);
 
@@ -84,7 +88,8 @@ class _TourRatingBookmarkButtonsState extends State<TourRatingBookmarkButtons> {
       }
       widget.tour.thisUsersRating = _thisUsersRating;
       tourProvider.updateTour(widget.tour, localUpdateOnly: true);
-      TourService.addOrUpdateRating(widget.tour.id, _thisUsersRating, authProvider.user!.uid);
+      TourService.addOrUpdateRating(
+          widget.tour.id, _thisUsersRating, authProvider.user!.uid);
     });
   }
 
@@ -100,7 +105,8 @@ class _TourRatingBookmarkButtonsState extends State<TourRatingBookmarkButtons> {
           content: SingleChildScrollView(
             child: ListBody(
               children: <Widget>[
-                Text('You are signed in as a guest. \n\nSign in with Google to $action and access more features.'),
+                Text(
+                    'You are signed in as a guest. \n\nSign in with Google to $action and access more features.'),
               ],
             ),
           ),
@@ -130,9 +136,11 @@ class _TourRatingBookmarkButtonsState extends State<TourRatingBookmarkButtons> {
       _showSignupDialog('save tours');
       return;
     }
-    if (widget.tour.isOfflineCreatedTour ?? false) return; // Tour creation tile should not have rating
+    if (widget.tour.isOfflineCreatedTour ?? false)
+      return; // Tour creation tile should not have rating
 
-    TourguideUserProvider tourguideUserProvider = Provider.of(context, listen: false);
+    TourguideUserProvider tourguideUserProvider =
+        Provider.of(context, listen: false);
 
     setState(() {
       tourguideUserProvider.user!.savedTourIds.contains(widget.tour.id)
@@ -144,18 +152,22 @@ class _TourRatingBookmarkButtonsState extends State<TourRatingBookmarkButtons> {
 
   @override
   Widget build(BuildContext context) {
-    TourguideUserProvider tourguideUserProvider = Provider.of<TourguideUserProvider>(context);
+    TourguideUserProvider tourguideUserProvider =
+        Provider.of<TourguideUserProvider>(context);
 
     return Row(
       children: [
         ElevatedButton(
-          onPressed: (widget.tour.isOfflineCreatedTour ?? false) ? null : saveTour,
+          onPressed:
+              (widget.tour.isOfflineCreatedTour ?? false) ? null : saveTour,
           style: ElevatedButton.styleFrom(
             shape: CircleBorder(),
             padding: EdgeInsets.all(0),
-            foregroundColor:
-              tourguideUserProvider.user != null && tourguideUserProvider.user!.savedTourIds.contains(widget.tour.id) ?
-              Theme.of(context).colorScheme.primary : Colors.grey,
+            foregroundColor: tourguideUserProvider.user != null &&
+                    tourguideUserProvider.user!.savedTourIds
+                        .contains(widget.tour.id)
+                ? Theme.of(context).colorScheme.primary
+                : Colors.grey,
             backgroundColor: Theme.of(context).colorScheme.surfaceContainer,
           ),
           child: Icon(Icons.bookmark_rounded), // Replace with your desired icon
@@ -173,7 +185,10 @@ class _TourRatingBookmarkButtonsState extends State<TourRatingBookmarkButtons> {
                   height: 35,
                   child: IconButton(
                     onPressed: toggleThumbsUp,
-                    icon: Icon(Icons.thumb_up, color: (widget.tour.thisUsersRating ?? 0) == 1 ? Theme.of(context).colorScheme.primary : Colors.grey),
+                    icon: Icon(Icons.thumb_up,
+                        color: (widget.tour.thisUsersRating ?? 0) == 1
+                            ? Theme.of(context).colorScheme.primary
+                            : Colors.grey),
                     iconSize: 18,
                     padding: EdgeInsets.all(0),
                     constraints: BoxConstraints(),
@@ -190,7 +205,10 @@ class _TourRatingBookmarkButtonsState extends State<TourRatingBookmarkButtons> {
                   height: 35,
                   child: IconButton(
                     onPressed: toggleThumbsDown,
-                    icon: Icon(Icons.thumb_down, color: (widget.tour.thisUsersRating ?? 0) == -1 ? Theme.of(context).colorScheme.primary : Colors.grey),
+                    icon: Icon(Icons.thumb_down,
+                        color: (widget.tour.thisUsersRating ?? 0) == -1
+                            ? Theme.of(context).colorScheme.primary
+                            : Colors.grey),
                     iconSize: 18,
                     padding: EdgeInsets.all(0),
                     constraints: BoxConstraints(),

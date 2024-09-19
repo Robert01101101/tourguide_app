@@ -44,7 +44,8 @@ class _CreateEditTourState extends State<CreateEditTour> {
   final GlobalKey<FormState> _formKeyPlaces = GlobalKey<FormState>();
   final GlobalKey<FormState> _formKeyPlacesDetails = GlobalKey<FormState>();
   final GlobalKey<FormState> _formKeyDetails = GlobalKey<FormState>();
-  final GlobalKey<FormFieldState> _formFieldTagsKey = GlobalKey<FormFieldState>();
+  final GlobalKey<FormFieldState> _formFieldTagsKey =
+      GlobalKey<FormFieldState>();
   AutovalidateMode _formValidateMode = AutovalidateMode.disabled;
   AutovalidateMode _formPlacesValidateMode = AutovalidateMode.disabled;
   AutovalidateMode _formPlacesDetailsValidateMode = AutovalidateMode.disabled;
@@ -81,11 +82,15 @@ class _CreateEditTourState extends State<CreateEditTour> {
       for (int i = 0; i < _tour.tourguidePlaces.length; i++) {
         TourguidePlace place = _tour.tourguidePlaces[i];
         _placeControllers.add(TextEditingController(text: place.title));
-        _placeControllers[i].selection = TextSelection.fromPosition(TextPosition(offset: _placeControllers[i].text.length));
-        place.descriptionEditingController = TextEditingController(text: place.description);
+        _placeControllers[i].selection = TextSelection.fromPosition(
+            TextPosition(offset: _placeControllers[i].text.length));
+        place.descriptionEditingController =
+            TextEditingController(text: place.description);
         place.descriptionEditingController!.selection =
-            TextSelection.fromPosition(TextPosition(offset: place.descriptionEditingController!.text.length));
-        _updateTourguidePlaceDetailsWithPlaceId(i, place.googleMapPlaceId, place.title);
+            TextSelection.fromPosition(TextPosition(
+                offset: place.descriptionEditingController!.text.length));
+        _updateTourguidePlaceDetailsWithPlaceId(
+            i, place.googleMapPlaceId, place.title);
       }
     }
 
@@ -139,10 +144,13 @@ class _CreateEditTourState extends State<CreateEditTour> {
         _isFormSubmitted = true;
       });
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('${widget.isEditMode ? 'Updating' : 'Uploading'} tour...')),
+        SnackBar(
+            content: Text(
+                '${widget.isEditMode ? 'Updating' : 'Uploading'} tour...')),
       );
       //Final update to tour data
-      final myAuth.AuthProvider authProvider = Provider.of(context, listen: false);
+      final myAuth.AuthProvider authProvider =
+          Provider.of(context, listen: false);
       DateTime? createdDateTime = _tour.createdDateTime;
       _tour = _tour.copyWith(
         visibility: _tourIsPublic ? "public" : "private", //always true for now
@@ -152,20 +160,25 @@ class _CreateEditTourState extends State<CreateEditTour> {
         authorName: authProvider.user!.displayName,
       );
       // Validation passed, proceed with tour creation
-      widget.isEditMode ? await tourProvider.updateTour(_tour) : await tourProvider.uploadTour(_tour);
+      widget.isEditMode
+          ? await tourProvider.updateTour(_tour)
+          : await tourProvider.uploadTour(_tour);
 
-      if (mounted){
+      if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Successfully ${widget.isEditMode ? 'updated' : 'uploaded'} tour. Thanks for contributing!')),
+          SnackBar(
+              content: Text(
+                  'Successfully ${widget.isEditMode ? 'updated' : 'uploaded'} tour. Thanks for contributing!')),
         );
         Navigator.pop(context);
       }
     } catch (e, stackTrace) {
       logger.e('Error creating tour: $e \n stackTrace: $stackTrace');
-      if (mounted){
+      if (mounted) {
         ScaffoldMessenger.of(context).hideCurrentSnackBar();
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Failed to create tour. Please try again.')),
+          const SnackBar(
+              content: Text('Failed to create tour. Please try again.')),
         );
       }
       setState(() {
@@ -196,7 +209,10 @@ class _CreateEditTourState extends State<CreateEditTour> {
   // Function to upload image to Firebase Storage
   Future<String> _uploadImage(File imageFile) async {
     // Create a reference to the location you want to upload to in Firebase Storage
-    Reference ref = FirebaseStorage.instance.ref().child('tour_images').child(DateTime.now().millisecondsSinceEpoch.toString());
+    Reference ref = FirebaseStorage.instance
+        .ref()
+        .child('tour_images')
+        .child(DateTime.now().millisecondsSinceEpoch.toString());
 
     // Upload the file to Firebase Storage
     UploadTask uploadTask = ref.putFile(imageFile);
@@ -211,15 +227,16 @@ class _CreateEditTourState extends State<CreateEditTour> {
   }
 
   /// Try to go to the step, but first validate and update the tour if data is valid
-  void _tryToGoToStep(int step){
-    try{
+  void _tryToGoToStep(int step) {
+    try {
       if (_stepChanging) return;
       _stepChanging = true;
       final tourProvider = Provider.of<TourProvider>(context, listen: false);
 
-      if (step == _reviewStepIndex+1) {
+      if (step == _reviewStepIndex + 1) {
         // Final step (Review), create the tour
-        logger.t("_currentStep: $_currentStep, step: $step -> Creating tour...");
+        logger
+            .t("_currentStep: $_currentStep, step: $step -> Creating tour...");
         _firestoreCreateTour();
         _stepChanging = false;
         return;
@@ -227,8 +244,9 @@ class _CreateEditTourState extends State<CreateEditTour> {
 
       final filter = ProfanityFilter();
       bool isValid = false;
-      bool skipPermitted = step <= _currentStep+1 || step <= _maxStepReached; //true if not skipping, or skipping to a previous step
-
+      bool skipPermitted = step <= _currentStep + 1 ||
+          step <=
+              _maxStepReached; //true if not skipping, or skipping to a previous step
 
       if (step < _currentStep) {
         isValid = true;
@@ -237,11 +255,11 @@ class _CreateEditTourState extends State<CreateEditTour> {
         switch (_currentStep) {
           case 0: // Basic Info
             isValid = _formKey.currentState!.validate() && skipPermitted;
-            if (isValid){
+            if (isValid) {
               final selectedTags = _formFieldTagsKey.currentState?.value;
               //logger.i("Selected tags: $selectedTags");
               setState(() {
-                if (!widget.isEditMode){
+                if (!widget.isEditMode) {
                   _tour = _tour.copyWith(
                       name: filter.censor(_nameController.text),
                       description: filter.censor(_descriptionController.text),
@@ -263,9 +281,11 @@ class _CreateEditTourState extends State<CreateEditTour> {
             break;
           case 1: // Places
             isValid = _formKeyPlaces.currentState!.validate() && skipPermitted;
-            if (isValid){
+            if (isValid) {
               setState(() {
-                LatLng centerPoint = _calculateCenterPoint(_tour.tourguidePlaces.map((p) => LatLng(lat: p.latitude, lng: p.longitude)).toList());
+                LatLng centerPoint = _calculateCenterPoint(_tour.tourguidePlaces
+                    .map((p) => LatLng(lat: p.latitude, lng: p.longitude))
+                    .toList());
                 _tour = _tour.copyWith(
                     latitude: centerPoint.lat,
                     longitude: centerPoint.lng,
@@ -274,22 +294,32 @@ class _CreateEditTourState extends State<CreateEditTour> {
             }
             break;
           case 2: // Place Details
-            isValid = _formKeyPlacesDetails.currentState!.validate() && skipPermitted;
+            isValid =
+                _formKeyPlacesDetails.currentState!.validate() && skipPermitted;
             //Set the description of the places using the controller
             setState(() {
               for (int i = 0; i < _tour.tourguidePlaces.length; i++) {
-                String description = _tour.tourguidePlaces[i].descriptionEditingController!.text;
+                String description =
+                    _tour.tourguidePlaces[i].descriptionEditingController!.text;
                 //logger.t("Updating place $i with description: $description");
-                _tour.tourguidePlaces[i] = _tour.tourguidePlaces[i].copyWith(description: filter.censor(description));
+                _tour.tourguidePlaces[i] = _tour.tourguidePlaces[i]
+                    .copyWith(description: filter.censor(description));
               }
             });
             break;
           case 3: // Tour Details
             isValid = _formKeyDetails.currentState!.validate() && skipPermitted;
-            if (kIsWeb){
-              _tour = _tour.copyWith(imageFileToUploadWeb: _selectedImgIndex == -1 ? _imageWeb : _tour.tourguidePlaces[_selectedImgIndex!].imageFileToUploadWeb);
+            if (kIsWeb) {
+              _tour = _tour.copyWith(
+                  imageFileToUploadWeb: _selectedImgIndex == -1
+                      ? _imageWeb
+                      : _tour.tourguidePlaces[_selectedImgIndex!]
+                          .imageFileToUploadWeb);
             } else {
-              _tour = _tour.copyWith(imageFile: _selectedImgIndex == -1 ? _image : _tour.tourguidePlaces[_selectedImgIndex!].imageFile);
+              _tour = _tour.copyWith(
+                  imageFile: _selectedImgIndex == -1
+                      ? _image
+                      : _tour.tourguidePlaces[_selectedImgIndex!].imageFile);
             }
             logger.i("Reviewing tour: ${_tour.toString()}");
             break;
@@ -298,20 +328,24 @@ class _CreateEditTourState extends State<CreateEditTour> {
         }
       }
 
-      logger.t("_currentStep: $_currentStep, step: $step, isValid: $isValid, skipPermitted: $skipPermitted");
+      logger.t(
+          "_currentStep: $_currentStep, step: $step, isValid: $isValid, skipPermitted: $skipPermitted");
 
       _setAutoValidate(isValid);
 
       _goToStepAsync(isValid, step);
-    } catch (e, stackTrace){
+    } catch (e, stackTrace) {
       logger.e('Error trying to go to step: $e \n stackTrace: $stackTrace');
     }
   }
 
-  Future<void> _goToStepAsync (bool isValid, int step) async {
+  Future<void> _goToStepAsync(bool isValid, int step) async {
     try {
       if (isValid) {
-        final isKeyboardOpen = keyboardVisibilityController!.isVisible || (_currentStep == 2 && step > _currentStep); //Places Details is super buggy, always wait here
+        final isKeyboardOpen = keyboardVisibilityController!.isVisible ||
+            (_currentStep == 2 &&
+                step >
+                    _currentStep); //Places Details is super buggy, always wait here
         //logger.i('Keyboard visibility goToStepAsync = ${keyboardVisibilityController!.isVisible}');
         setState(() {
           FocusScope.of(context).unfocus(); // Hide the keyboard
@@ -331,32 +365,36 @@ class _CreateEditTourState extends State<CreateEditTour> {
           //logger.i('Keyboard is open, waiting for it to close...');
           await Future.delayed(const Duration(milliseconds: 400));
         }
-        setState(() {
-
-        });
+        setState(() {});
       }
       _stepChanging = false;
-    } catch (e, stackTrace){
+    } catch (e, stackTrace) {
       logger.e('Error trying to go to step: $e \n stackTrace: $stackTrace');
       _stepChanging = false;
     }
   }
 
-  void _setAutoValidate(bool isValid){
+  void _setAutoValidate(bool isValid) {
     switch (_currentStep) {
       case 0:
         setState(() {
-          _formValidateMode = isValid ? AutovalidateMode.disabled : AutovalidateMode.onUserInteraction;
+          _formValidateMode = isValid
+              ? AutovalidateMode.disabled
+              : AutovalidateMode.onUserInteraction;
         });
         break;
       case 1:
         setState(() {
-          _formPlacesValidateMode = isValid ? AutovalidateMode.disabled : AutovalidateMode.onUserInteraction;
+          _formPlacesValidateMode = isValid
+              ? AutovalidateMode.disabled
+              : AutovalidateMode.onUserInteraction;
         });
         break;
       case 2:
         setState(() {
-          _formDetailsValidateMode = isValid ? AutovalidateMode.disabled : AutovalidateMode.onUserInteraction;
+          _formDetailsValidateMode = isValid
+              ? AutovalidateMode.disabled
+              : AutovalidateMode.onUserInteraction;
         });
         break;
       default:
@@ -364,22 +402,29 @@ class _CreateEditTourState extends State<CreateEditTour> {
     }
   }
 
-  Future <void> _updateTourguidePlaceDetails(int index, AutocompletePrediction placePrediction) async{
-    _updateTourguidePlaceDetailsWithPlaceId(index, placePrediction.placeId, placePrediction.primaryText);
+  Future<void> _updateTourguidePlaceDetails(
+      int index, AutocompletePrediction placePrediction) async {
+    _updateTourguidePlaceDetailsWithPlaceId(
+        index, placePrediction.placeId, placePrediction.primaryText);
   }
 
-  Future <void> _updateTourguidePlaceDetailsWithPlaceId(int index, String placeId, String primaryText) async{
+  Future<void> _updateTourguidePlaceDetailsWithPlaceId(
+      int index, String placeId, String primaryText) async {
     try {
       bool existingPlace = false;
       //check if it has a place with placeId
-      if (_tour.tourguidePlaces.length > index && _tour.tourguidePlaces[index].googleMapPlaceId == placeId) {
-        logger.i("_updateTourguidePlaceDetails() - place already exists with placeId: $placeId");
+      if (_tour.tourguidePlaces.length > index &&
+          _tour.tourguidePlaces[index].googleMapPlaceId == placeId) {
+        logger.i(
+            "_updateTourguidePlaceDetails() - place already exists with placeId: $placeId");
         existingPlace = true;
       }
 
       LocationProvider locationProvider = Provider.of(context, listen: false);
-      Place? googlePlaceWithDetails = await locationProvider.getLocationDetailsFromPlaceId(placeId);
-      TourguidePlaceImg? tourguidePlaceImg = await locationProvider.fetchPlacePhoto(placeId: placeId, setAsCurrentImage: false);
+      Place? googlePlaceWithDetails =
+          await locationProvider.getLocationDetailsFromPlaceId(placeId);
+      TourguidePlaceImg? tourguidePlaceImg = await locationProvider
+          .fetchPlacePhoto(placeId: placeId, setAsCurrentImage: false);
       String? photoUrl;
       Image? photo;
       if (tourguidePlaceImg == null) {
@@ -388,14 +433,17 @@ class _CreateEditTourState extends State<CreateEditTour> {
         tourguidePlaceImg!.googlePlacesImg!.placePhotoResponse?.maybeWhen(
           image: (image) {
             photo = image;
-            logger.i("_updateTourguidePlaceDetails() - googlePlacesImg!.placePhotoResponse?.maybeWhen -> returned image");
+            logger.i(
+                "_updateTourguidePlaceDetails() - googlePlacesImg!.placePhotoResponse?.maybeWhen -> returned image");
           },
           imageUrl: (imageUrl) {
             photoUrl = imageUrl;
-            logger.i("_updateTourguidePlaceDetails() - googlePlacesImg!.placePhotoResponse?.maybeWhen -> returned imagUrl=${imageUrl}");
+            logger.i(
+                "_updateTourguidePlaceDetails() - googlePlacesImg!.placePhotoResponse?.maybeWhen -> returned imagUrl=${imageUrl}");
           },
           orElse: () {
-            logger.w("_updateTourguidePlaceDetails() - googlePlacesImg!.placePhotoResponse?.maybeWhen -> returned orElse");
+            logger.w(
+                "_updateTourguidePlaceDetails() - googlePlacesImg!.placePhotoResponse?.maybeWhen -> returned orElse");
           },
         );
       }
@@ -410,17 +458,18 @@ class _CreateEditTourState extends State<CreateEditTour> {
         imageFile: tourguidePlaceImg?.file,
         descriptionEditingController: TextEditingController(),
       );
-      logger.i("_updateTourguidePlaceDetails() - created updated TourguidePlace: $newTourguidePlace");
+      logger.i(
+          "_updateTourguidePlaceDetails() - created updated TourguidePlace: $newTourguidePlace");
       setState(() {
-        if (existingPlace){
+        if (existingPlace) {
           _tour.tourguidePlaces[index] = _tour.tourguidePlaces[index].copyWith(
-            latitude: newTourguidePlace.latitude,
-            longitude: newTourguidePlace.longitude,
-            googleMapPlaceId: newTourguidePlace.googleMapPlaceId,
-            title: newTourguidePlace.title,
-            photoUrl: newTourguidePlace.photoUrl,
-            image: newTourguidePlace.image,
-            imageFile: newTourguidePlace.imageFile);
+              latitude: newTourguidePlace.latitude,
+              longitude: newTourguidePlace.longitude,
+              googleMapPlaceId: newTourguidePlace.googleMapPlaceId,
+              title: newTourguidePlace.title,
+              photoUrl: newTourguidePlace.photoUrl,
+              image: newTourguidePlace.image,
+              imageFile: newTourguidePlace.imageFile);
         } else {
           _tour.tourguidePlaces[index] = newTourguidePlace;
         }
@@ -431,14 +480,11 @@ class _CreateEditTourState extends State<CreateEditTour> {
     }
   }
 
-  void _setTourImageSelection(int newIndex){
+  void _setTourImageSelection(int newIndex) {
     setState(() {
       _selectedImgIndex = newIndex;
     });
   }
-
-
-
 
   @override
   Widget build(BuildContext context) {
@@ -447,45 +493,59 @@ class _CreateEditTourState extends State<CreateEditTour> {
         title: Text(widget.isEditMode ? 'Edit Tour' : 'Create a new Tour'),
       ),
       body: Padding(
-        padding: kIsWeb && MediaQuery.of(context).size.width > 1280 ? EdgeInsets.symmetric(horizontal: MediaQuery.of(context).size.width/5) : EdgeInsets.zero,
+        padding: kIsWeb && MediaQuery.of(context).size.width > 1280
+            ? EdgeInsets.symmetric(
+                horizontal: MediaQuery.of(context).size.width / 5)
+            : EdgeInsets.zero,
         child: Stepper(
           currentStep: _currentStep,
           onStepContinue: () => _tryToGoToStep(_currentStep + 1),
-          onStepCancel:() => _tryToGoToStep(_currentStep - 1),
+          onStepCancel: () => _tryToGoToStep(_currentStep - 1),
           onStepTapped: (int step) => _tryToGoToStep(step),
-          controlsBuilder: (BuildContext context, ControlsDetails controlsDetails) {
+          controlsBuilder:
+              (BuildContext context, ControlsDetails controlsDetails) {
             return Padding(
               padding: const EdgeInsets.all(8.0),
               child: Row(
                 children: <Widget>[
-                  if (_currentStep > 0)
-                    const SizedBox(width: 8),
+                  if (_currentStep > 0) const SizedBox(width: 8),
                   if (_currentStep > 0)
                     TextButton(
                       onPressed: controlsDetails.onStepCancel,
                       style: ElevatedButton.styleFrom(
                         elevation: 0,
                         backgroundColor: Colors.transparent,
-                        foregroundColor: Theme.of(context).colorScheme.onSecondaryContainer,
+                        foregroundColor:
+                            Theme.of(context).colorScheme.onSecondaryContainer,
                         //primary: Colors.blue, // Custom color for "Continue" button
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(3.0), // Custom radius
+                          borderRadius:
+                              BorderRadius.circular(3.0), // Custom radius
                         ),
                       ),
                       child: const Text('Back'),
                     ),
-                  const SizedBox(width: 24), // Add spacing between buttons if needed
+                  const SizedBox(
+                      width: 24), // Add spacing between buttons if needed
                   TextButton(
-                    onPressed: _isFormSubmitted ? null : controlsDetails.onStepContinue,
+                    onPressed: _isFormSubmitted
+                        ? null
+                        : controlsDetails.onStepContinue,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Theme.of(context).colorScheme.primary,
-                      foregroundColor: Theme.of(context).colorScheme.surfaceContainerLow,
+                      foregroundColor:
+                          Theme.of(context).colorScheme.surfaceContainerLow,
                       //primary: Colors.grey, // Custom color for "Back" button
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(3.0), // Custom radius
+                        borderRadius:
+                            BorderRadius.circular(3.0), // Custom radius
                       ),
                     ),
-                    child: _currentStep != _reviewStepIndex ? const Text('Next') : widget.isEditMode ? const Text('Update Tour') : const Text('Create Tour'),
+                    child: _currentStep != _reviewStepIndex
+                        ? const Text('Next')
+                        : widget.isEditMode
+                            ? const Text('Update Tour')
+                            : const Text('Create Tour'),
                   ),
                   Spacer(),
                   /*if (_currentStep == 1) //TODO Map view
@@ -501,7 +561,8 @@ class _CreateEditTourState extends State<CreateEditTour> {
             Step(
               title: const Text('Basic Info'),
               isActive: _currentStep >= 0,
-              state: _maxStepReached > 0 ? StepState.complete : StepState.indexed,
+              state:
+                  _maxStepReached > 0 ? StepState.complete : StepState.indexed,
               content: Form(
                 autovalidateMode: _formValidateMode,
                 key: _formKey,
@@ -545,13 +606,15 @@ class _CreateEditTourState extends State<CreateEditTour> {
                         if (value == null || value.isEmpty) {
                           return 'Please enter a description for your tour';
                         }
-                        if (value != null && value.characters.length > _descriptionMaxChars) {
+                        if (value != null &&
+                            value.characters.length > _descriptionMaxChars) {
                           return 'Please enter a maximum of $_descriptionMaxChars characters';
                         }
                         return null;
                       },
                       onChanged: (value) {
-                        setState(() {}); // Trigger a rebuild to update the character counter
+                        setState(
+                            () {}); // Trigger a rebuild to update the character counter
                       },
                       enabled: !_isFormSubmitted,
                     ),
@@ -562,7 +625,8 @@ class _CreateEditTourState extends State<CreateEditTour> {
                         if (value == null || value['duration'] == null) {
                           return 'Please select a duration';
                         }
-                        if (value['descriptive'] == null || (value['descriptive'] as List).isEmpty) {
+                        if (value['descriptive'] == null ||
+                            (value['descriptive'] as List).isEmpty) {
                           return 'Please select at least 1 descriptive tag';
                         }
                         if ((value['descriptive'] as List).length > 5) {
@@ -593,7 +657,8 @@ class _CreateEditTourState extends State<CreateEditTour> {
             Step(
               title: const Text('Places'),
               isActive: _currentStep >= 1,
-              state: _maxStepReached > 1 ? StepState.complete : StepState.indexed,
+              state:
+                  _maxStepReached > 1 ? StepState.complete : StepState.indexed,
               content: Form(
                 autovalidateMode: _formPlacesValidateMode,
                 key: _formKeyPlaces,
@@ -616,8 +681,10 @@ class _CreateEditTourState extends State<CreateEditTour> {
                             return AnimatedBuilder(
                               animation: animation,
                               builder: (BuildContext context, Widget? child) {
-                                final double animValue = Curves.easeInOut.transform(animation.value);
-                                final double scale = lerpDouble(1, 1.05, animValue)!;
+                                final double animValue =
+                                    Curves.easeInOut.transform(animation.value);
+                                final double scale =
+                                    lerpDouble(1, 1.05, animValue)!;
                                 return Transform.scale(
                                   scale: scale,
                                   child: Material(
@@ -635,48 +702,59 @@ class _CreateEditTourState extends State<CreateEditTour> {
                               if (newIndex > oldIndex) {
                                 newIndex -= 1;
                               }
-                              final TourguidePlace place = _tour.tourguidePlaces.removeAt(oldIndex);
+                              final TourguidePlace place =
+                                  _tour.tourguidePlaces.removeAt(oldIndex);
                               _tour.tourguidePlaces.insert(newIndex, place);
 
-                              final TextEditingController controller = _placeControllers.removeAt(oldIndex);
+                              final TextEditingController controller =
+                                  _placeControllers.removeAt(oldIndex);
                               _placeControllers.insert(newIndex, controller);
                             });
                           },
                           children: [
-                            for (int index = 0; index < _tour.tourguidePlaces.length; index++)
+                            for (int index = 0;
+                                index < _tour.tourguidePlaces.length;
+                                index++)
                               Container(
                                 key: ValueKey(_placeControllers[index]),
                                 width: double.infinity,
                                 child: ListTile(
-                                  contentPadding: EdgeInsets.symmetric(vertical: 0.0, horizontal: 0),
+                                  contentPadding: EdgeInsets.symmetric(
+                                      vertical: 0.0, horizontal: 0),
                                   leading: ReorderableDragStartListener(
                                     index: index,
                                     child: Icon(Icons.drag_handle),
                                   ),
                                   title: PlaceAutocomplete(
-                                    textEditingController: _placeControllers[index],
+                                    textEditingController:
+                                        _placeControllers[index],
                                     restrictToCities: false,
                                     isFormSubmitted: _isFormSubmitted,
                                     decoration: InputDecoration(
                                       labelText: 'Place ${index + 1}',
                                       border: const UnderlineInputBorder(),
                                       suffixIcon: IconButton(
-                                        icon: const Icon(Icons.remove_circle_outline),
+                                        icon: const Icon(
+                                            Icons.remove_circle_outline),
                                         onPressed: () {
                                           _removePlace(index);
                                         },
                                       ),
                                     ),
                                     customLabel: true,
-                                    onItemSelected: (AutocompletePrediction prediction) {
-                                      _updateTourguidePlaceDetails(index, prediction);
+                                    onItemSelected:
+                                        (AutocompletePrediction prediction) {
+                                      _updateTourguidePlaceDetails(
+                                          index, prediction);
                                     },
                                   ),
                                 ),
                               ),
                           ],
                         ),
-                        SizedBox(height: 16,),
+                        SizedBox(
+                          height: 16,
+                        ),
                         SizedBox(
                           width: double.infinity,
                           child: ElevatedButton.icon(
@@ -685,11 +763,14 @@ class _CreateEditTourState extends State<CreateEditTour> {
                             label: const Text('Add Place'),
                           ),
                         ),
-                        SizedBox(height: 16,),
+                        SizedBox(
+                          height: 16,
+                        ),
                         if (state.hasError)
                           Text(
                             state.errorText ?? '',
-                            style: TextStyle(color: Theme.of(context).colorScheme.error),
+                            style: TextStyle(
+                                color: Theme.of(context).colorScheme.error),
                           ),
                       ],
                     );
@@ -700,60 +781,76 @@ class _CreateEditTourState extends State<CreateEditTour> {
             Step(
               title: const Text('Places Details'),
               isActive: _currentStep >= 2,
-              state: _maxStepReached > 2 ? StepState.complete : StepState.indexed,
+              state:
+                  _maxStepReached > 2 ? StepState.complete : StepState.indexed,
               content: Form(
                 autovalidateMode: _formPlacesDetailsValidateMode,
                 key: _formKeyPlacesDetails,
                 child: Column(
                   children: [
-                    for (int index = 0; index < _tour.tourguidePlaces.length; index++)
-                    Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 8.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            (index+1).toString() + ")  " + _tour.tourguidePlaces[index].title, // Assuming _places[index] has a 'name' field
-                            style: Theme.of(context).textTheme.titleMedium,
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.only(left: 20.0, top: 8.0),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                if (_tour.tourguidePlaces[index].image != null)
-                                  Container(
-                                    height: 100, // Set the desired height here
-                                    width: double.infinity, // Make it fill the width of its parent
-                                    child: FittedBox(
-                                      fit: BoxFit.cover,
-                                      clipBehavior: Clip.hardEdge,
-                                      child: _tour.tourguidePlaces[index].image!,
-                                    ),
-                                  ),
-                                SizedBox(height: 2,),
-                                TextFormField(
-                                  controller: _tour.tourguidePlaces[index].descriptionEditingController, // Assuming each place has a description controller
-                                  decoration: InputDecoration(
-                                    labelText: 'Description',
-                                  ),
-                                  minLines: 3,
-                                  maxLines: 20,
-                                  validator: (value) {
-                                    if (value == null || value.isEmpty) {
-                                      return 'Please enter a description';
-                                    }
-                                    return null;
-                                  },
-                                ),
-                                if (index < _tour.tourguidePlaces.length - 1)
-                                  SizedBox(height: 30,),
-                              ],
+                    for (int index = 0;
+                        index < _tour.tourguidePlaces.length;
+                        index++)
+                      Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 8.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              (index + 1).toString() +
+                                  ")  " +
+                                  _tour.tourguidePlaces[index]
+                                      .title, // Assuming _places[index] has a 'name' field
+                              style: Theme.of(context).textTheme.titleMedium,
                             ),
-                          ),
-                        ],
-                      ),
-                    )
+                            Padding(
+                              padding:
+                                  const EdgeInsets.only(left: 20.0, top: 8.0),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  if (_tour.tourguidePlaces[index].image !=
+                                      null)
+                                    Container(
+                                      height:
+                                          100, // Set the desired height here
+                                      width: double
+                                          .infinity, // Make it fill the width of its parent
+                                      child: FittedBox(
+                                        fit: BoxFit.cover,
+                                        clipBehavior: Clip.hardEdge,
+                                        child:
+                                            _tour.tourguidePlaces[index].image!,
+                                      ),
+                                    ),
+                                  SizedBox(
+                                    height: 2,
+                                  ),
+                                  TextFormField(
+                                    controller: _tour.tourguidePlaces[index]
+                                        .descriptionEditingController, // Assuming each place has a description controller
+                                    decoration: InputDecoration(
+                                      labelText: 'Description',
+                                    ),
+                                    minLines: 3,
+                                    maxLines: 20,
+                                    validator: (value) {
+                                      if (value == null || value.isEmpty) {
+                                        return 'Please enter a description';
+                                      }
+                                      return null;
+                                    },
+                                  ),
+                                  if (index < _tour.tourguidePlaces.length - 1)
+                                    SizedBox(
+                                      height: 30,
+                                    ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      )
                   ],
                 ),
               ),
@@ -761,17 +858,24 @@ class _CreateEditTourState extends State<CreateEditTour> {
             Step(
               title: const Text('Details'),
               isActive: _currentStep >= 3,
-              state: _maxStepReached > 3 ? StepState.complete : StepState.indexed,
+              state:
+                  _maxStepReached > 3 ? StepState.complete : StepState.indexed,
               content: Form(
                 autovalidateMode: _formDetailsValidateMode,
                 key: _formKeyDetails,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('Select an image for your tour', style: Theme.of(context).textTheme.titleMedium),
-                    const SizedBox(height: 16,),
+                    Text('Select an image for your tour',
+                        style: Theme.of(context).textTheme.titleMedium),
+                    const SizedBox(
+                      height: 16,
+                    ),
                     SizedBox(
-                      height: kIsWeb ? 438 : ((_tour.tourguidePlaces.length+1)/2).ceil() * 167,
+                      height: kIsWeb
+                          ? 438
+                          : ((_tour.tourguidePlaces.length + 1) / 2).ceil() *
+                              167,
                       child: GridView.count(
                         crossAxisCount: kIsWeb ? 4 : 2,
                         physics: const NeverScrollableScrollPhysics(),
@@ -780,7 +884,8 @@ class _CreateEditTourState extends State<CreateEditTour> {
                         childAspectRatio: 1.0, // Adjust as needed
                         children: [
                           for (int i = 0; i < _tour.tourguidePlaces.length; i++)
-                            if (!kIsWeb && _tour.tourguidePlaces[i].image != null)
+                            if (!kIsWeb &&
+                                _tour.tourguidePlaces[i].image != null)
                               GestureDetector(
                                 onTap: () {
                                   _setTourImageSelection(i);
@@ -798,11 +903,16 @@ class _CreateEditTourState extends State<CreateEditTour> {
                                         height: 146,
                                         width: 146,
                                         decoration: BoxDecoration(
-                                            color: Theme.of(context).scaffoldBackgroundColor.withOpacity(0.4),
-                                            border: _selectedImgIndex == i ? Border.all(
-                                                width: 2,
-                                                color: Theme.of(context).colorScheme.primary) : null
-                                        ),
+                                            color: Theme.of(context)
+                                                .scaffoldBackgroundColor
+                                                .withOpacity(0.4),
+                                            border: _selectedImgIndex == i
+                                                ? Border.all(
+                                                    width: 2,
+                                                    color: Theme.of(context)
+                                                        .colorScheme
+                                                        .primary)
+                                                : null),
                                       ),
                                     if (_selectedImgIndex == i)
                                       Positioned(
@@ -810,7 +920,9 @@ class _CreateEditTourState extends State<CreateEditTour> {
                                         right: 4,
                                         child: Icon(
                                           Icons.check_circle,
-                                          color: Theme.of(context).colorScheme.primary,
+                                          color: Theme.of(context)
+                                              .colorScheme
+                                              .primary,
                                           size: 24,
                                         ),
                                       ),
@@ -819,7 +931,8 @@ class _CreateEditTourState extends State<CreateEditTour> {
                               ),
                           GestureDetector(
                             onTap: () {
-                              if (kIsWeb && _imageWeb != null || !kIsWeb && _image != null) {
+                              if (kIsWeb && _imageWeb != null ||
+                                  !kIsWeb && _image != null) {
                                 _setTourImageSelection(-1);
                               }
                             },
@@ -827,37 +940,35 @@ class _CreateEditTourState extends State<CreateEditTour> {
                               height: kIsWeb ? 64 : 146,
                               width: kIsWeb ? 64 : 146,
                               child: kIsWeb
-                                ?
-                                AddImageTileWeb(
-                                  initialValue: _imageWeb,
-                                  onSaved: (value) {
-                                    _imageWeb = value;
-                                  },
-                                  onChanged: (value) {
-                                    setState(() {
-                                      _imageWeb = value;
-                                    });
-                                    _setTourImageSelection(-1);
-                                  },
-                                  enabled: !_isFormSubmitted,
-                                  isSelected: _selectedImgIndex == -1,
-                                )
-                              :
-                                AddImageTile(
-                                  initialValue: _image,
-                                  onSaved: (value) {
-                                    _image = value;
-                                  },
-                                  onChanged: (value) {
-                                    setState(() {
-                                      _image = value;
-                                    });
-                                    _setTourImageSelection(-1);
-                                  },
-                                  enabled: !_isFormSubmitted,
-                                  isSelected: _selectedImgIndex == -1,
-                                ),
-                              ),
+                                  ? AddImageTileWeb(
+                                      initialValue: _imageWeb,
+                                      onSaved: (value) {
+                                        _imageWeb = value;
+                                      },
+                                      onChanged: (value) {
+                                        setState(() {
+                                          _imageWeb = value;
+                                        });
+                                        _setTourImageSelection(-1);
+                                      },
+                                      enabled: !_isFormSubmitted,
+                                      isSelected: _selectedImgIndex == -1,
+                                    )
+                                  : AddImageTile(
+                                      initialValue: _image,
+                                      onSaved: (value) {
+                                        _image = value;
+                                      },
+                                      onChanged: (value) {
+                                        setState(() {
+                                          _image = value;
+                                        });
+                                        _setTourImageSelection(-1);
+                                      },
+                                      enabled: !_isFormSubmitted,
+                                      isSelected: _selectedImgIndex == -1,
+                                    ),
+                            ),
                           ),
                         ],
                       ),
@@ -869,7 +980,8 @@ class _CreateEditTourState extends State<CreateEditTour> {
             Step(
               title: const Text('Review'),
               isActive: _currentStep >= 4,
-              state: _maxStepReached > 4 ? StepState.complete : StepState.indexed,
+              state:
+                  _maxStepReached > 4 ? StepState.complete : StepState.indexed,
               content: Container(
                 width: double.infinity,
                 child: Column(
@@ -878,16 +990,18 @@ class _CreateEditTourState extends State<CreateEditTour> {
                     Padding(
                       padding: EdgeInsets.only(bottom: 16.0),
                       // small body text
-                      child: Text('Here\'s what your tour will look like', style: Theme.of(context).textTheme.bodyMedium),
+                      child: Text('Here\'s what your tour will look like',
+                          style: Theme.of(context).textTheme.bodyMedium),
                     ),
                     SizedBox(
                       height: TourTile.height,
                       child: Shimmer(
                           linearGradient: MyGlobals.shimmerGradient,
-                          child: TourTile(tour: _tour)
-                      ),
+                          child: TourTile(tour: _tour)),
                     ),
-                    SizedBox(height: 32,),
+                    SizedBox(
+                      height: 32,
+                    ),
                   ],
                 ),
               ),

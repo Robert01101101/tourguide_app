@@ -69,15 +69,16 @@ class _GeminiChatState extends State<GeminiChat> with WidgetsBindingObserver {
       exit(1);
     }*/
 
-    generativeModel = FirebaseVertexAI.instance.generativeModel(
-        model: geminiVersion);
+    generativeModel =
+        FirebaseVertexAI.instance.generativeModel(model: geminiVersion);
   }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
 
-    if (_user == null) { // Check if already initialized to prevent multiple calls
+    if (_user == null) {
+      // Check if already initialized to prevent multiple calls
       _user = types.User(
           id: userId,
           lastSeen: DateTime.now().millisecondsSinceEpoch,
@@ -99,6 +100,7 @@ class _GeminiChatState extends State<GeminiChat> with WidgetsBindingObserver {
   }
 
   @override
+
   /// App detached (-> Clear messages)
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.detached) {
@@ -107,18 +109,21 @@ class _GeminiChatState extends State<GeminiChat> with WidgetsBindingObserver {
     }
   }
 
-  void _startNewChat(){
+  void _startNewChat() {
     // Initialize the chat
-    final locationProvider = Provider.of<LocationProvider>(context, listen: false);
-    String initialPrompt = 'Please act as my friendly and knowledgeable tour guide, and respond in normal written English. Your name is AI Tourguide. Try to keep your response short unless I ask for detailed or longer responses, and avoid asking clarifying questions unless my question is extremely broad or requires clarification. If I ask for an address, inform me that information like a specific address might be inaccurate. If I ask for the location of something, say where you think it is, but suggest to confirm the location in Google Maps, and that your stated location might be inaccurate. Don\'t be shy to remind me of your limitations.';
-    if (locationProvider.currentCity != null){
-      initialPrompt += " I am currently located in ${locationProvider.currentCity}, ${locationProvider.currentState}, ${locationProvider.currentCountry}";
+    final locationProvider =
+        Provider.of<LocationProvider>(context, listen: false);
+    String initialPrompt =
+        'Please act as my friendly and knowledgeable tour guide, and respond in normal written English. Your name is AI Tourguide. Try to keep your response short unless I ask for detailed or longer responses, and avoid asking clarifying questions unless my question is extremely broad or requires clarification. If I ask for an address, inform me that information like a specific address might be inaccurate. If I ask for the location of something, say where you think it is, but suggest to confirm the location in Google Maps, and that your stated location might be inaccurate. Don\'t be shy to remind me of your limitations.';
+    if (locationProvider.currentCity != null) {
+      initialPrompt +=
+          " I am currently located in ${locationProvider.currentCity}, ${locationProvider.currentState}, ${locationProvider.currentCountry}";
     }
     logger.t("geminiChat._startNewChat() - initialPrompt=$initialPrompt");
 
     _chat = generativeModel.startChat(history: [
-      Content("user",Content.text(initialPrompt).parts),
-      Content("model",Content.text("Okay, how can I help you?").parts)
+      Content("user", Content.text(initialPrompt).parts),
+      Content("model", Content.text("Okay, how can I help you?").parts)
     ]);
     _user = types.User(
         id: userId,
@@ -144,7 +149,8 @@ class _GeminiChatState extends State<GeminiChat> with WidgetsBindingObserver {
   /// Saves messages so that when the user exits and returns to the screen, they don't disappear
   Future<void> _saveMessages() async {
     final prefs = await SharedPreferences.getInstance();
-    final List<String> messages = _messages.map((message) => jsonEncode(message.toJson())).toList();
+    final List<String> messages =
+        _messages.map((message) => jsonEncode(message.toJson())).toList();
     await prefs.setStringList('chat_messages', messages);
   }
 
@@ -156,59 +162,47 @@ class _GeminiChatState extends State<GeminiChat> with WidgetsBindingObserver {
     if (messages != null) {
       setState(() {
         _messages.clear();
-        _messages.addAll(messages.map((message) => types.Message.fromJson(jsonDecode(message))));
+        _messages.addAll(messages
+            .map((message) => types.Message.fromJson(jsonDecode(message))));
       });
     } else {
       logger.t("_loadMessages() - init new");
       // Initialize with a welcome message if no messages are stored
       final m = types.TextMessage(
         author: _bot!,
-        text: 'Hi ${FirebaseAuth.instance.currentUser!.displayName!.split(' ').first}, how can I help you today?',
+        text:
+            'Hi ${FirebaseAuth.instance.currentUser!.displayName!.split(' ').first}, how can I help you today?',
         id: const Uuid().v4(),
         status: types.Status.delivered,
       );
       final mCustom = types.TextMessage(
-        author: _user!,
-        text: 'Scenic local tours',
-        id: const Uuid().v4(),
-        status: types.Status.delivered,
-        metadata: const {
-          'aiCustomPrompt': 'true',
-          'prompt': 'tours'
-        },
-        showStatus: false
-      );
+          author: _user!,
+          text: 'Scenic local tours',
+          id: const Uuid().v4(),
+          status: types.Status.delivered,
+          metadata: const {'aiCustomPrompt': 'true', 'prompt': 'tours'},
+          showStatus: false);
       final mCustom2 = types.TextMessage(
           author: _user!,
           text: 'Popular nearby parks',
           id: const Uuid().v4(),
           status: types.Status.delivered,
-          metadata: const {
-            'aiCustomPrompt': 'true',
-            'prompt': 'parks'
-          },
-          showStatus: false
-      );
+          metadata: const {'aiCustomPrompt': 'true', 'prompt': 'parks'},
+          showStatus: false);
       final mCustom3 = types.TextMessage(
           author: _user!,
           text: 'Best spots in the city',
           id: const Uuid().v4(),
           status: types.Status.delivered,
-          metadata: const {
-            'aiCustomPrompt': 'true',
-            'prompt': 'city'
-          },
-          showStatus: false
-      );
-      setState((){
-
+          metadata: const {'aiCustomPrompt': 'true', 'prompt': 'city'},
+          showStatus: false);
+      setState(() {
         _messages.add(mCustom2);
         _messages.add(mCustom3);
         _messages.add(mCustom);
         _messages.add(m);
         logger.t("_loadMessages() - init new - set state ${m.text}");
       });
-
     }
   }
 
@@ -225,15 +219,15 @@ class _GeminiChatState extends State<GeminiChat> with WidgetsBindingObserver {
       });
     } catch (e) {
       setState(() {
-        _handleGeminiResponse("Sorry, an error occurred. Try rephrasing your message.");
+        _handleGeminiResponse(
+            "Sorry, an error occurred. Try rephrasing your message.");
         logger.t(e);
       });
     }
-
   }
 
   //TODO fix
-  String _cleanUpAiResponseString(String responseString){
+  String _cleanUpAiResponseString(String responseString) {
     String cleanedUpString = responseString
         .replaceAll("* **", "*")
         .replaceAll("**", "*")
@@ -255,7 +249,9 @@ class _GeminiChatState extends State<GeminiChat> with WidgetsBindingObserver {
               children: <Widget>[
                 Padding(
                   padding: const EdgeInsets.all(20.0),
-                  child: Center(child: Text("Powered by Google's $geminiVersion.\n\nAI Tourguide might provide inaccurate information, use with care.")),
+                  child: Center(
+                      child: Text(
+                          "Powered by Google's $geminiVersion.\n\nAI Tourguide might provide inaccurate information, use with care.")),
                 ),
                 ListTile(
                   leading: Icon(Icons.delete),
@@ -288,21 +284,20 @@ class _GeminiChatState extends State<GeminiChat> with WidgetsBindingObserver {
     _handleSendPrompt(message.text);
   }
 
-  void _handleSendPrompt(String prompt){
+  void _handleSendPrompt(String prompt) {
     final textMessage = types.TextMessage(
-      author: _user!,
-      createdAt: DateTime.now().millisecondsSinceEpoch,
-      id: uuid.v4(),
-      text: prompt,
-      status: types.Status.sending
-    );
+        author: _user!,
+        createdAt: DateTime.now().millisecondsSinceEpoch,
+        id: uuid.v4(),
+        text: prompt,
+        status: types.Status.sending);
 
     _addMessage(textMessage);
     _promptGemini(prompt);
   }
 
   /// Submits the response [message] written by Gemini to the chat history .
-  void _handleGeminiResponse(String responseMessage){
+  void _handleGeminiResponse(String responseMessage) {
     final textMessage = types.TextMessage(
       author: _bot!,
       createdAt: DateTime.now().millisecondsSinceEpoch,
@@ -318,13 +313,16 @@ class _GeminiChatState extends State<GeminiChat> with WidgetsBindingObserver {
 
   @override
   Widget build(BuildContext context) {
-    double horizontalPadding = (kIsWeb && MediaQuery.of(context).size.width > 1280) ? MediaQuery.of(context).size.width/5 : 10;
+    double horizontalPadding =
+        (kIsWeb && MediaQuery.of(context).size.width > 1280)
+            ? MediaQuery.of(context).size.width / 5
+            : 10;
 
     return Scaffold(
       appBar: AppBar(
         title: Text('AI Tourguide'),
-          actions: [
-            IconButton(
+        actions: [
+          IconButton(
             icon: Icon(Icons.more_vert),
             onPressed: () {
               // Show options menu
@@ -334,7 +332,8 @@ class _GeminiChatState extends State<GeminiChat> with WidgetsBindingObserver {
         ],
       ),
       body: Padding(
-        padding: EdgeInsets.fromLTRB(horizontalPadding, 0, horizontalPadding, 10),
+        padding:
+            EdgeInsets.fromLTRB(horizontalPadding, 0, horizontalPadding, 10),
         child: Chat(
           messages: _messages,
           onSendPressed: _handleSendPressed,
@@ -359,103 +358,110 @@ class _GeminiChatState extends State<GeminiChat> with WidgetsBindingObserver {
     );
   }
 
-
-
   static const Radius radiusMessage = Radius.circular(20);
 
   /// Build bubble message widget
   Widget _customBubbleBuilder(
-      Widget child, {
-        required types.Message message,
-        required bool nextMessageInGroup,
-      }) {
+    Widget child, {
+    required types.Message message,
+    required bool nextMessageInGroup,
+  }) {
     bool isUser = message.author.id == _user?.id;
-    bool isAiCustomPrompt = message.metadata != null && message.metadata!.isNotEmpty && message.metadata!.containsKey("aiCustomPrompt");
+    bool isAiCustomPrompt = message.metadata != null &&
+        message.metadata!.isNotEmpty &&
+        message.metadata!.containsKey("aiCustomPrompt");
 
-    return isAiCustomPrompt ?
-      Center(
-        child: Container(
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.all(Radius.circular(36)),
-          color: Theme.of(context).colorScheme.secondary,
-        ),
-        child: Padding(
-          padding: const EdgeInsets.all(10.0),
-          child: ElevatedButton(
-            onPressed: (){
-              //check if text in metadata contains "tour"
-              //log all metadata
-              logger.i("metadata: ${message.metadata}");
-              if (message.metadata!["prompt"] == "tours") {
-                _handleSendPrompt("What's a nice scenic local tour I can take?");
-              } else if (message.metadata!["prompt"] == "parks") {
-                _handleSendPrompt("What are the 5 most popular parks around here? I want a day out in nature!");
-              } else if (message.metadata!["prompt"] == "city") {
-                _handleSendPrompt("What are the best 5 urban spots around here? I want to explore the city!");
-              }
-            },
-            style: ElevatedButton.styleFrom(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 0),
-              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-            ),
-            child: Wrap(
-              crossAxisAlignment: WrapCrossAlignment.center,
-              children: <Widget>[
-                const Icon(
-                  Icons.lightbulb,
-                  size: 24.0,
+    return isAiCustomPrompt
+        ? Center(
+            child: Container(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.all(Radius.circular(36)),
+                  color: Theme.of(context).colorScheme.secondary,
                 ),
-                IgnorePointer(
-                  child: child,
-                ),//IgnorePointer ensures clicks pass through to button behind it
-              ],
+                child: Padding(
+                  padding: const EdgeInsets.all(10.0),
+                  child: ElevatedButton(
+                    onPressed: () {
+                      //check if text in metadata contains "tour"
+                      //log all metadata
+                      logger.i("metadata: ${message.metadata}");
+                      if (message.metadata!["prompt"] == "tours") {
+                        _handleSendPrompt(
+                            "What's a nice scenic local tour I can take?");
+                      } else if (message.metadata!["prompt"] == "parks") {
+                        _handleSendPrompt(
+                            "What are the 5 most popular parks around here? I want a day out in nature!");
+                      } else if (message.metadata!["prompt"] == "city") {
+                        _handleSendPrompt(
+                            "What are the best 5 urban spots around here? I want to explore the city!");
+                      }
+                    },
+                    style: ElevatedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 16.0, vertical: 0),
+                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    ),
+                    child: Wrap(
+                      crossAxisAlignment: WrapCrossAlignment.center,
+                      children: <Widget>[
+                        const Icon(
+                          Icons.lightbulb,
+                          size: 24.0,
+                        ),
+                        IgnorePointer(
+                          child: child,
+                        ), //IgnorePointer ensures clicks pass through to button behind it
+                      ],
+                    ),
+                  ),
+                )),
+          )
+        : Container(
+            decoration: BoxDecoration(
+              borderRadius: (isUser)
+                  ? const BorderRadius.only(
+                      topLeft: radiusMessage,
+                      topRight: radiusMessage,
+                      bottomLeft: radiusMessage,
+                    )
+                  : const BorderRadius.only(
+                      topLeft: radiusMessage,
+                      topRight: radiusMessage,
+                      bottomRight: radiusMessage,
+                    ),
+              color: isUser
+                  ? Theme.of(context).colorScheme.secondary
+                  : Theme.of(context).colorScheme.surfaceContainer,
             ),
-          ),
-        )
-      ),
-    ) : Container(
-        decoration: BoxDecoration(
-          borderRadius: (isUser) ?
-          const BorderRadius.only(
-            topLeft: radiusMessage,
-            topRight: radiusMessage,
-            bottomLeft: radiusMessage,
-          ) : const BorderRadius.only(
-            topLeft: radiusMessage,
-            topRight: radiusMessage,
-            bottomRight: radiusMessage,
-          ),
-          color: isUser ?
-          Theme.of(context).colorScheme.secondary :
-          Theme.of(context).colorScheme.surfaceContainer,
-        ),
-        child: child
-    );
+            child: child);
   }
 
   Widget _textMessageBuilder(
-      types.TextMessage textMessage, {
-        required int messageWidth,
-        required bool showName,
-      }) {
-
-    bool isAiCustomPrompt = textMessage.metadata != null && textMessage.metadata!.isNotEmpty && textMessage.metadata!.containsKey("aiCustomPrompt");
+    types.TextMessage textMessage, {
+    required int messageWidth,
+    required bool showName,
+  }) {
+    bool isAiCustomPrompt = textMessage.metadata != null &&
+        textMessage.metadata!.isNotEmpty &&
+        textMessage.metadata!.containsKey("aiCustomPrompt");
 
     return Container(
-      padding: isAiCustomPrompt? EdgeInsets.all(16) : EdgeInsets.symmetric(vertical: 18, horizontal: 20),
+      padding: isAiCustomPrompt
+          ? EdgeInsets.all(16)
+          : EdgeInsets.symmetric(vertical: 18, horizontal: 20),
       child: SelectableText.rich(
         TextSpan(
           children: _parseTextWithMarkdown(textMessage.text),
           style: Theme.of(context).textTheme.bodyMedium!.copyWith(
-            color: isAiCustomPrompt ?
-              Theme.of(context).colorScheme.primary :
-              textMessage.author.id == _user!.id ?
-              Theme.of(context).colorScheme.onSecondary :
-              Theme.of(context).colorScheme.onSurface,
-            fontSize: 16,
-            fontWeight: FontWeight.w500,
-            height: 1.5,
-          ),
+                color: isAiCustomPrompt
+                    ? Theme.of(context).colorScheme.primary
+                    : textMessage.author.id == _user!.id
+                        ? Theme.of(context).colorScheme.onSecondary
+                        : Theme.of(context).colorScheme.onSurface,
+                fontSize: 16,
+                fontWeight: FontWeight.w500,
+                height: 1.5,
+              ),
         ),
       ),
     );
@@ -470,7 +476,8 @@ class _GeminiChatState extends State<GeminiChat> with WidgetsBindingObserver {
       if (match.start > start) {
         spans.add(TextSpan(text: text.substring(start, match.start)));
       }
-      spans.add(TextSpan(text: match.group(1), style: TextStyle(fontWeight: FontWeight.bold)));
+      spans.add(TextSpan(
+          text: match.group(1), style: TextStyle(fontWeight: FontWeight.bold)));
       start = match.end;
     }
 
@@ -480,7 +487,6 @@ class _GeminiChatState extends State<GeminiChat> with WidgetsBindingObserver {
 
     return spans;
   }
-
 
   /// Build retry widget.
   Widget _customRetryBuilder() {
@@ -494,5 +500,4 @@ class _GeminiChatState extends State<GeminiChat> with WidgetsBindingObserver {
       iconSize: 25,
     );
   }
-
 }

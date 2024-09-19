@@ -26,10 +26,8 @@ import 'package:tourguide_app/utilities/providers/tourguide_user_provider.dart';
 import 'main.dart';
 import 'package:tourguide_app/utilities/providers/auth_provider.dart' as myAuth;
 import '../../ui/google_places_img.dart'
-if (dart.library.html) '../../ui/google_places_img_web.dart'
-as gpi;
+    if (dart.library.html) '../../ui/google_places_img_web.dart' as gpi;
 import 'dart:ui' as ui;
-
 
 // #docregion Initialize
 const List<String> scopes = <String>[
@@ -43,8 +41,6 @@ GoogleSignIn _googleSignIn = GoogleSignIn(
   scopes: scopes,
 );
 
-
-
 //because I update the login status dynamically, the Explore screen needs to be a stateful widget (from Chat GPT)
 class Explore extends StatefulWidget {
   const Explore({super.key});
@@ -56,7 +52,8 @@ class Explore extends StatefulWidget {
 class ExploreState extends State<Explore> {
   GoogleSignInAccount? _currentUser;
   Future<TourguidePlaceImg?>? _fetchPhotoFuture;
-  final GlobalKey _contentKey = GlobalKey(); // to measure height of page accurately
+  final GlobalKey _contentKey =
+      GlobalKey(); // to measure height of page accurately
   double _contentHeight = 600;
 
   @override
@@ -70,16 +67,16 @@ class ExploreState extends State<Explore> {
       _checkIfFirstTimeUserAfterAccountDeletion();
 
       //Firebase auth
-      FirebaseAuth.instance
-          .userChanges()
-          .listen((User? user) {
+      FirebaseAuth.instance.userChanges().listen((User? user) {
         if (!mounted) return;
         final tourProvider = Provider.of<TourProvider>(context, listen: false);
         if (user == null) {
-          logger.t('ExploreState.initState() - FirabaseAuth listen - FIREBASE AUTH (EXPLORE) - User is currently signed out!');
+          logger.t(
+              'ExploreState.initState() - FirabaseAuth listen - FIREBASE AUTH (EXPLORE) - User is currently signed out!');
         } else {
-          logger.t('ExploreState.initState() - FirabaseAuth listen - FIREBASE AUTH (EXPLORE) - User is signed in!');
-          if (!tourProvider.isLoadingTours){
+          logger.t(
+              'ExploreState.initState() - FirabaseAuth listen - FIREBASE AUTH (EXPLORE) - User is signed in!');
+          if (!tourProvider.isLoadingTours) {
             downloadTours();
           }
           FlutterNativeSplash.remove();
@@ -110,9 +107,9 @@ class ExploreState extends State<Explore> {
     super.dispose();
   }
 
-  void _checkIfFirstTimeUserAfterAccountDeletion() async{
+  void _checkIfFirstTimeUserAfterAccountDeletion() async {
     var prefs = await SharedPreferences.getInstance();
-    if (prefs.getBool('firstTimeUser') == null){
+    if (prefs.getBool('firstTimeUser') == null) {
       logger.i('_checkIfFirstTimeUserAfterAccountDeletion -> true');
       TourguideNavigation.router.go(
         TourguideNavigation.onboardingPath,
@@ -120,20 +117,23 @@ class ExploreState extends State<Explore> {
     }
   }
 
-
   //TODO: Move
   Future<void> downloadTours() async {
     logger.t('downloadTours');
 
     final tourProvider = Provider.of<TourProvider>(context, listen: false);
-    final locationProvider = Provider.of<LocationProvider>(context, listen: false);
-    final myAuth.AuthProvider authProvider = Provider.of(context, listen: false);
-    TourguideUserProvider userProvider = Provider.of<TourguideUserProvider>(context, listen: false);
+    final locationProvider =
+        Provider.of<LocationProvider>(context, listen: false);
+    final myAuth.AuthProvider authProvider =
+        Provider.of(context, listen: false);
+    TourguideUserProvider userProvider =
+        Provider.of<TourguideUserProvider>(context, listen: false);
 
     try {
       await Future.doWhile(() async {
         // Check if the currentPosition is null
-        if (locationProvider.currentPosition == null || (userProvider.user == null && !authProvider.isAnonymous)) {
+        if (locationProvider.currentPosition == null ||
+            (userProvider.user == null && !authProvider.isAnonymous)) {
           // Wait for a short duration before checking again
           await Future.delayed(const Duration(milliseconds: 100));
           return true; // Continue looping
@@ -167,14 +167,16 @@ class ExploreState extends State<Explore> {
       context: context,
       builder: (BuildContext context) {
         return OptionsDialog(
-          onPlaceSet: _handlePlaceSet,);
+          onPlaceSet: _handlePlaceSet,
+        );
       },
     );
   }
 
   void _handlePlaceSet() {
-    TourProvider tourProvider = Provider.of<TourProvider>(context, listen: false);
-    if (!tourProvider.isLoadingTours){
+    TourProvider tourProvider =
+        Provider.of<TourProvider>(context, listen: false);
+    if (!tourProvider.isLoadingTours) {
       downloadTours();
     }
   }
@@ -192,9 +194,9 @@ class ExploreState extends State<Explore> {
     }
   }
 
-  final ScrollController _scrollController = ScrollController(); //for bg parallax effect and refresh
+  final ScrollController _scrollController =
+      ScrollController(); //for bg parallax effect and refresh
   double _scrollOffset = 0;
-
 
   @override
   Widget build(BuildContext context) {
@@ -204,7 +206,7 @@ class ExploreState extends State<Explore> {
     String displayName = authProvider.user?.displayName ?? '';
 
     Future<void> refresh() async {
-      if (!tourProvider.isLoadingTours){
+      if (!tourProvider.isLoadingTours) {
         await locationProvider.refreshCurrentLocation();
         await downloadTours();
       }
@@ -237,7 +239,16 @@ class ExploreState extends State<Explore> {
                             width: double.infinity,
                             decoration: BoxDecoration(
                               gradient: LinearGradient(
-                                colors: [Theme.of(context).colorScheme.surfaceDim.withOpacity(.6), Theme.of(context).colorScheme.surfaceBright.withOpacity(.6)],
+                                colors: [
+                                  Theme.of(context)
+                                      .colorScheme
+                                      .surfaceDim
+                                      .withOpacity(.6),
+                                  Theme.of(context)
+                                      .colorScheme
+                                      .surfaceBright
+                                      .withOpacity(.6)
+                                ],
                                 begin: Alignment.topCenter,
                                 end: Alignment.bottomCenter,
                               ),
@@ -261,8 +272,12 @@ class ExploreState extends State<Explore> {
                             return const LinearGradient(
                               begin: Alignment.topCenter,
                               end: Alignment.bottomCenter,
-                              colors: [kIsWeb ? Colors.transparent : Colors.white, kIsWeb ? Colors.black87 : Colors.black45],
-                            ).createShader(Rect.fromLTRB(0, 0, rect.width, rect.height));
+                              colors: [
+                                kIsWeb ? Colors.transparent : Colors.white,
+                                kIsWeb ? Colors.black87 : Colors.black45
+                              ],
+                            ).createShader(
+                                Rect.fromLTRB(0, 0, rect.width, rect.height));
                           },
                           blendMode: BlendMode.multiply,
                           child: LayoutBuilder(
@@ -273,21 +288,27 @@ class ExploreState extends State<Explore> {
                                 child: FittedBox(
                                   fit: BoxFit.cover,
                                   alignment: Alignment.center,
-                                  child: kIsWeb ?
-                                  gpi.GooglePlacesImg(  //prevents CORS error, taken from places sdk example //TODO investigate if also usable on mobile
-                                    photoMetadata: currentPlaceImg.googlePlacesImg!.photoMetadata,
-                                    placePhotoResponse: currentPlaceImg.googlePlacesImg!.placePhotoResponse,
-                                  ) :
-                                  currentPlaceImg.googlePlacesImg!.placePhotoResponse.when(
-                                    image: (image) => Image(
-                                      image: image.image,
-                                      gaplessPlayback: true,
-                                    ),
-                                    imageUrl: (imageUrl) => Image.network(
-                                      imageUrl,
-                                      gaplessPlayback: true,
-                                    ),
-                                  ),
+                                  child: kIsWeb
+                                      ? gpi.GooglePlacesImg(
+                                          //prevents CORS error, taken from places sdk example //TODO investigate if also usable on mobile
+                                          photoMetadata: currentPlaceImg
+                                              .googlePlacesImg!.photoMetadata,
+                                          placePhotoResponse: currentPlaceImg
+                                              .googlePlacesImg!
+                                              .placePhotoResponse,
+                                        )
+                                      : currentPlaceImg
+                                          .googlePlacesImg!.placePhotoResponse
+                                          .when(
+                                          image: (image) => Image(
+                                            image: image.image,
+                                            gaplessPlayback: true,
+                                          ),
+                                          imageUrl: (imageUrl) => Image.network(
+                                            imageUrl,
+                                            gaplessPlayback: true,
+                                          ),
+                                        ),
                                 ),
                               );
                             },
@@ -297,12 +318,14 @@ class ExploreState extends State<Explore> {
                     }
                   },
                 ),
-                Stack( //helps with the parallax effect by providing a spacer + white bg to cover the google img on scroll
+                Stack(
+                  //helps with the parallax effect by providing a spacer + white bg to cover the google img on scroll
                   children: [
                     Column(
                       children: [
                         Container(
-                          height: 300,  //should match google image (TODO: ensure it's never under 300)
+                          height:
+                              300, //should match google image (TODO: ensure it's never under 300)
                           color: Colors.transparent,
                         ),
                         Container(
@@ -311,118 +334,181 @@ class ExploreState extends State<Explore> {
                         )
                       ],
                     ),
-                    StandardLayout(
-                        children: [
-                          SizedBox(
-                          height: 290,
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 0),
-                            child: Align(
-                              alignment: Alignment.bottomCenter,
-                              child: GradientText(
-                                gradient: const LinearGradient(colors: [
-                                  Color(0xeeF2F8F8),
-                                  Color(0xeeE4F0EF),
-                                ]),
-                                richText: RichText(
-                                  text: TextSpan(
-                                    style: Theme.of(context).textTheme.displayMedium,
-                                    children: <TextSpan>[
-                                      const TextSpan(text: 'Welcome'),
-                                      if (locationProvider.currentCity != null && locationProvider.currentCity.isNotEmpty)
-                                        TextSpan(text: ' to \r'),
-                                      if (locationProvider.currentCity != null && locationProvider.currentCity.isNotEmpty)
-                                        TextSpan(
-                                            text: locationProvider.currentCity,
-                                            style: GoogleFonts.vollkorn(  //need to explicitly specify font for weight setting to work for some reason
-                                              textStyle: Theme.of(context).textTheme.displayMedium,
-                                              fontWeight: FontWeight.w600,
-                                              fontStyle: FontStyle.italic,
-                                            ),
-                                            recognizer: TapGestureRecognizer()..onTap = () {
+                    StandardLayout(children: [
+                      SizedBox(
+                        height: 290,
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(
+                              vertical: 20, horizontal: 0),
+                          child: Align(
+                            alignment: Alignment.bottomCenter,
+                            child: GradientText(
+                              gradient: const LinearGradient(colors: [
+                                Color(0xeeF2F8F8),
+                                Color(0xeeE4F0EF),
+                              ]),
+                              richText: RichText(
+                                text: TextSpan(
+                                  style:
+                                      Theme.of(context).textTheme.displayMedium,
+                                  children: <TextSpan>[
+                                    const TextSpan(text: 'Welcome'),
+                                    if (locationProvider.currentCity != null &&
+                                        locationProvider.currentCity.isNotEmpty)
+                                      TextSpan(text: ' to \r'),
+                                    if (locationProvider.currentCity != null &&
+                                        locationProvider.currentCity.isNotEmpty)
+                                      TextSpan(
+                                          text: locationProvider.currentCity,
+                                          style: GoogleFonts.vollkorn(
+                                            //need to explicitly specify font for weight setting to work for some reason
+                                            textStyle: Theme.of(context)
+                                                .textTheme
+                                                .displayMedium,
+                                            fontWeight: FontWeight.w600,
+                                            fontStyle: FontStyle.italic,
+                                          ),
+                                          recognizer: TapGestureRecognizer()
+                                            ..onTap = () {
                                               logger.t('Tapped city name');
                                               _showOptionsDialog(context);
-                                            }
-                                        ),
-                                      if (displayName != null && displayName.isNotEmpty) TextSpan(text: ', ${displayName.split(' ').first}'),
-                                      if (locationProvider.permissionStatus != PermissionStatus.granted)
-                                        TextSpan(
-                                            text: '\n\nPlease enable location services',
-                                            style: Theme.of(context).textTheme.titleMedium),
-                                      if (locationProvider.permissionStatus != PermissionStatus.granted && locationProvider.currentCity != null && locationProvider.currentCity.isNotEmpty)
-                                        TextSpan(
-                                            text: ' for full functionality',
-                                            style: Theme.of(context).textTheme.titleMedium),
-                                      if (locationProvider.permissionStatus != PermissionStatus.granted && locationProvider.currentCity == null || locationProvider.currentCity.isEmpty)
-                                        TextSpan(
-                                            text: ', or ',
-                                            style: Theme.of(context).textTheme.titleMedium),
-                                      if (locationProvider.permissionStatus != PermissionStatus.granted && locationProvider.currentCity == null || locationProvider.currentCity.isEmpty)
-                                        TextSpan(
-                                          text: 'set your location',
-                                          style: Theme.of(context).textTheme.titleMedium!.copyWith(
-                                            decoration: TextDecoration.underline,
-                                          ),
-                                          recognizer: TapGestureRecognizer()..onTap = () {
-                                            logger.t('Tapped set your location');
+                                            }),
+                                    if (displayName != null &&
+                                        displayName.isNotEmpty)
+                                      TextSpan(
+                                          text:
+                                              ', ${displayName.split(' ').first}'),
+                                    if (locationProvider.permissionStatus !=
+                                        PermissionStatus.granted)
+                                      TextSpan(
+                                          text:
+                                              '\n\nPlease enable location services',
+                                          style: Theme.of(context)
+                                              .textTheme
+                                              .titleMedium),
+                                    if (locationProvider.permissionStatus !=
+                                            PermissionStatus.granted &&
+                                        locationProvider.currentCity != null &&
+                                        locationProvider.currentCity.isNotEmpty)
+                                      TextSpan(
+                                          text: ' for full functionality',
+                                          style: Theme.of(context)
+                                              .textTheme
+                                              .titleMedium),
+                                    if (locationProvider.permissionStatus !=
+                                                PermissionStatus.granted &&
+                                            locationProvider.currentCity ==
+                                                null ||
+                                        locationProvider.currentCity.isEmpty)
+                                      TextSpan(
+                                          text: ', or ',
+                                          style: Theme.of(context)
+                                              .textTheme
+                                              .titleMedium),
+                                    if (locationProvider.permissionStatus !=
+                                                PermissionStatus.granted &&
+                                            locationProvider.currentCity ==
+                                                null ||
+                                        locationProvider.currentCity.isEmpty)
+                                      TextSpan(
+                                        text: 'set your location',
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .titleMedium!
+                                            .copyWith(
+                                              decoration:
+                                                  TextDecoration.underline,
+                                            ),
+                                        recognizer: TapGestureRecognizer()
+                                          ..onTap = () {
+                                            logger
+                                                .t('Tapped set your location');
                                             _showOptionsDialog(context);
-                                          },),
-                                    ],
-                                  ),
+                                          },
+                                      ),
+                                  ],
                                 ),
                               ),
                             ),
                           ),
                         ),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text("Popular tours near you", style: Theme.of(context).textTheme.headlineSmall),
-                              IconButton(onPressed: (){
-                                Navigator.push(
-                                   context,
-                                   MaterialPageRoute(builder: (context) => ExploreMap(tours: tourProvider.getTours(tourProvider.popularTours), name: "Popular tours near you")),
-                                );
-                              }, icon: Icon(Icons.map))
-                            ],
-                          ),
-                          StandardLayoutChild(
-                            fullWidth: true,
-                            child: HorizontalScroller(tours: tourProvider.getTours(tourProvider.popularTours)),
-                          ),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text("Local tours", style: Theme.of(context).textTheme.headlineSmall),
-                              IconButton(onPressed: (){
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text("Popular tours near you",
+                              style: Theme.of(context).textTheme.headlineSmall),
+                          IconButton(
+                              onPressed: () {
                                 Navigator.push(
                                   context,
-                                  MaterialPageRoute(builder: (context) => ExploreMap(tours: tourProvider.getTours(tourProvider.localTours), name: "Local tours")),
+                                  MaterialPageRoute(
+                                      builder: (context) => ExploreMap(
+                                          tours: tourProvider.getTours(
+                                              tourProvider.popularTours),
+                                          name: "Popular tours near you")),
                                 );
-                              }, icon: Icon(Icons.map))
-                            ],
-                          ),
-                          StandardLayoutChild(
-                            fullWidth: true,
-                            child: HorizontalScroller(tours: tourProvider.getTours(tourProvider.localTours)),
-                          ),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text("Tours around the world", style: Theme.of(context).textTheme.headlineSmall),
-                              IconButton(onPressed: (){
+                              },
+                              icon: Icon(Icons.map))
+                        ],
+                      ),
+                      StandardLayoutChild(
+                        fullWidth: true,
+                        child: HorizontalScroller(
+                            tours: tourProvider
+                                .getTours(tourProvider.popularTours)),
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text("Local tours",
+                              style: Theme.of(context).textTheme.headlineSmall),
+                          IconButton(
+                              onPressed: () {
                                 Navigator.push(
                                   context,
-                                  MaterialPageRoute(builder: (context) => ExploreMap(tours: tourProvider.getTours(tourProvider.globalTours), name: "Tours around the world")),
+                                  MaterialPageRoute(
+                                      builder: (context) => ExploreMap(
+                                          tours: tourProvider.getTours(
+                                              tourProvider.localTours),
+                                          name: "Local tours")),
                                 );
-                              }, icon: Icon(Icons.map))
-                            ],
-                          ),
-                          StandardLayoutChild(
-                            fullWidth: true,
-                            child: HorizontalScroller(tours: tourProvider.getTours((tourProvider.globalTours))),
-                          ),
-                          /*Text("Debug", style: Theme.of(context).textTheme.headlineSmall),
+                              },
+                              icon: Icon(Icons.map))
+                        ],
+                      ),
+                      StandardLayoutChild(
+                        fullWidth: true,
+                        child: HorizontalScroller(
+                            tours:
+                                tourProvider.getTours(tourProvider.localTours)),
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text("Tours around the world",
+                              style: Theme.of(context).textTheme.headlineSmall),
+                          IconButton(
+                              onPressed: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) => ExploreMap(
+                                          tours: tourProvider.getTours(
+                                              tourProvider.globalTours),
+                                          name: "Tours around the world")),
+                                );
+                              },
+                              icon: Icon(Icons.map))
+                        ],
+                      ),
+                      StandardLayoutChild(
+                        fullWidth: true,
+                        child: HorizontalScroller(
+                            tours: tourProvider
+                                .getTours((tourProvider.globalTours))),
+                      ),
+                      /*Text("Debug", style: Theme.of(context).textTheme.headlineSmall),
                           Row(
                             children: [
                               ElevatedButton(
@@ -436,14 +522,14 @@ class ExploreState extends State<Explore> {
                               ),
                             ],
                           ),*/
-                      ]
-                    ),
+                    ]),
                     Align(
                       alignment: Alignment.topRight,
                       child: Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 0),
+                        padding: const EdgeInsets.symmetric(
+                            vertical: 4.0, horizontal: 0),
                         child: IconButton(
-                            onPressed: (){
+                            onPressed: () {
                               _showOptionsDialog(context);
                             },
                             icon: const Icon(Icons.more_vert),
@@ -500,13 +586,14 @@ class _OptionsDialogState extends State<OptionsDialog> {
   Alignment _alignment = Alignment.center;
   late StreamSubscription<bool> keyboardSubscription;
 
-
   @override
   void initState() {
     super.initState();
 
-    KeyboardVisibilityController keyboardVisibilityController = KeyboardVisibilityController();
-    keyboardSubscription  = keyboardVisibilityController!.onChange.listen((bool visible) {
+    KeyboardVisibilityController keyboardVisibilityController =
+        KeyboardVisibilityController();
+    keyboardSubscription =
+        keyboardVisibilityController!.onChange.listen((bool visible) {
       setState(() {
         _alignment = visible ? Alignment.topCenter : Alignment.center;
       });
@@ -551,7 +638,9 @@ class _OptionsDialogState extends State<OptionsDialog> {
                   },
                 ),
                 if (_showConfirm)
-                  SizedBox(height: 32), // Add spacing between the dropdown and the button
+                  SizedBox(
+                      height:
+                          32), // Add spacing between the dropdown and the button
                 if (_showConfirm)
                   ElevatedButton(
                     onPressed: () {

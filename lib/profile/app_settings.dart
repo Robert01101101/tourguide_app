@@ -34,8 +34,10 @@ class _AppSettingsState extends State<AppSettings> {
   @override
   void initState() {
     super.initState();
-    ThemeProvider themeProvider = Provider.of<ThemeProvider>(context, listen: false);
-    initialThemeMode = themeProvider.themeMode.toString().split('.').last.capitalize();
+    ThemeProvider themeProvider =
+        Provider.of<ThemeProvider>(context, listen: false);
+    initialThemeMode =
+        themeProvider.themeMode.toString().split('.').last.capitalize();
     _loadSettings();
     _initPackageInfo();
   }
@@ -47,14 +49,18 @@ class _AppSettingsState extends State<AppSettings> {
     });
   }
 
-
   Future<void> _loadSettings() async {
-    TourguideUserProvider userProvider = Provider.of<TourguideUserProvider>(context, listen: false);
+    TourguideUserProvider userProvider =
+        Provider.of<TourguideUserProvider>(context, listen: false);
     setState(() {
-      _emailGeneralNotificationsEnabled = !(userProvider.user!.emailSubscriptionsDisabled.contains('general'));
-      _emailReportsNotificationsEnabled = !(userProvider.user!.emailSubscriptionsDisabled.contains('reports'));
-      _emailGeneralNotificationsEnabledInitialState = _emailGeneralNotificationsEnabled;
-      _emailReportsNotificationsEnabledInitialState = _emailReportsNotificationsEnabled;
+      _emailGeneralNotificationsEnabled =
+          !(userProvider.user!.emailSubscriptionsDisabled.contains('general'));
+      _emailReportsNotificationsEnabled =
+          !(userProvider.user!.emailSubscriptionsDisabled.contains('reports'));
+      _emailGeneralNotificationsEnabledInitialState =
+          _emailGeneralNotificationsEnabled;
+      _emailReportsNotificationsEnabledInitialState =
+          _emailReportsNotificationsEnabled;
     });
   }
 
@@ -62,16 +68,21 @@ class _AppSettingsState extends State<AppSettings> {
     setState(() {
       _savingSettings = true;
     });
-    TourguideUserProvider userProvider = Provider.of<TourguideUserProvider>(context, listen: false);
-    userProvider.user!.setEmailSubscriptionEnabled('general', !_emailGeneralNotificationsEnabled);
-    userProvider.user!.setEmailSubscriptionEnabled('reports', !_emailReportsNotificationsEnabled);
+    TourguideUserProvider userProvider =
+        Provider.of<TourguideUserProvider>(context, listen: false);
+    userProvider.user!.setEmailSubscriptionEnabled(
+        'general', !_emailGeneralNotificationsEnabled);
+    userProvider.user!.setEmailSubscriptionEnabled(
+        'reports', !_emailReportsNotificationsEnabled);
     await userProvider.updateUser(userProvider.user!);
     setState(() {
-      _emailGeneralNotificationsEnabledInitialState = _emailGeneralNotificationsEnabled;
-      _emailReportsNotificationsEnabledInitialState = _emailReportsNotificationsEnabled;
+      _emailGeneralNotificationsEnabledInitialState =
+          _emailGeneralNotificationsEnabled;
+      _emailReportsNotificationsEnabledInitialState =
+          _emailReportsNotificationsEnabled;
       _savingSettings = false;
     });
-    if (mounted){
+    if (mounted) {
       ScaffoldMessenger.of(context).hideCurrentSnackBar();
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Updated Notification Settings.')),
@@ -81,7 +92,8 @@ class _AppSettingsState extends State<AppSettings> {
 
   @override
   Widget build(BuildContext context) {
-    TourguideUserProvider userProvider = Provider.of<TourguideUserProvider>(context);
+    TourguideUserProvider userProvider =
+        Provider.of<TourguideUserProvider>(context);
     ThemeProvider themeProvider = Provider.of<ThemeProvider>(context);
     myAuth.AuthProvider authProvider = Provider.of(context);
 
@@ -96,51 +108,60 @@ class _AppSettingsState extends State<AppSettings> {
             children: [
               const SizedBox(height: 0),
               if (!authProvider.isAnonymous)
-              Text("Notifications", style: Theme.of(context).textTheme.titleLarge),
+                Text("Notifications",
+                    style: Theme.of(context).textTheme.titleLarge),
               if (!authProvider.isAnonymous)
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  ListTile(
-                    leading: Checkbox(
-                      value: _emailGeneralNotificationsEnabled,
-                      onChanged: (bool? value) {
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    ListTile(
+                      leading: Checkbox(
+                        value: _emailGeneralNotificationsEnabled,
+                        onChanged: (bool? value) {
+                          setState(() {
+                            _emailGeneralNotificationsEnabled = value ?? false;
+                          });
+                        },
+                      ),
+                      title: const Text('Receive general email notifications'),
+                      onTap: () {
                         setState(() {
-                          _emailGeneralNotificationsEnabled = value ?? false;
+                          _emailGeneralNotificationsEnabled =
+                              !_emailGeneralNotificationsEnabled;
                         });
                       },
                     ),
-                    title: const Text('Receive general email notifications'),
-                    onTap: () {
-                      setState(() {
-                        _emailGeneralNotificationsEnabled = !_emailGeneralNotificationsEnabled;
-                      });
-                    },
-                  ),
-                  ListTile(
-                    leading: Checkbox(
-                      value: _emailReportsNotificationsEnabled,
-                      onChanged: (bool? value) {
+                    ListTile(
+                      leading: Checkbox(
+                        value: _emailReportsNotificationsEnabled,
+                        onChanged: (bool? value) {
+                          setState(() {
+                            _emailReportsNotificationsEnabled = value ?? false;
+                          });
+                        },
+                      ),
+                      title: const Text(
+                          'Receive email notifications when users report your tours'),
+                      onTap: () {
                         setState(() {
-                          _emailReportsNotificationsEnabled = value ?? false;
+                          _emailReportsNotificationsEnabled =
+                              !_emailReportsNotificationsEnabled;
                         });
                       },
                     ),
-                    title: const Text('Receive email notifications when users report your tours'),
-                    onTap: () {
-                      setState(() {
-                        _emailReportsNotificationsEnabled = !_emailReportsNotificationsEnabled;
-                      });
-                    },
-                  ),
-                  ElevatedButton(
-                    onPressed: _emailGeneralNotificationsEnabledInitialState != _emailGeneralNotificationsEnabled ||
-                        _emailReportsNotificationsEnabledInitialState != _emailReportsNotificationsEnabled ? _saveSettings : null,
-                    child: _savingSettings ? const Text('Saving Notification Settings') : const Text('Save Notification Settings'),
-                  ),
-                ],
-              ),
-          
+                    ElevatedButton(
+                      onPressed: _emailGeneralNotificationsEnabledInitialState !=
+                                  _emailGeneralNotificationsEnabled ||
+                              _emailReportsNotificationsEnabledInitialState !=
+                                  _emailReportsNotificationsEnabled
+                          ? _saveSettings
+                          : null,
+                      child: _savingSettings
+                          ? const Text('Saving Notification Settings')
+                          : const Text('Save Notification Settings'),
+                    ),
+                  ],
+                ),
               const SizedBox(height: 16),
               Text("Theme", style: Theme.of(context).textTheme.titleLarge),
               DropdownMenu<String>(
@@ -150,7 +171,8 @@ class _AppSettingsState extends State<AppSettings> {
                   String themeModeString = 'ThemeMode.' + value!.toLowerCase();
                   themeProvider.setThemeModeWithString(themeModeString);
                 },
-                dropdownMenuEntries: themeList.map<DropdownMenuEntry<String>>((String value) {
+                dropdownMenuEntries:
+                    themeList.map<DropdownMenuEntry<String>>((String value) {
                   return DropdownMenuEntry<String>(value: value, label: value);
                 }).toList(),
               ),
@@ -158,7 +180,8 @@ class _AppSettingsState extends State<AppSettings> {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text("Text to Speech", style: Theme.of(context).textTheme.titleLarge),
+                  Text("Text to Speech",
+                      style: Theme.of(context).textTheme.titleLarge),
                   TtsSettings(),
                 ],
               ),
@@ -167,10 +190,22 @@ class _AppSettingsState extends State<AppSettings> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [
-                  Text('Tourguide v', style: Theme.of(context).textTheme.bodyLarge,),
-                  Text(_packageInfo!.version, style: Theme.of(context).textTheme.bodyLarge,),
-                  Text(', build ', style: Theme.of(context).textTheme.bodyLarge,),
-                  Text(_packageInfo!.buildNumber, style: Theme.of(context).textTheme.bodyLarge,),
+                  Text(
+                    'Tourguide v',
+                    style: Theme.of(context).textTheme.bodyLarge,
+                  ),
+                  Text(
+                    _packageInfo!.version,
+                    style: Theme.of(context).textTheme.bodyLarge,
+                  ),
+                  Text(
+                    ', build ',
+                    style: Theme.of(context).textTheme.bodyLarge,
+                  ),
+                  Text(
+                    _packageInfo!.buildNumber,
+                    style: Theme.of(context).textTheme.bodyLarge,
+                  ),
                 ],
               ),
               const SizedBox(height: 0),

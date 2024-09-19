@@ -15,7 +15,8 @@ import 'tour_rating_bookmark_buttons.dart';
 import '../utilities/custom_import.dart';
 import '../utilities/providers/tourguide_user_provider.dart';
 import '../utilities/services/tts_service.dart';
-import 'package:tourguide_app/utilities/providers/auth_provider.dart' as my_auth;
+import 'package:tourguide_app/utilities/providers/auth_provider.dart'
+    as my_auth;
 
 class FullscreenTourPage extends StatefulWidget {
   final Tour tour;
@@ -28,7 +29,8 @@ class FullscreenTourPage extends StatefulWidget {
 
 class _FullscreenTourPageState extends State<FullscreenTourPage> {
   final TourMapController _tourMapController = TourMapController();
-  final Completer<GoogleMapController> _mapControllerCompleter = Completer<GoogleMapController>();
+  final Completer<GoogleMapController> _mapControllerCompleter =
+      Completer<GoogleMapController>();
   bool _isFullScreen = false;
   bool _isLoading = true, _isLoadingFullscreen = true;
   CameraPosition _currentCameraPosition = CameraPosition(
@@ -42,7 +44,6 @@ class _FullscreenTourPageState extends State<FullscreenTourPage> {
   List<GlobalKey> _targetKeys = [];
   int thisUsersRating = 0;
 
-
   @override
   void initState() {
     thisUsersRating = widget.tour.thisUsersRating ?? 0;
@@ -53,7 +54,7 @@ class _FullscreenTourPageState extends State<FullscreenTourPage> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _tourMapController.initTourMapController(
         tour: widget.tour,
-        primaryColor:  Theme.of(context).colorScheme.primary,
+        primaryColor: Theme.of(context).colorScheme.primary,
         onInfoTapped: (int step) {
           logger.t('Step $step tapped');
           //_setStep(step);
@@ -72,7 +73,6 @@ class _FullscreenTourPageState extends State<FullscreenTourPage> {
     super.dispose();
   }
 
-
   void _showOptionsDialog(BuildContext context) {
     final tourProvider = Provider.of<TourProvider>(context, listen: false);
     showDialog(
@@ -83,8 +83,11 @@ class _FullscreenTourPageState extends State<FullscreenTourPage> {
             // Handle edit button press
             Navigator.of(context).pop(); // Close the dialog
             Navigator.push(
-               context,
-               MaterialPageRoute(builder: (context) => CreateEditTour(isEditMode: true,tour: widget.tour.copyWith(isOfflineCreatedTour: true))),
+              context,
+              MaterialPageRoute(
+                  builder: (context) => CreateEditTour(
+                      isEditMode: true,
+                      tour: widget.tour.copyWith(isOfflineCreatedTour: true))),
             );
           },
           onDeletePressed: () {
@@ -106,7 +109,7 @@ class _FullscreenTourPageState extends State<FullscreenTourPage> {
       );
       final tourProvider = Provider.of<TourProvider>(context, listen: false);
       await tourProvider.deleteTour(widget.tour);
-      if (mounted){
+      if (mounted) {
         Navigator.of(context).pop();
         Navigator.of(context).pop();
         ScaffoldMessenger.of(context).hideCurrentSnackBar();
@@ -114,18 +117,16 @@ class _FullscreenTourPageState extends State<FullscreenTourPage> {
           const SnackBar(content: Text('Successfully deleted tour.')),
         );
       }
-
     } catch (e) {
       logger.e('Failed to delete tour: $e');
-      if (mounted){
+      if (mounted) {
         ScaffoldMessenger.of(context).hideCurrentSnackBar();
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Failed to delete tour due to an error.')),
+          const SnackBar(
+              content: Text('Failed to delete tour due to an error.')),
         );
       }
     }
-
-
   }
 
   int? currentlyPlayingIndex; // Track the index of the currently playing place
@@ -146,7 +147,8 @@ class _FullscreenTourPageState extends State<FullscreenTourPage> {
 
   //TODO unify behavior and UI with tour tile
   void startTour() {
-    TourProvider tourProvider = Provider.of<TourProvider>(context, listen: false);
+    TourProvider tourProvider =
+        Provider.of<TourProvider>(context, listen: false);
     tourProvider.selectTourById(widget.tour.id);
     // Navigate to the fullscreen tour page
     TourguideNavigation.router.push(
@@ -154,14 +156,16 @@ class _FullscreenTourPageState extends State<FullscreenTourPage> {
     );
   }
 
-
   @override
   Widget build(BuildContext context) {
     final tourProvider = Provider.of<TourProvider>(context);
     final tourguideUserProvider = Provider.of<TourguideUserProvider>(context);
     bool isOfflineCreatedTour = (widget.tour.isOfflineCreatedTour ?? false);
 
-    bool showMap = widget.tour.latitude != null && widget.tour.latitude != 0 && widget.tour.longitude != null && widget.tour.longitude != 0;
+    bool showMap = widget.tour.latitude != null &&
+        widget.tour.latitude != 0 &&
+        widget.tour.longitude != null &&
+        widget.tour.longitude != 0;
     if (showMap && _currentCameraPosition.target == LatLng(0, 0)) {
       _currentCameraPosition = CameraPosition(
         target: LatLng(widget.tour.latitude, widget.tour.longitude),
@@ -189,23 +193,20 @@ class _FullscreenTourPageState extends State<FullscreenTourPage> {
                       height: kIsWeb ? 300 : 200,
                       child: ClipRRect(
                         child: kIsWeb
-                            ?
-                        Image.network(widget.tour.imageUrl!,
-                            width: MediaQuery.of(context).size.width,
-                            height: 300.0,
-                            fit: BoxFit.cover)
-                            :
-                        widget.tour.imageFile != null
-                            ?
-                        Image.file(widget.tour.imageFile!,
-                            width: MediaQuery.of(context).size.width,
-                            height: 200.0,
-                            fit: BoxFit.cover)
-                            : Container(
-                          color: Colors.grey,
-                          width: MediaQuery.of(context).size.width,
-                          height: 200.0,
-                        ),
+                            ? Image.network(widget.tour.imageUrl!,
+                                width: MediaQuery.of(context).size.width,
+                                height: 300.0,
+                                fit: BoxFit.cover)
+                            : widget.tour.imageFile != null
+                                ? Image.file(widget.tour.imageFile!,
+                                    width: MediaQuery.of(context).size.width,
+                                    height: 200.0,
+                                    fit: BoxFit.cover)
+                                : Container(
+                                    color: Colors.grey,
+                                    width: MediaQuery.of(context).size.width,
+                                    height: 200.0,
+                                  ),
                       ),
                     ),
                     if (tourProvider.isUserCreatedTour(widget.tour))
@@ -223,14 +224,16 @@ class _FullscreenTourPageState extends State<FullscreenTourPage> {
                                     child: Icon(
                                       Icons.report_outlined,
                                       color: Colors.yellow,
-                                      size: 22,),
+                                      size: 22,
+                                    ),
                                   ),
                                 const CircleAvatar(
                                   radius: 16,
                                   backgroundColor: Colors.black45,
                                   child: Icon(
                                     Icons.attribution,
-                                    color: Colors.white,),
+                                    color: Colors.white,
+                                  ),
                                 ),
                               ],
                             ),
@@ -246,19 +249,16 @@ class _FullscreenTourPageState extends State<FullscreenTourPage> {
                       style: Theme.of(context).textTheme.bodyMedium,
                     ),
                     const SizedBox(height: StandardLayout.defaultGap),
-                    TourTagsRow(
-                        tags: TourTag.parseTags(widget.tour.tags!)
-                    ),
+                    TourTagsRow(tags: TourTag.parseTags(widget.tour.tags!)),
                   ],
                 ),
               ),
               TourMap(
-                  tourMapController: _tourMapController,
-                  tour: widget.tour,
-                  height: 220,
-                  heightWeb: 320,
+                tourMapController: _tourMapController,
+                tour: widget.tour,
+                height: 220,
+                heightWeb: 320,
               ),
-
               if (widget.tour.tourguidePlaces.isNotEmpty)
                 SelectionArea(
                   child: Column(
@@ -266,32 +266,48 @@ class _FullscreenTourPageState extends State<FullscreenTourPage> {
                     children: [
                       Padding(
                         padding: const EdgeInsets.only(top: 12.0),
-                        child: Text(
-                            'Places you\'ll visit',
-                            style: Theme.of(context).textTheme.titleLarge
-                        ),
+                        child: Text('Places you\'ll visit',
+                            style: Theme.of(context).textTheme.titleLarge),
                       ),
                       const SizedBox(height: StandardLayout.defaultGap),
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
-                        children: widget.tour.tourguidePlaces.asMap().entries.map((entry) {
+                        children: widget.tour.tourguidePlaces
+                            .asMap()
+                            .entries
+                            .map((entry) {
                           int index = entry.key;
                           var place = entry.value;
                           return Padding(
-                            key: _targetKeys.isNotEmpty ? _targetKeys[index] : null,
-                            padding: index != 0 ? const EdgeInsets.symmetric(vertical: 12.0) : const EdgeInsets.only(bottom: 12.0),
+                            key: _targetKeys.isNotEmpty
+                                ? _targetKeys[index]
+                                : null,
+                            padding: index != 0
+                                ? const EdgeInsets.symmetric(vertical: 12.0)
+                                : const EdgeInsets.only(bottom: 12.0),
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  "${index+1}.  ${place.title}",
-                                  style: Theme.of(context).textTheme.titleMedium!.copyWith(overflow: TextOverflow.ellipsis,),
+                                  "${index + 1}.  ${place.title}",
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .titleMedium!
+                                      .copyWith(
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
                                   maxLines: 2,
                                 ),
                                 SizedBox(height: 6),
                                 Text(
-                                  place.description, // Assuming each place has a 'description' field
-                                  style: Theme.of(context).textTheme.bodyMedium!.copyWith(overflow: TextOverflow.ellipsis,),
+                                  place
+                                      .description, // Assuming each place has a 'description' field
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .bodyMedium!
+                                      .copyWith(
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
                                   maxLines: 3,
                                 ),
                               ],
@@ -312,14 +328,17 @@ class _FullscreenTourPageState extends State<FullscreenTourPage> {
                     children: [
                       Container(
                         width: MediaQuery.of(context).size.width * 0.39,
-                        child:
-                        ElevatedButton(
+                        child: ElevatedButton(
                           onPressed: isOfflineCreatedTour ? null : startTour,
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: Theme.of(context).colorScheme.primary,
-                            foregroundColor: Theme.of(context).colorScheme.surfaceContainerLow,
+                            backgroundColor:
+                                Theme.of(context).colorScheme.primary,
+                            foregroundColor: Theme.of(context)
+                                .colorScheme
+                                .surfaceContainerLow,
                           ),
-                          child: Text("Start"),),
+                          child: Text("Start"),
+                        ),
                       ),
                       TourRatingBookmarkButtons(tour: widget.tour),
                     ],
@@ -334,15 +353,18 @@ class _FullscreenTourPageState extends State<FullscreenTourPage> {
                       'Created on ${widget.tour.createdDateTime!.toLocal().toString().split(' ')[0]} by:',
                       style: Theme.of(context).textTheme.bodyMedium,
                     ),
-                    TextButton(onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) =>
-                            TourguideUserProfileView(
-                                tourguideUserId: widget.tour.authorId,
-                                tourguideUserDisplayName: widget.tour.authorName)),
-                      );
-                    }, child: Text(widget.tour.authorName))
+                    TextButton(
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => TourguideUserProfileView(
+                                    tourguideUserId: widget.tour.authorId,
+                                    tourguideUserDisplayName:
+                                        widget.tour.authorName)),
+                          );
+                        },
+                        child: Text(widget.tour.authorName))
                   ],
                 ),
             ],

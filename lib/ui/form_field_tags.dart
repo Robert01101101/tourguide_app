@@ -10,26 +10,28 @@ class FormFieldTags<T> extends FormField<Map<String, dynamic>> {
     Widget? hintText,
     required this.enabled,
   }) : super(
-    builder: (state) {
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _FormFieldTagsContent(
-            enabled: enabled,
-            onChanged: (selectedValues) {
-              state.didChange(selectedValues); // Update form field state
-            },
-          ),
-          if (state.hasError)
-            Text(
-              state.errorText ?? "",
-              style: Theme.of(state.context).textTheme.labelMedium!.copyWith(
-                color: Theme.of(state.context).colorScheme.error)
-            ),
-        ],
-      );
-    },
-  );
+          builder: (state) {
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _FormFieldTagsContent(
+                  enabled: enabled,
+                  onChanged: (selectedValues) {
+                    state.didChange(selectedValues); // Update form field state
+                  },
+                ),
+                if (state.hasError)
+                  Text(state.errorText ?? "",
+                      style: Theme.of(state.context)
+                          .textTheme
+                          .labelMedium!
+                          .copyWith(
+                              color:
+                                  Theme.of(state.context).colorScheme.error)),
+              ],
+            );
+          },
+        );
 }
 
 class _FormFieldTagsContent extends StatefulWidget {
@@ -54,10 +56,37 @@ class _FormFieldTagsContent extends StatefulWidget {
 class _FormFieldTagsContentState extends State<_FormFieldTagsContent> {
   String? _duration;
   List<String> _descriptiveTags = [];
-  final List<String> _durationPresets = ['1h','3h','6h','1 day', '2 days', '3 days'];
-  final List<String> _descriptiveTagsPresets = ['Scenic', 'Historic', 'Urban', 'Cultural', 'Natural',
-    'Sporty', 'Relaxing', 'Educational', 'Family', 'Romantic', 'Adventurous', 'Foodie', 'Shopping',
-    'Nightlife', 'Festive', 'Seasonal', 'Budget','Pet-friendly', 'Eco-friendly', 'Sustainable', 'LGBTQ+'];
+  final List<String> _durationPresets = [
+    '1h',
+    '3h',
+    '6h',
+    '1 day',
+    '2 days',
+    '3 days'
+  ];
+  final List<String> _descriptiveTagsPresets = [
+    'Scenic',
+    'Historic',
+    'Urban',
+    'Cultural',
+    'Natural',
+    'Sporty',
+    'Relaxing',
+    'Educational',
+    'Family',
+    'Romantic',
+    'Adventurous',
+    'Foodie',
+    'Shopping',
+    'Nightlife',
+    'Festive',
+    'Seasonal',
+    'Budget',
+    'Pet-friendly',
+    'Eco-friendly',
+    'Sustainable',
+    'LGBTQ+'
+  ];
 
   @override
   void initState() {
@@ -74,7 +103,8 @@ class _FormFieldTagsContentState extends State<_FormFieldTagsContent> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const SizedBox(height: 8),
-          Text('Duration',
+          Text(
+            'Duration',
             style: Theme.of(context).textTheme.labelMedium!.copyWith(
                 color: Theme.of(context).colorScheme.onSurfaceVariant),
           ),
@@ -82,34 +112,35 @@ class _FormFieldTagsContentState extends State<_FormFieldTagsContent> {
           Wrap(
             spacing: 8,
             runSpacing: 0,
-            children:
-              List<Widget>.generate(_durationPresets.length, (index) {
-                return ChoiceChip(
-                  label: Text(_durationPresets[index]),
-                  selected: _duration == _durationPresets[index],
-                  onSelected: (bool selected) {
-                    setState(() {
-                      _duration = selected ? _durationPresets[index] : null;
-                    });
-                    widget.onChanged({
-                      'duration': _duration,
-                      'descriptive': _descriptiveTags,
-                    });
-                  },
-                );
-              }),
+            children: List<Widget>.generate(_durationPresets.length, (index) {
+              return ChoiceChip(
+                label: Text(_durationPresets[index]),
+                selected: _duration == _durationPresets[index],
+                onSelected: (bool selected) {
+                  setState(() {
+                    _duration = selected ? _durationPresets[index] : null;
+                  });
+                  widget.onChanged({
+                    'duration': _duration,
+                    'descriptive': _descriptiveTags,
+                  });
+                },
+              );
+            }),
           ),
           const SizedBox(height: 16),
-          Text('Descriptive Tags (${_descriptiveTags.length}/5)',
+          Text(
+            'Descriptive Tags (${_descriptiveTags.length}/5)',
             style: Theme.of(context).textTheme.labelMedium!.copyWith(
                 color: Theme.of(context).colorScheme.onSurfaceVariant),
           ),
           const SizedBox(height: 8),
           Wrap(
             spacing: 8,
-            runSpacing: kIsWeb && MediaQuery.of(context).size.width > 1280 ? 8 : 0,
+            runSpacing:
+                kIsWeb && MediaQuery.of(context).size.width > 1280 ? 8 : 0,
             children:
-            List<Widget>.generate(_descriptiveTagsPresets.length, (index) {
+                List<Widget>.generate(_descriptiveTagsPresets.length, (index) {
               String descriptiveTag = _descriptiveTagsPresets[index];
               return FilterChip(
                 label: Text(descriptiveTag),
@@ -117,7 +148,8 @@ class _FormFieldTagsContentState extends State<_FormFieldTagsContent> {
                 onSelected: (bool selected) {
                   setState(() {
                     if (selected) {
-                      if (_descriptiveTags.length < 5) _descriptiveTags.add(descriptiveTag);
+                      if (_descriptiveTags.length < 5)
+                        _descriptiveTags.add(descriptiveTag);
                     } else {
                       _descriptiveTags.remove(descriptiveTag);
                     }

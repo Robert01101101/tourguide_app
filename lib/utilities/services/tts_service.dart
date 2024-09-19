@@ -29,16 +29,19 @@ class TtsService {
   bool get isAndroid => !kIsWeb && Platform.isAndroid;
 
   //for listeners
-  final StreamController<Map<String, dynamic>> _progressController = StreamController.broadcast();
+  final StreamController<Map<String, dynamic>> _progressController =
+      StreamController.broadcast();
   Stream<Map<String, dynamic>> get progressStream => _progressController.stream;
-  final StreamController<TtsState> _ttsStateController = StreamController<TtsState>.broadcast();
+  final StreamController<TtsState> _ttsStateController =
+      StreamController<TtsState>.broadcast();
   Stream<TtsState> get ttsStateStream => _ttsStateController.stream;
-  ValueNotifier<bool> isCurrentLanguageInstalledNotifier = ValueNotifier<bool>(false);
-  bool get isCurrentLanguageInstalled => isCurrentLanguageInstalledNotifier.value;
+  ValueNotifier<bool> isCurrentLanguageInstalledNotifier =
+      ValueNotifier<bool>(false);
+  bool get isCurrentLanguageInstalled =>
+      isCurrentLanguageInstalledNotifier.value;
   ValueNotifier<String?> languageNotifier = ValueNotifier<String?>(null);
   ValueNotifier<double> rateNotifier = ValueNotifier<double>(0.6);
   ValueNotifier<bool> hasSavedSettings = ValueNotifier<bool>(false);
-
 
   void _initTts() async {
     await _getDefaultVoice();
@@ -74,7 +77,8 @@ class TtsService {
       _ttsStateController.add(_ttsState);
     });
 
-    _flutterTts.setProgressHandler((String text, int startOffset, int endOffset, String word) {
+    _flutterTts.setProgressHandler(
+        (String text, int startOffset, int endOffset, String word) {
       //logger.t("Progress: $text, $startOffset, $endOffset, $word");
       _progressController.add({
         'text': text,
@@ -106,7 +110,8 @@ class TtsService {
   Future<void> _saveSettings() async {
     final prefs = await SharedPreferences.getInstance();
     prefs.setDouble('tts_rate', rate);
-    if (languageNotifier != null && languageNotifier.value != null) prefs.setString('tts_language', languageNotifier.value!);
+    if (languageNotifier != null && languageNotifier.value != null)
+      prefs.setString('tts_language', languageNotifier.value!);
     hasSavedSettings.value = true;
   }
 
@@ -148,16 +153,16 @@ class TtsService {
     _ttsStateController.close();
   }
 
-
   // ----
 
   Future<void> _getDefaultVoice() async {
-    if (isAndroid){
+    if (isAndroid) {
       var voice = await _flutterTts.getDefaultVoice;
       if (voice != null) {
         //logger.t(voice);
         languageNotifier.value = voice['locale'];
-        isCurrentLanguageInstalledNotifier.value = await _flutterTts.isLanguageInstalled(languageNotifier.value!);
+        isCurrentLanguageInstalledNotifier.value =
+            await _flutterTts.isLanguageInstalled(languageNotifier.value!);
         setLanguage(languageNotifier.value!, saveSettings: false);
       }
     } else {
@@ -167,21 +172,22 @@ class TtsService {
       languageNotifier.value = defaultLanguageVoice;
       setLanguage(languageNotifier.value!, saveSettings: false);
     }
-
   }
 
-  void setLanguage(String selectedLanguage, {bool saveSettings = true}){
+  void setLanguage(String selectedLanguage, {bool saveSettings = true}) {
     languageNotifier.value = selectedLanguage;
     _flutterTts.setLanguage(languageNotifier.value!);
     if (isAndroid) {
-      _flutterTts
-          .isLanguageInstalled(languageNotifier.value!)
-          .then((value) {isCurrentLanguageInstalledNotifier.value = (value as bool); logger.t("Is language installed: $isCurrentLanguageInstalled, isCurrentLanguageInstalled=$isCurrentLanguageInstalled");});
+      _flutterTts.isLanguageInstalled(languageNotifier.value!).then((value) {
+        isCurrentLanguageInstalledNotifier.value = (value as bool);
+        logger.t(
+            "Is language installed: $isCurrentLanguageInstalled, isCurrentLanguageInstalled=$isCurrentLanguageInstalled");
+      });
     }
     if (saveSettings) _saveSettings();
   }
 
-  void setRate(double newRate){
+  void setRate(double newRate) {
     rate = newRate;
     _flutterTts.setSpeechRate(rate);
     rateNotifier.value = rate;

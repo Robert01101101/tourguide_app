@@ -5,7 +5,6 @@ import 'package:tourguide_app/utilities/custom_import.dart';
 import 'package:tourguide_app/testing/second_screen_test.dart';
 import 'package:flutter/material.dart';
 
-
 // FROM FLUTTER SAMPLE
 // MARK: Google Maps code snippet starts here
 
@@ -18,7 +17,7 @@ class MapSample extends StatefulWidget {
 
 class MapSampleState extends State<MapSample> {
   final Completer<GoogleMapController> _controller =
-  Completer<GoogleMapController>();
+      Completer<GoogleMapController>();
 
   static const CameraPosition _kGooglePlex = CameraPosition(
     target: LatLng(37.42796133580664, -122.085749655962),
@@ -31,9 +30,8 @@ class MapSampleState extends State<MapSample> {
       tilt: 59.440717697143555,
       zoom: 19.151926040649414);
 
-
   int _counter = 0;
-  Position ? _currentPosition;
+  Position? _currentPosition;
 
   //do on page load
   @override
@@ -41,7 +39,6 @@ class MapSampleState extends State<MapSample> {
     super.initState();
     _determinePosition();
   }
-
 
   /// Determine the current position of the device.
   ///
@@ -81,7 +78,7 @@ class MapSampleState extends State<MapSample> {
 
     // When we reach here, permissions are granted and we can
     // continue accessing the position of the device.
-    Position newPosition =  await Geolocator.getCurrentPosition();
+    Position newPosition = await Geolocator.getCurrentPosition();
 
     setState(() {
       _currentPosition = newPosition;
@@ -95,7 +92,8 @@ class MapSampleState extends State<MapSample> {
 
   Future<void> _goToGoogleHq() async {
     final GoogleMapController controller = await _controller.future;
-    await controller.animateCamera(CameraUpdate.newCameraPosition(_kGooglePlex));
+    await controller
+        .animateCamera(CameraUpdate.newCameraPosition(_kGooglePlex));
   }
 
   Future<void> _goToMyLocation() async {
@@ -115,61 +113,59 @@ class MapSampleState extends State<MapSample> {
         title: const Text('Map Sample'),
       ),
       body: Center(
-        child: Column(
-          children: [
-            Expanded(
-              child: GoogleMap(
-                mapType: MapType.hybrid,
-                initialCameraPosition: _kLake,
-                onMapCreated: (GoogleMapController controller) {
-                  _controller.complete(controller);
-                },
-              ),
+          child: Column(
+        children: [
+          Expanded(
+            child: GoogleMap(
+              mapType: MapType.hybrid,
+              initialCameraPosition: _kLake,
+              onMapCreated: (GoogleMapController controller) {
+                _controller.complete(controller);
+              },
             ),
-            const SizedBox(
-              height: 20,
-            ),
-            const Text(
-              'Your current GPS Location is:',
-            ),
-            _currentPosition != null
-                ? Text(
-              'LAT: ${(_currentPosition!!).latitude}, \n LNG: ${(_currentPosition!!).longitude}',//cast to non nullable
-              style: TextStyle(fontSize: 24),
-            )
-                : CircularProgressIndicator(),
-            const SizedBox(
-              height: 20,
-            ),
-            Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly,children: [
-              ElevatedButton(onPressed: _goToMyLocation, child: const Text("My Location")),
-              ElevatedButton(onPressed: _goToGoogleHq, child: const Text("Google's HQ")),
-              ElevatedButton(onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const SecondRoute()),
-                );
-              }, child: const Text("Route 2")),
-            ],),
-            const SizedBox(
-              height: 20,
-            ),
-          ],
-        )
-      ),
+          ),
+          const SizedBox(
+            height: 20,
+          ),
+          const Text(
+            'Your current GPS Location is:',
+          ),
+          _currentPosition != null
+              ? Text(
+                  'LAT: ${(_currentPosition!!).latitude}, \n LNG: ${(_currentPosition!!).longitude}', //cast to non nullable
+                  style: TextStyle(fontSize: 24),
+                )
+              : CircularProgressIndicator(),
+          const SizedBox(
+            height: 20,
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              ElevatedButton(
+                  onPressed: _goToMyLocation, child: const Text("My Location")),
+              ElevatedButton(
+                  onPressed: _goToGoogleHq, child: const Text("Google's HQ")),
+              ElevatedButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => const SecondRoute()),
+                    );
+                  },
+                  child: const Text("Route 2")),
+            ],
+          ),
+          const SizedBox(
+            height: 20,
+          ),
+        ],
+      )),
     );
   }
 }
 
 // MARK: Google Maps code snippet ends here
-
-
-
-
-
-
-
-
-
 
 // FROM GOOGLE SAMPLE https://codelabs.developers.google.com/codelabs/google-maps-in-flutter#3

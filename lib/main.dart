@@ -33,10 +33,14 @@ import 'model/tourguide_place.dart';
 import 'model/tourguide_report.dart';
 
 var logger = kIsWeb
-    ? logger_web.Logger(level: logger_web.Level.all,)
-                        //filter: ProductionFilter())
-    : logger_mobile.Logger(level: logger_mobile.Level.all,);
-                        //filter: ProductionFilter());
+    ? logger_web.Logger(
+        level: logger_web.Level.all,
+      )
+    //filter: ProductionFilter())
+    : logger_mobile.Logger(
+        level: logger_mobile.Level.all,
+      );
+//filter: ProductionFilter());
 final FirebaseRemoteConfig remoteConfig = FirebaseRemoteConfig.instance;
 
 Future<void> main() async {
@@ -50,13 +54,15 @@ Future<void> main() async {
   await FirebaseAppCheck.instance.activate(
     // You can also use a `ReCaptchaEnterpriseProvider` provider instance as an
     // argument for `webProvider`
-    webProvider: ReCaptchaV3Provider('6LdoBC4qAAAAACZhq3EQuE5vVR8e_7X_2EE67oUp'),
+    webProvider:
+        ReCaptchaV3Provider('6LdoBC4qAAAAACZhq3EQuE5vVR8e_7X_2EE67oUp'),
     // Default provider for Android is the Play Integrity provider. You can use the "AndroidProvider" enum to choose
     // your preferred provider. Choose from:
     // 1. Debug provider
     // 2. Safety Net provider
     // 3. Play Integrity provider
-    androidProvider: kDebugMode ? AndroidProvider.debug : AndroidProvider.playIntegrity,
+    androidProvider:
+        kDebugMode ? AndroidProvider.debug : AndroidProvider.playIntegrity,
     // Default provider for iOS/macOS is the Device Check provider. You can use the "AppleProvider" enum to choose
     // your preferred provider. Choose from:
     // 1. Debug provider
@@ -70,7 +76,7 @@ Future<void> main() async {
   await fetchConfig();
 
   //HIVE DB
-  if (!kIsWeb){
+  if (!kIsWeb) {
     await Hive.initFlutter();
     Hive.registerAdapter(TourAdapter());
     Hive.registerAdapter(TourguidePlaceAdapter());
@@ -83,7 +89,7 @@ Future<void> main() async {
   //CRASHLYTICS
   FirebaseAnalytics analytics = FirebaseAnalytics.instance;
   // Pass all uncaught "fatal" errors from the framework to Crashlytics (except for web, which doesn't support it)
-  if (!kIsWeb){
+  if (!kIsWeb) {
     FlutterError.onError = (errorDetails) {
       FirebaseCrashlytics.instance.recordFlutterFatalError(errorDetails);
     };
@@ -116,13 +122,10 @@ Future<void> fetchConfig() async {
   }
 }
 
-String getFormattedTime(){
+String getFormattedTime() {
   DateTime now = DateTime.now();
   return " - at ${DateFormat('HH:mm:ss.SSS').format(now)}";
 }
-
-
-
 
 class MyApp extends StatefulWidget {
   const MyApp({super.key});
@@ -130,8 +133,6 @@ class MyApp extends StatefulWidget {
   @override
   _MyAppState createState() => _MyAppState();
 }
-
-
 
 class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
   @override
@@ -148,7 +149,8 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.detached || state == AppLifecycleState.paused) {
+    if (state == AppLifecycleState.detached ||
+        state == AppLifecycleState.paused) {
       clearPrefsOnClose();
     }
   }
@@ -167,8 +169,10 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
         ChangeNotifierProvider(create: (_) => LocationProvider()),
         ChangeNotifierProvider(create: (_) => TourProvider()),
         ChangeNotifierProxyProvider<AuthProvider, TourguideUserProvider>(
-          create: (_) => TourguideUserProvider(), // Provide TourguideUserProvider with access to AuthProvider
-          update: (_, authProvider, userProvider) => userProvider!..setAuthProvider(authProvider),
+          create: (_) =>
+              TourguideUserProvider(), // Provide TourguideUserProvider with access to AuthProvider
+          update: (_, authProvider, userProvider) =>
+              userProvider!..setAuthProvider(authProvider),
         ),
         ChangeNotifierProvider(create: (_) => ThemeProvider()),
       ],
@@ -185,8 +189,6 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
     );
   }
 }
-
-
 
 class MyGlobals {
   ///For web only, as I don't currently have a clean solution for users manually loading to a page other than the root //TODO: fix web routing
@@ -210,21 +212,23 @@ class MyGlobals {
     tileMode: TileMode.clamp,
   );
 
-  static void initProviders(BuildContext context){
+  static void initProviders(BuildContext context) {
     logger.t("initProviders()");
     myAuth.AuthProvider authProvider = Provider.of(context, listen: false);
     LocationProvider locationProvider = Provider.of(context, listen: false);
     TourProvider tourProvider = Provider.of(context, listen: false);
-    TourguideUserProvider tourguideUserProvider = Provider.of(context, listen: false);
+    TourguideUserProvider tourguideUserProvider =
+        Provider.of(context, listen: false);
     ThemeProvider themeProvider = Provider.of(context, listen: false);
   }
 
   /// Returns true if we have to reroute to sign in.
   /// For web only, as I don't currently have a clean solution for users manually loading to a page other than the root.
   /// TODO: fix web routing, looks like it shouldn't be too much work as parts of the app work when loading right into a non-root page
-  static bool webRoutingFix(String currentRoutePath){
+  static bool webRoutingFix(String currentRoutePath) {
     if (!kIsWeb) return false;
-    if ((userSignedIn ?? false) == false){ //for web
+    if ((userSignedIn ?? false) == false) {
+      //for web
       signInReroutePath = currentRoutePath;
       TourguideNavigation.router.go(
         TourguideNavigation.signInPath,

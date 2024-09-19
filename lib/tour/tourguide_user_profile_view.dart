@@ -20,25 +20,32 @@ class TourguideUserProfileView extends StatefulWidget {
   final String tourguideUserId;
   final String tourguideUserDisplayName;
 
-  const TourguideUserProfileView({Key? key, required this.tourguideUserId, required this.tourguideUserDisplayName}) : super(key: key);
+  const TourguideUserProfileView(
+      {Key? key,
+      required this.tourguideUserId,
+      required this.tourguideUserDisplayName})
+      : super(key: key);
 
   @override
-  State<TourguideUserProfileView> createState() => _TourguideUserProfileViewState();
+  State<TourguideUserProfileView> createState() =>
+      _TourguideUserProfileViewState();
 }
 
 class _TourguideUserProfileViewState extends State<TourguideUserProfileView> {
-
   @override
   Widget build(BuildContext context) {
-    TourguideUserProvider tourguideUserProvider = Provider.of<TourguideUserProvider>(context);
+    TourguideUserProvider tourguideUserProvider =
+        Provider.of<TourguideUserProvider>(context);
 
-    bool isCurrentUser = widget.tourguideUserId == tourguideUserProvider.user!.firebaseAuthId;
+    bool isCurrentUser =
+        widget.tourguideUserId == tourguideUserProvider.user!.firebaseAuthId;
 
     void _showReportDialog(BuildContext context) {
       showDialog(
         context: context,
         builder: (BuildContext context) {
-          return TourguideUserProfileViewReportOptions(tourguideUserId: widget.tourguideUserId);
+          return TourguideUserProfileViewReportOptions(
+              tourguideUserId: widget.tourguideUserId);
         },
       );
     }
@@ -51,19 +58,23 @@ class _TourguideUserProfileViewState extends State<TourguideUserProfileView> {
         child: Column(
           children: [
             Padding(
-              padding: const EdgeInsets.symmetric(vertical: 64.0, horizontal: 32),
-              child: Text(widget.tourguideUserDisplayName, style: Theme.of(context).textTheme.titleLarge,),
+              padding:
+                  const EdgeInsets.symmetric(vertical: 64.0, horizontal: 32),
+              child: Text(
+                widget.tourguideUserDisplayName,
+                style: Theme.of(context).textTheme.titleLarge,
+              ),
             ),
             if (isCurrentUser)
               const Padding(
-                padding: EdgeInsets.only(left:  8, right: 8, bottom: 32.0),
+                padding: EdgeInsets.only(left: 8, right: 8, bottom: 32.0),
                 child: Text('This is how other users see your profile.'),
               ),
             ProfileListButton(
               label: 'Block User',
               leftIcon: Icons.block,
-              onPressed: (){},
-              disabled: true,//isCurrentUser, //TODO
+              onPressed: () {},
+              disabled: true, //isCurrentUser, //TODO
             ),
             ProfileListButton(
               label: 'Report User',
@@ -76,7 +87,8 @@ class _TourguideUserProfileViewState extends State<TourguideUserProfileView> {
               leftIcon: Icons.feedback_outlined,
               isLastItem: true,
               onPressed: () {
-                launchUrl(Uri.parse("mailto:feedback@tourguide.rmichels.com?subject=Tourguide%20Tour%20Author%20Screen%20Feedback"));
+                launchUrl(Uri.parse(
+                    "mailto:feedback@tourguide.rmichels.com?subject=Tourguide%20Tour%20Author%20Screen%20Feedback"));
               },
             ),
           ],
@@ -86,22 +98,25 @@ class _TourguideUserProfileViewState extends State<TourguideUserProfileView> {
   }
 }
 
-
-
 class TourguideUserProfileViewReportOptions extends StatefulWidget {
   final String tourguideUserId;
 
-  const TourguideUserProfileViewReportOptions({Key? key, required this.tourguideUserId}) : super(key: key);
+  const TourguideUserProfileViewReportOptions(
+      {Key? key, required this.tourguideUserId})
+      : super(key: key);
 
   @override
-  State<TourguideUserProfileViewReportOptions> createState() => _TourguideUserProfileViewReportOptionsState();
+  State<TourguideUserProfileViewReportOptions> createState() =>
+      _TourguideUserProfileViewReportOptionsState();
 }
 
 //TODO: maybe find a better solution, state machine or something like that?
-class _TourguideUserProfileViewReportOptionsState extends State<TourguideUserProfileViewReportOptions> {
+class _TourguideUserProfileViewReportOptionsState
+    extends State<TourguideUserProfileViewReportOptions> {
   bool _reportSubmitted = false;
   String _selectedReportOption = '';
-  final TextEditingController _reportDetailsController = TextEditingController();
+  final TextEditingController _reportDetailsController =
+      TextEditingController();
 
   void _handleRadioValueChange(String? value) {
     setState(() {
@@ -118,13 +133,14 @@ class _TourguideUserProfileViewReportOptionsState extends State<TourguideUserPro
     logger.t('Selected Option: $_selectedReportOption');
     logger.t('Additional Details: $additionalDetails');
 
-    final tourguideUserProvider = Provider.of<TourguideUserProvider>(context, listen: false);
+    final tourguideUserProvider =
+        Provider.of<TourguideUserProvider>(context, listen: false);
     TourguideReport report = TourguideReport(
       title: _selectedReportOption,
       additionalDetails: additionalDetails,
       reportAuthorId: tourguideUserProvider.user!.firebaseAuthId,
     );
-    
+
     setState(() {
       //TODO
       tourguideUserProvider.reportUser(report, widget.tourguideUserId);
@@ -136,7 +152,8 @@ class _TourguideUserProfileViewReportOptionsState extends State<TourguideUserPro
       builder: (BuildContext context) {
         return AlertDialog(
           title: Text('Thank You'),
-          content: Text('Thank you for your report. We will review the user and take appropriate action if necessary.'),
+          content: Text(
+              'Thank you for your report. We will review the user and take appropriate action if necessary.'),
           actions: [
             TextButton(
               child: Text('OK'),
@@ -149,7 +166,6 @@ class _TourguideUserProfileViewReportOptionsState extends State<TourguideUserPro
       },
     );
   }
-  
 
   @override
   Widget build(BuildContext context) {
@@ -158,11 +174,12 @@ class _TourguideUserProfileViewReportOptionsState extends State<TourguideUserPro
       content: SingleChildScrollView(
         child: ListBody(
           children: <Widget>[
-          ReportDialogue(
-            selectedReportOption: _selectedReportOption,
-            onChanged: _handleRadioValueChange,
-            reportDetailsController: _reportDetailsController,
-            reportItem: 'user',)
+            ReportDialogue(
+              selectedReportOption: _selectedReportOption,
+              onChanged: _handleRadioValueChange,
+              reportDetailsController: _reportDetailsController,
+              reportItem: 'user',
+            )
           ],
         ),
       ),
@@ -183,4 +200,3 @@ class _TourguideUserProfileViewReportOptionsState extends State<TourguideUserPro
     );
   }
 }
-

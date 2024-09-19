@@ -6,7 +6,8 @@ class HorizontalScroller extends StatelessWidget {
   final List<Tour> tours;
   final bool leftPadding;
 
-  const HorizontalScroller({super.key, required this.tours, this.leftPadding = true});
+  const HorizontalScroller(
+      {super.key, required this.tours, this.leftPadding = true});
 
   @override
   Widget build(BuildContext context) {

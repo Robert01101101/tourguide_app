@@ -9,7 +9,6 @@ import 'package:tourguide_app/ui/shimmer_loading.dart';
 import 'package:tourguide_app/utilities/custom_import.dart';
 import 'package:tourguide_app/utilities/providers/tour_provider.dart';
 
-
 class ToTourList extends StatefulWidget {
   const ToTourList({super.key});
 
@@ -18,7 +17,6 @@ class ToTourList extends StatefulWidget {
 }
 
 class _ToTourListState extends State<ToTourList> {
-
   @override
   Widget build(BuildContext context) {
     TourProvider tourProvider = Provider.of<TourProvider>(context);
@@ -32,7 +30,8 @@ class _ToTourListState extends State<ToTourList> {
         child: StandardLayout(
           children: [
             SizedBox(height: 0),
-            Text("To Tour List", style: Theme.of(context).textTheme.headlineSmall),
+            Text("To Tour List",
+                style: Theme.of(context).textTheme.headlineSmall),
             StandardLayoutChild(
               fullWidth: true,
               child: HorizontalScroller(
@@ -46,8 +45,6 @@ class _ToTourListState extends State<ToTourList> {
   }
 }
 
-
-
 //_________________________________________________________________________ PUBLIC TOURS
 class PublicTours extends StatefulWidget {
   const PublicTours({super.key, required this.isPublic});
@@ -57,7 +54,6 @@ class PublicTours extends StatefulWidget {
   @override
   State<PublicTours> createState() => _PublicToursState();
 }
-
 
 class _PublicToursState extends State<PublicTours> {
   FirebaseFirestore db = FirebaseFirestore.instance;
@@ -74,7 +70,6 @@ class _PublicToursState extends State<PublicTours> {
     _firestoreGetPublicTours(widget.isPublic);
   }
 
-
   _firestoreGetPublicTours(bool isPublic) async {
     FirebaseFirestore db = FirebaseFirestore.instance;
     FirebaseAuth auth = FirebaseAuth.instance;
@@ -85,7 +80,7 @@ class _PublicToursState extends State<PublicTours> {
 
     // get public tours
     QuerySnapshot querySnapshot;
-    if (isPublic){
+    if (isPublic) {
       querySnapshot = await db
           .collection("tours")
           .where("visibility", isEqualTo: "public")
@@ -97,7 +92,6 @@ class _PublicToursState extends State<PublicTours> {
           .where("uid", isEqualTo: uid)
           .get();
     }
-
 
     // populate tours list
     setState(() {
@@ -111,7 +105,6 @@ class _PublicToursState extends State<PublicTours> {
       }));
     });
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -134,4 +127,3 @@ class _PublicToursState extends State<PublicTours> {
     );
   }
 }
-

@@ -22,9 +22,9 @@ import 'package:url_launcher/url_launcher.dart';
 import 'ui/sign_in_button.dart';
 import 'package:tourguide_app/utilities/custom_import.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:tourguide_app/utilities/providers/auth_provider.dart' as my_auth;
+import 'package:tourguide_app/utilities/providers/auth_provider.dart'
+    as my_auth;
 import 'package:flutter_native_splash/flutter_native_splash.dart';
-
 
 /// The SignIn app.
 class SignIn extends StatefulWidget {
@@ -51,23 +51,30 @@ class _SignInState extends State<SignIn> {
 
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
       authProvider.addListener(() {
-        logger.t("signIn.initState().authProviderListener -> user=${authProvider.user != null}, googleSignInUser=${authProvider.googleSignInUser != null}, isAuthorized=${authProvider.isAuthorized}, silentSignInFailed=${authProvider.silentSignInFailed}, isAnonymous=${authProvider.isAnonymous}");
-        if (authProvider.user != null && (authProvider.googleSignInUser != null || authProvider.isAnonymous) && !navigatedAwayFromSignIn) {
-          logger.t("signIn.initState().authProviderListener -> user is no longer null");
+        logger.t(
+            "signIn.initState().authProviderListener -> user=${authProvider.user != null}, googleSignInUser=${authProvider.googleSignInUser != null}, isAuthorized=${authProvider.isAuthorized}, silentSignInFailed=${authProvider.silentSignInFailed}, isAnonymous=${authProvider.isAnonymous}");
+        if (authProvider.user != null &&
+            (authProvider.googleSignInUser != null ||
+                authProvider.isAnonymous) &&
+            !navigatedAwayFromSignIn) {
+          logger.t(
+              "signIn.initState().authProviderListener -> user is no longer null");
           navigatedAwayFromSignIn = true;
           MyGlobals.userSignedIn = true; //for web
           // Navigate to the new screen once login is complete
           TourguideNavigation.router.go(
             MyGlobals.signInReroutePath ?? TourguideNavigation.explorePath,
           );
-          FirebaseAnalytics.instance.logLogin(loginMethod:'google');
-        } else if (authProvider.googleSignInUser == null || authProvider.silentSignInFailed){
-          logger.t("signIn.initState().authProviderListener -> user is null or silentSignInFailed");
+          FirebaseAnalytics.instance.logLogin(loginMethod: 'google');
+        } else if (authProvider.googleSignInUser == null ||
+            authProvider.silentSignInFailed) {
+          logger.t(
+              "signIn.initState().authProviderListener -> user is null or silentSignInFailed");
           FlutterNativeSplash.remove();
         }
       });
 
-      if (kIsWeb){
+      if (kIsWeb) {
         logger.t("signIn.initState() kIsWeb -> remove splash");
         FlutterNativeSplash.remove();
       }
@@ -104,7 +111,8 @@ class _SignInState extends State<SignIn> {
 
   Widget _buildButtonBody() {
     my_auth.AuthProvider authProvider = Provider.of(context);
-    final GoogleSignInAccount? googleSignInAccount = authProvider.googleSignInUser;
+    final GoogleSignInAccount? googleSignInAccount =
+        authProvider.googleSignInUser;
     final User? user = authProvider.user;
 
     if (googleSignInAccount != null && user == null) {
@@ -115,10 +123,12 @@ class _SignInState extends State<SignIn> {
           children: [
             const SizedBox(
                 width: 240,
-                child: Text('Sign into the Google Firebase Cloud service for access to Tourguide.', textAlign: TextAlign.center)
-            ),
+                child: Text(
+                    'Sign into the Google Firebase Cloud service for access to Tourguide.',
+                    textAlign: TextAlign.center)),
             ElevatedButton(
-              onPressed: () => authProvider.signInWithFirebase(authProvider.googleSignInUser!),
+              onPressed: () => authProvider
+                  .signInWithFirebase(authProvider.googleSignInUser!),
               child: const Text('SIGN INTO FIREBASE SERVICE'),
             ),
           ],
@@ -138,8 +148,12 @@ class _SignInState extends State<SignIn> {
                   Text('You are signed out.',
                       style: Theme.of(context).textTheme.bodyLarge),
                   const SizedBox(height: 20),
-                  Text('To continue, please sign in or create an account with Google.', textAlign: TextAlign.center,
-                      style: Theme.of(context).textTheme.bodyMedium!.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant)),
+                  Text(
+                      'To continue, please sign in or create an account with Google.',
+                      textAlign: TextAlign.center,
+                      style: Theme.of(context).textTheme.bodyMedium!.copyWith(
+                          color:
+                              Theme.of(context).colorScheme.onSurfaceVariant)),
                 ],
               ),
             ),
@@ -152,11 +166,15 @@ class _SignInState extends State<SignIn> {
                 ),
                 const SizedBox(height: StandardLayout.defaultGap),
                 TextButton(
-                    onPressed: () => authProvider.signInWithFirebaseAnonymously(),
+                    onPressed: () =>
+                        authProvider.signInWithFirebaseAnonymously(),
                     child: Text('SIGN IN AS GUEST',
-                        style: Theme.of(context).textTheme.labelMedium!.copyWith(
-                            color: Theme.of(context).colorScheme.primary,
-                            fontWeight: FontWeight.bold))),
+                        style: Theme.of(context)
+                            .textTheme
+                            .labelMedium!
+                            .copyWith(
+                                color: Theme.of(context).colorScheme.primary,
+                                fontWeight: FontWeight.bold))),
               ],
             ),
           ],
@@ -180,8 +198,11 @@ class _SignInState extends State<SignIn> {
             Expanded(
               child: ConstrainedBox(
                 constraints: const BoxConstraints.expand(),
-                child: ((authProvider.googleSignInUser != null && authProvider.isAuthorized && authProvider.user != null)
-                    || authProvider.isLoggingOut || authProvider.isLoggingIntoFirebaseMobile)
+                child: ((authProvider.googleSignInUser != null &&
+                            authProvider.isAuthorized &&
+                            authProvider.user != null) ||
+                        authProvider.isLoggingOut ||
+                        authProvider.isLoggingIntoFirebaseMobile)
                     ? _buildProcessingBody()
                     : _buildButtonBody(),
               ),
@@ -191,24 +212,31 @@ class _SignInState extends State<SignIn> {
               child: RichText(
                 textAlign: TextAlign.center,
                 text: TextSpan(
-                  style: Theme.of(context).textTheme.bodyMedium!.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant),
+                  style: Theme.of(context).textTheme.bodyMedium!.copyWith(
+                      color: Theme.of(context).colorScheme.onSurfaceVariant),
                   children: [
                     const TextSpan(text: 'By signing in, you agree to the \n'),
                     TextSpan(
                       text: 'Terms of Service',
-                      style: Theme.of(context).textTheme.bodyMedium!.copyWith(decoration: TextDecoration.underline, color: Theme.of(context).colorScheme.primary),
+                      style: Theme.of(context).textTheme.bodyMedium!.copyWith(
+                          decoration: TextDecoration.underline,
+                          color: Theme.of(context).colorScheme.primary),
                       recognizer: TapGestureRecognizer()
                         ..onTap = () {
-                          launchUrl(Uri.parse("https://tourguide.rmichels.com/termsOfService.html"));
+                          launchUrl(Uri.parse(
+                              "https://tourguide.rmichels.com/termsOfService.html"));
                         },
                     ),
                     const TextSpan(text: ' and '),
                     TextSpan(
                       text: 'Privacy Policy',
-                      style: Theme.of(context).textTheme.bodyMedium!.copyWith(decoration: TextDecoration.underline, color: Theme.of(context).colorScheme.primary),
+                      style: Theme.of(context).textTheme.bodyMedium!.copyWith(
+                          decoration: TextDecoration.underline,
+                          color: Theme.of(context).colorScheme.primary),
                       recognizer: TapGestureRecognizer()
                         ..onTap = () {
-                          launchUrl(Uri.parse("https://tourguide.rmichels.com/privacyPolicy.html"));
+                          launchUrl(Uri.parse(
+                              "https://tourguide.rmichels.com/privacyPolicy.html"));
                         },
                     ),
                     const TextSpan(text: '.'),

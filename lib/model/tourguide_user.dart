@@ -80,7 +80,8 @@ class TourguideUser {
       username: username ?? this.username,
       displayName: displayName ?? this.displayName,
       email: email ?? this.email,
-      emailSubscriptionsDisabled: emailSubscriptionsDisabled ?? this.emailSubscriptionsDisabled,
+      emailSubscriptionsDisabled:
+          emailSubscriptionsDisabled ?? this.emailSubscriptionsDisabled,
       savedTourIds: savedTourIds ?? this.savedTourIds,
       reports: reports ?? this.reports,
       useUsername: useUsername ?? this.useUsername,

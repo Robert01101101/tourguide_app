@@ -18,7 +18,6 @@ class DebugScreen extends StatefulWidget {
 }
 
 class DebugScreenState extends State<DebugScreen> {
-
   //do on page load
   @override
   void initState() {
@@ -27,7 +26,6 @@ class DebugScreenState extends State<DebugScreen> {
     //doing nothing custom atm -> remove?
   }
 
-
   //________________________________________________________________________________________ MapSample StatefulWidget - BUILD
   @override
   Widget build(BuildContext context) {
@@ -35,57 +33,79 @@ class DebugScreenState extends State<DebugScreen> {
       appBar: AppBar(
         title: const Text('Debug'),
       ),
-
-
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Text(
               'Debug Options',
-                style: Theme.of(context).textTheme.headlineMedium,
+              style: Theme.of(context).textTheme.headlineMedium,
             ),
             const SizedBox(
               height: 80,
             ),
-            Column(mainAxisAlignment: MainAxisAlignment.spaceEvenly,children: [
-              ElevatedButton(onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const MapSample()),
-                );
-              }, child: const Text("Map Sample")),
-              ElevatedButton(onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const SecondRoute()),
-                );
-              }, child: const Text("Route 2")),
-              ElevatedButton(onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const FlutterGooglePlacesSample()),
-                );
-              }, child: const Text("Places")),
-              ElevatedButton(onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const GeminiChat()),
-                );
-              }, child: const Text("Gemini Chat")),
-              ElevatedButton(onPressed: (){
-                MapUtils.openMap(-3.823216,-38.481700);
-              }, child: const Text("Google Maps GPS link")),
-              ElevatedButton(onPressed: (){
-                MapUtils.openMapWithQuery("Waterfront Vancouver BC Canada");
-              }, child: const Text("Google Maps Address link")),
-              ElevatedButton(onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const MapScreen()),
-                );
-              }, child: const Text("Old Map Menu Option")),
-            ],)
+            Column(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                ElevatedButton(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => const MapSample()),
+                      );
+                    },
+                    child: const Text("Map Sample")),
+                ElevatedButton(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => const SecondRoute()),
+                      );
+                    },
+                    child: const Text("Route 2")),
+                ElevatedButton(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) =>
+                                const FlutterGooglePlacesSample()),
+                      );
+                    },
+                    child: const Text("Places")),
+                ElevatedButton(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => const GeminiChat()),
+                      );
+                    },
+                    child: const Text("Gemini Chat")),
+                ElevatedButton(
+                    onPressed: () {
+                      MapUtils.openMap(-3.823216, -38.481700);
+                    },
+                    child: const Text("Google Maps GPS link")),
+                ElevatedButton(
+                    onPressed: () {
+                      MapUtils.openMapWithQuery(
+                          "Waterfront Vancouver BC Canada");
+                    },
+                    child: const Text("Google Maps Address link")),
+                ElevatedButton(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => const MapScreen()),
+                      );
+                    },
+                    child: const Text("Old Map Menu Option")),
+              ],
+            )
           ],
         ),
       ),
