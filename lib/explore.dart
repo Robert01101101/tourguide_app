@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter_google_places_sdk/flutter_google_places_sdk.dart';
@@ -10,12 +9,8 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tourguide_app/explore_map.dart';
-import 'package:tourguide_app/model/tour.dart';
-import 'package:tourguide_app/sign_in.dart';
-import 'package:tourguide_app/tour/tour_creation.dart';
 import 'package:tourguide_app/ui/my_layouts.dart';
 import 'package:tourguide_app/ui/horizontal_scroller.dart';
-import 'package:tourguide_app/tour/tour_tile.dart';
 import 'package:tourguide_app/ui/place_autocomplete.dart';
 import 'package:tourguide_app/ui/shimmer_loading.dart';
 import 'package:tourguide_app/utilities/custom_import.dart';
@@ -29,18 +24,6 @@ import '../../ui/google_places_img.dart'
     if (dart.library.html) '../../ui/google_places_img_web.dart' as gpi;
 import 'dart:ui' as ui;
 
-// #docregion Initialize
-const List<String> scopes = <String>[
-  'email',
-  //'https://www.googleapis.com/auth/contacts.readonly',  //CONTACT DEMO - for demo of using people API to get contacts etc
-];
-
-GoogleSignIn _googleSignIn = GoogleSignIn(
-  // Optional clientId
-  // clientId: 'your-client_id.apps.googleusercontent.com',
-  scopes: scopes,
-);
-
 //because I update the login status dynamically, the Explore screen needs to be a stateful widget (from Chat GPT)
 class Explore extends StatefulWidget {
   const Explore({super.key});
@@ -50,7 +33,6 @@ class Explore extends StatefulWidget {
 }
 
 class ExploreState extends State<Explore> {
-  GoogleSignInAccount? _currentUser;
   Future<TourguidePlaceImg?>? _fetchPhotoFuture;
   final GlobalKey _contentKey =
       GlobalKey(); // to measure height of page accurately
@@ -77,7 +59,7 @@ class ExploreState extends State<Explore> {
           logger.t(
               'ExploreState.initState() - FirabaseAuth listen - FIREBASE AUTH (EXPLORE) - User is signed in!');
           if (!tourProvider.isLoadingTours) {
-            downloadTours();
+            _downloadTours();
           }
           FlutterNativeSplash.remove();
         }
@@ -117,7 +99,7 @@ class ExploreState extends State<Explore> {
   }
 
   //TODO: Move
-  Future<void> downloadTours() async {
+  Future<void> _downloadTours() async {
     logger.t('downloadTours');
 
     final tourProvider = Provider.of<TourProvider>(context, listen: false);
@@ -176,7 +158,7 @@ class ExploreState extends State<Explore> {
     TourProvider tourProvider =
         Provider.of<TourProvider>(context, listen: false);
     if (!tourProvider.isLoadingTours) {
-      downloadTours();
+      _downloadTours();
     }
   }
 
@@ -207,7 +189,7 @@ class ExploreState extends State<Explore> {
     Future<void> refresh() async {
       if (!tourProvider.isLoadingTours) {
         await locationProvider.refreshCurrentLocation();
-        await downloadTours();
+        await _downloadTours();
       }
     }
 

@@ -25,7 +25,7 @@ class _ContributeState extends State<Contribute> {
   final ScrollController _scrollController = ScrollController();
 
   //TODO: Move (dupe to Explore)
-  Future<void> downloadTours() async {
+  Future<void> _downloadTours() async {
     logger.t('downloadTours');
 
     final tourProvider = Provider.of<TourProvider>(context, listen: false);
@@ -74,7 +74,7 @@ class _ContributeState extends State<Contribute> {
 
     Future<void> refresh() async {
       if (!tourProvider.isLoadingTours) {
-        await downloadTours();
+        await _downloadTours();
       }
     }
 

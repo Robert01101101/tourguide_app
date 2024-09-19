@@ -60,7 +60,9 @@ class _TourDetailsOptionsState extends State<TourDetailsOptions> {
     TourguideReport report = TourguideReport(
       title: _selectedReportOption,
       additionalDetails: additionalDetails,
-      reportAuthorId: tourguideUserProvider.user != null ? tourguideUserProvider.user!.firebaseAuthId : 'Anonymous',
+      reportAuthorId: tourguideUserProvider.user != null
+          ? tourguideUserProvider.user!.firebaseAuthId
+          : 'Anonymous',
     );
     //TODO: dont use context across async calls
     final TourguideUser? reportAuthor =

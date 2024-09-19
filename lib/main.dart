@@ -15,6 +15,7 @@ import 'package:provider/provider.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tourguide_app/ui/tourguide_theme.dart';
+import 'package:tourguide_app/utilities/crossplatform_utils.dart';
 import 'package:tourguide_app/utilities/providers/auth_provider.dart';
 import 'package:tourguide_app/utilities/custom_import.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -50,12 +51,11 @@ Future<void> main() async {
   await FirebaseAppCheck.instance.activate(
     // You can also use a `ReCaptchaEnterpriseProvider` provider instance as an
     // argument for `webProvider`
-    webProvider:
-        ReCaptchaV3Provider('6LdoBC4qAAAAACZhq3EQuE5vVR8e_7X_2EE67oUp'), //key is apparently safe to be checked into vc
+    webProvider: ReCaptchaV3Provider(
+        '6LdoBC4qAAAAACZhq3EQuE5vVR8e_7X_2EE67oUp'), //key is apparently safe to be checked into vc
     androidProvider:
         kDebugMode ? AndroidProvider.debug : AndroidProvider.playIntegrity,
-    appleProvider:
-        kDebugMode ? AppleProvider.debug : AppleProvider.appAttest,
+    appleProvider: kDebugMode ? AppleProvider.debug : AppleProvider.appAttest,
   );
 
   //LOAD ENVIRONMENT (SECURE VARS)

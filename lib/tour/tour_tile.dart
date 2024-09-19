@@ -101,8 +101,8 @@ class _TourTileState extends State<TourTile> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       ClipRRect(
-                        borderRadius:
-                            const BorderRadius.vertical(top: Radius.circular(12.0)),
+                        borderRadius: const BorderRadius.vertical(
+                            top: Radius.circular(12.0)),
                         child: Stack(
                           children: [
                             ShimmerLoading(
@@ -203,7 +203,8 @@ class _TourTileState extends State<TourTile> {
                         child: ShimmerLoading(
                           isLoading: !textDataReady,
                           child: textDataReady
-                              ? Text("${widget.tour.name}\n", //trick to get min 2 lines in combo with maxLines:2
+                              ? Text(
+                                  "${widget.tour.name}\n", //trick to get min 2 lines in combo with maxLines:2
                                   style: Theme.of(context).textTheme.titleSmall,
                                   overflow: TextOverflow.ellipsis,
                                   maxLines: 2,

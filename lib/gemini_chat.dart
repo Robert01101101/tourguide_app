@@ -163,7 +163,9 @@ class _GeminiChatState extends State<GeminiChat> with WidgetsBindingObserver {
       // Initialize with a welcome message if no messages are stored
       final m = types.TextMessage(
         author: _bot!,
-        text: userProvider.user?.displayName != null ? 'Hi ${userProvider.user?.displayName}, how can I help you today?' : 'Hi there, how can I help you today?',
+        text: userProvider.user?.displayName != null
+            ? 'Hi ${userProvider.user?.displayName}, how can I help you today?'
+            : 'Hi there, how can I help you today?',
         id: const Uuid().v4(),
         status: types.Status.delivered,
       );

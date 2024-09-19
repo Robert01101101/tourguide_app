@@ -62,11 +62,12 @@ class _ProfileState extends State<Profile> {
                               'Tourguide has ran into an issue while displaying your profile. Please sign out and sign in again.'),
                         )
                       : ListTile(
-                          leading: authProvider.googleSignInUser != null ? GoogleUserCircleAvatar(
-                            identity: authProvider.googleSignInUser!,
-                          ) : null,
-                          title: Text(
-                              userProvider.user!.displayName ?? ''),
+                          leading: authProvider.googleSignInUser != null
+                              ? GoogleUserCircleAvatar(
+                                  identity: authProvider.googleSignInUser!,
+                                )
+                              : null,
+                          title: Text(userProvider.user!.displayName ?? ''),
                           subtitle: Text(userProvider.user!.email),
                         ),
                 const SizedBox(
@@ -87,7 +88,8 @@ class _ProfileState extends State<Profile> {
                       context,
                       SlideTransitionRoute(
                         page: const ToTourList(),
-                        beginOffset: const Offset(1.0, 0.0), // Slide in from right
+                        beginOffset:
+                            const Offset(1.0, 0.0), // Slide in from right
                       ),
                     );
                   },
@@ -102,7 +104,8 @@ class _ProfileState extends State<Profile> {
                       context,
                       SlideTransitionRoute(
                         page: const ProfileSettings(),
-                        beginOffset: const Offset(1.0, 0.0), // Slide in from right
+                        beginOffset:
+                            const Offset(1.0, 0.0), // Slide in from right
                       ),
                     );
                   },
@@ -117,7 +120,8 @@ class _ProfileState extends State<Profile> {
                       context,
                       SlideTransitionRoute(
                         page: const AppSettings(),
-                        beginOffset: const Offset(1.0, 0.0), // Slide in from right
+                        beginOffset:
+                            const Offset(1.0, 0.0), // Slide in from right
                       ),
                     );
                   },

@@ -517,7 +517,8 @@ class TourMapController with ChangeNotifier {
             markerId: MarkerId(tourguidePlace.googleMapPlaceId),
             position: LatLng(tourguidePlace.latitude, tourguidePlace.longitude),
             icon: defaultIcon,
-            anchor: defaultIconWithAnchor.anchorOffset, //TODO: fix bug that causes circle to be anchored to btm om web - use pin?
+            anchor: defaultIconWithAnchor
+                .anchorOffset, //TODO: fix bug that causes circle to be anchored to btm om web - use pin?
             infoWindow: InfoWindow(
               title: tourguidePlace.title,
               snippet: tourguidePlace.description,

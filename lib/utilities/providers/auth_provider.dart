@@ -40,7 +40,8 @@ class AuthProvider with ChangeNotifier {
   User? get user => _user;
 
   /// Google Sign In User
-  GoogleSignInAccount? get googleSignInUser => _googleSignInUser; //TODO - remove all usage outside provider, returning web users will not have this
+  GoogleSignInAccount? get googleSignInUser =>
+      _googleSignInUser; //TODO - remove all usage outside provider, returning web users will not have this
   bool get isAuthorized => _isAuthorized;
   bool get isLoggingOut => _isLoggingOut;
   bool get silentSignInFailed => _silentSignInFailed;
@@ -80,9 +81,7 @@ class AuthProvider with ChangeNotifier {
     });
 
     //Listen to Firebase auth changes. Only used here to help log returning web users back in
-    FirebaseAuth.instance
-        .authStateChanges()
-        .listen((User? user) {
+    FirebaseAuth.instance.authStateChanges().listen((User? user) {
       if (user == null) {
         logger.i('User is currently signed out!');
       } else {
@@ -93,7 +92,8 @@ class AuthProvider with ChangeNotifier {
           _googleSignIn.signInSilently().then((GoogleSignInAccount? account) {
             _googleSignInUser = account;
             _isAuthorized = account != null;
-            logger.t('AuthProvider._init() - _googleSignIn.signInSilently() -> account is null=${account == null}, isAuthorized=$_isAuthorized');
+            logger.t(
+                'AuthProvider._init() - _googleSignIn.signInSilently() -> account is null=${account == null}, isAuthorized=$_isAuthorized');
             notifyListeners();
           });
         }
