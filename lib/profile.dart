@@ -1,14 +1,12 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:go_router/go_router.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:tourguide_app/profile/app_settings.dart';
 import 'package:tourguide_app/profile/profile_settings.dart';
 import 'package:tourguide_app/profile/to_tour_list.dart';
 import 'package:tourguide_app/ui/my_layouts.dart';
 import 'package:tourguide_app/utilities/custom_import.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:tourguide_app/utilities/providers/auth_provider.dart' as myAuth;
 import 'package:tourguide_app/utilities/providers/tour_provider.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -30,11 +28,9 @@ class _ProfileState extends State<Profile> {
     MyGlobals.webRoutingFix(TourguideNavigation.profilePath);
   }
 
-  //db = FirebaseFirestore.instance;
   @override
   Widget build(BuildContext context) {
-    logger.t(
-        'FirebaseAuth.instance.currentUser=${FirebaseAuth.instance.currentUser}');
+    //logger.t('FirebaseAuth.instance.currentUser=${FirebaseAuth.instance.currentUser}');
     myAuth.AuthProvider authProvider = Provider.of(context);
     TourProvider tourProvider = Provider.of(context);
 
@@ -50,20 +46,27 @@ class _ProfileState extends State<Profile> {
                 const SizedBox(
                   height: 0,
                 ),
-                authProvider.isAnonymous
-                    ? const Padding(
-                        padding: EdgeInsets.all(16.0),
-                        child: Text(
-                            'You are signed in as a guest. \n\nSign in with Google to save tours and access more features.'),
-                      )
-                    : ListTile(
-                        leading: GoogleUserCircleAvatar(
-                          identity: authProvider.googleSignInUser!,
+                if (authProvider.isAnonymous)
+                  const Padding(
+                    padding: EdgeInsets.all(16.0),
+                    child: Text(
+                        'You are signed in as a guest. \n\nSign in with Google to save tours and access more features.'),
+                  ),
+                if (!authProvider.isAnonymous)
+                  authProvider.googleSignInUser == null
+                      ? const Padding(
+                          padding: EdgeInsets.all(16.0),
+                          child: Text(
+                              'Tourguide has ran into an issue while displaying your profile. Please sign out and sign in again.'),
+                        )
+                      : ListTile(
+                          leading: GoogleUserCircleAvatar(
+                            identity: authProvider.googleSignInUser!,
+                          ),
+                          title: Text(
+                              authProvider.googleSignInUser!.displayName ?? ''),
+                          subtitle: Text(authProvider.googleSignInUser!.email),
                         ),
-                        title: Text(
-                            authProvider.googleSignInUser!.displayName ?? ''),
-                        subtitle: Text(authProvider.googleSignInUser!.email),
-                      ),
                 const SizedBox(
                   height: 8,
                 ),
@@ -81,8 +84,8 @@ class _ProfileState extends State<Profile> {
                     Navigator.push(
                       context,
                       SlideTransitionRoute(
-                        page: ToTourList(),
-                        beginOffset: Offset(1.0, 0.0), // Slide in from right
+                        page: const ToTourList(),
+                        beginOffset: const Offset(1.0, 0.0), // Slide in from right
                       ),
                     );
                   },
@@ -96,8 +99,8 @@ class _ProfileState extends State<Profile> {
                     Navigator.push(
                       context,
                       SlideTransitionRoute(
-                        page: ProfileSettings(),
-                        beginOffset: Offset(1.0, 0.0), // Slide in from right
+                        page: const ProfileSettings(),
+                        beginOffset: const Offset(1.0, 0.0), // Slide in from right
                       ),
                     );
                   },
@@ -111,8 +114,8 @@ class _ProfileState extends State<Profile> {
                     Navigator.push(
                       context,
                       SlideTransitionRoute(
-                        page: AppSettings(),
-                        beginOffset: Offset(1.0, 0.0), // Slide in from right
+                        page: const AppSettings(),
+                        beginOffset: const Offset(1.0, 0.0), // Slide in from right
                       ),
                     );
                   },

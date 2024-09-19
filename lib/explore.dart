@@ -85,8 +85,6 @@ class ExploreState extends State<Explore> {
 
       super.initState();
 
-      _fetchPhotoFuture = context.read<LocationProvider>().fetchPlacePhoto();
-
       //for parallax
       _scrollController.addListener(() {
         setState(() {
@@ -97,6 +95,7 @@ class ExploreState extends State<Explore> {
       //to accurately measure height of page
       WidgetsBinding.instance.addPostFrameCallback((_) {
         _measureContentHeight();
+        _fetchPhotoFuture = context.read<LocationProvider>().fetchPlacePhoto();
       });
     }
   }
