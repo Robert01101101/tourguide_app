@@ -92,7 +92,7 @@ class _ProfileSettingsState extends State<ProfileSettings> {
     }
     await userProvider.updateUser(userProvider.user!.copyWith(
         username: _newUsername,
-        displayName: authProvider.googleSignInUser!.displayName!));
+        displayName: userProvider.user!.displayName!));
     if (mounted) {
       ScaffoldMessenger.of(context).hideCurrentSnackBar();
       ScaffoldMessenger.of(context).showSnackBar(
@@ -150,17 +150,18 @@ class _ProfileSettingsState extends State<ProfileSettings> {
           children: [
             StandardLayout(
               children: [
-                SizedBox(
+                const SizedBox(
                   height: 0,
                 ),
                 ListTile(
-                  leading: GoogleUserCircleAvatar(
+                  leading: authProvider.googleSignInUser != null ? GoogleUserCircleAvatar(
                     identity: authProvider.googleSignInUser!,
-                  ),
-                  title: Text(authProvider.googleSignInUser!.displayName ?? ''),
-                  subtitle: Text(authProvider.googleSignInUser!.email),
+                  ) : null,
+                  title: Text(
+                      userProvider.user!.displayName ?? ''),
+                  subtitle: Text(userProvider.user!.email),
                 ),
-                SizedBox(
+                const SizedBox(
                   height: 8,
                 ),
                 Row(

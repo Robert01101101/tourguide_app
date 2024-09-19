@@ -9,6 +9,7 @@ import 'package:tourguide_app/ui/my_layouts.dart';
 import 'package:tourguide_app/utilities/custom_import.dart';
 import 'package:tourguide_app/utilities/providers/auth_provider.dart' as myAuth;
 import 'package:tourguide_app/utilities/providers/tour_provider.dart';
+import 'package:tourguide_app/utilities/providers/tourguide_user_provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class Profile extends StatefulWidget {
@@ -32,6 +33,7 @@ class _ProfileState extends State<Profile> {
   Widget build(BuildContext context) {
     //logger.t('FirebaseAuth.instance.currentUser=${FirebaseAuth.instance.currentUser}');
     myAuth.AuthProvider authProvider = Provider.of(context);
+    TourguideUserProvider userProvider = Provider.of(context);
     TourProvider tourProvider = Provider.of(context);
 
     return Scaffold(
@@ -53,19 +55,19 @@ class _ProfileState extends State<Profile> {
                         'You are signed in as a guest. \n\nSign in with Google to save tours and access more features.'),
                   ),
                 if (!authProvider.isAnonymous)
-                  authProvider.googleSignInUser == null
+                  userProvider.user == null
                       ? const Padding(
                           padding: EdgeInsets.all(16.0),
                           child: Text(
                               'Tourguide has ran into an issue while displaying your profile. Please sign out and sign in again.'),
                         )
                       : ListTile(
-                          leading: GoogleUserCircleAvatar(
+                          leading: authProvider.googleSignInUser != null ? GoogleUserCircleAvatar(
                             identity: authProvider.googleSignInUser!,
-                          ),
+                          ) : null,
                           title: Text(
-                              authProvider.googleSignInUser!.displayName ?? ''),
-                          subtitle: Text(authProvider.googleSignInUser!.email),
+                              userProvider.user!.displayName ?? ''),
+                          subtitle: Text(userProvider.user!.email),
                         ),
                 const SizedBox(
                   height: 8,

@@ -40,7 +40,7 @@ class AuthProvider with ChangeNotifier {
   User? get user => _user;
 
   /// Google Sign In User
-  GoogleSignInAccount? get googleSignInUser => _googleSignInUser;
+  GoogleSignInAccount? get googleSignInUser => _googleSignInUser; //TODO - remove all usage outside provider, returning web users will not have this
   bool get isAuthorized => _isAuthorized;
   bool get isLoggingOut => _isLoggingOut;
   bool get silentSignInFailed => _silentSignInFailed;
@@ -72,10 +72,31 @@ class AuthProvider with ChangeNotifier {
           "AuthProvider._googleSignIn.onCurrentUserChanged -> isAuthorized=${_isAuthorized}, _googleSignInUser=$_googleSignInUser, _user=$_user");
       notifyListeners();
 
-      //sign in with Firebase if authorized (otherwise user has to press button to authorize first, in which case firebase sign in is done in handleAuthorizeScopes()
+      //sign in with Firebase if authorized (on web the user has to press the button)
       if (_isAuthorized && !kIsWeb) {
         _isLoggingIntoFirebaseMobile = true;
         await signInWithFirebase(account!);
+      }
+    });
+
+    //Listen to Firebase auth changes. Only used here to help log returning web users back in
+    FirebaseAuth.instance
+        .authStateChanges()
+        .listen((User? user) {
+      if (user == null) {
+        logger.i('User is currently signed out!');
+      } else {
+        logger.i('User is signed in!');
+        if (kIsWeb && _googleSignInUser == null) {
+          _user = user;
+          logger.t('AuthProvider._init() - _googleSignIn.signInSilently()');
+          _googleSignIn.signInSilently().then((GoogleSignInAccount? account) {
+            _googleSignInUser = account;
+            _isAuthorized = account != null;
+            logger.t('AuthProvider._init() - _googleSignIn.signInSilently() -> account is null=${account == null}, isAuthorized=$_isAuthorized');
+            notifyListeners();
+          });
+        }
       }
     });
 
