@@ -106,31 +106,17 @@ class _SignInState extends State<SignIn> {
     my_auth.AuthProvider authProvider = Provider.of(context);
     final GoogleSignInAccount? googleSignInAccount = authProvider.googleSignInUser;
     final User? user = authProvider.user;
-    if (false && googleSignInAccount != null && !authProvider.isAuthorized && user == null) {
-      // The user is Authenticated, but not authorized or signed into firebase
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: <Widget>[
-            if (!authProvider.isAuthorized) ...<Widget>[
-              // The user has NOT Authorized all required scopes.
-              // (Mobile users may never see this button!)
-              const Text('Additional permissions needed to authorize your account.'),
-              ElevatedButton(
-                onPressed: authProvider.handleAuthorizeScopes,
-                child: const Text('REQUEST PERMISSIONS'),
-              ),
-            ],
-          ],
-        ),
-      );
-    } else if (googleSignInAccount != null && user == null) {
+
+    if (googleSignInAccount != null && user == null) {
       // The user is Authenticated and authorized, but not signed into firebase
       return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
-            const Text('Sign into the Google Firebase Cloud service for access to Tourguide.'),
+            const SizedBox(
+                width: 240,
+                child: Text('Sign into the Google Firebase Cloud service for access to Tourguide.', textAlign: TextAlign.center)
+            ),
             ElevatedButton(
               onPressed: () => authProvider.signInWithFirebase(authProvider.googleSignInUser!),
               child: const Text('SIGN INTO FIREBASE SERVICE'),
@@ -151,7 +137,7 @@ class _SignInState extends State<SignIn> {
                 children: [
                   Text('You are signed out.',
                       style: Theme.of(context).textTheme.bodyLarge),
-                  SizedBox(height: 20),
+                  const SizedBox(height: 20),
                   Text('To continue, please sign in or create an account with Google.', textAlign: TextAlign.center,
                       style: Theme.of(context).textTheme.bodyMedium!.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant)),
                 ],
@@ -164,7 +150,7 @@ class _SignInState extends State<SignIn> {
                 buildSignInButton(
                   onPressed: authProvider.handleSignIn,
                 ),
-                SizedBox(height: StandardLayout.defaultGap),
+                const SizedBox(height: StandardLayout.defaultGap),
                 TextButton(
                     onPressed: () => authProvider.signInWithFirebaseAnonymously(),
                     child: Text('SIGN IN AS GUEST',
@@ -194,7 +180,8 @@ class _SignInState extends State<SignIn> {
             Expanded(
               child: ConstrainedBox(
                 constraints: const BoxConstraints.expand(),
-                child: ((authProvider.googleSignInUser != null && authProvider.isAuthorized && authProvider.user != null) || authProvider.isLoggingOut)
+                child: ((authProvider.googleSignInUser != null && authProvider.isAuthorized && authProvider.user != null)
+                    || authProvider.isLoggingOut || authProvider.isLoggingIntoFirebaseMobile)
                     ? _buildProcessingBody()
                     : _buildButtonBody(),
               ),

@@ -31,10 +31,11 @@ class AuthProvider with ChangeNotifier {
   bool _isAuthorized = false;
   bool _isLoggingOut = false;
   bool _silentSignInFailed = false;
+  bool _isLoggingIntoFirebaseMobile = false;
   bool _isAnonymous = false;
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
-  ////// PUBLIC /////
+  // PUBLIC //
   /// Firebase User
   User? get user => _user;
   /// Google Sign In User
@@ -43,6 +44,7 @@ class AuthProvider with ChangeNotifier {
   bool get isLoggingOut => _isLoggingOut;
   bool get silentSignInFailed => _silentSignInFailed;
   bool get isAnonymous => _isAnonymous;
+  bool get isLoggingIntoFirebaseMobile => _isLoggingIntoFirebaseMobile;
 
 
   AuthProvider() {
@@ -69,6 +71,7 @@ class AuthProvider with ChangeNotifier {
 
       //sign in with Firebase if authorized (otherwise user has to press button to authorize first, in which case firebase sign in is done in handleAuthorizeScopes()
       if (_isAuthorized && !kIsWeb) {
+        _isLoggingIntoFirebaseMobile = true;
         await signInWithFirebase(account!);
       }
     });
@@ -161,9 +164,12 @@ class AuthProvider with ChangeNotifier {
       if (_user != null) {
         _isAnonymous = false;
       }
+      _isLoggingIntoFirebaseMobile = false;
       notifyListeners();
       logger.t('AuthProvider.signInWithFirebase() - Firebase User Info: ${_user?.displayName}, ${_user?.email}');
     } catch (error) {
+      _isLoggingIntoFirebaseMobile = false;
+      notifyListeners();
       logger.e('AuthProvider.signInWithFirebase() - Error signing in with Firebase: $error');
     }
   }
