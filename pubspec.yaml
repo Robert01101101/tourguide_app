@@ -30,60 +30,70 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  geolocator: ^12.0.0
-  google_maps_flutter: ^2.7.0
-  go_router : ^14.2.0
-  cached_network_image: ^3.3.1
-  scroll_to_hide: ^2.1.0
-  flutter_polyline_points: ^2.0.0
-  flutter_google_places_sdk: ^0.3.9
-  cupertino_icons: ^1.0.2
+  # Firebase
   firebase_core: ^3.1.0
   firebase_auth: ^5.2.0
   firebase_vertexai: ^0.2.2+1
-  google_sign_in: ^6.2.1
-  cloud_firestore: ^5.0.1
   firebase_analytics: ^11.0.1
-  provider: ^6.1.1
-  google_generative_ai: ^0.4.3
-  flutter_chat_ui: ^1.6.14
-  shared_preferences: ^2.2.3
-  geocoding: ^3.0.0
-  flutter_native_splash: ^2.4.0
-  flutter_secure_storage: ^9.2.2
-  google_fonts: ^6.2.1
-  sqflite: ^2.3.3+1
-  bubble: ^1.2.1
-  scroll_to_index: ^3.0.1
-  google_places_autocomplete_text_field: ^0.1.3
-  url_launcher: ^6.3.0
-  image_picker: ^1.1.2
-  permission_handler: ^11.3.1
-  path_provider: ^2.1.3
   firebase_storage: ^12.1.0
-  logger: ^2.3.0
   firebase_crashlytics: ^4.0.2
   firebase_remote_config: ^5.0.2
-  introduction_screen: ^3.1.14
+  firebase_app_check: ^0.3.0+4
+  cloud_firestore: ^5.0.1
+  # Google
+  google_sign_in: ^6.2.1
+  google_generative_ai: ^0.4.3
+  google_fonts: ^6.2.1
+  google_maps_flutter: ^2.7.0
+  google_places_autocomplete_text_field: ^0.1.3
+  flutter_google_places_sdk: ^0.3.9
+  # Maps Utils
+  geolocator: ^12.0.0
+  geocoding: ^3.0.0
+  google_maps_custom_marker: ^1.0.3
+  flutter_polyline_points: ^2.0.0
+  # Logic
+  go_router : ^14.2.0
+  provider: ^6.1.1
+  # Utility
   profanity_filter: ^2.0.0
+  logger: ^2.3.0
+  url_launcher: ^6.3.0
+  # Local Storage
+  hive: ^2.2.3
+  hive_flutter: ^1.1.0
+  path_provider: ^2.1.3
+  sqflite: ^2.3.3+1
+  shared_preferences: ^2.2.3
+  flutter_secure_storage: ^9.2.2
+  cached_network_image: ^3.3.1
+  # UI
+  sliver_tools: ^0.2.12
+  visibility_detector: ^0.4.0+2
+  scroll_to_hide: ^2.1.0
+  scroll_to_index: ^3.0.1 # Not used anymore?
+  flutter_keyboard_visibility: ^6.0.0
+  flutter_native_splash: ^2.4.0
+  introduction_screen: ^3.1.14
+  flutter_chat_ui: ^1.6.14
+  bubble: ^1.2.1
+  font_awesome_flutter: ^10.7.0
+  cupertino_icons: ^1.0.2
+  # Networking
   http: ^1.2.1
-  intl: ^0.19.0
-  characters: ^1.3.0
+  universal_html: ^2.2.4
+  # Device
+  package_info_plus: ^8.0.2
+  android_intent_plus: ^5.1.0
+  permission_handler: ^11.3.1
   flutter_tts:
     git:
       url: https://github.com/Robert01101101/flutter_tts.git
       ref: web_progress_handler
-  flutter_keyboard_visibility: ^6.0.0
-  hive: ^2.2.3
-  hive_flutter: ^1.1.0
-  firebase_app_check: ^0.3.0+4
-  sliver_tools: ^0.2.12
-  visibility_detector: ^0.4.0+2
-  universal_html: ^2.2.4
-  package_info_plus: ^8.0.2
-  android_intent_plus: ^5.1.0
-  font_awesome_flutter: ^10.7.0
-  google_maps_custom_marker: ^1.0.3
+  intl: ^0.19.0
+  characters: ^1.3.0
+  image_picker: ^1.1.2
+
 
 
 dev_dependencies:
