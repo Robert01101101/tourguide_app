@@ -21,7 +21,7 @@ import 'package:tourguide_app/utilities/providers/auth_provider.dart'
 class FullscreenTourPage extends StatefulWidget {
   final Tour tour;
 
-  const FullscreenTourPage({Key? key, required this.tour}) : super(key: key);
+  const FullscreenTourPage({super.key, required this.tour});
 
   @override
   State<FullscreenTourPage> createState() => _FullscreenTourPageState();
@@ -29,19 +29,8 @@ class FullscreenTourPage extends StatefulWidget {
 
 class _FullscreenTourPageState extends State<FullscreenTourPage> {
   final TourMapController _tourMapController = TourMapController();
-  final Completer<GoogleMapController> _mapControllerCompleter =
-      Completer<GoogleMapController>();
-  bool _isFullScreen = false;
-  bool _isLoading = true, _isLoadingFullscreen = true;
-  CameraPosition _currentCameraPosition = CameraPosition(
-    target: LatLng(0, 0),
-    zoom: 14.0,
-  );
-  Set<Marker> _markers = Set<Marker>();
-  Set<Polyline> _polylines = Set<Polyline>();
   final TtsService _ttsService = TtsService();
   final ScrollController _scrollController = ScrollController();
-  List<GlobalKey> _targetKeys = [];
   int thisUsersRating = 0;
 
   @override
@@ -74,7 +63,6 @@ class _FullscreenTourPageState extends State<FullscreenTourPage> {
   }
 
   void _showOptionsDialog(BuildContext context) {
-    final tourProvider = Provider.of<TourProvider>(context, listen: false);
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -131,20 +119,6 @@ class _FullscreenTourPageState extends State<FullscreenTourPage> {
 
   int? currentlyPlayingIndex; // Track the index of the currently playing place
 
-  void _scrollToTarget(int placeIndex) {
-    final context = _targetKeys[placeIndex].currentContext;
-    if (context != null) {
-      setState(() {
-        _isFullScreen = false;
-      });
-      Scrollable.ensureVisible(
-        context,
-        duration: Duration(milliseconds: 500),
-        curve: Curves.easeInOut,
-      );
-    }
-  }
-
   //TODO unify behavior and UI with tour tile
   void startTour() {
     TourProvider tourProvider =
@@ -159,19 +133,8 @@ class _FullscreenTourPageState extends State<FullscreenTourPage> {
   @override
   Widget build(BuildContext context) {
     final tourProvider = Provider.of<TourProvider>(context);
-    final tourguideUserProvider = Provider.of<TourguideUserProvider>(context);
-    bool isOfflineCreatedTour = (widget.tour.isOfflineCreatedTour ?? false);
 
-    bool showMap = widget.tour.latitude != null &&
-        widget.tour.latitude != 0 &&
-        widget.tour.longitude != null &&
-        widget.tour.longitude != 0;
-    if (showMap && _currentCameraPosition.target == LatLng(0, 0)) {
-      _currentCameraPosition = CameraPosition(
-        target: LatLng(widget.tour.latitude, widget.tour.longitude),
-        zoom: 14.0,
-      );
-    }
+    bool isOfflineCreatedTour = (widget.tour.isOfflineCreatedTour ?? false);
 
     return TourMapFullscreen(
       tour: widget.tour,
@@ -279,9 +242,6 @@ class _FullscreenTourPageState extends State<FullscreenTourPage> {
                           int index = entry.key;
                           var place = entry.value;
                           return Padding(
-                            key: _targetKeys.isNotEmpty
-                                ? _targetKeys[index]
-                                : null,
                             padding: index != 0
                                 ? const EdgeInsets.symmetric(vertical: 12.0)
                                 : const EdgeInsets.only(bottom: 12.0),
@@ -326,7 +286,7 @@ class _FullscreenTourPageState extends State<FullscreenTourPage> {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Container(
+                      SizedBox(
                         width: MediaQuery.of(context).size.width * 0.39,
                         child: ElevatedButton(
                           onPressed: isOfflineCreatedTour ? null : startTour,
@@ -337,7 +297,7 @@ class _FullscreenTourPageState extends State<FullscreenTourPage> {
                                 .colorScheme
                                 .surfaceContainerLow,
                           ),
-                          child: Text("Start"),
+                          child: const Text("Start"),
                         ),
                       ),
                       TourRatingBookmarkButtons(tour: widget.tour),

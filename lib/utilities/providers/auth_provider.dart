@@ -5,6 +5,7 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:flutter/foundation.dart';
 import 'package:tourguide_app/main.dart';
 import 'package:tourguide_app/utilities/tourguide_navigation.dart';
+import 'package:universal_html/js_util.dart';
 
 const List<String> scopes = <String>[
   'email',
@@ -31,6 +32,7 @@ class AuthProvider with ChangeNotifier {
   bool _silentSignInFailed = false;
   bool _isLoggingIntoFirebaseMobile = false;
   bool _isAnonymous = false;
+  bool _isLoggingInAnonymously = false;
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
   // PUBLIC //
@@ -44,6 +46,7 @@ class AuthProvider with ChangeNotifier {
   bool get silentSignInFailed => _silentSignInFailed;
   bool get isAnonymous => _isAnonymous;
   bool get isLoggingIntoFirebaseMobile => _isLoggingIntoFirebaseMobile;
+  bool get isLoggingInAnonymously => _isLoggingInAnonymously;
 
   AuthProvider() {
     _init();
@@ -179,15 +182,20 @@ class AuthProvider with ChangeNotifier {
   Future<void> signInWithFirebaseAnonymously() async {
     logger.t('AuthProvider.signInWithFirebaseAnonymously()');
     try {
+      _isLoggingInAnonymously = true;
+      notifyListeners();
       UserCredential authResult = await _auth.signInAnonymously();
 
       // Access the logged-in user using FirebaseAuth.instance.currentUser
       _user = authResult.user;
       _isAnonymous = true;
+      _isLoggingInAnonymously = false;
       notifyListeners();
       logger.t(
           'AuthProvider.signInWithFirebase() - Firebase User Info: ${_user?.displayName}, ${_user?.email}');
     } catch (error) {
+      _isLoggingInAnonymously = false;
+      notifyListeners();
       logger.e(
           'AuthProvider.signInWithFirebase() - Error signing in with Firebase: $error');
     }
@@ -209,18 +217,26 @@ class AuthProvider with ChangeNotifier {
       _isAuthorized = false;
       _silentSignInFailed = false;
       _isLoggingOut = false;
+      notifyListeners();
       //SnackBarService.showSnackBar(content: 'You\'re signed out!');
+      logger.t('AuthProvider.signOut() - User signed out.');
     } catch (e) {
       logger.e(e);
       _isLoggingOut = false;
     }
   }
 
+  //TODO - merge with signOut()?
   void resetAuthProvider() {
     _user = null;
     _googleSignInUser = null;
     _isAuthorized = false;
     _silentSignInFailed = false;
-    _googleSignIn.disconnect();
+    _isLoggingOut = false;
+    _isLoggingIntoFirebaseMobile = false;
+    _isAnonymous = false;
+    _isLoggingInAnonymously = false;
+    if (_googleSignInUser != null) _googleSignIn.disconnect();
+    notifyListeners();
   }
 }

@@ -60,8 +60,9 @@ class _TourDetailsOptionsState extends State<TourDetailsOptions> {
     TourguideReport report = TourguideReport(
       title: _selectedReportOption,
       additionalDetails: additionalDetails,
-      reportAuthorId: tourguideUserProvider.user!.firebaseAuthId,
+      reportAuthorId: tourguideUserProvider.user != null ? tourguideUserProvider.user!.firebaseAuthId : 'Anonymous',
     );
+    //TODO: dont use context across async calls
     final TourguideUser? reportAuthor =
         await tourguideUserProvider.getUserInfo(widget.tour.authorId);
     final tourProvider = Provider.of<TourProvider>(context, listen: false);
@@ -74,12 +75,12 @@ class _TourDetailsOptionsState extends State<TourDetailsOptions> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Thank You'),
-          content: Text(
+          title: const Text('Thank You'),
+          content: const Text(
               'Thank you for your report. We will review the content and take appropriate action if necessary.'),
           actions: [
             TextButton(
-              child: Text('OK'),
+              child: const Text('OK'),
               onPressed: () {
                 Navigator.of(context).pop();
               },

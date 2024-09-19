@@ -395,6 +395,8 @@ class TourMapController with ChangeNotifier {
       // Your logic to move the camera and highlight marker
       _moveCameraToMarkerAndHighlightMarker(step);
     };
+
+    _showOptionsDialog = showOptionsDialog;
   }
 
   @override
@@ -423,7 +425,7 @@ class TourMapController with ChangeNotifier {
   }
 
   void triggerShowOptionsDialog(BuildContext context) {
-    //logger.t('triggerShowOptionsDialog');
+    //logger.t('triggerShowOptionsDialog - hashCode=$hashCode, context=$context, _showOptionsDialog=$_showOptionsDialog');
     if (_showOptionsDialog != null) {
       _showOptionsDialog!(context);
     }
@@ -515,7 +517,7 @@ class TourMapController with ChangeNotifier {
             markerId: MarkerId(tourguidePlace.googleMapPlaceId),
             position: LatLng(tourguidePlace.latitude, tourguidePlace.longitude),
             icon: defaultIcon,
-            anchor: defaultIconWithAnchor.anchorOffset,
+            anchor: defaultIconWithAnchor.anchorOffset, //TODO: fix bug that causes circle to be anchored to btm om web - use pin?
             infoWindow: InfoWindow(
               title: tourguidePlace.title,
               snippet: tourguidePlace.description,

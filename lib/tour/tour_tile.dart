@@ -169,7 +169,7 @@ class _TourTileState extends State<TourTile> {
                               Align(
                                   alignment: Alignment.topRight,
                                   child: Padding(
-                                    padding: EdgeInsets.all(8.0),
+                                    padding: const EdgeInsets.all(8.0),
                                     child: Row(
                                       mainAxisAlignment: MainAxisAlignment.end,
                                       children: [
@@ -203,9 +203,7 @@ class _TourTileState extends State<TourTile> {
                         child: ShimmerLoading(
                           isLoading: !textDataReady,
                           child: textDataReady
-                              ? Text(
-                                  widget.tour.name +
-                                      "\n", //trick to get min 2 lines in combo with maxLines:2
+                              ? Text("${widget.tour.name}\n", //trick to get min 2 lines in combo with maxLines:2
                                   style: Theme.of(context).textTheme.titleSmall,
                                   overflow: TextOverflow.ellipsis,
                                   maxLines: 2,

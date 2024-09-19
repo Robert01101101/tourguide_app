@@ -164,7 +164,7 @@ class _SignInState extends State<SignIn> {
                 buildSignInButton(
                   onPressed: authProvider.handleSignIn,
                 ),
-                const SizedBox(height: StandardLayout.defaultGap),
+                /*const SizedBox(height: StandardLayout.defaultGap),  //TODO: show guest sign in once done testing
                 TextButton(
                     onPressed: () =>
                         authProvider.signInWithFirebaseAnonymously(),
@@ -174,7 +174,7 @@ class _SignInState extends State<SignIn> {
                             .labelMedium!
                             .copyWith(
                                 color: Theme.of(context).colorScheme.primary,
-                                fontWeight: FontWeight.bold))),
+                                fontWeight: FontWeight.bold))),*/
               ],
             ),
           ],
@@ -186,6 +186,11 @@ class _SignInState extends State<SignIn> {
   @override
   Widget build(BuildContext context) {
     my_auth.AuthProvider authProvider = Provider.of(context);
+
+    // logger.i("signIn.build() -> user=${authProvider.user != null}, googleSignInUser=${authProvider.googleSignInUser != null}, "
+    //     "isAuthorized=${authProvider.isAuthorized}, silentSignInFailed=${authProvider.silentSignInFailed}, \n"
+    //     "isAnonymous=${authProvider.isAnonymous}, isLoggingOut=${authProvider.isLoggingOut}, "
+    //     "isLoggingIntoFirebaseMobile=${authProvider.isLoggingIntoFirebaseMobile}, isLoggingInAnonymously=${authProvider.isLoggingInAnonymously}");
 
     return Scaffold(
       appBar: AppBar(
@@ -202,7 +207,8 @@ class _SignInState extends State<SignIn> {
                             authProvider.isAuthorized &&
                             authProvider.user != null) ||
                         authProvider.isLoggingOut ||
-                        authProvider.isLoggingIntoFirebaseMobile)
+                        authProvider.isLoggingIntoFirebaseMobile ||
+                        authProvider.isLoggingInAnonymously)
                     ? _buildProcessingBody()
                     : _buildButtonBody(),
               ),
