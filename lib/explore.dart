@@ -217,7 +217,7 @@ class ExploreState extends State<Explore> {
         child: SingleChildScrollView(
           controller: _scrollController,
           child: Shimmer(
-            linearGradient: MyGlobals.shimmerGradient,
+            linearGradient: MyGlobals.createShimmerGradient(context),
             child: Stack(
               key: _contentKey,
               children: [

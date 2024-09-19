@@ -996,7 +996,7 @@ class _CreateEditTourState extends State<CreateEditTour> {
                     SizedBox(
                       height: TourTile.height,
                       child: Shimmer(
-                          linearGradient: MyGlobals.shimmerGradient,
+                          linearGradient: MyGlobals.createShimmerGradient(context),
                           child: TourTile(tour: _tour)),
                     ),
                     SizedBox(

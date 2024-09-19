@@ -11,6 +11,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:tourguide_app/utilities/custom_import.dart';
 import 'package:tourguide_app/utilities/providers/location_provider.dart';
+import 'package:tourguide_app/utilities/providers/tourguide_user_provider.dart';
 import 'package:uuid/uuid.dart';
 import 'package:tourguide_app/main.dart';
 
@@ -58,16 +59,6 @@ class _GeminiChatState extends State<GeminiChat> with WidgetsBindingObserver {
 
     //Register observer to detect app closed
     WidgetsBinding.instance.addObserver(this);
-
-    // Access your API key as an environment variable (see "Set up your API key" above)
-    // old approach with google_generative_ai
-    /*const apiKeyStringFromEnv = String.fromEnvironment('API_KEY');
-    final apiKeyFromPlatform = Platform.environment['API_KEY'];
-    apiKey = apiKeyStringFromEnv ?? apiKeyFromPlatform;
-    if (apiKey == null) {
-      logger.t('No \$API_KEY environment variable: apiKey=$apiKeyFromPlatform, apiKeyStringFromEnv=$apiKeyStringFromEnv');
-      exit(1);
-    }*/
 
     generativeModel =
         FirebaseVertexAI.instance.generativeModel(model: geminiVersion);
@@ -156,6 +147,8 @@ class _GeminiChatState extends State<GeminiChat> with WidgetsBindingObserver {
 
   /// Loads saved messages so that when the user exits and returns to the screen, they don't disappear
   Future<void> _loadMessages() async {
+    TourguideUserProvider userProvider =
+        Provider.of<TourguideUserProvider>(context, listen: false);
     logger.t("_loadMessages()");
     final prefs = await SharedPreferences.getInstance();
     final List<String>? messages = prefs.getStringList('chat_messages');
@@ -170,8 +163,7 @@ class _GeminiChatState extends State<GeminiChat> with WidgetsBindingObserver {
       // Initialize with a welcome message if no messages are stored
       final m = types.TextMessage(
         author: _bot!,
-        text:
-            'Hi ${FirebaseAuth.instance.currentUser!.displayName!.split(' ').first}, how can I help you today?',
+        text: userProvider.user?.displayName != null ? 'Hi ${userProvider.user?.displayName}, how can I help you today?' : 'Hi there, how can I help you today?',
         id: const Uuid().v4(),
         status: types.Status.delivered,
       );
@@ -254,8 +246,8 @@ class _GeminiChatState extends State<GeminiChat> with WidgetsBindingObserver {
                           "Powered by Google's $geminiVersion.\n\nAI Tourguide might provide inaccurate information, use with care.")),
                 ),
                 ListTile(
-                  leading: Icon(Icons.delete),
-                  title: Text('Clear Chat History'),
+                  leading: const Icon(Icons.delete),
+                  title: const Text('Clear Chat History'),
                   onTap: () async {
                     await _clearMessages();
                     Navigator.of(context).pop();

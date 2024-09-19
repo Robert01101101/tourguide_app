@@ -1,8 +1,6 @@
-import 'package:cached_network_image/cached_network_image.dart';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:tourguide_app/model/tour.dart';
-import 'package:tourguide_app/tour/tour_creation.dart';
 import 'package:tourguide_app/ui/horizontal_scroller.dart';
 import 'package:tourguide_app/ui/my_layouts.dart';
 import 'package:tourguide_app/ui/shimmer_loading.dart';
@@ -26,7 +24,7 @@ class _ToTourListState extends State<ToTourList> {
         title: const Text('Saved Tours'),
       ),
       body: Shimmer(
-        linearGradient: MyGlobals.shimmerGradient,
+        linearGradient: MyGlobals.createShimmerGradient(context),
         child: StandardLayout(
           children: [
             SizedBox(height: 0),

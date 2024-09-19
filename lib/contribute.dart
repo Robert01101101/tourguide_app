@@ -101,7 +101,7 @@ class _ContributeState extends State<Contribute> {
                 controller: _scrollController,
                 physics: const AlwaysScrollableScrollPhysics(),
                 child: Shimmer(
-                  linearGradient: MyGlobals.shimmerGradient,
+                  linearGradient: MyGlobals.createShimmerGradient(context),
                   child: StandardLayout(
                     children: [
                       Row(

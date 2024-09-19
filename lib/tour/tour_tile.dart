@@ -1,24 +1,16 @@
 import 'dart:math';
-
 import 'package:firebase_analytics/firebase_analytics.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:tourguide_app/model/tour.dart';
-import 'package:tourguide_app/model/tourguide_user.dart';
 import 'package:tourguide_app/tour/tour_creation.dart';
 import 'package:tourguide_app/tour/tour_details.dart';
-import 'package:tourguide_app/tour/tour_running.dart';
 import 'package:tourguide_app/ui/my_layouts.dart';
 import 'package:tourguide_app/ui/shimmer_loading.dart';
 import 'package:tourguide_app/tour/tour_tag.dart';
 import 'package:tourguide_app/utilities/providers/tour_provider.dart';
-import 'package:tourguide_app/utilities/providers/tourguide_user_provider.dart';
-import 'package:tourguide_app/utilities/services/tour_service.dart';
 import 'package:tourguide_app/utilities/tourguide_navigation.dart';
-
-import '../main.dart';
 import 'tour_rating_bookmark_buttons.dart';
 
 class TourTile extends StatefulWidget {
@@ -81,7 +73,7 @@ class _TourTileState extends State<TourTile> {
 
     return MouseRegion(
       cursor: SystemMouseCursors.click,
-      child: Container(
+      child: SizedBox(
         width: TourTile.width,
         child: Card(
           clipBehavior: Clip.hardEdge,
@@ -94,9 +86,9 @@ class _TourTileState extends State<TourTile> {
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Icon(Icons.add_circle_outline_sharp,
+                          const Icon(Icons.add_circle_outline_sharp,
                               color: Colors.grey),
-                          SizedBox(height: 16),
+                          const SizedBox(height: 16),
                           Text(
                             "Add Tour",
                             style: Theme.of(context).textTheme.titleMedium,
@@ -110,7 +102,7 @@ class _TourTileState extends State<TourTile> {
                     children: [
                       ClipRRect(
                         borderRadius:
-                            BorderRadius.vertical(top: Radius.circular(12.0)),
+                            const BorderRadius.vertical(top: Radius.circular(12.0)),
                         child: Stack(
                           children: [
                             ShimmerLoading(

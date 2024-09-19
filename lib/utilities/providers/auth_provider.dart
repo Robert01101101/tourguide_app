@@ -5,7 +5,6 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:flutter/foundation.dart';
 import 'package:tourguide_app/main.dart';
 import 'package:tourguide_app/utilities/tourguide_navigation.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 const List<String> scopes = <String>[
   'email',

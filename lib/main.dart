@@ -10,7 +10,6 @@ import 'package:hive/hive.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:logger/logger.dart' as logger_mobile;
-import 'package:logger/logger.dart';
 import 'package:logger/web.dart' as logger_web;
 import 'package:provider/provider.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
@@ -25,7 +24,6 @@ import 'package:tourguide_app/utilities/providers/tour_provider.dart';
 import 'package:tourguide_app/utilities/providers/tourguide_user_provider.dart';
 import 'firebase_options.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:tourguide_app/utilities/providers/auth_provider.dart' as myAuth;
 
 import 'model/tour.dart';
@@ -34,13 +32,11 @@ import 'model/tourguide_report.dart';
 
 var logger = kIsWeb
     ? logger_web.Logger(
-        level: logger_web.Level.all,
+        level: logger_web.Level.all, //filter: ProductionFilter(),
       )
-    //filter: ProductionFilter())
     : logger_mobile.Logger(
-        level: logger_mobile.Level.all,
+        level: logger_mobile.Level.all, //filter: ProductionFilter(),
       );
-//filter: ProductionFilter());
 final FirebaseRemoteConfig remoteConfig = FirebaseRemoteConfig.instance;
 
 Future<void> main() async {
@@ -196,21 +192,23 @@ class MyGlobals {
   static String? signInReroutePath;
   static AutoScrollController? scrollController; //TODO fix
   static List<String> processedImageUrls = [];
-  static const shimmerGradient = LinearGradient(
-    colors: [
-      Color(0xFFEBEBF4),
-      Color(0xFFF4F4F4),
-      Color(0xFFEBEBF4),
-    ],
-    stops: [
-      0.1,
-      0.3,
-      0.4,
-    ],
-    begin: Alignment(-1.0, -0.3),
-    end: Alignment(1.0, 0.3),
-    tileMode: TileMode.clamp,
-  );
+  static LinearGradient createShimmerGradient(BuildContext context) {
+    return LinearGradient(
+      colors: [
+        Theme.of(context).colorScheme.surfaceContainerHighest,
+        Theme.of(context).colorScheme.surfaceContainerHigh,
+        Theme.of(context).colorScheme.surfaceContainerHighest,
+      ],
+      stops: const [
+        0.1,
+        0.3,
+        0.4,
+      ],
+      begin: const Alignment(-1.0, -0.3),
+      end: const Alignment(1.0, 0.3),
+      tileMode: TileMode.clamp,
+    );
+  }
 
   static void initProviders(BuildContext context) {
     logger.t("initProviders()");
