@@ -15,7 +15,6 @@ class TourDetailsOptions extends StatefulWidget {
   final VoidCallback onDeletePressed;
   final Tour tour;
 
-
   TourDetailsOptions({
     required this.onEditPressed,
     required this.onDeletePressed,
@@ -36,7 +35,8 @@ class _TourDetailsOptionsState extends State<TourDetailsOptions> {
   bool _isRequestReviewChecked = false;
   bool _reportSubmitted = false;
   String _selectedReportOption = '';
-  final TextEditingController _reportDetailsController = TextEditingController();
+  final TextEditingController _reportDetailsController =
+      TextEditingController();
 
   void _handleRadioValueChange(String? value) {
     setState(() {
@@ -55,13 +55,16 @@ class _TourDetailsOptionsState extends State<TourDetailsOptions> {
     logger.t('Selected Option: $_selectedReportOption');
     logger.t('Additional Details: $additionalDetails');
 
-    final tourguideUserProvider = Provider.of<TourguideUserProvider>(context, listen: false);
+    final tourguideUserProvider =
+        Provider.of<TourguideUserProvider>(context, listen: false);
     TourguideReport report = TourguideReport(
       title: _selectedReportOption,
       additionalDetails: additionalDetails,
-      reportAuthorId: tourguideUserProvider.user!.firebaseAuthId,
+      reportAuthorId: tourguideUserProvider.user != null ? tourguideUserProvider.user!.firebaseAuthId : 'Anonymous',
     );
-    final TourguideUser? reportAuthor = await tourguideUserProvider.getUserInfo(widget.tour.authorId);
+    //TODO: dont use context across async calls
+    final TourguideUser? reportAuthor =
+        await tourguideUserProvider.getUserInfo(widget.tour.authorId);
     final tourProvider = Provider.of<TourProvider>(context, listen: false);
     setState(() {
       tourProvider.reportTour(widget.tour, report, reportAuthor!);
@@ -72,11 +75,12 @@ class _TourDetailsOptionsState extends State<TourDetailsOptions> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Thank You'),
-          content: Text('Thank you for your report. We will review the content and take appropriate action if necessary.'),
+          title: const Text('Thank You'),
+          content: const Text(
+              'Thank you for your report. We will review the content and take appropriate action if necessary.'),
           actions: [
             TextButton(
-              child: Text('OK'),
+              child: const Text('OK'),
               onPressed: () {
                 Navigator.of(context).pop();
               },
@@ -99,7 +103,8 @@ class _TourDetailsOptionsState extends State<TourDetailsOptions> {
       builder: (BuildContext context) {
         return AlertDialog(
           title: const Text('Tour under Review'),
-          content: const Text('Thank you for submitting your request for review. We will review the content and remove the reports if we deem the content to be in compliance with our community guidelines.'),
+          content: const Text(
+              'Thank you for submitting your request for review. We will review the content and remove the reports if we deem the content to be in compliance with our community guidelines.'),
           actions: [
             TextButton(
               child: const Text('OK'),
@@ -118,12 +123,24 @@ class _TourDetailsOptionsState extends State<TourDetailsOptions> {
     final tourProvider = Provider.of<TourProvider>(context);
     bool isAuthor = tourProvider.isUserCreatedTour(widget.tour);
     return AlertDialog(
-      title: Text(isAuthor ? (!_isConfirmingDelete ? (!_isViewingReports ? (!_isRequestingReview ? 'Author Options' : 'Request a Review') : 'Reports') : 'Delete Tour') : (!_isReportingTour ? 'Options' : 'Report Tour')),
+      title: Text(isAuthor
+          ? (!_isConfirmingDelete
+              ? (!_isViewingReports
+                  ? (!_isRequestingReview
+                      ? 'Author Options'
+                      : 'Request a Review')
+                  : 'Reports')
+              : 'Delete Tour')
+          : (!_isReportingTour ? 'Options' : 'Report Tour')),
       content: SingleChildScrollView(
         child: ListBody(
           children: <Widget>[
-            Visibility( //Main Options
-              visible: !_isConfirmingDelete && !_isReportingTour && !_isViewingReports && !_isRequestingReview,
+            Visibility(
+              //Main Options
+              visible: !_isConfirmingDelete &&
+                  !_isReportingTour &&
+                  !_isViewingReports &&
+                  !_isRequestingReview,
               child: Column(
                 children: [
                   if (isAuthor)
@@ -142,18 +159,36 @@ class _TourDetailsOptionsState extends State<TourDetailsOptions> {
                                   children: [
                                     const Divider(),
                                     const SizedBox(height: 8.0),
-                                    Text("Your tour was reported!", style: Theme.of(context).textTheme.titleMedium!.copyWith(color: Theme.of(context).colorScheme.error)),
-                                    if (widget.tour.requestReviewStatus.isNotEmpty)
+                                    Text("Your tour was reported!",
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .titleMedium!
+                                            .copyWith(
+                                                color: Theme.of(context)
+                                                    .colorScheme
+                                                    .error)),
+                                    if (widget
+                                        .tour.requestReviewStatus.isNotEmpty)
                                       Column(
                                         children: [
                                           const SizedBox(height: 8.0),
-                                          Text("You have requested a review, but we have not yet reviewed the reports.", style: Theme.of(context).textTheme.bodyMedium!.copyWith(fontWeight: FontWeight.bold),),
+                                          Text(
+                                            "You have requested a review, but we have not yet reviewed the reports.",
+                                            style: Theme.of(context)
+                                                .textTheme
+                                                .bodyMedium!
+                                                .copyWith(
+                                                    fontWeight:
+                                                        FontWeight.bold),
+                                          ),
                                         ],
                                       ),
                                     const SizedBox(height: 8.0),
-                                    const Text("There are reports for your tour, and it may be in violation of our community guidelines. Please review the reports and take appropriate action. In the meantime this tour is only visible to you."),
+                                    const Text(
+                                        "There are reports for your tour, and it may be in violation of our community guidelines. Please review the reports and take appropriate action. In the meantime this tour is only visible to you."),
                                     const SizedBox(height: 8.0),
-                                    const Text("If you believe you have addressed the reported issues, or that the reports are in error, you can request a review of your tour by selecting View Reports."),
+                                    const Text(
+                                        "If you believe you have addressed the reported issues, or that the reports are in error, you can request a review of your tour by selecting View Reports."),
                                     const SizedBox(height: 8.0),
                                     Align(
                                       alignment: Alignment.center,
@@ -184,8 +219,12 @@ class _TourDetailsOptionsState extends State<TourDetailsOptions> {
                           },
                           style: ElevatedButton.styleFrom(
                             //backgroundColor: Theme.of(context).colorScheme.error, // Background color of the button
-                            foregroundColor: Theme.of(context).colorScheme.error, // Text color
-                            side: BorderSide(color: Theme.of(context).colorScheme.error, width: 2),
+                            foregroundColor: Theme.of(context)
+                                .colorScheme
+                                .error, // Text color
+                            side: BorderSide(
+                                color: Theme.of(context).colorScheme.error,
+                                width: 2),
                           ),
                           icon: const Icon(Icons.delete),
                           label: const Text("Delete Tour"),
@@ -209,13 +248,16 @@ class _TourDetailsOptionsState extends State<TourDetailsOptions> {
                 ],
               ),
             ),
-            Visibility( //Delete Confirmation Options
+            Visibility(
+              //Delete Confirmation Options
               visible: _isConfirmingDelete,
               child: Column(
                 children: [
                   const Padding(
                     padding: EdgeInsets.all(20.0),
-                    child: Center(child: Text("Are you sure you'd like to delete this tour? This action cannot be undone.")),
+                    child: Center(
+                        child: Text(
+                            "Are you sure you'd like to delete this tour? This action cannot be undone.")),
                   ),
                   CheckboxListTile(
                     title: const Text("Confirm Delete"),
@@ -237,9 +279,12 @@ class _TourDetailsOptionsState extends State<TourDetailsOptions> {
                     label: const Text("Cancel"),
                   ),
                   ElevatedButton.icon(
-                    onPressed: _isDeleteConfirmChecked ? widget.onDeletePressed : null,
+                    onPressed:
+                        _isDeleteConfirmChecked ? widget.onDeletePressed : null,
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Theme.of(context).colorScheme.error, // Background color of the button
+                      backgroundColor: Theme.of(context)
+                          .colorScheme
+                          .error, // Background color of the button
                       foregroundColor: Colors.white, // Text color
                     ),
                     icon: const Icon(Icons.delete),
@@ -248,7 +293,8 @@ class _TourDetailsOptionsState extends State<TourDetailsOptions> {
                 ],
               ),
             ),
-            Visibility( //Report Options
+            Visibility(
+              //Report Options
               visible: _isReportingTour,
               child: ReportDialogue(
                 selectedReportOption: _selectedReportOption,
@@ -257,12 +303,13 @@ class _TourDetailsOptionsState extends State<TourDetailsOptions> {
                 reportItem: 'tour',
               ),
             ),
-            Visibility( //Viewing Reports
+            Visibility(
+              //Viewing Reports
               visible: _isViewingReports && !_isRequestingReview,
               child: Column(
                 children: [
                   Column(
-                    children:  widget.tour.reports.map((report) {
+                    children: widget.tour.reports.map((report) {
                       return Padding(
                         padding: const EdgeInsets.symmetric(vertical: 4.0),
                         child: Card(
@@ -302,13 +349,16 @@ class _TourDetailsOptionsState extends State<TourDetailsOptions> {
                 ],
               ),
             ),
-            Visibility( //Requesting Review
+            Visibility(
+              //Requesting Review
               visible: _isRequestingReview,
               child: Column(
                 children: [
                   const Padding(
                     padding: EdgeInsets.all(20.0),
-                    child: Center(child: Text("Please only request a review of your tour once you have addressed the reported issues, or if you believe the reports are in error. Our team will review the reports and take appropriate action if necessary.")),
+                    child: Center(
+                        child: Text(
+                            "Please only request a review of your tour once you have addressed the reported issues, or if you believe the reports are in error. Our team will review the reports and take appropriate action if necessary.")),
                   ),
                   CheckboxListTile(
                     title: const Text("Confirm Request"),
@@ -340,21 +390,22 @@ class _TourDetailsOptionsState extends State<TourDetailsOptions> {
           ],
         ),
       ),
-      actions: !_isReportingTour ? null : [
-        TextButton(
-          child: Text('Cancel'),
-          onPressed: () {
-            setState(() {
-              _isReportingTour = false;
-            });
-          },
-        ),
-        TextButton(
-          child: Text('Submit Report'),
-          onPressed: _selectedReportOption.isEmpty ? null : _submitReport,
-        ),
-      ],
+      actions: !_isReportingTour
+          ? null
+          : [
+              TextButton(
+                child: Text('Cancel'),
+                onPressed: () {
+                  setState(() {
+                    _isReportingTour = false;
+                  });
+                },
+              ),
+              TextButton(
+                child: Text('Submit Report'),
+                onPressed: _selectedReportOption.isEmpty ? null : _submitReport,
+              ),
+            ],
     );
   }
 }
-

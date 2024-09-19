@@ -1,14 +1,12 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:go_router/go_router.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:tourguide_app/profile/app_settings.dart';
 import 'package:tourguide_app/profile/profile_settings.dart';
 import 'package:tourguide_app/profile/to_tour_list.dart';
 import 'package:tourguide_app/ui/my_layouts.dart';
 import 'package:tourguide_app/utilities/custom_import.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:tourguide_app/utilities/providers/auth_provider.dart' as myAuth;
 import 'package:tourguide_app/utilities/providers/tour_provider.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -21,9 +19,7 @@ class Profile extends StatefulWidget {
 }
 
 class _ProfileState extends State<Profile> {
-
   final TextEditingController _usernameController = TextEditingController();
-
 
   @override
   void initState() {
@@ -32,11 +28,9 @@ class _ProfileState extends State<Profile> {
     MyGlobals.webRoutingFix(TourguideNavigation.profilePath);
   }
 
-
-  //db = FirebaseFirestore.instance;
   @override
   Widget build(BuildContext context) {
-    logger.t('FirebaseAuth.instance.currentUser=${FirebaseAuth.instance.currentUser}');
+    //logger.t('FirebaseAuth.instance.currentUser=${FirebaseAuth.instance.currentUser}');
     myAuth.AuthProvider authProvider = Provider.of(context);
     TourProvider tourProvider = Provider.of(context);
 
@@ -49,15 +43,33 @@ class _ProfileState extends State<Profile> {
           children: [
             StandardLayout(
               children: [
-                SizedBox(height: 0,),
-                ListTile(
-                  leading: GoogleUserCircleAvatar(
-                    identity: authProvider.googleSignInUser!,
-                  ),
-                  title: Text(authProvider.googleSignInUser!.displayName ?? ''),
-                  subtitle: Text(authProvider.googleSignInUser!.email),
+                const SizedBox(
+                  height: 0,
                 ),
-                SizedBox(height: 8,),
+                if (authProvider.isAnonymous)
+                  const Padding(
+                    padding: EdgeInsets.all(16.0),
+                    child: Text(
+                        'You are signed in as a guest. \n\nSign in with Google to save tours and access more features.'),
+                  ),
+                if (!authProvider.isAnonymous)
+                  authProvider.googleSignInUser == null
+                      ? const Padding(
+                          padding: EdgeInsets.all(16.0),
+                          child: Text(
+                              'Tourguide has ran into an issue while displaying your profile. Please sign out and sign in again.'),
+                        )
+                      : ListTile(
+                          leading: GoogleUserCircleAvatar(
+                            identity: authProvider.googleSignInUser!,
+                          ),
+                          title: Text(
+                              authProvider.googleSignInUser!.displayName ?? ''),
+                          subtitle: Text(authProvider.googleSignInUser!.email),
+                        ),
+                const SizedBox(
+                  height: 8,
+                ),
               ],
             ),
             StandardLayout(
@@ -72,11 +84,12 @@ class _ProfileState extends State<Profile> {
                     Navigator.push(
                       context,
                       SlideTransitionRoute(
-                        page: ToTourList(),
-                        beginOffset: Offset(1.0, 0.0), // Slide in from right
+                        page: const ToTourList(),
+                        beginOffset: const Offset(1.0, 0.0), // Slide in from right
                       ),
                     );
                   },
+                  disabled: authProvider.isAnonymous,
                 ),
                 ProfileListButton(
                   label: 'Profile Settings',
@@ -86,11 +99,12 @@ class _ProfileState extends State<Profile> {
                     Navigator.push(
                       context,
                       SlideTransitionRoute(
-                        page: ProfileSettings(),
-                        beginOffset: Offset(1.0, 0.0), // Slide in from right
+                        page: const ProfileSettings(),
+                        beginOffset: const Offset(1.0, 0.0), // Slide in from right
                       ),
                     );
                   },
+                  disabled: authProvider.isAnonymous,
                 ),
                 ProfileListButton(
                   label: 'App Settings',
@@ -100,8 +114,8 @@ class _ProfileState extends State<Profile> {
                     Navigator.push(
                       context,
                       SlideTransitionRoute(
-                        page: AppSettings(),
-                        beginOffset: Offset(1.0, 0.0), // Slide in from right
+                        page: const AppSettings(),
+                        beginOffset: const Offset(1.0, 0.0), // Slide in from right
                       ),
                     );
                   },
@@ -111,41 +125,49 @@ class _ProfileState extends State<Profile> {
                     label: 'Get the Android App on Google Play',
                     leftIcon: FontAwesomeIcons.googlePlay,
                     onPressed: () {
-                      launchUrl(Uri.parse("https://play.google.com/store/apps/details?id=com.robertmichelsdigitalmedia.tourguideapp"));
+                      launchUrl(Uri.parse(
+                          "https://play.google.com/store/apps/details?id=com.robertmichelsdigitalmedia.tourguideapp"));
                     },
                   ),
                 ProfileListButton(
                   label: 'Community Guidelines',
                   leftIcon: Icons.local_library_outlined,
                   onPressed: () {
-                    launchUrl(Uri.parse("https://tourguide.rmichels.com/communityGuidelines.html"));
+                    launchUrl(Uri.parse(
+                        "https://tourguide.rmichels.com/communityGuidelines.html"));
                   },
                 ),
                 ProfileListButton(
                   label: 'Terms of Service',
                   leftIcon: Icons.description_outlined,
                   onPressed: () {
-                    launchUrl(Uri.parse("https://tourguide.rmichels.com/termsOfService.html"));
+                    launchUrl(Uri.parse(
+                        "https://tourguide.rmichels.com/termsOfService.html"));
                   },
                 ),
                 ProfileListButton(
                   label: 'Privacy Policy',
                   leftIcon: Icons.privacy_tip_outlined,
                   onPressed: () {
-                    launchUrl(Uri.parse("https://tourguide.rmichels.com/privacyPolicy.html"));
+                    launchUrl(Uri.parse(
+                        "https://tourguide.rmichels.com/privacyPolicy.html"));
                   },
                 ),
-                ProfileListButton(
-                  label: 'Rate Tourguide',
-                  leftIcon: Icons.star_border,
-                  onPressed: (){},
-                  disabled: true,
-                ),
+                if (!kIsWeb)
+                  ProfileListButton(
+                    label: 'Rate Tourguide',
+                    leftIcon: Icons.star_border,
+                    onPressed: () {
+                      launchUrl(Uri.parse(
+                          "https://tourguide.rmichels.com/privacyPolicy.html"));
+                    },
+                  ),
                 ProfileListButton(
                   label: 'Provide Feedback',
                   leftIcon: Icons.feedback_outlined,
                   onPressed: () {
-                    launchUrl(Uri.parse("mailto:feedback@tourguide.rmichels.com?subject=Tourguide%20Feedback"));
+                    launchUrl(Uri.parse(
+                        "https://play.google.com/store/apps/details?id=com.robertmichelsdigitalmedia.tourguideapp"));
                   },
                 ),
                 ProfileListButton(
@@ -187,7 +209,6 @@ class ProfileListButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -198,12 +219,15 @@ class ProfileListButton extends StatelessWidget {
         TextButton(
           onPressed: disabled ?? false ? null : onPressed,
           style: TextButton.styleFrom(
-            padding: EdgeInsets.all((kIsWeb && MediaQuery.of(context).size.width > 1280) ? 24 : 16),
+            padding: EdgeInsets.all(
+                (kIsWeb && MediaQuery.of(context).size.width > 1280) ? 24 : 16),
             alignment: Alignment.centerLeft,
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(0), // Set to 0 for sharp corners
+              borderRadius:
+                  BorderRadius.circular(0), // Set to 0 for sharp corners
             ),
-            foregroundColor: color != null ? color : Theme.of(context).colorScheme.primary,
+            foregroundColor:
+                color != null ? color : Theme.of(context).colorScheme.primary,
           ),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -212,14 +236,20 @@ class ProfileListButton extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Icon(leftIcon), // Left icon
-                  SizedBox(width: 16), // Adjust spacing between icon and text as needed
+                  SizedBox(
+                      width:
+                          16), // Adjust spacing between icon and text as needed
                   Text(
                     label,
                     style: TextStyle(fontWeight: FontWeight.bold),
                   ),
                 ],
               ),
-              if (rightIcon != null) Icon(rightIcon, size: 20,), // Right icon if provided
+              if (rightIcon != null)
+                Icon(
+                  rightIcon,
+                  size: 20,
+                ), // Right icon if provided
             ],
           ),
         ),

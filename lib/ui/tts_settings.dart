@@ -44,30 +44,28 @@ class _TtsSettingsState extends State<TtsSettings> {
 
   Widget _languageDropDownSection(List<dynamic> languages) => Container(
       padding: const EdgeInsets.only(top: 10.0),
-      child: Column(
-          children: [
+      child: Column(children: [
         ValueListenableBuilder<String?>(
-        valueListenable: _ttsService.languageNotifier,
-        builder: (context, language, child) {
-          logger.t('TtsSettings._languageDropDownSection() - language=$language');
-          return DropdownMenu<String>(
-            initialSelection: language ?? languages.first,
-            dropdownMenuEntries: getLanguageDropDownMenuItems(languages),
-            onSelected: changedLanguageDropDownItem,
-          );
-        }),
+            valueListenable: _ttsService.languageNotifier,
+            builder: (context, language, child) {
+              logger.t(
+                  'TtsSettings._languageDropDownSection() - language=$language');
+              return DropdownMenu<String>(
+                initialSelection: language ?? languages.first,
+                dropdownMenuEntries: getLanguageDropDownMenuItems(languages),
+                onSelected: changedLanguageDropDownItem,
+              );
+            }),
       ]));
 
   List<DropdownMenuEntry<String>> getLanguageDropDownMenuItems(
       List<dynamic> languages) {
     var items = <DropdownMenuEntry<String>>[];
     for (dynamic type in languages) {
-      items.add(DropdownMenuEntry(
-          value: type, label: type));
+      items.add(DropdownMenuEntry(value: type, label: type));
     }
     return items;
   }
-
 
   void changedLanguageDropDownItem(String? selectedType) {
     setState(() {
@@ -75,7 +73,6 @@ class _TtsSettingsState extends State<TtsSettings> {
       _ttsService.setLanguage(selectedType!);
     });
   }
-
 
   void _toggleTTS(String description) {
     if (_currentlyPlaying) {
@@ -91,7 +88,7 @@ class _TtsSettingsState extends State<TtsSettings> {
     }
   }
 
-  openTtsSettings() async{
+  openTtsSettings() async {
     AndroidIntent intent = const AndroidIntent(
       action: 'com.android.settings.TTS_SETTINGS',
     );
@@ -106,9 +103,13 @@ class _TtsSettingsState extends State<TtsSettings> {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            TtsText(text: "Text to Speech is provided by your device.", ttsService: _ttsService, currentlyPlayingItem: _currentlyPlaying),
+            TtsText(
+                text: "Text to Speech is provided by your device.",
+                ttsService: _ttsService,
+                currentlyPlayingItem: _currentlyPlaying),
             IconButton(
-              onPressed: () => _toggleTTS("Text to Speech is provided by your device."),
+              onPressed: () =>
+                  _toggleTTS("Text to Speech is provided by your device."),
               icon: Icon(_currentlyPlaying ? Icons.stop : Icons.play_circle),
             ),
           ],
@@ -119,46 +120,51 @@ class _TtsSettingsState extends State<TtsSettings> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             if (!kIsWeb)
-            Column(
-              mainAxisAlignment: MainAxisAlignment.start,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text("Voice", style: Theme.of(context).textTheme.titleSmall),
-                FutureBuilder<dynamic>(
-                    future: _ttsService.getLanguages(),
-                    builder: (BuildContext context, AsyncSnapshot<dynamic> snapshot) {
-                      if (snapshot.hasData) {
-                        return _languageDropDownSection(snapshot.data as List<dynamic>);
-                      } else if (snapshot.hasError) {
-                        return Text('Error loading languages...');
-                      } else
-                        return Text('Loading Languages...');
-                    }),
-                ValueListenableBuilder<bool>(
-                  valueListenable: _ttsService.isCurrentLanguageInstalledNotifier,
-                  builder: (context, isInstalled, child) {
-                    return Visibility(
-                      visible: (_ttsService.isAndroid && !isInstalled),
-                      child: Padding(
-                        padding: const EdgeInsets.only(top: 8.0),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            SizedBox(width: 4.0),
-                            Icon(Icons.error, size: 16.0, color: Theme.of(context).colorScheme.error),
-                            SizedBox(width: 4.0),
-                            Text("Not installed", style: Theme.of(context).textTheme.bodySmall),
-                          ],
-                        ),
-                      ),
-                    );
-                  }
-                ),
-              ],
-            ),
-            if (!kIsWeb)
-            SizedBox(width: 16.0),
+              Column(
+                mainAxisAlignment: MainAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text("Voice", style: Theme.of(context).textTheme.titleSmall),
+                  FutureBuilder<dynamic>(
+                      future: _ttsService.getLanguages(),
+                      builder: (BuildContext context,
+                          AsyncSnapshot<dynamic> snapshot) {
+                        if (snapshot.hasData) {
+                          return _languageDropDownSection(
+                              snapshot.data as List<dynamic>);
+                        } else if (snapshot.hasError) {
+                          return Text('Error loading languages...');
+                        } else
+                          return Text('Loading Languages...');
+                      }),
+                  ValueListenableBuilder<bool>(
+                      valueListenable:
+                          _ttsService.isCurrentLanguageInstalledNotifier,
+                      builder: (context, isInstalled, child) {
+                        return Visibility(
+                          visible: (_ttsService.isAndroid && !isInstalled),
+                          child: Padding(
+                            padding: const EdgeInsets.only(top: 8.0),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                SizedBox(width: 4.0),
+                                Icon(Icons.error,
+                                    size: 16.0,
+                                    color: Theme.of(context).colorScheme.error),
+                                SizedBox(width: 4.0),
+                                Text("Not installed",
+                                    style:
+                                        Theme.of(context).textTheme.bodySmall),
+                              ],
+                            ),
+                          ),
+                        );
+                      }),
+                ],
+              ),
+            if (!kIsWeb) SizedBox(width: 16.0),
             Column(
               mainAxisAlignment: MainAxisAlignment.start,
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -168,20 +174,19 @@ class _TtsSettingsState extends State<TtsSettings> {
                 ValueListenableBuilder<double>(
                     valueListenable: _ttsService.rateNotifier,
                     builder: (context, rate, child) {
-                    return Slider(
-                      value: rate,
-                      onChanged: (newRate) {
-                        if (_currentlyPlaying) _ttsService.stop();
-                        setState(() => _ttsService.setRate(newRate));
-                      },
-                      min: 0.0,
-                      max: 1.0,
-                      divisions: 10,
-                      label: "${rate}",
-                      activeColor: Theme.of(context).colorScheme.primary,
-                    );
-                  }
-                ),
+                      return Slider(
+                        value: rate,
+                        onChanged: (newRate) {
+                          if (_currentlyPlaying) _ttsService.stop();
+                          setState(() => _ttsService.setRate(newRate));
+                        },
+                        min: 0.0,
+                        max: 1.0,
+                        divisions: 10,
+                        label: "${rate}",
+                        activeColor: Theme.of(context).colorScheme.primary,
+                      );
+                    }),
               ],
             ),
           ],
@@ -190,24 +195,29 @@ class _TtsSettingsState extends State<TtsSettings> {
         Wrap(
           children: [
             if (!kIsWeb)
-            ElevatedButton.icon(
-              onPressed: openTtsSettings,
-              label: const Text('Open System TTS Settings'),
-              icon: const Icon(Icons.settings, size: 20,),
-            ),
+              ElevatedButton.icon(
+                onPressed: openTtsSettings,
+                label: const Text('Open System TTS Settings'),
+                icon: const Icon(
+                  Icons.settings,
+                  size: 20,
+                ),
+              ),
             ValueListenableBuilder<bool>(
                 valueListenable: _ttsService.hasSavedSettings,
                 builder: (context, hasSavedSettings, child) {
-                return Visibility(
-                  visible: hasSavedSettings,
-                  child: ElevatedButton.icon(
-                    onPressed: _ttsService.clearSettings,
-                    label: const Text('Clear App TTS Preferences'),
-                    icon: const Icon(Icons.restart_alt, size: 20,),
-                  ),
-                );
-              }
-            ),
+                  return Visibility(
+                    visible: hasSavedSettings,
+                    child: ElevatedButton.icon(
+                      onPressed: _ttsService.clearSettings,
+                      label: const Text('Clear App TTS Preferences'),
+                      icon: const Icon(
+                        Icons.restart_alt,
+                        size: 20,
+                      ),
+                    ),
+                  );
+                }),
           ],
         ),
       ],

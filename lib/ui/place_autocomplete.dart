@@ -36,8 +36,10 @@ class _PlaceAutocompleteState extends State<PlaceAutocomplete> {
   // request.
   String? _currentQuery;
   // The most recent options received from the API.
-  late Iterable<AutocompletePrediction> _lastOptions = <AutocompletePrediction>[];
-  late final _Debounceable<Iterable<AutocompletePrediction>?, String> _debouncedSearch;
+  late Iterable<AutocompletePrediction> _lastOptions =
+      <AutocompletePrediction>[];
+  late final _Debounceable<Iterable<AutocompletePrediction>?, String>
+      _debouncedSearch;
   // A network error was received on the most recent query.
   bool _networkError = false;
   bool _isValidSelection = false;
@@ -46,23 +48,23 @@ class _PlaceAutocompleteState extends State<PlaceAutocomplete> {
   void initState() {
     //logger.i('PlaceAutocomplete.initState(), textEditingController.text=${widget.textEditingController.text}');
     super.initState();
-    LocationProvider locationProvider = Provider.of<LocationProvider>(context, listen: false);
+    LocationProvider locationProvider =
+        Provider.of<LocationProvider>(context, listen: false);
     _debouncedSearch = _debounce<Iterable<AutocompletePrediction>?, String>(
-            (query) => locationProvider.getAutocompleteSuggestions(query, restrictToCities: widget.restrictToCities));
+        (query) => locationProvider.getAutocompleteSuggestions(query,
+            restrictToCities: widget.restrictToCities));
     if (widget.textEditingController.text.isNotEmpty) {
       _isValidSelection = true;
     }
   }
-
-
-
 
   @override
   Widget build(BuildContext context) {
     LocationProvider locationProvider = Provider.of<LocationProvider>(context);
     //logger.i('PlaceAutocomplete.build()');
 
-    return LayoutBuilder( //LayoutBuilder is needed to match the list width to text input width
+    return LayoutBuilder(
+      //LayoutBuilder is needed to match the list width to text input width
       builder: (BuildContext context, BoxConstraints constraints) {
         return Autocomplete<AutocompletePrediction>(
           optionsBuilder: (TextEditingValue textEditingValue) async {
@@ -71,7 +73,7 @@ class _PlaceAutocompleteState extends State<PlaceAutocomplete> {
               _isValidSelection = false;
             });
             final Iterable<AutocompletePrediction>? options =
-            await _debouncedSearch(textEditingValue.text);
+                await _debouncedSearch(textEditingValue.text);
             if (options == null) {
               return _lastOptions;
             }
@@ -79,28 +81,47 @@ class _PlaceAutocompleteState extends State<PlaceAutocomplete> {
             return options;
           },
           initialValue: widget.textEditingController.value,
-          displayStringForOption: (AutocompletePrediction option) => option.fullText!,
-          fieldViewBuilder: (BuildContext context, TextEditingController fieldTextEditingController, FocusNode fieldFocusNode, VoidCallback onFieldSubmitted) {
+          displayStringForOption: (AutocompletePrediction option) =>
+              option.fullText!,
+          fieldViewBuilder: (BuildContext context,
+              TextEditingController fieldTextEditingController,
+              FocusNode fieldFocusNode,
+              VoidCallback onFieldSubmitted) {
             // TODO: better understand why the city field in tour creation sometimes resets to empty
             WidgetsBinding.instance.addPostFrameCallback((_) {
-              if (widget.textEditingController.text.isNotEmpty && fieldTextEditingController.text.isEmpty && !fieldFocusNode.hasFocus) {
-                fieldTextEditingController.text = widget.textEditingController.text;
+              if (widget.textEditingController.text.isNotEmpty &&
+                  fieldTextEditingController.text.isEmpty &&
+                  !fieldFocusNode.hasFocus) {
+                fieldTextEditingController.text =
+                    widget.textEditingController.text;
                 _isValidSelection = true;
                 //logger.i('Updated text in fieldTextEditingController: ${fieldTextEditingController.text}, addresses bug where city field in tour creation sometimes resets to empty');
               }
             });
 
-
             return TextFormField(
               controller: fieldTextEditingController,
               focusNode: fieldFocusNode,
               decoration: widget.decoration?.copyWith(
-                labelText: widget.customLabel ? widget.decoration!.labelText : widget.restrictToCities ? 'City' : 'Place',
-                errorText: _networkError ? 'Network error, please try again.' : null,
-              ) ?? InputDecoration(
-                labelText: widget.customLabel ? widget.decoration!.labelText : widget.restrictToCities ? 'City' : 'Place',
-                errorText: _networkError ? 'Network error, please try again.' : null,
-              ),
+                    labelText: widget.customLabel
+                        ? widget.decoration!.labelText
+                        : widget.restrictToCities
+                            ? 'City'
+                            : 'Place',
+                    errorText: _networkError
+                        ? 'Network error, please try again.'
+                        : null,
+                  ) ??
+                  InputDecoration(
+                    labelText: widget.customLabel
+                        ? widget.decoration!.labelText
+                        : widget.restrictToCities
+                            ? 'City'
+                            : 'Place',
+                    errorText: _networkError
+                        ? 'Network error, please try again.'
+                        : null,
+                  ),
               validator: (String? value) {
                 if (value == null || value.isEmpty) {
                   return 'Please enter a city';
@@ -118,7 +139,9 @@ class _PlaceAutocompleteState extends State<PlaceAutocomplete> {
               enabled: !widget.isFormSubmitted,
             );
           },
-          optionsViewBuilder: (BuildContext context, AutocompleteOnSelected<AutocompletePrediction> onSelected, Iterable<AutocompletePrediction> options) {
+          optionsViewBuilder: (BuildContext context,
+              AutocompleteOnSelected<AutocompletePrediction> onSelected,
+              Iterable<AutocompletePrediction> options) {
             return Align(
               alignment: Alignment.topLeft,
               child: Material(
@@ -130,7 +153,8 @@ class _PlaceAutocompleteState extends State<PlaceAutocomplete> {
                     itemCount: options.length,
                     shrinkWrap: true,
                     itemBuilder: (BuildContext context, int index) {
-                      final AutocompletePrediction option = options.elementAt(index);
+                      final AutocompletePrediction option =
+                          options.elementAt(index);
                       return ListTile(
                         title: Text(option.fullText!),
                         onTap: () async {
@@ -140,7 +164,8 @@ class _PlaceAutocompleteState extends State<PlaceAutocomplete> {
                             _isValidSelection = true;
                           });
                           if (widget.onPlaceInfoFetched != null) {
-                            Place? place = await locationProvider.getLocationDetailsFromPlaceId(option.placeId!);
+                            Place? place = await locationProvider
+                                .getLocationDetailsFromPlaceId(option.placeId!);
                             widget.onPlaceInfoFetched!(place);
                           }
                         },
@@ -153,7 +178,8 @@ class _PlaceAutocompleteState extends State<PlaceAutocomplete> {
           },
           onSelected: (AutocompletePrediction selection) {
             widget.textEditingController.text = selection.fullText!;
-            widget.textEditingController.selection = TextSelection.fromPosition(TextPosition(offset: selection.fullText!.length));
+            widget.textEditingController.selection = TextSelection.fromPosition(
+                TextPosition(offset: selection.fullText!.length));
           },
         );
       },
@@ -161,11 +187,8 @@ class _PlaceAutocompleteState extends State<PlaceAutocomplete> {
   }
 }
 
-
 //From https://api.flutter.dev/flutter/material/Autocomplete-class.html
 const Duration debounceDuration = Duration(milliseconds: 400);
-
-
 
 // A wrapper around Timer used for debouncing.
 class _DebounceTimer {

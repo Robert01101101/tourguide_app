@@ -4,9 +4,12 @@ part 'tourguide_report.g.dart';
 
 @HiveType(typeId: 2)
 class TourguideReport {
-  @HiveField(0) final String title;
-  @HiveField(1) final String additionalDetails;
-  @HiveField(2) final String reportAuthorId;
+  @HiveField(0)
+  final String title;
+  @HiveField(1)
+  final String additionalDetails;
+  @HiveField(2)
+  final String reportAuthorId;
 
   TourguideReport({
     required this.title,
@@ -22,13 +25,13 @@ class TourguideReport {
     };
   }
 
- factory TourguideReport.fromMap(Map<String, dynamic> data) {
-   return TourguideReport(
-     title: data['title'],
-     additionalDetails: data['additionalDetails'],
-     reportAuthorId: data['reportAuthorId'],
-   );
- }
+  factory TourguideReport.fromMap(Map<String, dynamic> data) {
+    return TourguideReport(
+      title: data['title'],
+      additionalDetails: data['additionalDetails'],
+      reportAuthorId: data['reportAuthorId'],
+    );
+  }
 
   TourguideReport copyWith({
     String? title,

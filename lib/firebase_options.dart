@@ -67,8 +67,10 @@ class DefaultFirebaseOptions {
     messagingSenderId: '69433430524',
     projectId: 'tourguide-firebase',
     storageBucket: 'tourguide-firebase.appspot.com',
-    androidClientId: '69433430524-051aek1jtn1j9ml9gl2fao9i1jrqmbvr.apps.googleusercontent.com',
-    iosClientId: '69433430524-q50ntvvjnb08v75f7c4uej3mua53e7jc.apps.googleusercontent.com',
+    androidClientId:
+        '69433430524-051aek1jtn1j9ml9gl2fao9i1jrqmbvr.apps.googleusercontent.com',
+    iosClientId:
+        '69433430524-q50ntvvjnb08v75f7c4uej3mua53e7jc.apps.googleusercontent.com',
     iosBundleId: 'com.robertMichelsDigitalMedia.tourguideApp',
   );
 
@@ -78,8 +80,10 @@ class DefaultFirebaseOptions {
     messagingSenderId: '69433430524',
     projectId: 'tourguide-firebase',
     storageBucket: 'tourguide-firebase.appspot.com',
-    androidClientId: '69433430524-051aek1jtn1j9ml9gl2fao9i1jrqmbvr.apps.googleusercontent.com',
-    iosClientId: '69433430524-l135gic6e4vikfvgjmuquapodikuu5c8.apps.googleusercontent.com',
+    androidClientId:
+        '69433430524-051aek1jtn1j9ml9gl2fao9i1jrqmbvr.apps.googleusercontent.com',
+    iosClientId:
+        '69433430524-l135gic6e4vikfvgjmuquapodikuu5c8.apps.googleusercontent.com',
     iosBundleId: 'com.robertMichelsDigitalMedia.tourguideApp.RunnerTests',
   );
 }

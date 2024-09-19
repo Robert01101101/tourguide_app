@@ -9,13 +9,19 @@ part 'tourguide_place.g.dart';
 //TODO: change name to tour place? More accurate since the description etc is specific to this place's tour
 @HiveType(typeId: 1)
 class TourguidePlace {
-  @HiveField(0) final double latitude;
-  @HiveField(1) final double longitude;
-  @HiveField(2) final String googleMapPlaceId;
-  @HiveField(3) final String title;
-  @HiveField(4) final String description;
-  @HiveField(5) final String photoUrl;
-  TextEditingController? descriptionEditingController;  //mutable
+  @HiveField(0)
+  final double latitude;
+  @HiveField(1)
+  final double longitude;
+  @HiveField(2)
+  final String googleMapPlaceId;
+  @HiveField(3)
+  final String title;
+  @HiveField(4)
+  final String description;
+  @HiveField(5)
+  final String photoUrl;
+  TextEditingController? descriptionEditingController; //mutable
   Image? image; //mutable
   File? imageFile; //mutable
   XFile? imageFileToUploadWeb; //mutable, web, upload only
@@ -63,7 +69,8 @@ class TourguidePlace {
       title: title ?? this.title,
       description: description ?? this.description,
       photoUrl: photoUrl ?? this.photoUrl,
-      descriptionEditingController: descriptionEditingController ?? this.descriptionEditingController,
+      descriptionEditingController:
+          descriptionEditingController ?? this.descriptionEditingController,
       image: image ?? this.image,
       imageFile: imageFile ?? this.imageFile,
       imageFileToUploadWeb: imageFileToUploadWeb ?? this.imageFileToUploadWeb,

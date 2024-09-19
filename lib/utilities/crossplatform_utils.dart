@@ -4,7 +4,6 @@ import 'package:universal_html/html.dart' as html;
 import '../main.dart';
 
 class CrossplatformUtils {
-
   CrossplatformUtils._();
 
   static bool? _isMobile;
@@ -237,8 +236,10 @@ class CrossplatformUtils {
       r'zeto',
       r'zte\-',
     ];
-    bool isMobile = patterns.any((pattern) => RegExp(pattern).hasMatch(userAgent));
-    logger.t("CrossplatformUtils.isMobile() -> userAgent=$userAgent, isMobile=$isMobile");
+    bool isMobile =
+        patterns.any((pattern) => RegExp(pattern).hasMatch(userAgent));
+    logger.t(
+        "CrossplatformUtils.isMobile() -> userAgent=$userAgent, isMobile=$isMobile");
     _isMobile = isMobile;
     return isMobile; //userAgent.contains('mobi');
   }

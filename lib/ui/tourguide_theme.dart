@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-
 class TourguideTheme {
   //Colors
   static const Color tourguideColor = Color(0xff006a65);
-  static const Color primaryColor = Color(0xff6fece4);
+  static const Color seedColor = Color(0xff6fece4);
   static const Color textColorDarkTheme = Colors.white;
 
   //Themes
@@ -19,13 +18,13 @@ class TourguideTheme {
 
   //Theme builder
   static ThemeData _buildTheme({
-      required Brightness brightness,
-    }) {
+    required Brightness brightness,
+  }) {
     final baseTheme = ThemeData(
       useMaterial3: true,
       brightness: brightness,
       colorScheme: ColorScheme.fromSeed(
-        seedColor: primaryColor,
+        seedColor: seedColor,
         brightness: brightness,
       ),
     );
@@ -35,31 +34,32 @@ class TourguideTheme {
     return baseTheme.copyWith(
       //scaffoldBackgroundColor: backgroundColor,
       extensions: <ThemeExtension<dynamic>>[
-        const TourguideColors(        //TODO - this is an example and not in use atm - check necessity and otherwise remove?
+        const TourguideColors(
+          //TODO - this is an example and not in use atm - check necessity and otherwise remove?
           brandColor: Color(0xFF006a65),
           danger: Color(0xFFE53935),
         ),
       ],
       textTheme: GoogleFonts.latoTextTheme(textTheme).copyWith(
         // Titles are GoogleFonts Lato with bold styling
-        displayLarge: GoogleFonts.vollkorn(textStyle: textTheme.displayLarge,
-            fontWeight: FontWeight.w400),
-        displayMedium: GoogleFonts.vollkorn(textStyle: textTheme.displayMedium,
-            fontWeight: FontWeight.w400),
-        displaySmall: GoogleFonts.vollkorn(textStyle: textTheme.displaySmall,
-            fontWeight: FontWeight.w400),
-        headlineLarge: GoogleFonts.lato(textStyle: textTheme.headlineLarge,
-            fontWeight: FontWeight.bold),
-        headlineMedium: GoogleFonts.lato(textStyle: textTheme.headlineMedium,
-            fontWeight: FontWeight.bold),
-        headlineSmall: GoogleFonts.lato(textStyle: textTheme.headlineSmall,
-            fontWeight: FontWeight.bold),
-        titleLarge: GoogleFonts.lato(textStyle: textTheme.titleLarge,
-            fontWeight: FontWeight.bold),
-        titleMedium: GoogleFonts.lato(textStyle: textTheme.titleMedium,
-            fontWeight: FontWeight.bold),
-        titleSmall: GoogleFonts.lato(textStyle: textTheme.titleSmall,
-            fontWeight: FontWeight.bold),
+        displayLarge: GoogleFonts.vollkorn(
+            textStyle: textTheme.displayLarge, fontWeight: FontWeight.w400),
+        displayMedium: GoogleFonts.vollkorn(
+            textStyle: textTheme.displayMedium, fontWeight: FontWeight.w400),
+        displaySmall: GoogleFonts.vollkorn(
+            textStyle: textTheme.displaySmall, fontWeight: FontWeight.w400),
+        headlineLarge: GoogleFonts.lato(
+            textStyle: textTheme.headlineLarge, fontWeight: FontWeight.bold),
+        headlineMedium: GoogleFonts.lato(
+            textStyle: textTheme.headlineMedium, fontWeight: FontWeight.bold),
+        headlineSmall: GoogleFonts.lato(
+            textStyle: textTheme.headlineSmall, fontWeight: FontWeight.bold),
+        titleLarge: GoogleFonts.lato(
+            textStyle: textTheme.titleLarge, fontWeight: FontWeight.bold),
+        titleMedium: GoogleFonts.lato(
+            textStyle: textTheme.titleMedium, fontWeight: FontWeight.bold),
+        titleSmall: GoogleFonts.lato(
+            textStyle: textTheme.titleSmall, fontWeight: FontWeight.bold),
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
@@ -102,5 +102,6 @@ class TourguideColors extends ThemeExtension<TourguideColors> {
 
   // Optional
   @override
-  String toString() => 'TourguideColors(brandColor: $brandColor, danger: $danger)';
+  String toString() =>
+      'TourguideColors(brandColor: $brandColor, danger: $danger)';
 }

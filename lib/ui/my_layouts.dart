@@ -21,10 +21,17 @@ class StandardLayout extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    EdgeInsets insets = EdgeInsets.symmetric(vertical: enableVerticalPadding ? 8.0 : 0, horizontal: enableHorizontalPadding ? 16 : 0);
+    EdgeInsets insets = EdgeInsets.symmetric(
+        vertical: enableVerticalPadding ? 8.0 : 0,
+        horizontal: enableHorizontalPadding ? 16 : 0);
 
     return Padding(
-      padding: kIsWeb && MediaQuery.of(context).size.width > 1280 && !disableAdaptiveHorizontalPadding ? EdgeInsets.symmetric(horizontal: MediaQuery.of(context).size.width/5) : EdgeInsets.zero,
+      padding: kIsWeb &&
+              MediaQuery.of(context).size.width > 1280 &&
+              !disableAdaptiveHorizontalPadding
+          ? EdgeInsets.symmetric(
+              horizontal: MediaQuery.of(context).size.width / 5)
+          : EdgeInsets.zero,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: children.map((widget) {
@@ -60,17 +67,19 @@ class StandardLayoutChild extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: EdgeInsets.symmetric(vertical: enableVerticalPadding ? 8 : 0, horizontal: enableHorizontalPadding ? 16 : 0),
+      padding: EdgeInsets.symmetric(
+          vertical: enableVerticalPadding ? 8 : 0,
+          horizontal: enableHorizontalPadding ? 16 : 0),
       child: fullWidth
           ? SizedBox(
-        width: double.infinity,
-        child: child,
-      )
+              width: double.infinity,
+              child: child,
+            )
           : Align(
-        alignment:
-        child is Text ? Alignment.centerLeft : Alignment.center,
-        child: child,
-      ),
+              alignment:
+                  child is Text ? Alignment.centerLeft : Alignment.center,
+              child: child,
+            ),
     );
   }
 }

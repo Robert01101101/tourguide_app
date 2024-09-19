@@ -6,7 +6,8 @@ class TourTag extends StatelessWidget {
 
   TourTag({super.key, required this.label, this.leftPadding = true});
 
-  static List<String> parseTags(Map<String, dynamic> tagsMap, {bool shorten = false}) {
+  static List<String> parseTags(Map<String, dynamic> tagsMap,
+      {bool shorten = false}) {
     List<String> result = [];
 
     // Add duration first
@@ -39,11 +40,11 @@ class TourTag extends StatelessWidget {
           borderRadius: BorderRadius.circular(6),
         ),
         child: Text(
-            label,
-            style: Theme.of(context).textTheme.bodySmall!.copyWith(
-              color: Theme.of(context).colorScheme.onTertiaryContainer,
-            ),
-          ),
+          label,
+          style: Theme.of(context).textTheme.bodySmall!.copyWith(
+                color: Theme.of(context).colorScheme.onTertiaryContainer,
+              ),
+        ),
       ),
     );
   }
@@ -53,7 +54,8 @@ class TourTagsAndRatingRow extends StatelessWidget {
   final List<String> tags;
   final int rating;
 
-  const TourTagsAndRatingRow({super.key, required this.tags, required this.rating});
+  const TourTagsAndRatingRow(
+      {super.key, required this.tags, required this.rating});
 
   @override
   Widget build(BuildContext context) {
@@ -65,17 +67,26 @@ class TourTagsAndRatingRow extends StatelessWidget {
         SizedBox(width: 4),
         Material(
           elevation: 1,
-          color: Theme.of(context).colorScheme.secondaryContainer,//surfaceContainer,
+          color: Theme.of(context)
+              .colorScheme
+              .secondaryContainer, //surfaceContainer,
           borderRadius: BorderRadius.circular(6.0),
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
             child: Row(
               children: [
-                Icon((rating+1).sign == 1 ? Icons.thumb_up_outlined : Icons.thumb_down_outlined, color: Theme.of(context).colorScheme.secondary, size: 14),
+                Icon(
+                    (rating + 1).sign == 1
+                        ? Icons.thumb_up_outlined
+                        : Icons.thumb_down_outlined,
+                    color: Theme.of(context).colorScheme.secondary,
+                    size: 14),
                 SizedBox(width: 3),
                 Text(
                   '${(rating).sign == 1 ? '+' : ''}$rating',
-                  style: Theme.of(context).textTheme.labelMedium!.copyWith(color: Theme.of(context).colorScheme.onSecondaryContainer),
+                  style: Theme.of(context).textTheme.labelMedium!.copyWith(
+                      color:
+                          Theme.of(context).colorScheme.onSecondaryContainer),
                   overflow: TextOverflow.visible,
                   maxLines: 1,
                 ),
@@ -109,14 +120,16 @@ class TourTagsRow extends StatelessWidget {
             text: TextSpan(
               text: tag,
               style: Theme.of(context).textTheme.bodySmall!.copyWith(
-                color: Theme.of(context).colorScheme.onSecondaryContainer,
-              ),
+                    color: Theme.of(context).colorScheme.onSecondaryContainer,
+                  ),
             ),
             maxLines: 1,
             textDirection: TextDirection.ltr,
           )..layout();
 
-          double tagWidth = textPainter.width + 12 + (leftPadding ? 3 : 0); // Add padding and container's padding
+          double tagWidth = textPainter.width +
+              12 +
+              (leftPadding ? 3 : 0); // Add padding and container's padding
 
           if (usedWidth + tagWidth <= availableWidth) {
             usedWidth += tagWidth;

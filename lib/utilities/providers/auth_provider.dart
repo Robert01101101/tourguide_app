@@ -5,8 +5,7 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:flutter/foundation.dart';
 import 'package:tourguide_app/main.dart';
 import 'package:tourguide_app/utilities/tourguide_navigation.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-
+import 'package:universal_html/js_util.dart';
 
 const List<String> scopes = <String>[
   'email',
@@ -31,17 +30,23 @@ class AuthProvider with ChangeNotifier {
   bool _isAuthorized = false;
   bool _isLoggingOut = false;
   bool _silentSignInFailed = false;
+  bool _isLoggingIntoFirebaseMobile = false;
+  bool _isAnonymous = false;
+  bool _isLoggingInAnonymously = false;
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
-  ////// PUBLIC /////
+  // PUBLIC //
   /// Firebase User
   User? get user => _user;
+
   /// Google Sign In User
   GoogleSignInAccount? get googleSignInUser => _googleSignInUser;
   bool get isAuthorized => _isAuthorized;
   bool get isLoggingOut => _isLoggingOut;
   bool get silentSignInFailed => _silentSignInFailed;
-
+  bool get isAnonymous => _isAnonymous;
+  bool get isLoggingIntoFirebaseMobile => _isLoggingIntoFirebaseMobile;
+  bool get isLoggingInAnonymously => _isLoggingInAnonymously;
 
   AuthProvider() {
     _init();
@@ -56,16 +61,20 @@ class AuthProvider with ChangeNotifier {
       // However, on web...
       if (kIsWeb && account != null) {
         isAuthorized = await _googleSignIn.canAccessScopes(scopes);
-        logger.t('AuthProvider.AuthProvider() - _googleSignIn.onCurrentUserChanged (web) -> account is null=${account == null}, isAuthorized=$isAuthorized');
+        logger.t(
+            'AuthProvider.AuthProvider() - _googleSignIn.onCurrentUserChanged (web) -> account is null=${account == null}, isAuthorized=$isAuthorized');
       }
 
       _googleSignInUser = account;
       _isAuthorized = isAuthorized;
-      logger.t("AuthProvider._googleSignIn.onCurrentUserChanged -> isAuthorized=${_isAuthorized}, _googleSignInUser=$_googleSignInUser, _user=$_user");
+      _isAnonymous = _isAuthorized;
+      logger.t(
+          "AuthProvider._googleSignIn.onCurrentUserChanged -> isAuthorized=${_isAuthorized}, _googleSignInUser=$_googleSignInUser, _user=$_user");
       notifyListeners();
 
       //sign in with Firebase if authorized (otherwise user has to press button to authorize first, in which case firebase sign in is done in handleAuthorizeScopes()
       if (_isAuthorized && !kIsWeb) {
+        _isLoggingIntoFirebaseMobile = true;
         await signInWithFirebase(account!);
       }
     });
@@ -90,18 +99,16 @@ class AuthProvider with ChangeNotifier {
     super.dispose();
   }
 
-
   void _signInSilently() async {
-    GoogleSignInAccount? silentlySignedInUser = await _googleSignIn.signInSilently();
-    logger.t('AuthProvider.signInSilently() - silentlySignedInUser=$silentlySignedInUser');
+    GoogleSignInAccount? silentlySignedInUser =
+        await _googleSignIn.signInSilently();
+    logger.t(
+        'AuthProvider.signInSilently() - silentlySignedInUser=$silentlySignedInUser');
     if (silentlySignedInUser == null) {
       _silentSignInFailed = true;
       notifyListeners();
     }
   }
-
-
-
 
   // This is the on-click handler for the Sign In button that is rendered by Flutter.
   //
@@ -112,7 +119,8 @@ class AuthProvider with ChangeNotifier {
     logger.t('AuthProvider.handleSignIn()');
     try {
       GoogleSignInAccount? googleSignInAccount = await _googleSignIn.signIn();
-      logger.t('AuthProvider.handleSignIn() - googleSignInAccount=$googleSignInAccount');
+      logger.t(
+          'AuthProvider.handleSignIn() - googleSignInAccount=$googleSignInAccount');
     } catch (error) {
       print(error);
     }
@@ -131,14 +139,13 @@ class AuthProvider with ChangeNotifier {
     final bool isAuthorized = await _googleSignIn.requestScopes(scopes);
     // #enddocregion RequestScopes
     _isAuthorized = isAuthorized;
-    logger.t('AuthProvider.handleAuthorizeScopes() - isAuthorized=$isAuthorized');
+    logger
+        .t('AuthProvider.handleAuthorizeScopes() - isAuthorized=$isAuthorized');
     notifyListeners();
     //if (isAuthorized) {
     //  await signInWithFirebase(_googleSignInUser!); //doing this causes pop up to be blocked, instead, we wait for the user to click the button
     //}
   }
-
-
 
   // Called when the current auth user changes (google sign in), so we automatically log into Firebase as well.
   // This is seperate form the google sign in / authorization worfklow and just for access to firebase.
@@ -151,14 +158,46 @@ class AuthProvider with ChangeNotifier {
         idToken: googleAuth.idToken,
       );
       GoogleAuthProvider googleProvider = GoogleAuthProvider();
-      UserCredential authResult = kIsWeb ? await _auth.signInWithPopup(googleProvider) : await _auth.signInWithCredential(credential);
+      UserCredential authResult = kIsWeb
+          ? await _auth.signInWithPopup(googleProvider)
+          : await _auth.signInWithCredential(credential);
 
       // Access the logged-in user using FirebaseAuth.instance.currentUser
       _user = authResult.user;
+      if (_user != null) {
+        _isAnonymous = false;
+      }
+      _isLoggingIntoFirebaseMobile = false;
       notifyListeners();
-      logger.t('AuthProvider.signInWithFirebase() - Firebase User Info: ${_user?.displayName}, ${_user?.email}');
+      logger.t(
+          'AuthProvider.signInWithFirebase() - Firebase User Info: ${_user?.displayName}, ${_user?.email}');
     } catch (error) {
-      logger.e('AuthProvider.signInWithFirebase() - Error signing in with Firebase: $error');
+      _isLoggingIntoFirebaseMobile = false;
+      notifyListeners();
+      logger.e(
+          'AuthProvider.signInWithFirebase() - Error signing in with Firebase: $error');
+    }
+  }
+
+  Future<void> signInWithFirebaseAnonymously() async {
+    logger.t('AuthProvider.signInWithFirebaseAnonymously()');
+    try {
+      _isLoggingInAnonymously = true;
+      notifyListeners();
+      UserCredential authResult = await _auth.signInAnonymously();
+
+      // Access the logged-in user using FirebaseAuth.instance.currentUser
+      _user = authResult.user;
+      _isAnonymous = true;
+      _isLoggingInAnonymously = false;
+      notifyListeners();
+      logger.t(
+          'AuthProvider.signInWithFirebase() - Firebase User Info: ${_user?.displayName}, ${_user?.email}');
+    } catch (error) {
+      _isLoggingInAnonymously = false;
+      notifyListeners();
+      logger.e(
+          'AuthProvider.signInWithFirebase() - Error signing in with Firebase: $error');
     }
   }
 
@@ -172,24 +211,32 @@ class AuthProvider with ChangeNotifier {
         TourguideNavigation.signInPath,
       );
       await FirebaseAuth.instance.signOut();
-      await _googleSignIn.disconnect();
+      if (_googleSignInUser != null) await _googleSignIn.disconnect();
       _user = null;
       _googleSignInUser = null;
       _isAuthorized = false;
       _silentSignInFailed = false;
       _isLoggingOut = false;
+      notifyListeners();
       //SnackBarService.showSnackBar(content: 'You\'re signed out!');
-    } catch (e){
+      logger.t('AuthProvider.signOut() - User signed out.');
+    } catch (e) {
       logger.e(e);
       _isLoggingOut = false;
     }
   }
 
-  void resetAuthProvider(){
+  //TODO - merge with signOut()?
+  void resetAuthProvider() {
     _user = null;
     _googleSignInUser = null;
     _isAuthorized = false;
     _silentSignInFailed = false;
-    _googleSignIn.disconnect();
+    _isLoggingOut = false;
+    _isLoggingIntoFirebaseMobile = false;
+    _isAnonymous = false;
+    _isLoggingInAnonymously = false;
+    if (_googleSignInUser != null) _googleSignIn.disconnect();
+    notifyListeners();
   }
 }

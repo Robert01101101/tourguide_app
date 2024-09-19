@@ -39,7 +39,7 @@ dependencies:
   flutter_google_places_sdk: ^0.3.9
   cupertino_icons: ^1.0.2
   firebase_core: ^3.1.0
-  firebase_auth: ^5.1.0
+  firebase_auth: ^5.2.0
   firebase_vertexai: ^0.2.2+1
   google_sign_in: ^6.2.1
   cloud_firestore: ^5.0.1
@@ -83,6 +83,7 @@ dependencies:
   package_info_plus: ^8.0.2
   android_intent_plus: ^5.1.0
   font_awesome_flutter: ^10.7.0
+  google_maps_custom_marker: ^1.0.3
 
 
 dev_dependencies:

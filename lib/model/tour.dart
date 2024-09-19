@@ -10,38 +10,64 @@ part 'tour.g.dart';
 /// Mutable properties: upvotes, downvotes, isAddTourTile, isOfflineCreatedTour, thisUsersRating, imageToUpload
 @HiveType(typeId: 0)
 class Tour {
-  @HiveField(0) final String id;
-  @HiveField(1) final String name;
-  @HiveField(2) final String description;
-  @HiveField(3) final String city;
-  @HiveField(4) final String visibility;
-  @HiveField(5) final String imageUrl;
-  @HiveField(6) final DateTime? createdDateTime;
-  @HiveField(7) final DateTime? lastChangedDateTime;
-  @HiveField(8) final double latitude;
-  @HiveField(9) final double longitude;
-  @HiveField(10) final String placeId;
-  @HiveField(11) final String authorName;
-  @HiveField(12) final String authorId;
-  @HiveField(13) final String requestReviewStatus;
-  @HiveField(14) final List<TourguidePlace> tourguidePlaces;
-  @HiveField(15) final List<TourguideReport> reports;
-  @HiveField(18) final Map<String, dynamic>? tags;
+  @HiveField(0)
+  final String id;
+  @HiveField(1)
+  final String name;
+  @HiveField(2)
+  final String description;
+  @HiveField(3)
+  final String city;
+  @HiveField(4)
+  final String visibility;
+  @HiveField(5)
+  final String imageUrl;
+  @HiveField(6)
+  final DateTime? createdDateTime;
+  @HiveField(7)
+  final DateTime? lastChangedDateTime;
+  @HiveField(8)
+  final double latitude;
+  @HiveField(9)
+  final double longitude;
+  @HiveField(10)
+  final String placeId;
+  @HiveField(11)
+  final String authorName;
+  @HiveField(12)
+  final String authorId;
+  @HiveField(13)
+  final String requestReviewStatus;
+  @HiveField(14)
+  final List<TourguidePlace> tourguidePlaces;
+  @HiveField(15)
+  final List<TourguideReport> reports;
+  @HiveField(18)
+  final Map<String, dynamic>? tags;
+
   /// mutable AND stored in Firestore
-  @HiveField(16) int upvotes;
+  @HiveField(16)
+  int upvotes;
+
   /// mutable AND stored in Firestore
-  @HiveField(17) int downvotes;
+  @HiveField(17)
+  int downvotes;
 
   /// mutable, NOT stored in Firestore, indicates add tour button (dirty)
   bool? isAddTourTile;
+
   /// mutable, NOT stored in Firestore, indicates this is an offline tour about to be uploaded
   bool? isOfflineCreatedTour;
+
   /// mutable, NOT stored in Firestore, Track this user's rating
   int? thisUsersRating;
+
   /// mutable, NOT stored in Firestore, image file downloaded or ready for upload
   File? imageFile;
+
   /// mutable, NOT stored in Firestore, image file to upload (web only)
   XFile? imageFileToUploadWeb;
+
   /// mutable, NOT stored in Firestore, request media re-downloads for for this tour
   bool requestMediaRedownload = false;
 
@@ -101,10 +127,8 @@ class Tour {
   }
 
   factory Tour.isAddTourTile() {
-    Tour addTourTile = Tour.empty().copyWith(
-        id: 'addTourTile',
-        name: 'Add Tour',
-        isAddTourTile: true);
+    Tour addTourTile = Tour.empty()
+        .copyWith(id: 'addTourTile', name: 'Add Tour', isAddTourTile: true);
     return addTourTile;
   }
 
@@ -241,7 +265,8 @@ class Tour {
   }
 
   @override
-  bool operator ==(Object other) {  //compare tours by id (more performant)
+  bool operator ==(Object other) {
+    //compare tours by id (more performant)
     if (identical(this, other)) return true;
     if (runtimeType != other.runtimeType) return false;
     return other is Tour && other.id == id;
@@ -279,9 +304,3 @@ class Tour {
     return 'Tour{id: $id, name: $name, description: $description, city: $city, visibility: $visibility, imageUrl: $imageUrl, createdDateTime: $createdDateTime, lastChangedDateTime: $lastChangedDateTime, latitude: $latitude, longitude: $longitude, placeId: $placeId, authorName: $authorName, authorId: $authorId, reports:${reports.toString()}, requestReviewStatus: $requestReviewStatus, upvotes: $upvotes, downvotes: $downvotes, isAddTourTile: $isAddTourTile, isOfflineCreatedTour: $isOfflineCreatedTour, imageFile: $imageFile, tags: $tags, \ntourguidePlaces: ${tourguidePlaces.toString()}';
   }
 }
-
-
-
-
-
-

@@ -4,6 +4,7 @@ import 'dart:math';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:google_maps_custom_marker/google_maps_custom_marker.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:tourguide_app/main.dart';
@@ -24,15 +25,14 @@ class TourMap extends StatefulWidget {
   final double? height;
   final double? heightWeb;
 
-  const TourMap({
-    super.key,
-    required this.tourMapController,
-    required this.tour,
-    this.mapKey,
-    this.mapCurrentlyPinnedAtTop,
-    this.height,
-    this.heightWeb
-  });
+  const TourMap(
+      {super.key,
+      required this.tourMapController,
+      required this.tour,
+      this.mapKey,
+      this.mapCurrentlyPinnedAtTop,
+      this.height,
+      this.heightWeb});
 
   @override
   State<TourMap> createState() => _TourMapState();
@@ -54,28 +54,39 @@ class _TourMapState extends State<TourMap> {
       builder: (context, tourMapController, child) {
         //logger.t('TourMap - Consumer');
         return SizedBox(
-          height: kIsWeb && !CrossplatformUtils.isMobile() ? (widget.heightWeb ?? 450) : (widget.height ?? 350), // Adjust height as needed
+          height: kIsWeb && !CrossplatformUtils.isMobile()
+              ? (widget.heightWeb ?? 450)
+              : (widget.height ?? 350), // Adjust height as needed
           child: Stack(
             children: [
-              Container( //backdrop TODO - investigate why this is needed, otherwise sometimes I can see thru the map
+              Container(
+                //backdrop TODO - investigate why this is needed, otherwise sometimes I can see thru the map
                 color: const Color(0xffe8eaed),
               ),
               GoogleMap(
                 key: widget.mapKey,
-                gestureRecognizers: widget.mapCurrentlyPinnedAtTop ?? true ? _gestureRecognizersEager : _gestureRecognizersPan,
+                gestureRecognizers: widget.mapCurrentlyPinnedAtTop ?? true
+                    ? _gestureRecognizersEager
+                    : _gestureRecognizersPan,
                 mapType: MapType.normal,
                 myLocationEnabled: true,
-                initialCameraPosition: widget.tourMapController.currentCameraPosition,
+                initialCameraPosition:
+                    widget.tourMapController.currentCameraPosition,
                 markers: widget.tourMapController.markers,
                 polylines: widget.tourMapController.polylines,
                 onMapCreated: (GoogleMapController controller) async {
-                  if (!widget.tourMapController.mapControllerCompleter.isCompleted) {
-                    widget.tourMapController.mapControllerCompleter.complete(controller);
+                  if (!widget
+                      .tourMapController.mapControllerCompleter.isCompleted) {
+                    widget.tourMapController.mapControllerCompleter
+                        .complete(controller);
                   } else {
-                    final GoogleMapController mapController = await widget.tourMapController.mapControllerCompleter.future;
-                    mapController.moveCamera(CameraUpdate.newCameraPosition(widget.tourMapController.currentCameraPosition));
+                    final GoogleMapController mapController = await widget
+                        .tourMapController.mapControllerCompleter.future;
+                    mapController.moveCamera(CameraUpdate.newCameraPosition(
+                        widget.tourMapController.currentCameraPosition));
                   }
-                  await Future.delayed(const Duration(milliseconds: 200)); //avoid flicker
+                  await Future.delayed(
+                      const Duration(milliseconds: 200)); //avoid flicker
                   widget.tourMapController.setLoading(false);
                 },
                 onCameraMove: (CameraPosition position) {
@@ -101,22 +112,29 @@ class _TourMapState extends State<TourMap> {
                     height: 42,
                     child: RawMaterialButton(
                       onPressed: () async {
-                        final controller = await widget.tourMapController.mapControllerCompleter.future;
-                        widget.tourMapController.setFullScreen(!widget.tourMapController.isFullScreen);
+                        final controller = await widget
+                            .tourMapController.mapControllerCompleter.future;
+                        widget.tourMapController.setFullScreen(
+                            !widget.tourMapController.isFullScreen);
                         widget.tourMapController.setLoadingFullscreen(true);
                         controller.moveCamera(
-                          CameraUpdate.newCameraPosition(widget.tourMapController.currentCameraPosition),
+                          CameraUpdate.newCameraPosition(
+                              widget.tourMapController.currentCameraPosition),
                         );
                       },
                       elevation: 1.0,
                       fillColor: Colors.white.withOpacity(0.8),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8.0), // Adjust the radius as needed
+                        borderRadius: BorderRadius.circular(
+                            8.0), // Adjust the radius as needed
                       ),
                       child: Padding(
-                        padding: const EdgeInsets.all(1.0), // Adjust inner padding as needed
+                        padding: const EdgeInsets.all(
+                            1.0), // Adjust inner padding as needed
                         child: Icon(
-                          widget.tourMapController.isFullScreen ? Icons.fullscreen_exit : Icons.fullscreen,
+                          widget.tourMapController.isFullScreen
+                              ? Icons.fullscreen_exit
+                              : Icons.fullscreen,
                           color: const Color(0xff666666),
                           size: 32.0, // Adjust the size of the icon as needed
                         ),
@@ -132,22 +150,18 @@ class _TourMapState extends State<TourMap> {
   }
 }
 
-
-
-
 class TourMapFullscreen extends StatefulWidget {
   final TourMapController tourMapController;
   final Tour tour;
   final Widget child;
   final bool? alwaysShowAppBar;
 
-  const TourMapFullscreen({
-    super.key,
-    required this.tourMapController,
-    required this.tour,
-    required this.child,
-    this.alwaysShowAppBar
-  });
+  const TourMapFullscreen(
+      {super.key,
+      required this.tourMapController,
+      required this.tour,
+      required this.child,
+      this.alwaysShowAppBar});
 
   @override
   State<TourMapFullscreen> createState() => _TourMapFullscreenState();
@@ -165,31 +179,38 @@ class _TourMapFullscreenState extends State<TourMapFullscreen> {
         builder: (context, tourMapController, child) {
           //logger.t('TourMapFullscreen - Consumer');
           return Scaffold(
-            appBar: widget.tourMapController.isFullScreen || (widget.alwaysShowAppBar ?? false) ? AppBar(
-              title: Text(widget.tour.name),
-              actions:
-              [
-                if (!(widget.tour.isOfflineCreatedTour ?? false))
-                  IconButton(
-                    icon: const Icon(Icons.more_vert),
-                    onPressed: () {
-                      // Show options menu
-                      widget.tourMapController.triggerShowOptionsDialog(context);
-                    },
-                  ),
-              ],
-              leading: widget.tourMapController.isFullScreen ? IconButton(
-                icon: const Icon(Icons.arrow_back),
-                onPressed: () {
-                  logger.t('onPressed - isFullScreen=${widget.tourMapController.isFullScreen}');
-                  widget.tourMapController.setFullScreen(false);
-                },
-              ) : null,
-            ) : null,
+            appBar: widget.tourMapController.isFullScreen ||
+                    (widget.alwaysShowAppBar ?? false)
+                ? AppBar(
+                    title: Text(widget.tour.name),
+                    actions: [
+                      if (!(widget.tour.isOfflineCreatedTour ?? false))
+                        IconButton(
+                          icon: const Icon(Icons.more_vert),
+                          onPressed: () {
+                            // Show options menu
+                            widget.tourMapController
+                                .triggerShowOptionsDialog(context);
+                          },
+                        ),
+                    ],
+                    leading: widget.tourMapController.isFullScreen
+                        ? IconButton(
+                            icon: const Icon(Icons.arrow_back),
+                            onPressed: () {
+                              logger.t(
+                                  'onPressed - isFullScreen=${widget.tourMapController.isFullScreen}');
+                              widget.tourMapController.setFullScreen(false);
+                            },
+                          )
+                        : null,
+                  )
+                : null,
             body: PopScope(
-                canPop: !widget.tourMapController.isFullScreen || !(widget.alwaysShowAppBar ?? false),
+                canPop: !widget.tourMapController.isFullScreen ||
+                    !(widget.alwaysShowAppBar ?? false),
                 onPopInvoked: (bool didPop) {
-                  if (!didPop && widget.tourMapController.isFullScreen){
+                  if (!didPop && widget.tourMapController.isFullScreen) {
                     widget.tourMapController.setFullScreen(false);
                   }
                 },
@@ -202,25 +223,39 @@ class _TourMapFullscreenState extends State<TourMapFullscreen> {
                           children: [
                             GoogleMap(
                               mapType: MapType.normal,
-                              initialCameraPosition: widget.tourMapController.currentCameraPosition,
+                              initialCameraPosition: widget
+                                  .tourMapController.currentCameraPosition,
                               markers: widget.tourMapController.markers,
                               polylines: widget.tourMapController.polylines,
                               myLocationEnabled: true,
-                              onMapCreated: (GoogleMapController controller) async {
-                                if (!widget.tourMapController.mapControllerCompleter.isCompleted) {
-                                  widget.tourMapController.mapControllerCompleter.complete(controller);
+                              onMapCreated:
+                                  (GoogleMapController controller) async {
+                                if (!widget.tourMapController
+                                    .mapControllerCompleter.isCompleted) {
+                                  widget
+                                      .tourMapController.mapControllerCompleter
+                                      .complete(controller);
                                 } else {
-                                  final GoogleMapController mapController = await widget.tourMapController.mapControllerCompleter.future;
-                                  mapController.moveCamera(CameraUpdate.newCameraPosition(widget.tourMapController.currentCameraPosition));
+                                  final GoogleMapController mapController =
+                                      await widget.tourMapController
+                                          .mapControllerCompleter.future;
+                                  mapController.moveCamera(
+                                      CameraUpdate.newCameraPosition(widget
+                                          .tourMapController
+                                          .currentCameraPosition));
                                 }
-                                await Future.delayed(const Duration(milliseconds: 300)); //avoid flicker
-                                widget.tourMapController.setLoadingFullscreen(false);
+                                await Future.delayed(const Duration(
+                                    milliseconds: 300)); //avoid flicker
+                                widget.tourMapController
+                                    .setLoadingFullscreen(false);
                               },
                               onCameraMove: (CameraPosition position) {
-                                widget.tourMapController.setCurrentCameraPosition(position);
+                                widget.tourMapController
+                                    .setCurrentCameraPosition(position);
                               },
                               onCameraIdle: () {
-                                widget.tourMapController.notifyCurrentCameraPosition();
+                                widget.tourMapController
+                                    .notifyCurrentCameraPosition();
                               },
                             ),
                             if (widget.tourMapController.isLoadingFullscreen)
@@ -239,23 +274,35 @@ class _TourMapFullscreenState extends State<TourMapFullscreen> {
                                   height: 42,
                                   child: RawMaterialButton(
                                     onPressed: () async {
-                                      final controller = await widget.tourMapController.mapControllerCompleter.future;
-                                      widget.tourMapController.setFullScreen(!widget.tourMapController.isFullScreen);
+                                      final controller = await widget
+                                          .tourMapController
+                                          .mapControllerCompleter
+                                          .future;
+                                      widget.tourMapController.setFullScreen(
+                                          !widget
+                                              .tourMapController.isFullScreen);
                                       controller.moveCamera(
-                                        CameraUpdate.newCameraPosition(widget.tourMapController.currentCameraPosition),
+                                        CameraUpdate.newCameraPosition(widget
+                                            .tourMapController
+                                            .currentCameraPosition),
                                       );
                                     },
                                     elevation: 1.0,
                                     fillColor: Colors.white.withOpacity(0.9),
                                     shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(8.0), // Adjust the radius as needed
+                                      borderRadius: BorderRadius.circular(
+                                          8.0), // Adjust the radius as needed
                                     ),
                                     child: Padding(
-                                      padding: const EdgeInsets.all(1.0), // Adjust inner padding as needed
+                                      padding: const EdgeInsets.all(
+                                          1.0), // Adjust inner padding as needed
                                       child: Icon(
-                                        widget.tourMapController.isFullScreen ? Icons.fullscreen_exit : Icons.fullscreen,
+                                        widget.tourMapController.isFullScreen
+                                            ? Icons.fullscreen_exit
+                                            : Icons.fullscreen,
                                         color: const Color(0xff666666),
-                                        size: 32.0, // Adjust the size of the icon as needed
+                                        size:
+                                            32.0, // Adjust the size of the icon as needed
                                       ),
                                     ),
                                   ),
@@ -265,8 +312,7 @@ class _TourMapFullscreenState extends State<TourMapFullscreen> {
                         ),
                       ),
                   ],
-                )
-            ),
+                )),
           );
         },
       ),
@@ -274,15 +320,13 @@ class _TourMapFullscreenState extends State<TourMapFullscreen> {
   }
 }
 
-
-
-
 class TourMapController with ChangeNotifier {
   //#region FIELDS
   // Private fields
   Set<Marker> _markers = Set<Marker>();
   Set<Polyline> _polylines = Set<Polyline>();
-  final Completer<GoogleMapController> _mapControllerCompleter = Completer<GoogleMapController>();
+  final Completer<GoogleMapController> _mapControllerCompleter =
+      Completer<GoogleMapController>();
   bool _isFullScreen = false;
   bool _isLoading = true;
   bool _isLoadingFullscreen = true;
@@ -294,7 +338,8 @@ class TourMapController with ChangeNotifier {
   // Public fields
   Set<Marker> get markers => _markers;
   Set<Polyline> get polylines => _polylines;
-  Completer<GoogleMapController> get mapControllerCompleter => _mapControllerCompleter;
+  Completer<GoogleMapController> get mapControllerCompleter =>
+      _mapControllerCompleter;
   bool get isFullScreen => _isFullScreen;
   bool get isLoading => _isLoading;
   bool get isLoadingFullscreen => _isLoadingFullscreen;
@@ -330,8 +375,7 @@ class TourMapController with ChangeNotifier {
   void initTourMapController({
     required Tour tour,
     required Color primaryColor,
-    required Function(int step)
-    onInfoTapped,
+    required Function(int step) onInfoTapped,
     required Function(BuildContext context) showOptionsDialog,
     required String idToken,
   }) {
@@ -351,6 +395,8 @@ class TourMapController with ChangeNotifier {
       // Your logic to move the camera and highlight marker
       _moveCameraToMarkerAndHighlightMarker(step);
     };
+
+    _showOptionsDialog = showOptionsDialog;
   }
 
   @override
@@ -360,7 +406,7 @@ class TourMapController with ChangeNotifier {
     resetTourMapController();
   }
 
-  void resetTourMapController(){
+  void resetTourMapController() {
     logger.t('resetTourMapController - hashCode=$hashCode');
     moveCameraToMarkerAndHighlightMarker = null;
     _tour = Tour.empty();
@@ -379,7 +425,7 @@ class TourMapController with ChangeNotifier {
   }
 
   void triggerShowOptionsDialog(BuildContext context) {
-    //logger.t('triggerShowOptionsDialog');
+    //logger.t('triggerShowOptionsDialog - hashCode=$hashCode, context=$context, _showOptionsDialog=$_showOptionsDialog');
     if (_showOptionsDialog != null) {
       _showOptionsDialog!(context);
     }
@@ -437,8 +483,30 @@ class TourMapController with ChangeNotifier {
         TourguidePlace tourguidePlace = _tour.tourguidePlaces[i];
 
         // Create default and highlighted bitmaps
-        final BitmapDescriptor defaultIcon = await MapUtils.createNumberedMarkerBitmap(i + 1);
-        final BitmapDescriptor highlightedIcon = await MapUtils.createNumberedMarkerBitmap(i + 1, color: _primaryColor!);
+        final BitmapDescriptorWithAnchor defaultIconWithAnchor =
+            await GoogleMapsCustomMarker.createCustomBitmap(
+          shape: MarkerShape.circle,
+          title: '${i + 1}',
+          textSize: 32,
+          backgroundColor: Colors.blue,
+          circleOptions: CircleMarkerOptions(diameter: 52),
+          imagePixelRatio: 2,
+        );
+        final BitmapDescriptorWithAnchor defaultIconWithAnchorHighlighted =
+            await GoogleMapsCustomMarker.createCustomBitmap(
+          shape: MarkerShape.circle,
+          title: '${i + 1}',
+          backgroundColor: _primaryColor!,
+          textSize: 48,
+          shadowColor: Colors.black.withOpacity(0.7),
+          shadowBlur: 24,
+          circleOptions: CircleMarkerOptions(diameter: 64),
+          imagePixelRatio: 2,
+        );
+        final BitmapDescriptor defaultIcon =
+            defaultIconWithAnchor.bitmapDescriptor;
+        final BitmapDescriptor highlightedIcon =
+            defaultIconWithAnchorHighlighted.bitmapDescriptor;
 
         // Store the bitmaps in the lists
         _defaultMarkerBitmaps.add(defaultIcon);
@@ -449,6 +517,7 @@ class TourMapController with ChangeNotifier {
             markerId: MarkerId(tourguidePlace.googleMapPlaceId),
             position: LatLng(tourguidePlace.latitude, tourguidePlace.longitude),
             icon: defaultIcon,
+            anchor: defaultIconWithAnchor.anchorOffset, //TODO: fix bug that causes circle to be anchored to btm om web - use pin?
             infoWindow: InfoWindow(
               title: tourguidePlace.title,
               snippet: tourguidePlace.description,
@@ -464,8 +533,11 @@ class TourMapController with ChangeNotifier {
       }
 
       //set zoom
-      LatLngBounds bounds = MapUtils.createLatLngBounds(_tour.tourguidePlaces.map((place) => LatLng(place.latitude, place.longitude)).toList());
-      final GoogleMapController controller = await _mapControllerCompleter.future;
+      LatLngBounds bounds = MapUtils.createLatLngBounds(_tour.tourguidePlaces
+          .map((place) => LatLng(place.latitude, place.longitude))
+          .toList());
+      final GoogleMapController controller =
+          await _mapControllerCompleter.future;
       controller.moveCamera(CameraUpdate.newLatLngBounds(bounds, 50));
 
       // Fetch directions and draw polyline
@@ -491,11 +563,12 @@ class TourMapController with ChangeNotifier {
       //TODO: Address higher rate billing for 10+ waypoints
       // Create waypoints string for API request
 
-      if (waypoints.length > 2){
+      if (waypoints.length > 2) {
         /*waypointsString = waypoints.sublist(1, waypoints.length - 1)
           .map((point) => 'via:${point.latitude},${point.longitude}')
           .join('|');*/
-        waypointsString = waypoints.sublist(1, waypoints.length - 1)
+        waypointsString = waypoints
+            .sublist(1, waypoints.length - 1)
             .map((point) => 'via:place_id:${point}')
             .join('|');
       }
@@ -507,9 +580,9 @@ class TourMapController with ChangeNotifier {
 
     //TODO: Sometimes placeId works better, sometimes lat long, with placeIds it seems walking mode can be tricky -> address
 
-
     try {
-      const String functionUrl = 'https://fetchdirections-cmlu32z3qq-uc.a.run.app';
+      const String functionUrl =
+          'https://fetchdirections-cmlu32z3qq-uc.a.run.app';
       final Uri uri = Uri.parse(functionUrl).replace(
         queryParameters: {
           'originPlaceId': waypoints.first,
@@ -577,7 +650,8 @@ class TourMapController with ChangeNotifier {
         }
 
         // Ensure the index is strictly increasing
-        if (waypointIndices.isNotEmpty && closestIndex <= waypointIndices.last) {
+        if (waypointIndices.isNotEmpty &&
+            closestIndex <= waypointIndices.last) {
           // Adjust the index to be greater than the previous one
           closestIndex = waypointIndices.last + 1;
         }
@@ -595,7 +669,8 @@ class TourMapController with ChangeNotifier {
     }
   }
 
-  List<List<LatLng>> _createRouteSegments(List<LatLng> points, List<LatLng> waypoints) {
+  List<List<LatLng>> _createRouteSegments(
+      List<LatLng> points, List<LatLng> waypoints) {
     logger.t('_createRouteSegments');
     try {
       List<List<LatLng>> segments = [];
@@ -618,7 +693,8 @@ class TourMapController with ChangeNotifier {
       if (lastSegmentStart < points.length) {
         segments.add(points.sublist(lastSegmentStart, points.length));
       } else {
-        logger.w('Skipping last segment creation due to invalid lastSegmentStart=$lastSegmentStart');
+        logger.w(
+            'Skipping last segment creation due to invalid lastSegmentStart=$lastSegmentStart');
       }
 
       return segments;
@@ -631,7 +707,7 @@ class TourMapController with ChangeNotifier {
   List<LatLng> _decodePolyline(String encoded) {
     try {
       logger.t('_decodePolyline');
-      if (kIsWeb){
+      if (kIsWeb) {
         List<LatLng> poly = [];
         int index = 0, len = encoded.length;
         int lat = 0, lng = 0;
@@ -731,30 +807,38 @@ class TourMapController with ChangeNotifier {
     if (index >= 0 && index < _markers.length) {
       // Update the marker with the new bitmap
       _markers = _markers.map((marker) {
-        if (marker.markerId.value == _tour.tourguidePlaces[index].googleMapPlaceId) {
+        if (marker.markerId.value ==
+            _tour.tourguidePlaces[index].googleMapPlaceId) {
           // Use the highlighted bitmap for the selected marker
           return marker.copyWith(iconParam: _highlightedMarkerBitmaps[index]);
         } else {
           // Use the default bitmap for other markers
-          return marker.copyWith(iconParam: _defaultMarkerBitmaps[_markers.toList().indexOf(marker)]);
+          return marker.copyWith(
+              iconParam:
+                  _defaultMarkerBitmaps[_markers.toList().indexOf(marker)]);
         }
       }).toSet();
 
-      final marker = _markers.elementAt(index); // Get the marker at the specified index
-      final targetPosition = LatLng(marker.position.latitude, marker.position.longitude);
+      final marker =
+          _markers.elementAt(index); // Get the marker at the specified index
+      final targetPosition =
+          LatLng(marker.position.latitude, marker.position.longitude);
 
       LatLngBounds bounds;
 
       if (index == 0) {
         // If it's the first marker, just zoom into that marker
         bounds = LatLngBounds(
-          southwest: LatLng(marker.position.latitude - 0.005, marker.position.longitude - 0.005),
-          northeast: LatLng(marker.position.latitude + 0.005, marker.position.longitude + 0.005),
+          southwest: LatLng(marker.position.latitude - 0.005,
+              marker.position.longitude - 0.005),
+          northeast: LatLng(marker.position.latitude + 0.005,
+              marker.position.longitude + 0.005),
         );
       } else {
         // Get the previous marker
         final previousMarker = _markers.elementAt(index - 1);
-        final previousPosition = LatLng(previousMarker.position.latitude, previousMarker.position.longitude);
+        final previousPosition = LatLng(previousMarker.position.latitude,
+            previousMarker.position.longitude);
 
         // Create bounds to cover both markers
         bounds = LatLngBounds(
@@ -769,12 +853,14 @@ class TourMapController with ChangeNotifier {
         );
       }
 
-      final GoogleMapController mapController = await _mapControllerCompleter.future;
+      final GoogleMapController mapController =
+          await _mapControllerCompleter.future;
 
       // Move the camera to the bounds
-      mapController.animateCamera(CameraUpdate.newLatLngBounds(bounds, 100)); // The padding is set to 100
+      mapController.animateCamera(CameraUpdate.newLatLngBounds(
+          bounds, 100)); // The padding is set to 100
 
-      _highlightSegment(index-1);
+      _highlightSegment(index - 1);
     }
   }
 
@@ -800,4 +886,3 @@ class TourMapController with ChangeNotifier {
   }
   //# endregion MAP
 }
-

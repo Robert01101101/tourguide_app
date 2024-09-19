@@ -9,6 +9,7 @@ class TtsText extends StatefulWidget {
   final String text;
   final TtsService ttsService;
   final bool currentlyPlayingItem;
+
   /// Callback function to be called when a word is tapped, returns remaining section (word plus text after)
   final void Function(String tappedWord)? onWordTapped;
 
@@ -37,9 +38,12 @@ class _TtsTextState extends State<TtsText> {
   void initState() {
     super.initState();
 
-    _progressSubscription = widget.ttsService.progressStream.listen((progressData) {
+    _progressSubscription =
+        widget.ttsService.progressStream.listen((progressData) {
       if (!widget.currentlyPlayingItem) {
-        if (startOffset != 0 || endOffset != 0 || tappedStringCharacterOffset != 0) resetTtsViz();
+        if (startOffset != 0 ||
+            endOffset != 0 ||
+            tappedStringCharacterOffset != 0) resetTtsViz();
         return;
       }
 
@@ -49,7 +53,8 @@ class _TtsTextState extends State<TtsText> {
       });
     });
     //Listen to tts state changes
-    _ttsSubscription = widget.ttsService.ttsStateStream.listen((TtsState state) {
+    _ttsSubscription =
+        widget.ttsService.ttsStateStream.listen((TtsState state) {
       if (_ignoreStopEvent) {
         _ignoreStopEvent = false;
         return;
@@ -78,7 +83,8 @@ class _TtsTextState extends State<TtsText> {
 
   void _detectWordTapped(Offset tapPosition) {
     if (widget.onWordTapped == null) return;
-    final renderBox = _richTextKey.currentContext?.findRenderObject() as RenderBox?;
+    final renderBox =
+        _richTextKey.currentContext?.findRenderObject() as RenderBox?;
     if (renderBox == null) return;
 
     final localPosition = renderBox.globalToLocal(tapPosition);
@@ -91,13 +97,18 @@ class _TtsTextState extends State<TtsText> {
 
     if (wordRange != null) {
       int fixedWordRangeStart = wordRange.start;
-      while (fixedWordRangeStart > 0 && !RegExp(r'\s|,|\.|\n').hasMatch(widget.text[fixedWordRangeStart - 1])) {
+      while (fixedWordRangeStart > 0 &&
+          !RegExp(r'\s|,|\.|\n')
+              .hasMatch(widget.text[fixedWordRangeStart - 1])) {
         fixedWordRangeStart--;
       }
       tappedStringCharacterOffset = fixedWordRangeStart;
-      final tappedWord = widget.text.substring(fixedWordRangeStart, wordRange.end);
-      final remainingSubstring = widget.text.substring(fixedWordRangeStart,  widget.text.length-1);
-      logger.t('Tapped word: $tappedWord\n remainingSubstring: $remainingSubstring');
+      final tappedWord =
+          widget.text.substring(fixedWordRangeStart, wordRange.end);
+      final remainingSubstring =
+          widget.text.substring(fixedWordRangeStart, widget.text.length - 1);
+      logger.t(
+          'Tapped word: $tappedWord\n remainingSubstring: $remainingSubstring');
 
       _ignoreStopEvent = true;
       widget.onWordTapped!(remainingSubstring);
@@ -130,20 +141,23 @@ class _TtsTextState extends State<TtsText> {
     }
 
     return MouseRegion(
-      cursor: widget.currentlyPlayingItem ? SystemMouseCursors.click : SystemMouseCursors.text,
+      cursor: widget.currentlyPlayingItem
+          ? SystemMouseCursors.click
+          : SystemMouseCursors.text,
       child: GestureDetector(
         onTapUp: (details) {
-          if (widget.currentlyPlayingItem) _detectWordTapped(details.globalPosition);
+          if (widget.currentlyPlayingItem)
+            _detectWordTapped(details.globalPosition);
         },
         child: Container(
-          key: _richTextKey,
-          child: Text.rich(
-                  softWrap: true,
-                  TextSpan(
-                    children:  _buildTextSpans(widget.text, startOffset + tappedStringCharacterOffset, endOffset + tappedStringCharacterOffset)
-                  )
-                )
-        ),
+            key: _richTextKey,
+            child: Text.rich(
+                softWrap: true,
+                TextSpan(
+                    children: _buildTextSpans(
+                        widget.text,
+                        startOffset + tappedStringCharacterOffset,
+                        endOffset + tappedStringCharacterOffset)))),
       ),
     );
   }
@@ -166,9 +180,10 @@ class _TtsTextState extends State<TtsText> {
       TextSpan(
         text: text.substring(startOffset, endOffset),
         style: Theme.of(context).textTheme.bodyMedium!.copyWith(
-          fontWeight: FontWeight.w900,
-          background: Paint()..color = Theme.of(context).colorScheme.tertiaryContainer,
-        ),
+              fontWeight: FontWeight.w900,
+              background: Paint()
+                ..color = Theme.of(context).colorScheme.tertiaryContainer,
+            ),
       ),
     );
 
@@ -177,7 +192,6 @@ class _TtsTextState extends State<TtsText> {
         TextSpan(
           text: text.substring(endOffset),
           style: Theme.of(context).textTheme.bodyMedium,
-
         ),
       );
     }

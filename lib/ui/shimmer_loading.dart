@@ -61,7 +61,7 @@ class _ShimmerLoadingState extends State<ShimmerLoading> {
     final gradient = shimmer.gradient;
     // Ensure the RenderBox is available.
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted){
+      if (mounted) {
         final renderObject = context.findRenderObject();
         if (renderObject is RenderBox) {
           final offsetWithinShimmer = shimmer.getDescendantOffset(
@@ -74,7 +74,6 @@ class _ShimmerLoadingState extends State<ShimmerLoading> {
         }
       }
     });
-
 
     return ShaderMask(
       blendMode: BlendMode.srcATop,
@@ -138,13 +137,13 @@ class ShimmerState extends State<Shimmer> with SingleTickerProviderStateMixin {
   }
 
   Gradient get gradient => LinearGradient(
-    colors: widget.linearGradient.colors,
-    stops: widget.linearGradient.stops,
-    begin: widget.linearGradient.begin,
-    end: widget.linearGradient.end,
-    transform:
-    _SlidingGradientTransform(slidePercent: _shimmerController.value),
-  );
+        colors: widget.linearGradient.colors,
+        stops: widget.linearGradient.stops,
+        begin: widget.linearGradient.begin,
+        end: widget.linearGradient.end,
+        transform:
+            _SlidingGradientTransform(slidePercent: _shimmerController.value),
+      );
 
   bool get isSized =>
       (context.findRenderObject() as RenderBox?)?.hasSize ?? false;

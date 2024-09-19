@@ -17,6 +17,7 @@ class TourProvider with ChangeNotifier {
   List<String> _globalTours = List.empty();
   List<String> _userCreatedTours = List.empty();
   List<String> _userSavedTours = List.empty();
+
   /// Not in any particular order, as it is assembled from the individual fetches which each have their own sorting
   Map<String, Tour> _allCachedTours = {};
   Tour? _selectedTour;
@@ -43,46 +44,79 @@ class TourProvider with ChangeNotifier {
     return tourIds.map((id) => _allCachedTours[id]!).toList();
   }
 
-
-
-  Future<void> fetchAndSetTours(double userLatitude, double userLongitude, String userId, List<String> userSavedTours) async {
+  Future<void> fetchAndSetTours(double userLatitude, double userLongitude,
+      String userId, List<String> userSavedTours) async {
     try {
       logger.t("fetchAndSetTours ${getFormattedTime()}");
       _isLoadingTours = true;
 
       // Step 1: Get tours from Hive
-      if (!kIsWeb){
-        _popularTours = _processToursAndUpdateCachedTours(await TourService.getToursFromHive(TourService.popularToursBoxName), userId);
-        _localTours = _processToursAndUpdateCachedTours(await TourService.getToursFromHive(TourService.localToursBoxName), userId);
-        _globalTours = _processToursAndUpdateCachedTours(await TourService.getToursFromHive(TourService.globalToursBoxName), userId);
-        _userCreatedTours = _processToursAndUpdateCachedTours(await TourService.getToursFromHive(TourService.userCreatedToursBoxName), userId);
-        _userSavedTours = _processToursAndUpdateCachedTours(await TourService.getToursFromHive(TourService.userSavedToursBoxName), userId);
-        logger.t("fetchAndSetTours - finished getting tours from Hive ${getFormattedTime()}");
+      if (!kIsWeb) {
+        _popularTours = _processToursAndUpdateCachedTours(
+            await TourService.getToursFromHive(TourService.popularToursBoxName),
+            userId);
+        _localTours = _processToursAndUpdateCachedTours(
+            await TourService.getToursFromHive(TourService.localToursBoxName),
+            userId);
+        _globalTours = _processToursAndUpdateCachedTours(
+            await TourService.getToursFromHive(TourService.globalToursBoxName),
+            userId);
+        _userCreatedTours = _processToursAndUpdateCachedTours(
+            await TourService.getToursFromHive(
+                TourService.userCreatedToursBoxName),
+            userId);
+        _userSavedTours = _processToursAndUpdateCachedTours(
+            await TourService.getToursFromHive(
+                TourService.userSavedToursBoxName),
+            userId);
+        logger.t(
+            "fetchAndSetTours - finished getting tours from Hive ${getFormattedTime()}");
         notifyListeners();
       }
 
       // Step 2: Fetch updated tours from Firestore
-      _popularTours = _processToursAndUpdateCachedTours(await TourService.fetchPopularToursNearYou(userLatitude, userLongitude), userId, replaceCached: true);
-      _localTours = _processToursAndUpdateCachedTours(await TourService.fetchLocalTours(userLatitude, userLongitude), userId, replaceCached: true);
-      _globalTours = _processToursAndUpdateCachedTours(await TourService.fetchPopularToursAroundTheWorld(), userId, replaceCached: true);
-      _userCreatedTours = _processToursAndUpdateCachedTours(await TourService.fetchUserCreatedTours(userId), userId, replaceCached: true);
-      _userSavedTours = _processToursAndUpdateCachedTours(await TourService.fetchUserSavedTours(userSavedTours), userId, replaceCached: true);
+      _popularTours = _processToursAndUpdateCachedTours(
+          await TourService.fetchPopularToursNearYou(
+              userLatitude, userLongitude),
+          userId,
+          replaceCached: true);
+      _localTours = _processToursAndUpdateCachedTours(
+          await TourService.fetchLocalTours(userLatitude, userLongitude),
+          userId,
+          replaceCached: true);
+      _globalTours = _processToursAndUpdateCachedTours(
+          await TourService.fetchPopularToursAroundTheWorld(), userId,
+          replaceCached: true);
+      _userCreatedTours = _processToursAndUpdateCachedTours(
+          await TourService.fetchUserCreatedTours(userId), userId,
+          replaceCached: true);
+      _userSavedTours = _processToursAndUpdateCachedTours(
+          await TourService.fetchUserSavedTours(userSavedTours), userId,
+          replaceCached: true);
       notifyListeners();
 
       // Step 3: Update Hive with new data  //TODO: optimize
-      if (!kIsWeb){
-        await TourService.overwriteToursInHive(TourService.popularToursBoxName, getTours(_popularTours));
-        await TourService.overwriteToursInHive(TourService.localToursBoxName, getTours(_localTours));
-        await TourService.overwriteToursInHive(TourService.globalToursBoxName, getTours(_globalTours));
-        await TourService.overwriteToursInHive(TourService.userCreatedToursBoxName, getTours(_userCreatedTours));
-        await TourService.overwriteToursInHive(TourService.userSavedToursBoxName, getTours(_userSavedTours));
+      if (!kIsWeb) {
+        await TourService.overwriteToursInHive(
+            TourService.popularToursBoxName, getTours(_popularTours));
+        await TourService.overwriteToursInHive(
+            TourService.localToursBoxName, getTours(_localTours));
+        await TourService.overwriteToursInHive(
+            TourService.globalToursBoxName, getTours(_globalTours));
+        await TourService.overwriteToursInHive(
+            TourService.userCreatedToursBoxName, getTours(_userCreatedTours));
+        await TourService.overwriteToursInHive(
+            TourService.userSavedToursBoxName, getTours(_userSavedTours));
       }
       _formatListsAndGetTourRatings(userId);
 
       // Step 4: Download images in parallel
-      logger.t("fetchAndSetTours - starting image downloads ${getFormattedTime()}");
-      await Future.wait(_allCachedTours.values.map((tour) => _setTourImage(tour)));
-      logger.t("fetchAndSetTours - image downloads complete ${getFormattedTime()}");
+      logger.t(
+          "fetchAndSetTours - starting image downloads ${getFormattedTime()}");
+      await Future.wait(
+          _allCachedTours.values.map((tour) => _setTourImage(tour)));
+      logger.t(
+          "fetchAndSetTours - image downloads complete ${getFormattedTime()}");
       notifyListeners();
     } catch (error, stack) {
       logger.e('Error fetching tours: $error, $stack');
@@ -97,10 +131,12 @@ class TourProvider with ChangeNotifier {
     if (localImage != null && !tour.requestMediaRedownload) {
       tour.imageFile = localImage;
     } else {
-      if (tour.requestMediaRedownload) logger.t('Requesting image redownload: ${tour.id}');
-      if (!kIsWeb){
+      if (tour.requestMediaRedownload)
+        logger.t('Requesting image redownload: ${tour.id}');
+      if (!kIsWeb) {
         await TourService.downloadAndSaveImage(tour.imageUrl, tour.id);
-        final File? downloadedImage = await TourService.getLocalImageFile(tour.id);
+        final File? downloadedImage =
+            await TourService.getLocalImageFile(tour.id);
         if (downloadedImage != null) {
           tour.imageFile = downloadedImage;
         }
@@ -108,7 +144,9 @@ class TourProvider with ChangeNotifier {
     }
   }
 
-  List<String> _processToursAndUpdateCachedTours(List<Tour> tours, String userId, {bool replaceCached = false}) {
+  List<String> _processToursAndUpdateCachedTours(
+      List<Tour> tours, String userId,
+      {bool replaceCached = false}) {
     try {
       List<String> updatedTours = [];
       for (Tour tour in tours) {
@@ -121,9 +159,11 @@ class TourProvider with ChangeNotifier {
           // Use the existing tour instance from the cache, unless media redownload requested
           bool requestMediaRedownload = tour.lastChangedDateTime == null ||
               _allCachedTours[tour.id]!.lastChangedDateTime == null ||
-              tour.lastChangedDateTime!.isAfter(_allCachedTours[tour.id]!.lastChangedDateTime!);
+              tour.lastChangedDateTime!
+                  .isAfter(_allCachedTours[tour.id]!.lastChangedDateTime!);
           if (requestMediaRedownload) {
-            logger.t('${tour.id} needs media redownload, last changed: ${tour.lastChangedDateTime} vs cached ${_allCachedTours[tour.id]!.lastChangedDateTime}');
+            logger.t(
+                '${tour.id} needs media redownload, last changed: ${tour.lastChangedDateTime} vs cached ${_allCachedTours[tour.id]!.lastChangedDateTime}');
             tour.requestMediaRedownload = true;
             _allCachedTours[tour.id] = tour;
           } else {
@@ -154,23 +194,24 @@ class TourProvider with ChangeNotifier {
     if (_userCreatedTours.isEmpty) {
       _userCreatedTours.add(addTourTile.id);
     } else {
-      _userCreatedTours.insert(0,addTourTile.id);
+      _userCreatedTours.insert(0, addTourTile.id);
     }
     notifyListeners();
 
-    logger.t('_formatListsAndGetTourRatings - get ratings (count: ${_allCachedTours.length})');
+    logger.t(
+        '_formatListsAndGetTourRatings - get ratings (count: ${_allCachedTours.length})');
     await TourService.getUserRatingsForTours(_allCachedTours, userId);
     _isLoadingTours = false;
     notifyListeners();
   }
 
-  Future<void> deleteTour(Tour tour) async{
+  Future<void> deleteTour(Tour tour) async {
     await TourService.deleteTour(tour);
     removeTourFromCachedTours(tour);
     notifyListeners();
   }
 
-  void removeTourFromCachedTours(Tour tour) async{
+  void removeTourFromCachedTours(Tour tour) async {
     _allCachedTours.remove(tour.id);
     _popularTours.remove(tour.id);
     _globalTours.remove(tour.id);
@@ -200,7 +241,7 @@ class TourProvider with ChangeNotifier {
     return userCreatedTours.contains(tour.id);
   }
 
-  Future<void> uploadTour(Tour tour) async{
+  Future<void> uploadTour(Tour tour) async {
     await TourService.uploadTour(tour);
     _allCachedTours[tour.id] = tour;
     _userCreatedTours.insert(1, tour.id);
@@ -208,7 +249,7 @@ class TourProvider with ChangeNotifier {
   }
 
   /// Updates the tour data in cache and firestore (for edits, reporting, etc)
-  Future<Tour> updateTour(Tour tour, {bool localUpdateOnly = false}) async{
+  Future<Tour> updateTour(Tour tour, {bool localUpdateOnly = false}) async {
     if (!localUpdateOnly) tour = await TourService.updateTour(tour);
     _allCachedTours[tour.id] = tour;
     notifyListeners();
@@ -216,7 +257,7 @@ class TourProvider with ChangeNotifier {
   }
 
   /// for logout
-  void resetTourProvider(){
+  void resetTourProvider() {
     _selectedTour = null;
     _isLoadingTours = false;
     _allCachedTours = {};
@@ -229,26 +270,31 @@ class TourProvider with ChangeNotifier {
   }
 
   //TODO: swap for approach where we use already cached list to avoid the first get call?
-  Future<void> updateAuthorNameForAllTheirTours(String authorId, String newAuthorName) async {
+  Future<void> updateAuthorNameForAllTheirTours(
+      String authorId, String newAuthorName) async {
     await TourService.updateAuthorNameForAllTheirTours(authorId, newAuthorName);
     notifyListeners();
   }
 
   // ____________________________ Reports ____________________________
-  Future<void> reportTour(Tour tour, TourguideReport report, TourguideUser reportedTourAuthor) async{
-    List<TourguideReport> newReports =  [...tour.reports, report];
-    Tour reportedTour = tour.copyWith(reports: newReports, lastChangedDateTime: DateTime.now());
+  Future<void> reportTour(Tour tour, TourguideReport report,
+      TourguideUser reportedTourAuthor) async {
+    List<TourguideReport> newReports = [...tour.reports, report];
+    Tour reportedTour =
+        tour.copyWith(reports: newReports, lastChangedDateTime: DateTime.now());
 
     logger.i('Tour reported: ${tour.id}');
-    _notifyAdminOfReportOrReviewRequest(tour.id, reportTitle: report.title, reportDetails: report.additionalDetails);
+    _notifyAdminOfReportOrReviewRequest(tour.id,
+        reportTitle: report.title, reportDetails: report.additionalDetails);
     _notifyUserOfReport(tour, report, reportedTourAuthor);
 
     await updateTour(reportedTour);
     removeTourFromCachedTours(reportedTour);
   }
 
-  Future<Tour> requestReviewOfTour(Tour tour) async{
-    Tour tourToReview = tour.copyWith(requestReviewStatus: "requested", lastChangedDateTime: DateTime.now());
+  Future<Tour> requestReviewOfTour(Tour tour) async {
+    Tour tourToReview = tour.copyWith(
+        requestReviewStatus: "requested", lastChangedDateTime: DateTime.now());
 
     logger.i('Tour Review requested: ${tour.id}');
     _notifyAdminOfReportOrReviewRequest(tour.id);
@@ -257,7 +303,8 @@ class TourProvider with ChangeNotifier {
   }
 
   //optional params String reportTitle, String reportDetails
-  Future<void> _notifyAdminOfReportOrReviewRequest (String tourId, {String? reportTitle, String? reportDetails}) async {
+  Future<void> _notifyAdminOfReportOrReviewRequest(String tourId,
+      {String? reportTitle, String? reportDetails}) async {
     Map<String, dynamic> emailData = {
       'to': 'contact@tourguide.rmichels.com',
       'template': {
@@ -274,9 +321,11 @@ class TourProvider with ChangeNotifier {
     await FirebaseFirestore.instance.collection('emails').add(emailData);
   }
 
-  Future<void> _notifyUserOfReport (Tour tour, TourguideReport report, TourguideUser reportedTourAuthor) async {
+  Future<void> _notifyUserOfReport(Tour tour, TourguideReport report,
+      TourguideUser reportedTourAuthor) async {
     if (reportedTourAuthor.emailSubscriptionsDisabled.contains('reports')) {
-      logger.t("UserProvider._notifyUserOfReport() - User is not subscribed to Report emails, skipping");
+      logger.t(
+          "UserProvider._notifyUserOfReport() - User is not subscribed to Report emails, skipping");
       return;
     }
     Map<String, dynamic> emailData = {
