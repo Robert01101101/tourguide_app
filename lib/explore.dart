@@ -24,6 +24,8 @@ import '../../ui/google_places_img.dart'
     if (dart.library.html) '../../ui/google_places_img_web.dart' as gpi;
 import 'dart:ui' as ui;
 
+import 'model/tour.dart';
+
 //because I update the login status dynamically, the Explore screen needs to be a stateful widget (from Chat GPT)
 class Explore extends StatefulWidget {
   const Explore({super.key});
@@ -420,7 +422,7 @@ class ExploreState extends State<Explore> {
                           Text("Popular tours near you",
                               style: Theme.of(context).textTheme.headlineSmall),
                           IconButton(
-                              onPressed: () {
+                              onPressed: tourProvider.popularTours.contains(Tour.addTourTileId) ? null : () {
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(
@@ -430,7 +432,7 @@ class ExploreState extends State<Explore> {
                                           name: "Popular tours near you")),
                                 );
                               },
-                              icon: Icon(Icons.map))
+                              icon: const Icon(Icons.map))
                         ],
                       ),
                       StandardLayoutChild(
@@ -445,7 +447,7 @@ class ExploreState extends State<Explore> {
                           Text("Local tours",
                               style: Theme.of(context).textTheme.headlineSmall),
                           IconButton(
-                              onPressed: () {
+                              onPressed: tourProvider.localTours.contains(Tour.addTourTileId) ? null : () {
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(
@@ -455,7 +457,7 @@ class ExploreState extends State<Explore> {
                                           name: "Local tours")),
                                 );
                               },
-                              icon: Icon(Icons.map))
+                              icon: const Icon(Icons.map))
                         ],
                       ),
                       StandardLayoutChild(
@@ -470,7 +472,7 @@ class ExploreState extends State<Explore> {
                           Text("Tours around the world",
                               style: Theme.of(context).textTheme.headlineSmall),
                           IconButton(
-                              onPressed: () {
+                              onPressed: tourProvider.globalTours.contains(Tour.addTourTileId) ? null : () {
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(
@@ -480,7 +482,7 @@ class ExploreState extends State<Explore> {
                                           name: "Tours around the world")),
                                 );
                               },
-                              icon: Icon(Icons.map))
+                              icon: const Icon(Icons.map))
                         ],
                       ),
                       StandardLayoutChild(
@@ -514,7 +516,7 @@ class ExploreState extends State<Explore> {
                               _showOptionsDialog(context);
                             },
                             icon: const Icon(Icons.more_vert),
-                            color: Color(0xeeF2F8F8)),
+                            color: const Color(0xeeF2F8F8)),
                       ),
                     ),
                   ],
