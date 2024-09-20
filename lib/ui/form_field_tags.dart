@@ -1,6 +1,8 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
+import '../main.dart';
+
 class FormFieldTags<T> extends FormField<Map<String, dynamic>> {
   final bool enabled;
 
@@ -9,7 +11,9 @@ class FormFieldTags<T> extends FormField<Map<String, dynamic>> {
     super.validator,
     Widget? hintText,
     required this.enabled,
+    Map<String, dynamic>? initialValue,
   }) : super(
+          initialValue: initialValue,
           builder: (state) {
             return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -19,6 +23,7 @@ class FormFieldTags<T> extends FormField<Map<String, dynamic>> {
                   onChanged: (selectedValues) {
                     state.didChange(selectedValues); // Update form field state
                   },
+                  initialValue: state.value,
                 ),
                 if (state.hasError)
                   Text(state.errorText ?? "",
@@ -38,6 +43,7 @@ class _FormFieldTagsContent extends StatefulWidget {
   //final FormFieldState<T> state;
   final ValueChanged<Map<String, dynamic>> onChanged;
   final bool enabled;
+  final Map<String, dynamic>? initialValue;
   //final bool isSelected;
 
   const _FormFieldTagsContent({
@@ -47,6 +53,7 @@ class _FormFieldTagsContent extends StatefulWidget {
     required this.onChanged,
     required this.enabled,
     //this.isSelected = false,
+    this.initialValue,
   });
 
   @override
@@ -91,7 +98,12 @@ class _FormFieldTagsContentState extends State<_FormFieldTagsContent> {
   @override
   void initState() {
     super.initState();
-    //_imageFile = widget.initialValue;
+
+    // Initialize _duration and _descriptiveTags from widget.initialValue
+    if (widget.initialValue != null) {
+      _duration = widget.initialValue?['duration'] as String?;
+      _descriptiveTags = List<String>.from(widget.initialValue?['descriptive'] ?? []);
+    }
   }
 
   @override

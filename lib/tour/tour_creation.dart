@@ -64,6 +64,7 @@ class _CreateEditTourState extends State<CreateEditTour> {
   int _currentStep = 0;
   int _maxStepReached = 0;
   bool _stepChanging = false;
+  Map<String, dynamic>? _initialTagsValue; //for edit mode only
   KeyboardVisibilityController? keyboardVisibilityController;
 
   @override
@@ -78,7 +79,6 @@ class _CreateEditTourState extends State<CreateEditTour> {
       _nameController.text = _tour.name;
       _descriptionController.text = _tour.description;
       _cityController.text = _tour.city;
-      //for loop
       for (int i = 0; i < _tour.tourguidePlaces.length; i++) {
         TourguidePlace place = _tour.tourguidePlaces[i];
         _placeControllers.add(TextEditingController(text: place.title));
@@ -92,6 +92,7 @@ class _CreateEditTourState extends State<CreateEditTour> {
         _updateTourguidePlaceDetailsWithPlaceId(
             i, place.googleMapPlaceId, place.title);
       }
+      _initialTagsValue = _tour.tags;
     }
 
     keyboardVisibilityController = KeyboardVisibilityController();
@@ -634,6 +635,7 @@ class _CreateEditTourState extends State<CreateEditTour> {
                         }
                         return null;
                       },
+                      initialValue: _initialTagsValue,
                     ),
                     /*
                     SwitchListTile(
