@@ -110,6 +110,8 @@ class TourService {
       // Reference to the tour document
       DocumentReference tourRef = db.collection('tours').doc(tour.id);
 
+      deleteTourImage(tourRef);
+
       // Get ratings sub-collection
       QuerySnapshot ratingsSnapshot = await tourRef.collection('ratings').get();
 
@@ -125,6 +127,24 @@ class TourService {
           'Tour with ID ${tour.id} and its sub-collections successfully deleted');
     } catch (e) {
       logger.e('Error deleting tour with ID ${tour.id}: $e');
+    }
+  }
+
+  static Future<void> deleteTourImage(DocumentReference tourDocReference) async {
+    try {
+      // Get the image URL from the tour document
+      DocumentSnapshot tourDoc = await tourDocReference.get();
+      String imageUrl = tourDoc['imageUrl'];
+
+      // Step 1: Delete the image from Firebase Storage
+      if (imageUrl.isNotEmpty) {
+        Reference storageRef = FirebaseStorage.instance.refFromURL(imageUrl);
+        // Delete the image
+        await storageRef.delete();
+        logger.i('Image at $imageUrl successfully deleted from Firebase Storage');
+      }
+    } catch (e, stack) {
+      logger.e('Error deleting image from Firebase Storage: $e, stack: $stack');
     }
   }
 
@@ -147,18 +167,16 @@ class TourService {
   }
 
   static Future<void> getUserRatingsForTours(
-      Map<String, Tour> allCachedTours, String userId) async {
+      Map<String, Tour> allCachedTours, List<String> realTourIds, String userId) async {
+    logger.t('Fetching user ratings for all tours. Tour count: ${allCachedTours.length}');
     try {
-      // Step 1: Collect all tour IDs
-      List<String> tourIds = allCachedTours.keys.toList();
-
-      // Step 2: Create a map to hold all ratings for these tours
+      // Step 1: Create a map to hold all ratings for these tours
       Map<String, int> ratingsMap = {};
 
       // Fetch ratings in batches to avoid too many simultaneous requests
       int batchSize = 10;
-      for (int i = 0; i < tourIds.length; i += batchSize) {
-        List<String> batchTourIds = tourIds.skip(i).take(batchSize).toList();
+      for (int i = 0; i < realTourIds.length; i += batchSize) {
+        List<String> batchTourIds = realTourIds.skip(i).take(batchSize).toList();
 
         // Fetch ratings for the current batch
         await Future.wait(batchTourIds.map((tourId) async {
@@ -184,7 +202,7 @@ class TourService {
         await Future.delayed(const Duration(milliseconds: 500));
       }
 
-      // Step 3: Update the tours with their ratings
+      // Step 2: Update the tours with their ratings
       for (var entry in ratingsMap.entries) {
         String tourId = entry.key;
         int userRating = entry.value;
@@ -194,7 +212,7 @@ class TourService {
         }
       }
     } catch (error, stack) {
-      logger.e('Error fetching user ratings, error: $error, stack: $stack');
+      logger.e('Error fetching user ratings.\nAll tour ids: ${allCachedTours.keys.join(', ')}\nError: $error, Stack: $stack');
     }
   }
 
@@ -474,13 +492,15 @@ class TourService {
         'imageUrl': imageUrl,
       });
 
-      // Step 4: add empty rating for user
+      // Step 4: add empty rating for user to generate ratings collection
       await addOrUpdateRating(tour.id, 0, tour.authorId);
 
-      tour.isOfflineCreatedTour = false;
+      // Step 5: Retrieve the full tour document after updating
+      DocumentSnapshot tourSnapshot = await tourDocRef.get();
+      Tour uploadedTourFromFirestore = Tour.fromFirestore(tourSnapshot);
 
       logger.i('Successfully created tour: ${tour.toString()}');
-      return tour;
+      return uploadedTourFromFirestore;
     } catch (e, stack) {
       //log with stack
       logger.e('Error uploading tour: $e, stack: $stack');
@@ -491,6 +511,9 @@ class TourService {
   static Future<Tour> updateTour(Tour tour) async {
     try {
       if (tour.imageFile != null) {
+        // Delete the old image
+        DocumentReference tourRef = FirebaseFirestore.instance.collection('tours').doc(tour.id);
+        deleteTourImage(tourRef);
         // Upload the new image
         String newImageUrl = await uploadImage(tour);
         tour = tour.copyWith(imageUrl: newImageUrl);

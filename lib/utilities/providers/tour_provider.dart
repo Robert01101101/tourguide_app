@@ -40,8 +40,14 @@ class TourProvider with ChangeNotifier {
     logger.t("TourProvider._init()");
   }
 
-  List<Tour> getTours(List<String> tourIds) {
+  List<Tour> getToursByIds(List<String> tourIds) {
     return tourIds.map((id) => _allCachedTours[id]!).toList();
+  }
+
+  List<String> getAllCachedRealTourIds() {
+    return _allCachedTours.keys
+        .where((id) => id.isNotEmpty && id != Tour.addTourTileId)
+        .toList();
   }
 
   Future<void> fetchAndSetTours(double userLatitude, double userLongitude,
@@ -98,15 +104,15 @@ class TourProvider with ChangeNotifier {
       // Step 3: Update Hive with new data  //TODO: optimize
       if (!kIsWeb) {
         await TourService.overwriteToursInHive(
-            TourService.popularToursBoxName, getTours(_popularTours));
+            TourService.popularToursBoxName, getToursByIds(_popularTours));
         await TourService.overwriteToursInHive(
-            TourService.localToursBoxName, getTours(_localTours));
+            TourService.localToursBoxName, getToursByIds(_localTours));
         await TourService.overwriteToursInHive(
-            TourService.globalToursBoxName, getTours(_globalTours));
+            TourService.globalToursBoxName, getToursByIds(_globalTours));
         await TourService.overwriteToursInHive(
-            TourService.userCreatedToursBoxName, getTours(_userCreatedTours));
+            TourService.userCreatedToursBoxName, getToursByIds(_userCreatedTours));
         await TourService.overwriteToursInHive(
-            TourService.userSavedToursBoxName, getTours(_userSavedTours));
+            TourService.userSavedToursBoxName, getToursByIds(_userSavedTours));
       }
       _formatListsAndGetTourRatings(userId);
 
@@ -155,6 +161,10 @@ class TourProvider with ChangeNotifier {
           logger.w('Tour has reports, removing: ${tour.id}');
           continue; // Skip tours with reports
         }
+        if (tour.id.isEmpty || tour.id == Tour.addTourTileId) {
+          logger.w('Tour has invalid id:\"${tour.id}\", skipping');
+          continue;
+        }
         if (_allCachedTours.containsKey(tour.id) && !replaceCached) {
           // Use the existing tour instance from the cache, unless media redownload requested
           bool requestMediaRedownload = tour.lastChangedDateTime == null ||
@@ -198,9 +208,7 @@ class TourProvider with ChangeNotifier {
     }
     notifyListeners();
 
-    logger.t(
-        '_formatListsAndGetTourRatings - get ratings (count: ${_allCachedTours.length})');
-    await TourService.getUserRatingsForTours(_allCachedTours, userId);
+    await TourService.getUserRatingsForTours(_allCachedTours, getAllCachedRealTourIds(), userId);
     _isLoadingTours = false;
     notifyListeners();
   }

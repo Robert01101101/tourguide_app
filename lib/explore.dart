@@ -427,7 +427,7 @@ class ExploreState extends State<Explore> {
                                   context,
                                   MaterialPageRoute(
                                       builder: (context) => ExploreMap(
-                                          tours: tourProvider.getTours(
+                                          tours: tourProvider.getToursByIds(
                                               tourProvider.popularTours),
                                           name: "Popular tours near you")),
                                 );
@@ -439,7 +439,7 @@ class ExploreState extends State<Explore> {
                         fullWidth: true,
                         child: HorizontalScroller(
                             tours: tourProvider
-                                .getTours(tourProvider.popularTours)),
+                                .getToursByIds(tourProvider.popularTours)),
                       ),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -452,7 +452,7 @@ class ExploreState extends State<Explore> {
                                   context,
                                   MaterialPageRoute(
                                       builder: (context) => ExploreMap(
-                                          tours: tourProvider.getTours(
+                                          tours: tourProvider.getToursByIds(
                                               tourProvider.localTours),
                                           name: "Local tours")),
                                 );
@@ -464,7 +464,7 @@ class ExploreState extends State<Explore> {
                         fullWidth: true,
                         child: HorizontalScroller(
                             tours:
-                                tourProvider.getTours(tourProvider.localTours)),
+                                tourProvider.getToursByIds(tourProvider.localTours)),
                       ),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -477,7 +477,7 @@ class ExploreState extends State<Explore> {
                                   context,
                                   MaterialPageRoute(
                                       builder: (context) => ExploreMap(
-                                          tours: tourProvider.getTours(
+                                          tours: tourProvider.getToursByIds(
                                               tourProvider.globalTours),
                                           name: "Tours around the world")),
                                 );
@@ -489,7 +489,7 @@ class ExploreState extends State<Explore> {
                         fullWidth: true,
                         child: HorizontalScroller(
                             tours: tourProvider
-                                .getTours((tourProvider.globalTours))),
+                                .getToursByIds((tourProvider.globalTours))),
                       ),
                       /*Text("Debug", style: Theme.of(context).textTheme.headlineSmall),
                           Row(

@@ -33,7 +33,7 @@ class _ToTourListState extends State<ToTourList> {
               fullWidth: true,
               child: HorizontalScroller(
                   leftPadding: true,
-                  tours: tourProvider.getTours(tourProvider.userSavedTours)),
+                  tours: tourProvider.getToursByIds(tourProvider.userSavedTours)),
             ),
           ],
         ),

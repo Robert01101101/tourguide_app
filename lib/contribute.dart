@@ -121,7 +121,7 @@ class _ContributeState extends State<Contribute> {
                         fullWidth: true,
                         child: HorizontalScroller(
                             tours: tourProvider
-                                .getTours(tourProvider.userCreatedTours),
+                                .getToursByIds(tourProvider.userCreatedTours),
                             leftPadding: true),
                       ),
                       /*Text("Review unreviewed tours", style: Theme.of(context).textTheme.headlineSmall),

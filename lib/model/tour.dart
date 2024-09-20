@@ -71,6 +71,8 @@ class Tour {
   /// mutable, NOT stored in Firestore, request media re-downloads for for this tour
   bool requestMediaRedownload = false;
 
+  static const String addTourTileId = 'addTourTile';
+
   Tour({
     required this.id,
     required this.name,
@@ -128,7 +130,7 @@ class Tour {
 
   factory Tour.isAddTourTile() {
     Tour addTourTile = Tour.empty()
-        .copyWith(id: 'addTourTile', name: 'Add Tour', isAddTourTile: true);
+        .copyWith(id: addTourTileId, name: 'Add Tour', isAddTourTile: true);
     return addTourTile;
   }
 
