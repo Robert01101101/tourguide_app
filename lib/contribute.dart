@@ -12,6 +12,7 @@ import 'package:tourguide_app/utilities/providers/tour_provider.dart';
 import 'package:tourguide_app/utilities/providers/auth_provider.dart' as myAuth;
 import 'package:tourguide_app/utilities/providers/tourguide_user_provider.dart';
 
+import 'explore_map.dart';
 import 'main.dart';
 
 class Contribute extends StatefulWidget {
@@ -78,6 +79,9 @@ class _ContributeState extends State<Contribute> {
       }
     }
 
+    List<String> userCreatedTourIds = List.from(tourProvider.userCreatedTours);
+    userCreatedTourIds.remove(Tour.addTourTileId);
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Contribute'),
@@ -109,12 +113,17 @@ class _ContributeState extends State<Contribute> {
                         children: [
                           Text("Tours you created",
                               style: Theme.of(context).textTheme.headlineSmall),
-                          /*IconButton(onPressed: (){
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) => const CreateEditTour()),
-                      );
-                    }, icon: Icon(Icons.add_circle_outline_sharp),),*/
+                          IconButton(
+                              onPressed: tourProvider.userCreatedTours.length <= 1 ? null : () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) => ExploreMap(
+                                          tours: tourProvider.getToursByIds(userCreatedTourIds),
+                                          name: "Tours you created")),
+                                );
+                              },
+                              icon: const Icon(Icons.map))
                         ],
                       ),
                       StandardLayoutChild(

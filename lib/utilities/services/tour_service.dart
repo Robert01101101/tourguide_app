@@ -557,7 +557,15 @@ class TourService {
           // Convert XFile to Uint8List
           final Uint8List imageData =
               await tour.imageFileToUploadWeb!.readAsBytes();
-          UploadTask uploadTask = ref.putData(imageData);
+
+          // Get the MIME type (if necessary, infer based on file extension)
+          final String mimeType = tour.imageFileToUploadWeb!.mimeType ?? 'image/png';
+
+          // Create metadata with the correct content type
+          SettableMetadata metadata = SettableMetadata(contentType: mimeType);
+
+          // Upload the data with the specified content type
+          UploadTask uploadTask = ref.putData(imageData, metadata);
 
           // Await the completion of the upload task
           TaskSnapshot taskSnapshot = await uploadTask;
