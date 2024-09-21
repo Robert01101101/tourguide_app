@@ -236,6 +236,11 @@ class TourProvider with ChangeNotifier {
     notifyListeners();
   }
 
+  void userSavedTour(String tourId, bool tourIsSaved) {
+    tourIsSaved ? _userSavedTours.add(tourId) : _userSavedTours.remove(tourId);
+    notifyListeners();
+  }
+
   //TODO: get rid? What could I use this for? Select a tour that user has started? was used for details but no longer used for that
   void selectTourById(String id) {
     try {
