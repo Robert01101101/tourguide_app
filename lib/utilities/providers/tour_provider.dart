@@ -55,6 +55,7 @@ class TourProvider with ChangeNotifier {
     try {
       logger.t("fetchAndSetTours ${getFormattedTime()}");
       _isLoadingTours = true;
+      notifyListeners();
 
       // Step 1: Get tours from Hive
       if (!kIsWeb) {
@@ -114,7 +115,7 @@ class TourProvider with ChangeNotifier {
         await TourService.overwriteToursInHive(
             TourService.userSavedToursBoxName, getToursByIds(_userSavedTours));
       }
-      _formatListsAndGetTourRatings(userId);
+      await _formatListsAndGetTourRatings(userId);
 
       // Step 4: Download images in parallel
       logger.t(
@@ -123,6 +124,7 @@ class TourProvider with ChangeNotifier {
           _allCachedTours.values.map((tour) => _setTourImage(tour)));
       logger.t(
           "fetchAndSetTours - image downloads complete ${getFormattedTime()}");
+      _isLoadingTours = false;
       notifyListeners();
     } catch (error, stack) {
       logger.e('Error fetching tours: $error, $stack');
@@ -214,7 +216,8 @@ class TourProvider with ChangeNotifier {
   }
 
   Future<void> deleteTour(Tour tour) async {
-    await TourService.deleteTour(tour);
+    bool deleteSuccess = await TourService.deleteTour(tour);
+    if (!deleteSuccess) return;
     removeTourFromCachedTours(tour);
     notifyListeners();
   }
@@ -250,8 +253,8 @@ class TourProvider with ChangeNotifier {
   }
 
   Future<void> uploadTour(Tour tour) async {
-    await TourService.uploadTour(tour);
-    _allCachedTours[tour.id] = tour;
+    Tour newTour = await TourService.uploadTour(tour);
+    _allCachedTours[tour.id] = newTour;
     _userCreatedTours.insert(1, tour.id);
     notifyListeners();
   }

@@ -97,4 +97,9 @@ class TourguideUser {
       emailSubscriptionsDisabled.remove(type);
     }
   }
+
+  @override
+  String toString() {
+    return 'TourguideUser{firebaseAuthId: $firebaseAuthId, googleSignInId: $googleSignInId, username: $username, displayName: $displayName, email: $email, emailSubscriptionsDisabled: $emailSubscriptionsDisabled, savedTourIds: $savedTourIds, reports: $reports, useUsername: $useUsername}';
+  }
 }

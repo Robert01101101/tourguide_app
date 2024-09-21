@@ -51,7 +51,7 @@ class _HorizontalScrollerState extends State<HorizontalScroller> {
     return SizedBox(
       height: TourTile.height,
       // On web, wrap in GestureDetector to enable drag scrolling
-      child: CrossplatformUtils.isMobile()
+      child: !CrossplatformUtils.isMobile()
           ? GestureDetector(
               onHorizontalDragUpdate: (details) {
                 _scrollController.jumpTo(

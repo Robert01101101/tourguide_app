@@ -103,7 +103,8 @@ class TourService {
     return tours;
   }
 
-  static Future<void> deleteTour(Tour tour) async {
+  /// Attempts to delete a Tour and returns true if successful
+  static Future<bool> deleteTour(Tour tour) async {
     FirebaseFirestore db = FirebaseFirestore.instance;
 
     try {
@@ -125,16 +126,19 @@ class TourService {
 
       logger.t(
           'Tour with ID ${tour.id} and its sub-collections successfully deleted');
+      return true;
     } catch (e) {
       logger.e('Error deleting tour with ID ${tour.id}: $e');
+      return false;
     }
   }
 
   static Future<void> deleteTourImage(DocumentReference tourDocReference) async {
+    String imageUrl = '';
     try {
       // Get the image URL from the tour document
       DocumentSnapshot tourDoc = await tourDocReference.get();
-      String imageUrl = tourDoc['imageUrl'];
+      imageUrl = tourDoc['imageUrl'];
 
       // Step 1: Delete the image from Firebase Storage
       if (imageUrl.isNotEmpty) {
@@ -144,7 +148,7 @@ class TourService {
         logger.i('Image at $imageUrl successfully deleted from Firebase Storage');
       }
     } catch (e, stack) {
-      logger.e('Error deleting image from Firebase Storage: $e, stack: $stack');
+      logger.e('Error deleting image from Firebase Storage with url $imageUrl:\n$e, stack: $stack');
     }
   }
 
@@ -500,7 +504,8 @@ class TourService {
       Tour uploadedTourFromFirestore = Tour.fromFirestore(tourSnapshot);
 
       logger.i('Successfully created tour: ${tour.toString()}');
-      return uploadedTourFromFirestore;
+      downloadAndSaveImage(imageUrl, tourId);
+      return uploadedTourFromFirestore.copyWith(imageFile: tour.imageFile, imageFileToUploadWeb: tour.imageFileToUploadWeb);
     } catch (e, stack) {
       //log with stack
       logger.e('Error uploading tour: $e, stack: $stack');
