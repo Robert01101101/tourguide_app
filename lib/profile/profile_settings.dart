@@ -144,7 +144,8 @@ class _ProfileSettingsState extends State<ProfileSettings> {
       appBar: AppBar(
         title: const Text('Profile Settings'),
       ),
-      body: SingleChildScrollView(
+      body: userProvider.user != null && authProvider.user != null ?
+      SingleChildScrollView(
         child: Column(
           children: [
             StandardLayout(
@@ -255,7 +256,8 @@ class _ProfileSettingsState extends State<ProfileSettings> {
             ),
           ],
         ),
-      ),
+      )
+      : const Text("Profile not loaded"),
     );
   }
 }
@@ -295,22 +297,22 @@ class _ProfileSettingsDeleteAccountState
   bool _deleteStarted = false;
   void _deleteAccount() async {
     myAuth.AuthProvider authProvider = Provider.of(context, listen: false);
+    TourProvider tourProvider = Provider.of(context, listen: false);
+    TourguideUserProvider tourguideUserProvider =
+    Provider.of(context, listen: false);
+
     if (_deleteStarted) return;
     logger.w("Delete account confirmed and pressed");
     User? user = FirebaseAuth.instance.currentUser;
     if (user != null) {
       try {
         _deleteStarted = true;
-        TourProvider tourProvider = Provider.of(context, listen: false);
-        TourguideUserProvider tourguideUserProvider =
-            Provider.of(context, listen: false);
-
         tourProvider.resetTourProvider();
         tourguideUserProvider.resetUserProvider();
         await user.delete();
         SharedPreferences prefs = await SharedPreferences.getInstance();
         prefs.remove('firstTimeUser');
-        authProvider.resetAuthProvider();
+        authProvider.deleteUser();
 
         TourguideNavigation.router.go(
           TourguideNavigation.signInPath,
@@ -363,8 +365,7 @@ class _ProfileSettingsDeleteAccountState
 
   @override
   Widget build(BuildContext context) {
-    logger.t(
-        'FirebaseAuth.instance.currentUser=${FirebaseAuth.instance.currentUser}');
+    //logger.t('FirebaseAuth.instance.currentUser=${FirebaseAuth.instance.currentUser}');
     myAuth.AuthProvider authProvider = Provider.of(context);
 
     return Scaffold(
@@ -418,8 +419,8 @@ class _ProfileSettingsDeleteAccountState
                 onPressed: _isDeleteEnabled ? _deleteAccount : null,
                 style: ElevatedButton.styleFrom(
                     backgroundColor: Theme.of(context).colorScheme.error,
-                    foregroundColor: Colors.white,
-                    textStyle: TextStyle(
+                    foregroundColor: Theme.of(context).colorScheme.onError,
+                    textStyle: const TextStyle(
                       fontWeight: FontWeight.bold,
                     )),
                 child:

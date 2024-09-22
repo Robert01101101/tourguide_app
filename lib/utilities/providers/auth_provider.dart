@@ -248,7 +248,8 @@ class AuthProvider with ChangeNotifier {
   }
 
   //TODO - merge with signOut()?
-  void resetAuthProvider() {
+  void deleteUser() {
+    if (_googleSignInUser != null) _googleSignIn.disconnect();
     _user = null;
     _googleSignInUser = null;
     _isAuthorized = false;
@@ -257,7 +258,6 @@ class AuthProvider with ChangeNotifier {
     _isLoggingIntoFirebaseMobile = false;
     _isAnonymous = false;
     _isLoggingInAnonymously = false;
-    if (_googleSignInUser != null) _googleSignIn.disconnect();
     notifyListeners();
   }
 }

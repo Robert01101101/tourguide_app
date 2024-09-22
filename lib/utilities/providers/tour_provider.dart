@@ -285,6 +285,7 @@ class TourProvider with ChangeNotifier {
     logger.t("TourProvider.resetTourProvider()");
   }
 
+
   //TODO: swap for approach where we use already cached list to avoid the first get call?
   Future<void> updateAuthorNameForAllTheirTours(
       String authorId, String newAuthorName) async {
