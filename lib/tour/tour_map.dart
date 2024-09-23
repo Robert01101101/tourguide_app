@@ -4,6 +4,7 @@ import 'dart:math';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_custom_marker/google_maps_custom_marker.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:provider/provider.dart';
@@ -12,7 +13,9 @@ import 'package:tourguide_app/model/tour.dart';
 import 'package:tourguide_app/model/tourguide_place.dart';
 import 'package:tourguide_app/utilities/map_utils.dart';
 import 'package:http/http.dart' as http;
+import 'package:tourguide_app/utilities/providers/location_provider.dart';
 
+import '../ui/tourguide_theme.dart';
 import '../utilities/crossplatform_utils.dart';
 
 /// NOTE: not using ChangeNotifierProvider atm, because nesting it was causing problems as it's not how it's intended to be used
@@ -47,8 +50,11 @@ class _TourMapState extends State<TourMap> {
     Factory<PanGestureRecognizer>(() => PanGestureRecognizer())
   };
 
+
   @override
   Widget build(BuildContext context) {
+    LocationProvider locationProvider = Provider.of(context);
+
     //logger.t('TourMap - build');
     return Consumer<TourMapController>(
       builder: (context, tourMapController, child) {
@@ -70,6 +76,7 @@ class _TourMapState extends State<TourMap> {
                     : _gestureRecognizersPan,
                 mapType: MapType.normal,
                 myLocationEnabled: true,
+                myLocationButtonEnabled: false,
                 initialCameraPosition:
                     widget.tourMapController.currentCameraPosition,
                 markers: widget.tourMapController.markers,
@@ -105,40 +112,132 @@ class _TourMapState extends State<TourMap> {
                 ),
               if (!widget.tourMapController.isLoading)
                 Positioned(
-                  bottom: 120,
-                  right: 10,
-                  child: SizedBox(
-                    width: 42,
-                    height: 42,
-                    child: RawMaterialButton(
-                      onPressed: () async {
-                        final controller = await widget
-                            .tourMapController.mapControllerCompleter.future;
-                        widget.tourMapController.setFullScreen(
-                            !widget.tourMapController.isFullScreen);
-                        widget.tourMapController.setLoadingFullscreen(true);
-                        controller.moveCamera(
-                          CameraUpdate.newCameraPosition(
-                              widget.tourMapController.currentCameraPosition),
-                        );
-                      },
-                      elevation: 1.0,
-                      fillColor: Colors.white.withOpacity(0.8),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(
-                            8.0), // Adjust the radius as needed
-                      ),
-                      child: Padding(
-                        padding: const EdgeInsets.all(
-                            1.0), // Adjust inner padding as needed
-                        child: Icon(
-                          widget.tourMapController.isFullScreen
-                              ? Icons.fullscreen_exit
-                              : Icons.fullscreen,
-                          color: const Color(0xff666666),
-                          size: 32.0, // Adjust the size of the icon as needed
+                  top: 0,
+                  right: 12,
+                  child: SafeArea(
+                    left: false,
+                    right: false,
+                    bottom: false,
+                    minimum: const EdgeInsets.only(top: 12),
+                    child: Column(
+                      children: [
+                        SizedBox(
+                          width: 38,
+                          height: 38,
+                          child: RawMaterialButton(
+                            onPressed: () async {
+                              widget.tourMapController.triggerMoveCameraToMarkerAndHighlightMarker();
+                            },
+                            elevation: 1.0,
+                            highlightElevation: 2,
+                            fillColor: Colors.white.withOpacity(0.8),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(
+                                  3.0), // Adjust the radius as needed
+                            ),
+                            child: Padding(
+                              padding: const EdgeInsets.all(
+                                  1.0), // Adjust inner padding as needed
+                              child: Stack(
+                                alignment: Alignment.center,
+                                children: [
+                                  const Icon(Icons.circle,
+                                    color: Color(0xff666666),
+                                    size: 24.0, // Adjust the size of the icon as needed
+                                  ),
+                                  Text((widget.tourMapController.step + 1).toString(),
+                                  style: const TextStyle(
+                                    fontFamily: 'Roboto',
+                                    fontSize: 12,
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold,
+                                  ),)
+                                ],
+                              ),
+                            ),
+                          ),
                         ),
-                      ),
+                        const SizedBox(height: 8,),
+                        if (locationProvider.permissionStatus == PermissionStatus.granted)
+                          Column(
+                            children: [
+                              SizedBox(
+                              width: 38,
+                              height: 38,
+                              child: RawMaterialButton(
+                                onPressed: () async {
+                                  // Get the current location
+                                  Position position = await Geolocator.getCurrentPosition(
+                                      desiredAccuracy: LocationAccuracy.high);
+
+                                  // Get the map controller
+                                  final GoogleMapController mapController = await widget
+                                      .tourMapController.mapControllerCompleter.future;
+
+                                  // Animate the camera to the current location
+                                  mapController.animateCamera(CameraUpdate.newCameraPosition(
+                                    CameraPosition(
+                                      target: LatLng(position.latitude, position.longitude),
+                                      zoom: 15.0, // Adjust the zoom level as needed
+                                    ),
+                                  ));
+                                },
+                                elevation: 1.0,
+                                highlightElevation: 2,
+                                fillColor: Colors.white.withOpacity(0.8),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(
+                                      3.0), // Adjust the radius as needed
+                                ),
+                                child: const Padding(
+                                  padding: EdgeInsets.all(
+                                      1.0), // Adjust inner padding as needed
+                                  child: Icon(Icons.my_location,
+                                    color: Color(0xff666666),
+                                    size: 24.0, // Adjust the size of the icon as needed
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(height: 8,),
+                            ],
+                          ),
+                        SizedBox(
+                          width: 38,
+                          height: 38,
+                          child: RawMaterialButton(
+                            onPressed: () async {
+                              final controller = await widget
+                                  .tourMapController.mapControllerCompleter.future;
+                              widget.tourMapController.setFullScreen(
+                                  !widget.tourMapController.isFullScreen);
+                              widget.tourMapController.setLoadingFullscreen(true);
+                              controller.moveCamera(
+                                CameraUpdate.newCameraPosition(
+                                    widget.tourMapController.currentCameraPosition),
+                              );
+                            },
+                            elevation: 1.0,
+                            highlightElevation: 2,
+                            fillColor: Colors.white.withOpacity(0.8),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(
+                                  3.0), // Adjust the radius as needed
+                            ),
+                            child: Padding(
+                              padding: const EdgeInsets.all(
+                                  1.0), // Adjust inner padding as needed
+                              child: Icon(
+                                widget.tourMapController.isFullScreen
+                                    ? Icons.fullscreen_exit
+                                    : Icons.fullscreen,
+                                color: const Color(0xff666666),
+                                size: 32.0, // Adjust the size of the icon as needed
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ),
@@ -172,6 +271,7 @@ class _TourMapFullscreenState extends State<TourMapFullscreen> {
 
   @override
   Widget build(BuildContext context) {
+    LocationProvider locationProvider = Provider.of(context);
     //logger.t('TourMapFullscreen - build');
     return ChangeNotifierProvider(
       create: (_) => widget.tourMapController,
@@ -228,6 +328,7 @@ class _TourMapFullscreenState extends State<TourMapFullscreen> {
                               markers: widget.tourMapController.markers,
                               polylines: widget.tourMapController.polylines,
                               myLocationEnabled: true,
+                              myLocationButtonEnabled: false,
                               onMapCreated:
                                   (GoogleMapController controller) async {
                                 if (!widget.tourMapController
@@ -267,45 +368,131 @@ class _TourMapFullscreenState extends State<TourMapFullscreen> {
                               ),
                             if (!widget.tourMapController.isLoadingFullscreen)
                               Positioned(
-                                bottom: 120,
+                                top: 10,
                                 right: 10,
-                                child: SizedBox(
-                                  width: 42,
-                                  height: 42,
-                                  child: RawMaterialButton(
-                                    onPressed: () async {
-                                      final controller = await widget
-                                          .tourMapController
-                                          .mapControllerCompleter
-                                          .future;
-                                      widget.tourMapController.setFullScreen(
-                                          !widget
-                                              .tourMapController.isFullScreen);
-                                      controller.moveCamera(
-                                        CameraUpdate.newCameraPosition(widget
-                                            .tourMapController
-                                            .currentCameraPosition),
-                                      );
-                                    },
-                                    elevation: 1.0,
-                                    fillColor: Colors.white.withOpacity(0.9),
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(
-                                          8.0), // Adjust the radius as needed
-                                    ),
-                                    child: Padding(
-                                      padding: const EdgeInsets.all(
-                                          1.0), // Adjust inner padding as needed
-                                      child: Icon(
-                                        widget.tourMapController.isFullScreen
-                                            ? Icons.fullscreen_exit
-                                            : Icons.fullscreen,
-                                        color: const Color(0xff666666),
-                                        size:
-                                            32.0, // Adjust the size of the icon as needed
+                                child: Column(
+                                  children: [
+                                    SizedBox(
+                                      width: 38,
+                                      height: 38,
+                                      child: RawMaterialButton(
+                                        onPressed: () async {
+                                          widget.tourMapController.triggerMoveCameraToMarkerAndHighlightMarker();
+                                        },
+                                        elevation: 1.0,
+                                        highlightElevation: 2,
+                                        fillColor: Colors.white.withOpacity(0.8),
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.circular(
+                                              3.0), // Adjust the radius as needed
+                                        ),
+                                        child: Padding(
+                                          padding: const EdgeInsets.all(
+                                              1.0), // Adjust inner padding as needed
+                                          child: Stack(
+                                            alignment: Alignment.center,
+                                            children: [
+                                              const Icon(Icons.circle,
+                                                color: Color(0xff666666),
+                                                size: 24.0, // Adjust the size of the icon as needed
+                                              ),
+                                              Text((widget.tourMapController.step + 1).toString(),
+                                                style: const TextStyle(
+                                                  fontFamily: 'Roboto',
+                                                  fontSize: 12,
+                                                  color: Colors.white,
+                                                  fontWeight: FontWeight.bold,
+                                                ),)
+                                            ],
+                                          ),
+                                        ),
                                       ),
                                     ),
-                                  ),
+                                    const SizedBox(height: 8,),
+                                    if (locationProvider.permissionStatus == PermissionStatus.granted)
+                                      Column(
+                                        children: [
+                                          SizedBox(
+                                            width: 38,
+                                            height: 38,
+                                            child: RawMaterialButton(
+                                              onPressed: () async {
+                                                // Get the current location
+                                                Position position = await Geolocator.getCurrentPosition(
+                                                    desiredAccuracy: LocationAccuracy.high);
+
+                                                // Get the map controller
+                                                final GoogleMapController mapController = await widget
+                                                    .tourMapController.mapControllerCompleter.future;
+
+                                                // Animate the camera to the current location
+                                                mapController.animateCamera(CameraUpdate.newCameraPosition(
+                                                  CameraPosition(
+                                                    target: LatLng(position.latitude, position.longitude),
+                                                    zoom: 15.0, // Adjust the zoom level as needed
+                                                  ),
+                                                ));
+                                              },
+                                              elevation: 1.0,
+                                              highlightElevation: 2,
+                                              fillColor: Colors.white.withOpacity(0.8),
+                                              shape: RoundedRectangleBorder(
+                                                borderRadius: BorderRadius.circular(
+                                                    3.0), // Adjust the radius as needed
+                                              ),
+                                              child: const Padding(
+                                                padding: EdgeInsets.all(
+                                                    1.0), // Adjust inner padding as needed
+                                                child: Icon(Icons.my_location,
+                                                  color: Color(0xff666666),
+                                                  size: 24.0, // Adjust the size of the icon as needed
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                          const SizedBox(height: 8,),
+                                        ],
+                                      ),
+                                    SizedBox(
+                                      width: 38,
+                                      height: 38,
+                                      child: RawMaterialButton(
+                                        onPressed: () async {
+                                          final controller = await widget
+                                              .tourMapController
+                                              .mapControllerCompleter
+                                              .future;
+                                          widget.tourMapController.setFullScreen(
+                                              !widget
+                                                  .tourMapController.isFullScreen);
+                                          controller.moveCamera(
+                                            CameraUpdate.newCameraPosition(widget
+                                                .tourMapController
+                                                .currentCameraPosition),
+                                          );
+                                        },
+                                        elevation: 1.0,
+                                        highlightElevation: 2,
+                                        fillColor: Colors.white.withOpacity(0.8),
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.circular(
+                                              8.0), // Adjust the radius as needed
+                                        ),
+                                        child: Padding(
+                                          padding: const EdgeInsets.all(
+                                              1.0), // Adjust inner padding as needed
+                                          child: Icon(
+                                            widget.tourMapController.isFullScreen
+                                                ? Icons.fullscreen_exit
+                                                : Icons.fullscreen,
+                                            color: const Color(0xff666666),
+                                            size:
+                                                32.0, // Adjust the size of the icon as needed
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ),
                           ],
@@ -344,7 +531,8 @@ class TourMapController with ChangeNotifier {
   bool get isLoading => _isLoading;
   bool get isLoadingFullscreen => _isLoadingFullscreen;
   CameraPosition get currentCameraPosition => _currentCameraPosition;
-  void Function(int step)? moveCameraToMarkerAndHighlightMarker;
+  void Function(int? step)? moveCameraToMarkerAndHighlightMarker;
+  int step = 0;
 
   // Internal
   Tour _tour = Tour.empty();
@@ -365,6 +553,7 @@ class TourMapController with ChangeNotifier {
   Function(int step)? _onInfoTapped;
   Color? _primaryColor;
   String _idToken = '';
+
   //# endregion
 
   //# region CORE
@@ -374,14 +563,12 @@ class TourMapController with ChangeNotifier {
 
   void initTourMapController({
     required Tour tour,
-    required Color primaryColor,
     required Function(int step) onInfoTapped,
     required Function(BuildContext context) showOptionsDialog,
     required String idToken,
   }) {
     logger.t('initTourMapController - hashCode=$hashCode');
     _tour = tour;
-    _primaryColor = primaryColor;
     _onInfoTapped = onInfoTapped;
     _idToken = idToken;
     _addMarkers();
@@ -391,7 +578,7 @@ class TourMapController with ChangeNotifier {
       zoom: 14.0,
     );
 
-    moveCameraToMarkerAndHighlightMarker = (int step) {
+    moveCameraToMarkerAndHighlightMarker = (int? step) {
       // Your logic to move the camera and highlight marker
       _moveCameraToMarkerAndHighlightMarker(step);
     };
@@ -417,7 +604,7 @@ class TourMapController with ChangeNotifier {
     _routeSegments = [];
   }
 
-  void triggerMoveCameraToMarkerAndHighlightMarker(int step) {
+  void triggerMoveCameraToMarkerAndHighlightMarker({int? step}) {
     //logger.t('triggerMoveCameraToMarkerAndHighlightMarker - step=$step');
     if (moveCameraToMarkerAndHighlightMarker != null) {
       moveCameraToMarkerAndHighlightMarker!(step);
@@ -496,7 +683,7 @@ class TourMapController with ChangeNotifier {
             await GoogleMapsCustomMarker.createCustomBitmap(
           shape: MarkerShape.circle,
           title: '${i + 1}',
-          backgroundColor: _primaryColor!,
+          backgroundColor: TourguideTheme.tourguideColor,
           textSize: 48,
           shadowColor: Colors.black.withOpacity(0.7),
           shadowBlur: 24,
@@ -804,7 +991,9 @@ class TourMapController with ChangeNotifier {
     notifyListeners();
   }
 
-  void _moveCameraToMarkerAndHighlightMarker(int index) async {
+  void _moveCameraToMarkerAndHighlightMarker(int? nullableIndex) async {
+    if (nullableIndex != null) step = nullableIndex;
+    int index = nullableIndex ?? step;
     if (index >= 0 && index < _markers.length) {
       // Update the marker with the new bitmap
       _markers = _markers.map((marker) {
@@ -868,7 +1057,7 @@ class TourMapController with ChangeNotifier {
   void _highlightSegment(int segmentIndex) {
     // Clear existing polylines
     _polylines.clear();
-    Color colPrimary = _primaryColor!;
+    Color colPrimary = TourguideTheme.tourguideColor;
 
     // Add non-highlighted segments
     for (int i = 0; i < _routeSegments.length; i++) {

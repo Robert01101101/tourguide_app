@@ -275,7 +275,7 @@ class TourService {
             fileExtension = 'tiff';
             break;
           default:
-            print('Unsupported content type: $contentType');
+            logger.w('Unsupported content type: $contentType');
             return;
         }
 

@@ -53,8 +53,9 @@ class _TourRunningState extends State<TourRunning> {
     _tour = tourProvider.selectedTour!;
     thisUsersRating = _tour.thisUsersRating ?? 0;
     //add global keys for each place, as well as one extra for the final scroll
-    for (int i = 0; i <= _tour.tourguidePlaces.length; i++)
+    for (int i = 0; i <= _tour.tourguidePlaces.length; i++) {
       _targetKeys.add(GlobalKey());
+    }
     _scrollController.addListener(_handleScroll);
 
     my_auth.AuthProvider authProvider = Provider.of(context, listen: false);
@@ -62,7 +63,6 @@ class _TourRunningState extends State<TourRunning> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _tourMapController.initTourMapController(
         tour: _tour,
-        primaryColor: Theme.of(context).colorScheme.primary,
         onInfoTapped: (int step) {
           logger.t('Step $step tapped');
           _setStep(step);
@@ -279,91 +279,91 @@ class _TourRunningState extends State<TourRunning> {
     return TourMapFullscreen(
       tour: _tour,
       tourMapController: _tourMapController,
-      child: SelectionArea(
-        child: CustomScrollView(
-          controller: _scrollController,
-          slivers: [
-            SliverAppBar(
-              actions: [
-                if (!isOfflineCreatedTour)
-                  IconButton(
-                    icon: const Icon(Icons.more_vert),
-                    onPressed: () {
-                      _showOptionsDialog(context);
-                    },
-                  ),
-              ],
-              foregroundColor: Theme.of(context).brightness == Brightness.light
-                  ? Theme.of(context).scaffoldBackgroundColor
-                  : Colors.white,
-              floating: false,
-              pinned: false,
-              expandedHeight: 230.0,
-              flexibleSpace: FlexibleSpaceBar(
-                centerTitle: true,
-                title: Transform.translate(
-                  offset: Offset(0, -32),
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                        vertical: 4, horizontal: 56.0),
-                    child: Text(
-                        textAlign: TextAlign.left,
-                        _tour.name,
-                        style: Theme.of(context)
-                            .textTheme
-                            .displaySmall!
-                            .copyWith(
-                              color: Theme.of(context).brightness ==
-                                      Brightness.light
-                                  ? Theme.of(context).scaffoldBackgroundColor
-                                  : Colors.white,
-                            )),
-                  ),
+      child: CustomScrollView(
+        controller: _scrollController,
+        slivers: [
+          SliverAppBar(
+            actions: [
+              if (!isOfflineCreatedTour)
+                IconButton(
+                  icon: const Icon(Icons.more_vert),
+                  onPressed: () {
+                    _showOptionsDialog(context);
+                  },
                 ),
-                titlePadding: EdgeInsets.only(bottom: 0.0),
-                expandedTitleScale: 1,
-                collapseMode: CollapseMode.parallax,
-                background: Stack(
-                  fit: StackFit.expand,
-                  children: [
-                    Container(
-                      height: kIsWeb ? 400 : 230,
-                      child: ClipRRect(
-                        child: kIsWeb
-                            ? Image.network(_tour.imageUrl!,
-                                width: MediaQuery.of(context).size.width,
-                                height: 400.0,
-                                fit: BoxFit.cover)
-                            : _tour.imageFile != null
-                                ? //add null safety for img to upload
-                                Image.file(_tour.imageFile!,
-                                    width: MediaQuery.of(context).size.width,
-                                    height: 230.0,
-                                    fit: BoxFit.cover)
-                                : Container(
-                                    color: Colors.grey,
-                                    width: MediaQuery.of(context).size.width,
-                                    height: 230.0,
-                                  ),
-                      ),
-                    ),
-                    Container(
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          begin: Alignment.topCenter,
-                          end: Alignment.bottomCenter,
-                          colors: [
-                            Colors.black.withOpacity(0.2),
-                            Colors.black.withOpacity(0.5),
-                          ],
-                        ),
-                      ),
-                    )
-                  ],
+            ],
+            foregroundColor: Theme.of(context).brightness == Brightness.light
+                ? Theme.of(context).scaffoldBackgroundColor
+                : Colors.white,
+            floating: false,
+            pinned: false,
+            expandedHeight: 230.0,
+            flexibleSpace: FlexibleSpaceBar(
+              centerTitle: true,
+              title: Transform.translate(
+                offset: Offset(0, -32),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                      vertical: 4, horizontal: 56.0),
+                  child: Text(
+                      textAlign: TextAlign.left,
+                      _tour.name,
+                      style: Theme.of(context)
+                          .textTheme
+                          .displaySmall!
+                          .copyWith(
+                            color: Theme.of(context).brightness ==
+                                    Brightness.light
+                                ? Theme.of(context).scaffoldBackgroundColor
+                                : Colors.white,
+                          )),
                 ),
               ),
+              titlePadding: EdgeInsets.only(bottom: 0.0),
+              expandedTitleScale: 1,
+              collapseMode: CollapseMode.parallax,
+              background: Stack(
+                fit: StackFit.expand,
+                children: [
+                  Container(
+                    height: kIsWeb ? 400 : 230,
+                    child: ClipRRect(
+                      child: kIsWeb
+                          ? Image.network(_tour.imageUrl!,
+                              width: MediaQuery.of(context).size.width,
+                              height: 400.0,
+                              fit: BoxFit.cover)
+                          : _tour.imageFile != null
+                              ? //add null safety for img to upload
+                              Image.file(_tour.imageFile!,
+                                  width: MediaQuery.of(context).size.width,
+                                  height: 230.0,
+                                  fit: BoxFit.cover)
+                              : Container(
+                                  color: Colors.grey,
+                                  width: MediaQuery.of(context).size.width,
+                                  height: 230.0,
+                                ),
+                    ),
+                  ),
+                  Container(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [
+                          Colors.black.withOpacity(0.2),
+                          Colors.black.withOpacity(0.5),
+                        ],
+                      ),
+                    ),
+                  )
+                ],
+              ),
             ),
-            SliverToBoxAdapter(
+          ),
+          SliverToBoxAdapter(
+            child: SelectionArea(
               child: Padding(
                 padding: const EdgeInsets.symmetric(vertical: 16.0),
                 child: StandardLayout(
@@ -377,15 +377,17 @@ class _TourRunningState extends State<TourRunning> {
                 ),
               ),
             ),
-            SliverPinnedHeader(
-              child: TourMap(
-                tour: _tour,
-                tourMapController: _tourMapController,
-                mapKey: _mapKey,
-                mapCurrentlyPinnedAtTop: _mapCurrentlyPinnedAtTop,
-              ),
+          ),
+          SliverPinnedHeader(
+            child: TourMap(
+              tour: _tour,
+              tourMapController: _tourMapController,
+              mapKey: _mapKey,
+              mapCurrentlyPinnedAtTop: _mapCurrentlyPinnedAtTop,
             ),
-            SliverToBoxAdapter(
+          ),
+          SliverToBoxAdapter(
+            child: SelectionArea(
               child: StandardLayout(
                 children: [
                   StandardLayoutChild(
@@ -685,9 +687,9 @@ class _TourRunningState extends State<TourRunning> {
                   )
                 ],
               ),
-            )
-          ],
-        ),
+            ),
+          )
+        ],
       ),
     );
   }

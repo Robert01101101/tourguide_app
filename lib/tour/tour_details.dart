@@ -43,7 +43,6 @@ class _FullscreenTourPageState extends State<FullscreenTourPage> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _tourMapController.initTourMapController(
         tour: widget.tour,
-        primaryColor: Theme.of(context).colorScheme.primary,
         onInfoTapped: (int step) {
           logger.t('Step $step tapped');
           //_setStep(step);
