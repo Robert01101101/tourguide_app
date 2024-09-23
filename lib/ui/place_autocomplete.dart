@@ -5,7 +5,6 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:tourguide_app/utilities/providers/location_provider.dart';
 import 'package:flutter_google_places_sdk/flutter_google_places_sdk.dart';
-
 import '../main.dart';
 
 class PlaceAutocomplete extends StatefulWidget {
@@ -14,6 +13,9 @@ class PlaceAutocomplete extends StatefulWidget {
   final Function(AutocompletePrediction) onItemSelected;
   final Function(Place?)? onPlaceInfoFetched;
   final bool restrictToCities;
+  final bool restrictToSurroundingArea;
+  final double? searchLocationLat;
+  final double? searchLocationLng;
   final InputDecoration? decoration;
   final bool customLabel;
 
@@ -23,6 +25,9 @@ class PlaceAutocomplete extends StatefulWidget {
     required this.onItemSelected,
     this.onPlaceInfoFetched,
     this.restrictToCities = true, //default true
+    this.restrictToSurroundingArea = false,
+    this.searchLocationLat,
+    this.searchLocationLng,
     this.decoration,
     this.customLabel = false,
   });
@@ -52,7 +57,10 @@ class _PlaceAutocompleteState extends State<PlaceAutocomplete> {
         Provider.of<LocationProvider>(context, listen: false);
     _debouncedSearch = _debounce<Iterable<AutocompletePrediction>?, String>(
         (query) => locationProvider.getAutocompleteSuggestions(query,
-            restrictToCities: widget.restrictToCities));
+            restrictToCities: widget.restrictToCities,
+        restrictToSurroundingArea: widget.restrictToSurroundingArea,
+        searchLocationLat: widget.searchLocationLat,
+        searchLocationLng: widget.searchLocationLng));
     if (widget.textEditingController.text.isNotEmpty) {
       _isValidSelection = true;
     }

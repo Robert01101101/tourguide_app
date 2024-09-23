@@ -600,7 +600,7 @@ class _CreateEditTourState extends State<CreateEditTour> {
                       minLines: 4,
                       maxLines: 8,
                       maxLength: _descriptionMaxChars,
-                      decoration: InputDecoration(
+                      decoration: const InputDecoration(
                         labelText: 'Description',
                       ),
                       validator: (String? value) {
@@ -721,7 +721,7 @@ class _CreateEditTourState extends State<CreateEditTour> {
                                 key: ValueKey(_placeControllers[index]),
                                 width: double.infinity,
                                 child: ListTile(
-                                  contentPadding: EdgeInsets.symmetric(
+                                  contentPadding: const EdgeInsets.symmetric(
                                       vertical: 0.0, horizontal: 0),
                                   leading: ReorderableDragStartListener(
                                     index: index,
@@ -731,6 +731,9 @@ class _CreateEditTourState extends State<CreateEditTour> {
                                     textEditingController:
                                         _placeControllers[index],
                                     restrictToCities: false,
+                                    restrictToSurroundingArea: true,
+                                    searchLocationLat: _city?.latLng?.lat,
+                                    searchLocationLng: _city?.latLng?.lng,
                                     isFormSubmitted: _isFormSubmitted,
                                     decoration: InputDecoration(
                                       labelText: 'Place ${index + 1}',

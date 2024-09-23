@@ -294,30 +294,35 @@ class LocationProvider with ChangeNotifier {
   }
 
   Future<List<AutocompletePrediction>?> getAutocompleteSuggestions(String query,
-      {bool restrictToCities = true}) async {
+      {bool restrictToCities = true, bool restrictToSurroundingArea = false, double? searchLocationLat, double? searchLocationLng}) async {
     if (query == null || query.isEmpty) {
       logger.w("Query is null or empty: $query");
       return null;
     }
     try {
       LatLng? location;
+      LatLng? searchLocation;
+      if (searchLocationLat != null && searchLocationLng != null) {
+        searchLocation = LatLng(lat: searchLocationLat, lng: searchLocationLng);
+      }
       LatLngBounds? locationBias;
 
       if (_currentPosition == null) {
         logger.w(
             "_currentPosition is null, autocomplete suggestions may not be accurate.");
       } else {
-        location = LatLng(
+        location = searchLocation ?? LatLng(
             lat: _currentPosition!.latitude, lng: _currentPosition!.longitude);
-        locationBias = _createBounds(location, 50);
+        locationBias = _createBounds(location, restrictToSurroundingArea ? 200 : 50);
       }
 
       // Get the Place ID using FlutterGooglePlacesSdk
       final result = await _places.findAutocompletePredictions(
         query,
         placeTypesFilter: restrictToCities ? [PlaceTypeFilter.CITIES] : [],
-        locationBias: locationBias,
+        locationBias: restrictToSurroundingArea ? null : locationBias,
         origin: location,
+        locationRestriction: restrictToSurroundingArea ? locationBias : null,
       );
 
       List<AutocompletePrediction> resultSorted = List.from(result.predictions);

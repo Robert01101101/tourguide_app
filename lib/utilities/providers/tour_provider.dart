@@ -205,7 +205,7 @@ class TourProvider with ChangeNotifier {
     if (_globalTours.isEmpty) _globalTours.add(addTourTile.id);
     if (_userCreatedTours.isEmpty) {
       _userCreatedTours.add(addTourTile.id);
-    } else {
+    } else if (!_userCreatedTours.contains(Tour.addTourTileId)) {
       _userCreatedTours.insert(0, addTourTile.id);
     }
     notifyListeners();
