@@ -279,6 +279,7 @@ class _TourRunningState extends State<TourRunning> {
     return TourMapFullscreen(
       tour: _tour,
       tourMapController: _tourMapController,
+      tourRunningMap: true,
       child: CustomScrollView(
         controller: _scrollController,
         slivers: [
@@ -382,6 +383,7 @@ class _TourRunningState extends State<TourRunning> {
             child: TourMap(
               tour: _tour,
               tourMapController: _tourMapController,
+              tourRunningMap: true,
               mapKey: _mapKey,
               mapCurrentlyPinnedAtTop: _mapCurrentlyPinnedAtTop,
             ),

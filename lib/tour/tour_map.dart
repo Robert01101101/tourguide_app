@@ -18,11 +18,13 @@ import 'package:tourguide_app/utilities/providers/location_provider.dart';
 import '../ui/tourguide_theme.dart';
 import '../utilities/crossplatform_utils.dart';
 
+//TODO: unify map buttons
 /// NOTE: not using ChangeNotifierProvider atm, because nesting it was causing problems as it's not how it's intended to be used
 /// as a result, I'm not sure whether this is safe to use without nesting inside a TourMapFullscreen atm
 class TourMap extends StatefulWidget {
   final TourMapController tourMapController;
   final Tour tour;
+  final bool tourRunningMap;
   final GlobalKey? mapKey;
   final bool? mapCurrentlyPinnedAtTop;
   final double? height;
@@ -32,10 +34,11 @@ class TourMap extends StatefulWidget {
       {super.key,
       required this.tourMapController,
       required this.tour,
+      required this.tourRunningMap,
       this.mapKey,
       this.mapCurrentlyPinnedAtTop,
       this.height,
-      this.heightWeb});
+      this.heightWeb,});
 
   @override
   State<TourMap> createState() => _TourMapState();
@@ -121,43 +124,48 @@ class _TourMapState extends State<TourMap> {
                     minimum: const EdgeInsets.only(top: 12),
                     child: Column(
                       children: [
-                        SizedBox(
-                          width: 38,
-                          height: 38,
-                          child: RawMaterialButton(
-                            onPressed: () async {
-                              widget.tourMapController.triggerMoveCameraToMarkerAndHighlightMarker();
-                            },
-                            elevation: 1.0,
-                            highlightElevation: 2,
-                            fillColor: Colors.white.withOpacity(0.8),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(
-                                  3.0), // Adjust the radius as needed
-                            ),
-                            child: Padding(
-                              padding: const EdgeInsets.all(
-                                  1.0), // Adjust inner padding as needed
-                              child: Stack(
-                                alignment: Alignment.center,
-                                children: [
-                                  const Icon(Icons.circle,
-                                    color: Color(0xff666666),
-                                    size: 24.0, // Adjust the size of the icon as needed
+                        if (widget.tourRunningMap)
+                          Column(
+                          children: [
+                            SizedBox(
+                              width: 38,
+                              height: 38,
+                              child: RawMaterialButton(
+                                onPressed: () async {
+                                  widget.tourMapController.triggerMoveCameraToMarkerAndHighlightMarker();
+                                },
+                                elevation: 1.0,
+                                highlightElevation: 2,
+                                fillColor: Colors.white.withOpacity(0.8),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(
+                                      3.0), // Adjust the radius as needed
+                                ),
+                                child: Padding(
+                                  padding: const EdgeInsets.all(
+                                      1.0), // Adjust inner padding as needed
+                                  child: Stack(
+                                    alignment: Alignment.center,
+                                    children: [
+                                      const Icon(Icons.circle,
+                                        color: Color(0xff666666),
+                                        size: 24.0, // Adjust the size of the icon as needed
+                                      ),
+                                      Text((widget.tourMapController.step + 1).toString(),
+                                      style: const TextStyle(
+                                        fontFamily: 'Roboto',
+                                        fontSize: 12,
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.bold,
+                                      ),)
+                                    ],
                                   ),
-                                  Text((widget.tourMapController.step + 1).toString(),
-                                  style: const TextStyle(
-                                    fontFamily: 'Roboto',
-                                    fontSize: 12,
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.bold,
-                                  ),)
-                                ],
+                                ),
                               ),
                             ),
-                          ),
+                            const SizedBox(height: 8,),
+                          ],
                         ),
-                        const SizedBox(height: 8,),
                         if (locationProvider.permissionStatus == PermissionStatus.granted)
                           Column(
                             children: [
@@ -253,6 +261,7 @@ class TourMapFullscreen extends StatefulWidget {
   final TourMapController tourMapController;
   final Tour tour;
   final Widget child;
+  final bool tourRunningMap;
   final bool? alwaysShowAppBar;
 
   const TourMapFullscreen(
@@ -260,6 +269,7 @@ class TourMapFullscreen extends StatefulWidget {
       required this.tourMapController,
       required this.tour,
       required this.child,
+      required this.tourRunningMap,
       this.alwaysShowAppBar});
 
   @override
@@ -372,43 +382,48 @@ class _TourMapFullscreenState extends State<TourMapFullscreen> {
                                 right: 10,
                                 child: Column(
                                   children: [
-                                    SizedBox(
-                                      width: 38,
-                                      height: 38,
-                                      child: RawMaterialButton(
-                                        onPressed: () async {
-                                          widget.tourMapController.triggerMoveCameraToMarkerAndHighlightMarker();
-                                        },
-                                        elevation: 1.0,
-                                        highlightElevation: 2,
-                                        fillColor: Colors.white.withOpacity(0.8),
-                                        shape: RoundedRectangleBorder(
-                                          borderRadius: BorderRadius.circular(
-                                              3.0), // Adjust the radius as needed
-                                        ),
-                                        child: Padding(
-                                          padding: const EdgeInsets.all(
-                                              1.0), // Adjust inner padding as needed
-                                          child: Stack(
-                                            alignment: Alignment.center,
-                                            children: [
-                                              const Icon(Icons.circle,
-                                                color: Color(0xff666666),
-                                                size: 24.0, // Adjust the size of the icon as needed
+                                    if (widget.tourRunningMap)
+                                      Column(
+                                      children: [
+                                        SizedBox(
+                                          width: 38,
+                                          height: 38,
+                                          child: RawMaterialButton(
+                                            onPressed: () async {
+                                              widget.tourMapController.triggerMoveCameraToMarkerAndHighlightMarker();
+                                            },
+                                            elevation: 1.0,
+                                            highlightElevation: 2,
+                                            fillColor: Colors.white.withOpacity(0.8),
+                                            shape: RoundedRectangleBorder(
+                                              borderRadius: BorderRadius.circular(
+                                                  3.0), // Adjust the radius as needed
+                                            ),
+                                            child: Padding(
+                                              padding: const EdgeInsets.all(
+                                                  1.0), // Adjust inner padding as needed
+                                              child: Stack(
+                                                alignment: Alignment.center,
+                                                children: [
+                                                  const Icon(Icons.circle,
+                                                    color: Color(0xff666666),
+                                                    size: 24.0, // Adjust the size of the icon as needed
+                                                  ),
+                                                  Text((widget.tourMapController.step + 1).toString(),
+                                                    style: const TextStyle(
+                                                      fontFamily: 'Roboto',
+                                                      fontSize: 12,
+                                                      color: Colors.white,
+                                                      fontWeight: FontWeight.bold,
+                                                    ),)
+                                                ],
                                               ),
-                                              Text((widget.tourMapController.step + 1).toString(),
-                                                style: const TextStyle(
-                                                  fontFamily: 'Roboto',
-                                                  fontSize: 12,
-                                                  color: Colors.white,
-                                                  fontWeight: FontWeight.bold,
-                                                ),)
-                                            ],
+                                            ),
                                           ),
                                         ),
-                                      ),
+                                        const SizedBox(height: 8,),
+                                      ],
                                     ),
-                                    const SizedBox(height: 8,),
                                     if (locationProvider.permissionStatus == PermissionStatus.granted)
                                       Column(
                                         children: [

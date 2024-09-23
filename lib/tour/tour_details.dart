@@ -138,6 +138,7 @@ class _FullscreenTourPageState extends State<FullscreenTourPage> {
     return TourMapFullscreen(
       tour: widget.tour,
       tourMapController: _tourMapController,
+      tourRunningMap: false,
       alwaysShowAppBar: true,
       child: Scrollbar(
         thumbVisibility: true,
@@ -175,7 +176,7 @@ class _FullscreenTourPageState extends State<FullscreenTourPage> {
                       Align(
                           alignment: Alignment.topRight,
                           child: Padding(
-                            padding: EdgeInsets.all(8.0),
+                            padding: const EdgeInsets.all(8.0),
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.end,
                               children: [
@@ -218,6 +219,7 @@ class _FullscreenTourPageState extends State<FullscreenTourPage> {
               TourMap(
                 tourMapController: _tourMapController,
                 tour: widget.tour,
+                tourRunningMap: false,
                 height: 220,
                 heightWeb: 320,
               ),
