@@ -264,7 +264,7 @@ class _TourTileState extends State<TourTile> {
                           ),
                         ),
                       ),
-                      Spacer(),
+                      const Spacer(),
                       Padding(
                         padding: const EdgeInsets.only(
                             left: 8, top: 6, right: 8, bottom: 10),
@@ -365,7 +365,7 @@ class _ExpandedTourTileOverlayState extends State<ExpandedTourTileOverlay> {
                     ),
                     IconButton(
                       onPressed: () => Navigator.of(context).pop(),
-                      icon: Icon(Icons.close),
+                      icon: const Icon(Icons.close),
                     ),
                   ],
                 ),
@@ -454,14 +454,14 @@ class _ExpandedTourTileOverlayState extends State<ExpandedTourTileOverlay> {
                         foregroundColor:
                             Theme.of(context).colorScheme.surfaceContainerLow,
                       ),
-                      child: Text("Start"),
+                      child: const Text("Start"),
                     ),
-                    SizedBox(width: 8.0),
+                    const SizedBox(width: 8.0),
                     ElevatedButton.icon(
                       onPressed: tourDetails,
-                      label: Text("Details"),
+                      label: const Text("Details"),
                       icon: widget.tour.reports.isNotEmpty
-                          ? Icon(
+                          ? const Icon(
                               Icons.report_outlined,
                             )
                           : null,

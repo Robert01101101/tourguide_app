@@ -11,6 +11,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tourguide_app/explore_map.dart';
 import 'package:tourguide_app/ui/my_layouts.dart';
 import 'package:tourguide_app/ui/horizontal_scroller.dart';
+import 'package:tourguide_app/ui/parallax_image.dart';
 import 'package:tourguide_app/ui/place_autocomplete.dart';
 import 'package:tourguide_app/ui/shimmer_loading.dart';
 import 'package:tourguide_app/utilities/custom_import.dart';
@@ -69,12 +70,7 @@ class ExploreState extends State<Explore> {
 
       super.initState();
 
-      //for parallax
-      _scrollController.addListener(() {
-        setState(() {
-          _scrollOffset = _scrollController.offset;
-        });
-      });
+
 
       //to accurately measure height of page
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -179,7 +175,6 @@ class ExploreState extends State<Explore> {
 
   final ScrollController _scrollController =
       ScrollController(); //for bg parallax effect and refresh
-  double _scrollOffset = 0;
 
   @override
   Widget build(BuildContext context) {
@@ -187,6 +182,8 @@ class ExploreState extends State<Explore> {
     LocationProvider locationProvider = Provider.of<LocationProvider>(context);
     TourProvider tourProvider = Provider.of<TourProvider>(context);
     String displayName = authProvider.user?.displayName ?? '';
+
+    logger.t('Explore.build()');
 
     Future<void> refresh() async {
       if (!tourProvider.isLoadingTours) {
@@ -248,55 +245,9 @@ class ExploreState extends State<Explore> {
                         ],
                       );
                     } else {
-                      return Transform.translate(
-                        offset: Offset(0, _scrollOffset * 0.5),
-                        child: ShaderMask(
-                          shaderCallback: (rect) {
-                            return const LinearGradient(
-                              begin: Alignment.topCenter,
-                              end: Alignment.bottomCenter,
-                              colors: [
-                                kIsWeb ? Colors.transparent : Colors.white,
-                                kIsWeb ? Colors.black87 : Colors.black45
-                              ],
-                            ).createShader(
-                                Rect.fromLTRB(0, 0, rect.width, rect.height));
-                          },
-                          blendMode: BlendMode.multiply,
-                          child: LayoutBuilder(
-                            builder: (context, constraints) {
-                              return SizedBox(
-                                width: constraints.maxWidth,
-                                height: 300,
-                                child: FittedBox(
-                                  fit: BoxFit.cover,
-                                  alignment: Alignment.center,
-                                  child: kIsWeb
-                                      ? gpi.GooglePlacesImg(
-                                          //prevents CORS error, taken from places sdk example //TODO investigate if also usable on mobile
-                                          photoMetadata: currentPlaceImg
-                                              .googlePlacesImg!.photoMetadata,
-                                          placePhotoResponse: currentPlaceImg
-                                              .googlePlacesImg!
-                                              .placePhotoResponse,
-                                        )
-                                      : currentPlaceImg
-                                          .googlePlacesImg!.placePhotoResponse
-                                          .when(
-                                          image: (image) => Image(
-                                            image: image.image,
-                                            gaplessPlayback: true,
-                                          ),
-                                          imageUrl: (imageUrl) => Image.network(
-                                            imageUrl,
-                                            gaplessPlayback: true,
-                                          ),
-                                        ),
-                                ),
-                              );
-                            },
-                          ),
-                        ),
+                      return ParallaxImage(
+                          scrollController: _scrollController,
+                          currentPlaceImg: currentPlaceImg
                       );
                     }
                   },
