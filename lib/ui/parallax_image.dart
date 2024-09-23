@@ -65,31 +65,35 @@ class _ParallaxImageState extends State<ParallaxImage> {
         blendMode: BlendMode.multiply,
         child: LayoutBuilder(
           builder: (context, constraints) {
-            return SizedBox(
-              width: constraints.maxWidth,
-              height: 300,
-              child: FittedBox(
-                fit: BoxFit.cover,
-                alignment: Alignment.center,
-                child: kIsWeb
-                    ? gpi.GooglePlacesImg(
-                  //prevents CORS error, taken from places sdk example //TODO investigate if also usable on mobile
-                  photoMetadata: widget.currentPlaceImg
-                      .googlePlacesImg!.photoMetadata,
-                  placePhotoResponse: widget.currentPlaceImg
-                      .googlePlacesImg!
-                      .placePhotoResponse,
-                )
-                    : widget.currentPlaceImg
-                    .googlePlacesImg!.placePhotoResponse
-                    .when(
-                  image: (image) => Image(
-                    image: image.image,
-                    gaplessPlayback: true,
-                  ),
-                  imageUrl: (imageUrl) => Image.network(
-                    imageUrl,
-                    gaplessPlayback: true,
+            return ClipRect (
+              child: SizedBox(
+                width: constraints.maxWidth,
+                height: 300,
+                child: FittedBox(
+                  fit: BoxFit.cover,
+                  alignment: Alignment.center,
+                  child: AbsorbPointer(
+                    child: kIsWeb
+                        ? gpi.GooglePlacesImg(
+                      //prevents CORS error, taken from places sdk example //TODO investigate if also usable on mobile
+                      photoMetadata: widget.currentPlaceImg
+                          .googlePlacesImg!.photoMetadata,
+                      placePhotoResponse: widget.currentPlaceImg
+                          .googlePlacesImg!
+                          .placePhotoResponse,
+                    )
+                        : widget.currentPlaceImg
+                        .googlePlacesImg!.placePhotoResponse
+                        .when(
+                      image: (image) => Image(
+                        image: image.image,
+                        gaplessPlayback: true,
+                      ),
+                      imageUrl: (imageUrl) => Image.network(
+                        imageUrl,
+                        gaplessPlayback: true,
+                      ),
+                    ),
                   ),
                 ),
               ),
