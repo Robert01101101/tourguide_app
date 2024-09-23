@@ -150,7 +150,7 @@ class _FormFieldTagsContentState extends State<_FormFieldTagsContent> {
           Wrap(
             spacing: 8,
             runSpacing:
-                kIsWeb && MediaQuery.of(context).size.width > 1280 ? 8 : 0,
+                kIsWeb ? 8 : 0,
             children:
                 List<Widget>.generate(_descriptiveTagsPresets.length, (index) {
               String descriptiveTag = _descriptiveTagsPresets[index];
