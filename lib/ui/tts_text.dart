@@ -143,7 +143,7 @@ class _TtsTextState extends State<TtsText> {
     return MouseRegion(
       cursor: widget.currentlyPlayingItem
           ? SystemMouseCursors.click
-          : SystemMouseCursors.text,
+          : SystemMouseCursors.basic,
       child: GestureDetector(
         onTapUp: (details) {
           if (widget.currentlyPlayingItem)

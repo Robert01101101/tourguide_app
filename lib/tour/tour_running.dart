@@ -389,306 +389,304 @@ class _TourRunningState extends State<TourRunning> {
             ),
           ),
           SliverToBoxAdapter(
-            child: SelectionArea(
-              child: StandardLayout(
-                children: [
-                  StandardLayoutChild(
-                    fullWidth: true,
-                    child: Column(
-                      //wrap in columnn to remove gap between stepper and bottom row, since stepper has a lot of margin by default
-                      children: [
-                        if (kIsWeb) const SizedBox(height: 32.0),
-                        if (_tour.tourguidePlaces.isNotEmpty)
-                          Transform.translate(
-                            // Move the stepper up to hide top margin, seems to be the easiest way to achieve it
-                            offset: Offset(0, -32),
-                            child: Stepper(
-                              currentStep: _currentStep,
-                              physics: NeverScrollableScrollPhysics(),
-                              onStepTapped: (step) {
-                                _setStep(step);
-                              },
-                              onStepContinue: () {
-                                if (_currentStep <
-                                    _tour.tourguidePlaces.length) {
-                                  setState(() {
-                                    _currentStep += 1;
-                                  });
-                                  _scrollToTarget(_currentStep, delay: true);
-                                  _tourMapController
-                                          .moveCameraToMarkerAndHighlightMarker!(
-                                      _currentStep);
-                                  //_moveCameraToMarkerAndHighlightMarker(_currentStep);
-                                }
-                              },
-                              onStepCancel: () {
-                                if (_currentStep > 0) {
-                                  setState(() {
-                                    _currentStep -= 1;
-                                  });
-                                  _scrollToTarget(_currentStep, delay: true);
-                                  _tourMapController
-                                          .moveCameraToMarkerAndHighlightMarker!(
-                                      _currentStep);
-                                  //_moveCameraToMarkerAndHighlightMarker(_currentStep);
-                                }
-                              },
-                              controlsBuilder: (BuildContext context,
-                                  ControlsDetails controlsDetails) {
-                                return Stack(
-                                  children: [
-                                    Visibility(
-                                        visible: !_currentStepVisible,
-                                        child: Container()),
-                                    Visibility(
-                                      visible: _currentStepVisible,
-                                      child: Padding(
-                                        padding: const EdgeInsets.all(8.0),
-                                        child: Row(
-                                          children: <Widget>[
-                                            const SizedBox(width: 8),
-                                            if (_currentStep > 0)
-                                              TextButton(
-                                                onPressed: controlsDetails
-                                                    .onStepCancel,
-                                                style: ElevatedButton.styleFrom(
-                                                  elevation: 0,
-                                                  backgroundColor:
-                                                      Colors.transparent,
-                                                  foregroundColor:
-                                                      Theme.of(context)
-                                                          .colorScheme
-                                                          .onSecondaryContainer,
-                                                  //primary: Colors.blue, // Custom color for "Continue" button
-                                                  shape: RoundedRectangleBorder(
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                            3.0), // Custom radius
-                                                  ),
-                                                ),
-                                                child: const Text(
-                                                    'Previous Place'),
-                                              ),
-                                            const SizedBox(
-                                                width:
-                                                    24), // Add spacing between buttons if needed
+            child: StandardLayout(
+              children: [
+                StandardLayoutChild(
+                  fullWidth: true,
+                  child: Column(
+                    //wrap in columnn to remove gap between stepper and bottom row, since stepper has a lot of margin by default
+                    children: [
+                      if (kIsWeb) const SizedBox(height: 32.0),
+                      if (_tour.tourguidePlaces.isNotEmpty)
+                        Transform.translate(
+                          // Move the stepper up to hide top margin, seems to be the easiest way to achieve it
+                          offset: Offset(0, -32),
+                          child: Stepper(
+                            currentStep: _currentStep,
+                            physics: NeverScrollableScrollPhysics(),
+                            onStepTapped: (step) {
+                              _setStep(step);
+                            },
+                            onStepContinue: () {
+                              if (_currentStep <
+                                  _tour.tourguidePlaces.length) {
+                                setState(() {
+                                  _currentStep += 1;
+                                });
+                                _scrollToTarget(_currentStep, delay: true);
+                                _tourMapController
+                                        .moveCameraToMarkerAndHighlightMarker!(
+                                    _currentStep);
+                                //_moveCameraToMarkerAndHighlightMarker(_currentStep);
+                              }
+                            },
+                            onStepCancel: () {
+                              if (_currentStep > 0) {
+                                setState(() {
+                                  _currentStep -= 1;
+                                });
+                                _scrollToTarget(_currentStep, delay: true);
+                                _tourMapController
+                                        .moveCameraToMarkerAndHighlightMarker!(
+                                    _currentStep);
+                                //_moveCameraToMarkerAndHighlightMarker(_currentStep);
+                              }
+                            },
+                            controlsBuilder: (BuildContext context,
+                                ControlsDetails controlsDetails) {
+                              return Stack(
+                                children: [
+                                  Visibility(
+                                      visible: !_currentStepVisible,
+                                      child: Container()),
+                                  Visibility(
+                                    visible: _currentStepVisible,
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(8.0),
+                                      child: Row(
+                                        children: <Widget>[
+                                          const SizedBox(width: 8),
+                                          if (_currentStep > 0)
                                             TextButton(
-                                              onPressed: _currentStep !=
-                                                      _tour.tourguidePlaces
-                                                              .length -
-                                                          1
-                                                  ? controlsDetails
-                                                      .onStepContinue
-                                                  : !_tourFinished
-                                                      ? _finishTour
-                                                      : null,
+                                              onPressed: controlsDetails
+                                                  .onStepCancel,
                                               style: ElevatedButton.styleFrom(
+                                                elevation: 0,
                                                 backgroundColor:
-                                                    Theme.of(context)
-                                                        .colorScheme
-                                                        .primary,
+                                                    Colors.transparent,
                                                 foregroundColor:
                                                     Theme.of(context)
                                                         .colorScheme
-                                                        .surfaceContainerLow,
-                                                //primary: Colors.grey, // Custom color for "Back" button
+                                                        .onSecondaryContainer,
+                                                //primary: Colors.blue, // Custom color for "Continue" button
                                                 shape: RoundedRectangleBorder(
                                                   borderRadius:
                                                       BorderRadius.circular(
                                                           3.0), // Custom radius
                                                 ),
                                               ),
-                                              child: _currentStep !=
-                                                      _tour.tourguidePlaces
-                                                              .length -
-                                                          1
-                                                  ? const Text('Next Place')
-                                                  : const Text('Finish Tour'),
+                                              child: const Text(
+                                                  'Previous Place'),
                                             ),
-                                            Spacer(),
-                                          ],
-                                        ),
+                                          const SizedBox(
+                                              width:
+                                                  24), // Add spacing between buttons if needed
+                                          TextButton(
+                                            onPressed: _currentStep !=
+                                                    _tour.tourguidePlaces
+                                                            .length -
+                                                        1
+                                                ? controlsDetails
+                                                    .onStepContinue
+                                                : !_tourFinished
+                                                    ? _finishTour
+                                                    : null,
+                                            style: ElevatedButton.styleFrom(
+                                              backgroundColor:
+                                                  Theme.of(context)
+                                                      .colorScheme
+                                                      .primary,
+                                              foregroundColor:
+                                                  Theme.of(context)
+                                                      .colorScheme
+                                                      .surfaceContainerLow,
+                                              //primary: Colors.grey, // Custom color for "Back" button
+                                              shape: RoundedRectangleBorder(
+                                                borderRadius:
+                                                    BorderRadius.circular(
+                                                        3.0), // Custom radius
+                                              ),
+                                            ),
+                                            child: _currentStep !=
+                                                    _tour.tourguidePlaces
+                                                            .length -
+                                                        1
+                                                ? const Text('Next Place')
+                                                : const Text('Finish Tour'),
+                                          ),
+                                          Spacer(),
+                                        ],
                                       ),
                                     ),
-                                  ],
-                                );
-                              },
-                              margin: EdgeInsets.zero,
-                              steps: _tour.tourguidePlaces
-                                  .asMap()
-                                  .entries
-                                  .map((entry) {
-                                int index = entry.key;
-                                var place = entry.value;
-                                return Step(
-                                  title: Text(
-                                      key: _targetKeys.isNotEmpty &&
-                                              _targetKeys.length > index
-                                          ? _targetKeys[index]
-                                          : null,
-                                      place.title),
-                                  isActive: _currentStep >= (index),
-                                  state: _currentStep > (index)
-                                      ? StepState.complete
-                                      : StepState.indexed,
-                                  content: Visibility(
-                                    visible: _currentStepVisible,
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Row(
-                                          //Title Row
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.spaceBetween,
-                                          children: [
-                                            Flexible(
-                                              child: Row(
-                                                children: [
-                                                  Text(
-                                                    "${index + 1}. ",
+                                  ),
+                                ],
+                              );
+                            },
+                            margin: EdgeInsets.zero,
+                            steps: _tour.tourguidePlaces
+                                .asMap()
+                                .entries
+                                .map((entry) {
+                              int index = entry.key;
+                              var place = entry.value;
+                              return Step(
+                                title: Text(
+                                    key: _targetKeys.isNotEmpty &&
+                                            _targetKeys.length > index
+                                        ? _targetKeys[index]
+                                        : null,
+                                    place.title),
+                                isActive: _currentStep >= (index),
+                                state: _currentStep > (index)
+                                    ? StepState.complete
+                                    : StepState.indexed,
+                                content: Visibility(
+                                  visible: _currentStepVisible,
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Row(
+                                        //Title Row
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          Flexible(
+                                            child: Row(
+                                              children: [
+                                                Text(
+                                                  "${index + 1}. ",
+                                                  style: Theme.of(context)
+                                                      .textTheme
+                                                      .titleMedium!
+                                                      .copyWith(
+                                                        overflow: TextOverflow
+                                                            .ellipsis,
+                                                      ),
+                                                  maxLines: 2,
+                                                ),
+                                                const SizedBox(width: 8.0),
+                                                Flexible(
+                                                  child: Text(
+                                                    "${place.title}",
                                                     style: Theme.of(context)
                                                         .textTheme
                                                         .titleMedium!
                                                         .copyWith(
-                                                          overflow: TextOverflow
-                                                              .ellipsis,
+                                                          overflow:
+                                                              TextOverflow
+                                                                  .ellipsis,
                                                         ),
                                                     maxLines: 2,
                                                   ),
-                                                  const SizedBox(width: 8.0),
-                                                  Flexible(
-                                                    child: Text(
-                                                      "${place.title}",
-                                                      style: Theme.of(context)
-                                                          .textTheme
-                                                          .titleMedium!
-                                                          .copyWith(
-                                                            overflow:
-                                                                TextOverflow
-                                                                    .ellipsis,
-                                                          ),
-                                                      maxLines: 2,
-                                                    ),
-                                                  ),
-                                                ],
-                                              ),
-                                            ),
-                                            Row(
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment.end,
-                                              children: [
-                                                IconButton(
-                                                  onPressed: () =>
-                                                      MapUtils.openMapWithQuery(
-                                                          place.title),
-                                                  icon: Icon(Icons.directions),
                                                 ),
                                               ],
                                             ),
-                                            IconButton(
-                                              onPressed: () => _toggleTTS(
-                                                  place.description, index),
-                                              icon: Icon(
-                                                  currentlyPlayingIndex == index
-                                                      ? Icons.stop
-                                                      : Icons.play_circle),
-                                            ),
-                                          ],
-                                        ),
-                                        SizedBox(height: 6.0),
-                                        VisibilityDetector(
-                                          key: Key('place$index'),
-                                          onVisibilityChanged:
-                                              (VisibilityInfo info) {
-                                            if (info.visibleFraction == 1) {
-                                              if (!_initialZoomToFirstWaypointComplete) {
-                                                logger.t(
-                                                    'Place $index visibility: ${info.visibleFraction} - > _initialZoomToFirstWaypoint');
-                                                _initialZoomToFirstWaypointComplete =
-                                                    true;
-                                                //_moveCameraToMarkerAndHighlightMarker(0);
-                                                _tourMapController
-                                                    .moveCameraToMarkerAndHighlightMarker!(0);
-                                              }
-                                            }
-                                          },
-                                          child: TtsText(
-                                            text: place.description,
-                                            ttsService: _ttsService,
-                                            currentlyPlayingItem:
-                                                currentlyPlayingIndex == index,
-                                            onWordTapped:
-                                                (String remainingString) {
-                                              _changeTtsSpeakPosition(
-                                                  remainingString);
-                                            },
                                           ),
+                                          Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.end,
+                                            children: [
+                                              IconButton(
+                                                onPressed: () =>
+                                                    MapUtils.openMapWithQuery(
+                                                        place.title),
+                                                icon: Icon(Icons.directions),
+                                              ),
+                                            ],
+                                          ),
+                                          IconButton(
+                                            onPressed: () => _toggleTTS(
+                                                place.description, index),
+                                            icon: Icon(
+                                                currentlyPlayingIndex == index
+                                                    ? Icons.stop
+                                                    : Icons.play_circle),
+                                          ),
+                                        ],
+                                      ),
+                                      SizedBox(height: 6.0),
+                                      VisibilityDetector(
+                                        key: Key('place$index'),
+                                        onVisibilityChanged:
+                                            (VisibilityInfo info) {
+                                          if (info.visibleFraction == 1) {
+                                            if (!_initialZoomToFirstWaypointComplete) {
+                                              logger.t(
+                                                  'Place $index visibility: ${info.visibleFraction} - > _initialZoomToFirstWaypoint');
+                                              _initialZoomToFirstWaypointComplete =
+                                                  true;
+                                              //_moveCameraToMarkerAndHighlightMarker(0);
+                                              _tourMapController
+                                                  .moveCameraToMarkerAndHighlightMarker!(0);
+                                            }
+                                          }
+                                        },
+                                        child: TtsText(
+                                          text: place.description,
+                                          ttsService: _ttsService,
+                                          currentlyPlayingItem:
+                                              currentlyPlayingIndex == index,
+                                          onWordTapped:
+                                              (String remainingString) {
+                                            _changeTtsSpeakPosition(
+                                                remainingString);
+                                          },
                                         ),
-                                      ],
-                                    ),
+                                      ),
+                                    ],
                                   ),
-                                );
-                              }).toList(),
-                            ),
+                                ),
+                              );
+                            }).toList(),
                           ),
-                        Visibility(
-                          visible: _tourFinished,
-                          child: Column(
+                        ),
+                      Visibility(
+                        visible: _tourFinished,
+                        child: Column(
+                          children: [
+                            Text(
+                                key: _targetKeys.isNotEmpty &&
+                                        _targetKeys.length >
+                                            _tour.tourguidePlaces.length
+                                    ? _targetKeys[_targetKeys.length - 1]
+                                    : null,
+                                'We hope you\'ve enjoyed this tour!',
+                                style:
+                                    Theme.of(context).textTheme.bodyMedium),
+                            SizedBox(height: 32.0),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                TourRatingBookmarkButtons(tour: _tour),
+                              ],
+                            ),
+                            SizedBox(height: 32.0),
+                          ],
+                        ),
+                      ),
+                      if (!isOfflineCreatedTour)
+                        Padding(
+                          padding:
+                              const EdgeInsets.symmetric(horizontal: 16.0),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.start,
                             children: [
                               Text(
-                                  key: _targetKeys.isNotEmpty &&
-                                          _targetKeys.length >
-                                              _tour.tourguidePlaces.length
-                                      ? _targetKeys[_targetKeys.length - 1]
-                                      : null,
-                                  'We hope you\'ve enjoyed this tour!',
-                                  style:
-                                      Theme.of(context).textTheme.bodyMedium),
-                              SizedBox(height: 32.0),
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  TourRatingBookmarkButtons(tour: _tour),
-                                ],
+                                'Created on ${_tour.createdDateTime!.toLocal().toString().split(' ')[0]} by:',
+                                style: Theme.of(context).textTheme.bodyMedium,
                               ),
-                              SizedBox(height: 32.0),
+                              TextButton(
+                                  onPressed: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                          builder: (context) =>
+                                              TourguideUserProfileView(
+                                                  tourguideUserId:
+                                                      _tour.authorId,
+                                                  tourguideUserDisplayName:
+                                                      _tour.authorName)),
+                                    );
+                                  },
+                                  child: Text(_tour.authorName))
                             ],
                           ),
                         ),
-                        if (!isOfflineCreatedTour)
-                          Padding(
-                            padding:
-                                const EdgeInsets.symmetric(horizontal: 16.0),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.start,
-                              children: [
-                                Text(
-                                  'Created on ${_tour.createdDateTime!.toLocal().toString().split(' ')[0]} by:',
-                                  style: Theme.of(context).textTheme.bodyMedium,
-                                ),
-                                TextButton(
-                                    onPressed: () {
-                                      Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                            builder: (context) =>
-                                                TourguideUserProfileView(
-                                                    tourguideUserId:
-                                                        _tour.authorId,
-                                                    tourguideUserDisplayName:
-                                                        _tour.authorName)),
-                                      );
-                                    },
-                                    child: Text(_tour.authorName))
-                              ],
-                            ),
-                          ),
-                      ],
-                    ),
-                  )
-                ],
-              ),
+                    ],
+                  ),
+                )
+              ],
             ),
           )
         ],
