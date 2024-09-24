@@ -12,6 +12,7 @@ import 'package:tourguide_app/tour/tour_tag.dart';
 import 'package:tourguide_app/utilities/providers/tour_provider.dart';
 import 'package:tourguide_app/utilities/tourguide_navigation.dart';
 import 'tour_rating_bookmark_buttons.dart';
+import 'package:tourguide_app/utilities/providers/auth_provider.dart' as myAuth;
 
 class TourTile extends StatefulWidget {
   static const double height = 300.0;
@@ -55,9 +56,51 @@ class _TourTileState extends State<TourTile> {
   }
 
   void _createTour() {
+    myAuth.AuthProvider authProvider = Provider.of(context, listen: false);
+    if (authProvider.isAnonymous) {
+      _showSignupDialog('create tours');
+      return;
+    }
     Navigator.push(
       context,
       MaterialPageRoute(builder: (context) => const CreateEditTour()),
+    );
+  }
+
+  Future<void> _showSignupDialog(String action) async {
+    myAuth.AuthProvider authProvider = Provider.of(context, listen: false);
+    TourProvider tourProvider = Provider.of(context, listen: false);
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false, // user must tap button!
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Sign in to $action'),
+          content: SingleChildScrollView(
+            child: ListBody(
+              children: <Widget>[
+                Text(
+                    'You are signed in as a guest. \n\nSign in with Google to $action and access more features.'),
+              ],
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('Sign In'),
+              onPressed: () {
+                tourProvider.resetTourProvider();
+                authProvider.signOut();
+              },
+            ),
+            TextButton(
+              child: const Text('Cancel'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
     );
   }
 

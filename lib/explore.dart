@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -545,13 +546,13 @@ class _OptionsDialogState extends State<OptionsDialog> {
     LocationProvider locationProvider = Provider.of<LocationProvider>(context);
 
     return AlertDialog(
-      title: Text('Change Location'),
+      title: const Text('Change Location'),
       alignment: _alignment,
-      content: Form(
-        key: _formKey,
-        child: SingleChildScrollView(
-          child: Container(
-            width: double.maxFinite,
+      content: SingleChildScrollView(
+        child: Form(
+          key: _formKey,
+          child: SizedBox(
+            width: min(400, MediaQuery.of(context).size.width * 0.9),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -574,7 +575,7 @@ class _OptionsDialogState extends State<OptionsDialog> {
                 if (_showConfirm)
                   SizedBox(
                       height:
-                          32), // Add spacing between the dropdown and the button
+                      32), // Add spacing between the dropdown and the button
                 if (_showConfirm)
                   ElevatedButton(
                     onPressed: () {
