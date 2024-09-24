@@ -53,8 +53,8 @@ class TourguideUserProvider with ChangeNotifier {
   }
 
   Future<void> _waitForRequiredData() async {
-    const maxWaitTime = Duration(seconds: 120);
-    const checkInterval = Duration(milliseconds: 100);
+    const maxWaitTime = Duration(seconds: 180);
+    const checkInterval = Duration(milliseconds: 200);
     final startTime = DateTime.now();
 
     // Loop to check for availability of firebaseUser and googleSignInUser

@@ -165,7 +165,7 @@ class _ProfileState extends State<Profile> {
                     leftIcon: Icons.star_border,
                     onPressed: () {
                       launchUrl(Uri.parse(
-                          "https://tourguide.rmichels.com/privacyPolicy.html"));
+                          "https://play.google.com/store/apps/details?id=com.robertmichelsdigitalmedia.tourguideapp"));
                     },
                   ),
                 ProfileListButton(
@@ -173,7 +173,7 @@ class _ProfileState extends State<Profile> {
                   leftIcon: Icons.feedback_outlined,
                   onPressed: () {
                     launchUrl(Uri.parse(
-                        "https://play.google.com/store/apps/details?id=com.robertmichelsdigitalmedia.tourguideapp"));
+                        "mailto:feedback@tourguide.rmichels.com?subject=Tourguide%20Feedback"));
                   },
                 ),
                 ProfileListButton(

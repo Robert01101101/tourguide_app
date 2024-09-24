@@ -8,6 +8,7 @@ import 'dart:async';
 import 'dart:convert' show json;
 import 'dart:math';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
@@ -39,6 +40,12 @@ class _SignInState extends State<SignIn> {
   GoogleSignInAccount? _currentUser;
   final FirebaseAuth _auth = FirebaseAuth.instance;
   bool navigatedAwayFromSignIn = false;
+  bool _guestSignInFormStep = false;
+  final _guestFormKey = GlobalKey<FormState>();
+  final _guestNameController = TextEditingController();
+  final _guestEmailController = TextEditingController();
+  final _guestCompanyController = TextEditingController();
+  bool _guestSignInStarted = false;
 
   @override
   void initState() {
@@ -65,7 +72,8 @@ class _SignInState extends State<SignIn> {
           TourguideNavigation.router.go(
             MyGlobals.signInReroutePath ?? TourguideNavigation.explorePath,
           );
-          FirebaseAnalytics.instance.logLogin(loginMethod: 'google');
+          //anonymous login is handled in _signInGuest()
+          if (!authProvider.isAnonymous) FirebaseAnalytics.instance.logLogin(loginMethod: 'google');
         } else if (authProvider.googleSignInUser == null ||
             authProvider.silentSignInFailed) {
           logger.t(
@@ -80,6 +88,38 @@ class _SignInState extends State<SignIn> {
       }
       //authProvider.signInSilently();
     });
+  }
+
+  Future<void> _signInGuest() async {
+    if(_guestSignInStarted) return;
+    _guestSignInStarted = true;
+    my_auth.AuthProvider authProvider = Provider.of(context, listen: false);
+    if (_guestFormKey.currentState!.validate()) {
+      _guestFormKey.currentState!.save();
+      logger.t(
+          "signIn._signInGuest() -> name=${_guestNameController.text}, email=${_guestEmailController.text}, company=${_guestCompanyController.text}");
+      //log to analytics
+      FirebaseAnalytics.instance.logLogin(
+        loginMethod: 'guest',
+        parameters: <String, Object>{
+          'name': _guestNameController.text,
+          'email': _guestEmailController.text,
+          'company': _guestCompanyController.text,
+        },
+      );
+      _guestSignInFormStep = false;
+      await authProvider.signInWithFirebaseAnonymously();
+    }
+  }
+
+  String safeEmailForFirestore(String email) {
+    // Replace unsafe characters with valid ones
+    return email.replaceAll('.', 'DOT') // Replace '.' with '_'
+        .replaceAll('#', 'HASHTAG')
+        .replaceAll('\$', 'DOLLARSIGN')
+        .replaceAll('[', 'SQBRACKETOPEN')
+        .replaceAll(']', 'SQBRACKETCLOSE')
+        .replaceAll('/', 'SLASH');
   }
 
   Widget _buildProcessingBody() {
@@ -119,8 +159,9 @@ class _SignInState extends State<SignIn> {
       // The user is Authenticated and authorized, but not signed into firebase
       return Center(
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
+            const SizedBox(height: 0),
             const SizedBox(
                 width: 240,
                 child: Text(
@@ -134,12 +175,13 @@ class _SignInState extends State<SignIn> {
           ],
         ),
       );
-    } else {
+    } else if (!_guestSignInFormStep) {
       // The user is NOT Authenticated
       return Center(
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: <Widget>[
+            const SizedBox(height: 0),
             SizedBox(
               width: 240,
               child: Column(
@@ -164,17 +206,118 @@ class _SignInState extends State<SignIn> {
                 buildSignInButton(
                   onPressed: authProvider.handleSignIn,
                 ),
-                /*const SizedBox(height: StandardLayout.defaultGap),  //TODO: show guest sign in once done testing
+                const SizedBox(height: StandardLayout.defaultGap),
                 TextButton(
-                    onPressed: () =>
-                        authProvider.signInWithFirebaseAnonymously(),
+                    onPressed: () {
+                      setState(() {
+                        _guestSignInFormStep = true;
+                      });
+                    },
+                    //() =>
+                        //authProvider.signInWithFirebaseAnonymously(),
                     child: Text('SIGN IN AS GUEST',
                         style: Theme.of(context)
                             .textTheme
                             .labelMedium!
                             .copyWith(
                                 color: Theme.of(context).colorScheme.primary,
-                                fontWeight: FontWeight.bold))),*/
+                                fontWeight: FontWeight.bold))),
+              ],
+            ),
+          ],
+        ),
+      );
+    } else {
+      // The user is trying to sign in as guest, try to get more information about them
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: <Widget>[
+            const SizedBox(height: 0),
+            SizedBox(
+              width: 320,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Text('Guest Sign In',
+                      style: Theme.of(context).textTheme.bodyLarge),
+                  const SizedBox(height: 20),
+                  Text(
+                      'In order to better understand who uses Tourguide, we would like to learn a little bit more about you. \n\nThis step is optional.',
+                      textAlign: TextAlign.center,
+                      style: Theme.of(context).textTheme.bodyMedium!.copyWith(
+                          color:
+                          Theme.of(context).colorScheme.onSurfaceVariant)),
+                ],
+              ),
+            ),
+            SizedBox(
+              width: min(MediaQuery.of(context).size.width - 48, 300),
+              child: Form(
+                key: _guestFormKey,
+                child: Column(
+                  children: [
+                    TextFormField(
+                      controller: _guestNameController,
+                      decoration: const InputDecoration(
+                        labelText: 'Name',
+                      ),
+                      onChanged: (value) {
+                        //authProvider.guestName = value;
+                      },
+                    ),
+                    TextFormField(
+                      controller: _guestEmailController,
+                      decoration: const InputDecoration(
+                        labelText: 'Email',
+                      ),
+                      onChanged: (value) {
+                        //authProvider.guestEmail = value;
+                      },
+                    ),
+                    TextFormField(
+                      controller: _guestCompanyController,
+                      decoration: const InputDecoration(
+                        labelText: 'Company',
+                      ),
+                      onChanged: (value) {
+                        //authProvider.guestEmail = value;
+                      },
+                    ),
+                  ],
+                )
+              ),
+            ),
+            // This method is used to separate mobile from web code with conditional exports.
+            // See: src/sign_in_button.dart
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                TextButton(
+                    onPressed: () {
+                      setState(() {
+                        _guestSignInFormStep = false;
+                      });
+                    },
+                    //() =>
+                    //authProvider.signInWithFirebaseAnonymously(),
+                    child: Text('CANCEL',
+                        style: Theme.of(context)
+                            .textTheme
+                            .labelMedium!
+                            .copyWith(
+                            color: Theme.of(context).colorScheme.primary,
+                            fontWeight: FontWeight.bold))),
+                const SizedBox(width: StandardLayout.defaultGap),
+                TextButton(
+                    onPressed: _signInGuest,
+                    child: Text('SIGN IN AS GUEST',
+                        style: Theme.of(context)
+                            .textTheme
+                            .labelMedium!
+                            .copyWith(
+                            color: Theme.of(context).colorScheme.primary,
+                            fontWeight: FontWeight.bold))),
               ],
             ),
           ],
@@ -195,63 +338,77 @@ class _SignInState extends State<SignIn> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Tourguide'),
+        centerTitle: true,
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(24.0),
-        child: Column(
-          children: [
-            Expanded(
-              child: ConstrainedBox(
-                constraints: const BoxConstraints.expand(),
-                child: ((authProvider.googleSignInUser != null &&
-                            authProvider.isAuthorized &&
-                            authProvider.user != null) ||
-                        authProvider.isLoggingOut ||
-                        authProvider.isLoggingIntoFirebaseMobile ||
-                        authProvider.isLoggingInAnonymously)
-                    ? _buildProcessingBody()
-                    : _buildButtonBody(),
+      body: LayoutBuilder(
+          builder: (context, constraints) {
+          return SingleChildScrollView(
+            child: ConstrainedBox(
+              constraints: BoxConstraints(
+                minHeight: constraints.maxHeight, // Take at least the full screen height
               ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: RichText(
-                textAlign: TextAlign.center,
-                text: TextSpan(
-                  style: Theme.of(context).textTheme.bodyMedium!.copyWith(
-                      color: Theme.of(context).colorScheme.onSurfaceVariant),
+              child: Padding(
+                padding: const EdgeInsets.all(24.0),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const TextSpan(text: 'By signing in, you agree to the \n'),
-                    TextSpan(
-                      text: 'Terms of Service',
-                      style: Theme.of(context).textTheme.bodyMedium!.copyWith(
-                          decoration: TextDecoration.underline,
-                          color: Theme.of(context).colorScheme.primary),
-                      recognizer: TapGestureRecognizer()
-                        ..onTap = () {
-                          launchUrl(Uri.parse(
-                              "https://tourguide.rmichels.com/termsOfService.html"));
-                        },
+                    ConstrainedBox(
+                      constraints: BoxConstraints(
+                        minHeight: 450, // Set the minimum height to 550
+                        maxHeight: max(constraints.maxHeight*0.7, 450), // Optional: Limit the maximum height to the screen height
+                      ),
+                      child: ((authProvider.googleSignInUser != null &&
+                          authProvider.isAuthorized &&
+                          authProvider.user != null) ||
+                          authProvider.isLoggingOut ||
+                          authProvider.isLoggingIntoFirebaseMobile ||
+                          authProvider.isLoggingInAnonymously)
+                          ? _buildProcessingBody()
+                          : _buildButtonBody(),
                     ),
-                    const TextSpan(text: ' and '),
-                    TextSpan(
-                      text: 'Privacy Policy',
-                      style: Theme.of(context).textTheme.bodyMedium!.copyWith(
-                          decoration: TextDecoration.underline,
-                          color: Theme.of(context).colorScheme.primary),
-                      recognizer: TapGestureRecognizer()
-                        ..onTap = () {
-                          launchUrl(Uri.parse(
-                              "https://tourguide.rmichels.com/privacyPolicy.html"));
-                        },
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: RichText(
+                        textAlign: TextAlign.center,
+                        text: TextSpan(
+                          style: Theme.of(context).textTheme.bodyMedium!.copyWith(
+                              color: Theme.of(context).colorScheme.onSurfaceVariant),
+                          children: [
+                            const TextSpan(text: 'By signing in, you agree to the \n'),
+                            TextSpan(
+                              text: 'Terms of Service',
+                              style: Theme.of(context).textTheme.bodyMedium!.copyWith(
+                                  decoration: TextDecoration.underline,
+                                  color: Theme.of(context).colorScheme.primary),
+                              recognizer: TapGestureRecognizer()
+                                ..onTap = () {
+                                  launchUrl(Uri.parse(
+                                      "https://tourguide.rmichels.com/termsOfService.html"));
+                                },
+                            ),
+                            const TextSpan(text: ' and '),
+                            TextSpan(
+                              text: 'Privacy Policy',
+                              style: Theme.of(context).textTheme.bodyMedium!.copyWith(
+                                  decoration: TextDecoration.underline,
+                                  color: Theme.of(context).colorScheme.primary),
+                              recognizer: TapGestureRecognizer()
+                                ..onTap = () {
+                                  launchUrl(Uri.parse(
+                                      "https://tourguide.rmichels.com/privacyPolicy.html"));
+                                },
+                            ),
+                            const TextSpan(text: '.'),
+                          ],
+                        ),
+                      ),
                     ),
-                    const TextSpan(text: '.'),
                   ],
                 ),
               ),
             ),
-          ],
-        ),
+          );
+        }
       ),
     );
   }
