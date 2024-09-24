@@ -111,11 +111,17 @@ class _TourTileState extends State<TourTile> {
                               child: kIsWeb
                                   ? Stack(
                                       children: [
-                                        Image.network(widget.tour.imageUrl!,
-                                            width: TourTile.width,
-                                            height:
+                                        isOfflineCreatedTour && widget.tour.imageFileToUploadWeb != null
+                                            ? Image.network(widget.tour.imageFileToUploadWeb!.path,
+                                                width: TourTile.width,
+                                                height:
                                                 0.55 * TourTile.width.ceil(),
-                                            fit: BoxFit.cover),
+                                                fit: BoxFit.cover)
+                                            : Image.network(widget.tour.imageUrl!,
+                                                width: TourTile.width,
+                                                height:
+                                                0.55 * TourTile.width.ceil(),
+                                                fit: BoxFit.cover),
                                         Container(
                                           width: TourTile.width,
                                           height: 0.55 * TourTile.width.ceil(),
@@ -379,7 +385,13 @@ class _ExpandedTourTileOverlayState extends State<ExpandedTourTileOverlay> {
                       child: Stack(
                         children: [
                           kIsWeb
-                              ? Image.network(widget.tour.imageUrl!,
+                              ?
+                          isOfflineCreatedTour && widget.tour.imageFileToUploadWeb != null
+                              ? Image.network(widget.tour.imageFileToUploadWeb!.path,
+                                  width: MediaQuery.of(context).size.width,
+                                  height: 200.0,
+                                  fit: BoxFit.cover)
+                              : Image.network(widget.tour.imageUrl!,
                                   width: MediaQuery.of(context).size.width,
                                   height: 200.0,
                                   fit: BoxFit.cover)

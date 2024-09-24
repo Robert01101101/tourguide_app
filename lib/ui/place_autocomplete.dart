@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:provider/provider.dart';
@@ -135,7 +136,7 @@ class _PlaceAutocompleteState extends State<PlaceAutocomplete> {
                   return 'Please enter a city';
                 }
                 if (!_isValidSelection) {
-                  return 'Select a city from the dropdown';
+                  return 'Select a ${widget.restrictToSurroundingArea && kIsWeb ? "nearby " : ""}city from the dropdown';
                 }
                 return null;
               },
@@ -169,7 +170,9 @@ class _PlaceAutocompleteState extends State<PlaceAutocomplete> {
                           onSelected(option);
                           widget.onItemSelected(option);
                           setState(() {
-                            _isValidSelection = true;
+                            //user tapped option, so it's valid (if close enough)
+                            //because web doesn't support location restrictions, enforce here
+                            _isValidSelection = widget.restrictToSurroundingArea && kIsWeb ? option.distanceMeters != null && option.distanceMeters! < 200000 : true;
                           });
                           if (widget.onPlaceInfoFetched != null) {
                             Place? place = await locationProvider

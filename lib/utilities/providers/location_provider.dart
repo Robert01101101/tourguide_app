@@ -299,6 +299,8 @@ class LocationProvider with ChangeNotifier {
       logger.w("Query is null or empty: $query");
       return null;
     }
+    logger.t(
+        "LocationProvider.getAutocompleteSuggestions($query, restrictToCities=$restrictToCities, restrictToSurroundingArea=$restrictToSurroundingArea, searchLocationLat=$searchLocationLat, searchLocationLng=$searchLocationLng)");
     try {
       LatLng? location;
       LatLng? searchLocation;
@@ -306,6 +308,10 @@ class LocationProvider with ChangeNotifier {
         searchLocation = LatLng(lat: searchLocationLat, lng: searchLocationLng);
       }
       LatLngBounds? locationBias;
+
+      // If the app is running on the web, restrictToSurroundingArea is not supported
+      // https://issuetracker.google.com/issues/36219203?pli=1
+      if (kIsWeb) restrictToSurroundingArea = false;
 
       if (_currentPosition == null) {
         logger.w(

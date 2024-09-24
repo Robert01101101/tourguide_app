@@ -56,6 +56,7 @@ class _CreateEditTourState extends State<CreateEditTour> {
   bool _tourIsPublic = true; // Initial boolean value
   bool _isFormSubmitted = false;
   final int _descriptionMaxChars = 250;
+  final int _placeDescriptionMaxChars = 5000;
   final int _reviewStepIndex = 4;
   File? _image;
   XFile? _imageWeb;
@@ -717,7 +718,7 @@ class _CreateEditTourState extends State<CreateEditTour> {
                             for (int index = 0;
                                 index < _tour.tourguidePlaces.length;
                                 index++)
-                              Container(
+                              SizedBox(
                                 key: ValueKey(_placeControllers[index]),
                                 width: double.infinity,
                                 child: ListTile(
@@ -725,7 +726,7 @@ class _CreateEditTourState extends State<CreateEditTour> {
                                       vertical: 0.0, horizontal: 0),
                                   leading: ReorderableDragStartListener(
                                     index: index,
-                                    child: Icon(Icons.drag_handle),
+                                    child: const Icon(Icons.drag_handle),
                                   ),
                                   title: PlaceAutocomplete(
                                     textEditingController:
@@ -757,7 +758,7 @@ class _CreateEditTourState extends State<CreateEditTour> {
                               ),
                           ],
                         ),
-                        SizedBox(
+                        const SizedBox(
                           height: 16,
                         ),
                         SizedBox(
@@ -768,7 +769,7 @@ class _CreateEditTourState extends State<CreateEditTour> {
                             label: const Text('Add Place'),
                           ),
                         ),
-                        SizedBox(
+                        const SizedBox(
                           height: 16,
                         ),
                         if (state.hasError)
@@ -802,10 +803,8 @@ class _CreateEditTourState extends State<CreateEditTour> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              (index + 1).toString() +
-                                  ")  " +
-                                  _tour.tourguidePlaces[index]
-                                      .title, // Assuming _places[index] has a 'name' field
+                              "${index + 1})  ${_tour.tourguidePlaces[index]
+                                      .title}", // Assuming _places[index] has a 'name' field
                               style: Theme.of(context).textTheme.titleMedium,
                             ),
                             Padding(
@@ -816,7 +815,7 @@ class _CreateEditTourState extends State<CreateEditTour> {
                                 children: [
                                   if (_tour.tourguidePlaces[index].image !=
                                       null)
-                                    Container(
+                                    SizedBox(
                                       height:
                                           100, // Set the desired height here
                                       width: double
@@ -828,26 +827,33 @@ class _CreateEditTourState extends State<CreateEditTour> {
                                             _tour.tourguidePlaces[index].image!,
                                       ),
                                     ),
-                                  SizedBox(
+                                  const SizedBox(
                                     height: 2,
                                   ),
                                   TextFormField(
                                     controller: _tour.tourguidePlaces[index]
                                         .descriptionEditingController, // Assuming each place has a description controller
-                                    decoration: InputDecoration(
+                                    keyboardType: TextInputType.multiline,
+                                    decoration: const InputDecoration(
                                       labelText: 'Description',
                                     ),
                                     minLines: 3,
                                     maxLines: 20,
+                                    maxLength: _placeDescriptionMaxChars,
                                     validator: (value) {
                                       if (value == null || value.isEmpty) {
                                         return 'Please enter a description';
+                                      }
+                                      if (value != null &&
+                                          value.characters.length >
+                                              _placeDescriptionMaxChars) {
+                                        return 'Please enter a maximum of $_placeDescriptionMaxChars characters';
                                       }
                                       return null;
                                     },
                                   ),
                                   if (index < _tour.tourguidePlaces.length - 1)
-                                    SizedBox(
+                                    const SizedBox(
                                       height: 30,
                                     ),
                                 ],
@@ -865,120 +871,146 @@ class _CreateEditTourState extends State<CreateEditTour> {
               isActive: _currentStep >= 3,
               state:
                   _maxStepReached > 3 ? StepState.complete : StepState.indexed,
-              content: Form(
-                autovalidateMode: _formDetailsValidateMode,
-                key: _formKeyDetails,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text('Select an image for your tour',
-                        style: Theme.of(context).textTheme.titleMedium),
-                    const SizedBox(
-                      height: 16,
-                    ),
-                    SizedBox(
-                      height: kIsWeb
-                          ? 438
-                          : ((_tour.tourguidePlaces.length + 1) / 2).ceil() *
-                              167,
-                      child: GridView.count(
-                        crossAxisCount: kIsWeb ? 4 : 2,
-                        physics: const NeverScrollableScrollPhysics(),
-                        crossAxisSpacing: 8.0,
-                        mainAxisSpacing: 8.0,
-                        childAspectRatio: 1.0, // Adjust as needed
-                        children: [
-                          for (int i = 0; i < _tour.tourguidePlaces.length; i++)
-                            if (!kIsWeb &&
-                                _tour.tourguidePlaces[i].image != null)
-                              GestureDetector(
-                                onTap: () {
-                                  _setTourImageSelection(i);
-                                },
-                                child: Stack(
-                                  fit: StackFit.expand,
-                                  children: [
-                                    FittedBox(
-                                      fit: BoxFit.cover,
-                                      clipBehavior: Clip.hardEdge,
-                                      child: _tour.tourguidePlaces[i].image!,
-                                    ),
-                                    if (_selectedImgIndex == i)
-                                      Container(
-                                        height: 146,
-                                        width: 146,
-                                        decoration: BoxDecoration(
-                                            color: Theme.of(context)
-                                                .scaffoldBackgroundColor
-                                                .withOpacity(0.4),
-                                            border: _selectedImgIndex == i
-                                                ? Border.all(
-                                                    width: 2,
-                                                    color: Theme.of(context)
-                                                        .colorScheme
-                                                        .primary)
-                                                : null),
-                                      ),
-                                    if (_selectedImgIndex == i)
-                                      Positioned(
-                                        top: 4,
-                                        right: 4,
-                                        child: Icon(
-                                          Icons.check_circle,
-                                          color: Theme.of(context)
-                                              .colorScheme
-                                              .primary,
-                                          size: 24,
-                                        ),
-                                      ),
-                                  ],
+              content: Align(
+                alignment: Alignment.centerLeft,
+                child: Form(
+                  autovalidateMode: _formDetailsValidateMode,
+                  key: _formKeyDetails,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      if (kIsWeb)
+                        Column(
+                          children: [
+                            Row(
+                              children: [
+                                const Icon(Icons.construction),
+                                const SizedBox(
+                                  width: 16,
                                 ),
-                              ),
-                          GestureDetector(
-                            onTap: () {
-                              if (kIsWeb && _imageWeb != null ||
-                                  !kIsWeb && _image != null) {
-                                _setTourImageSelection(-1);
-                              }
-                            },
-                            child: Container(
-                              height: kIsWeb ? 64 : 146,
-                              width: kIsWeb ? 64 : 146,
-                              child: kIsWeb
-                                  ? AddImageTileWeb(
-                                      initialValue: _imageWeb,
-                                      onSaved: (value) {
-                                        _imageWeb = value;
-                                      },
-                                      onChanged: (value) {
-                                        setState(() {
-                                          _imageWeb = value;
-                                        });
-                                        _setTourImageSelection(-1);
-                                      },
-                                      enabled: !_isFormSubmitted,
-                                      isSelected: _selectedImgIndex == -1,
-                                    )
-                                  : AddImageTile(
-                                      initialValue: _image,
-                                      onSaved: (value) {
-                                        _image = value;
-                                      },
-                                      onChanged: (value) {
-                                        setState(() {
-                                          _image = value;
-                                        });
-                                        _setTourImageSelection(-1);
-                                      },
-                                      enabled: !_isFormSubmitted,
-                                      isSelected: _selectedImgIndex == -1,
-                                    ),
+                                Flexible(
+                                  child: Text(
+                                    'Note: Picking images from relevant google maps places is not yet supported on the web. Please upload images manually.',
+                                    style: Theme.of(context).textTheme.bodyMedium,
+                                  ),
+                                ),
+                              ],
                             ),
-                          ),
-                        ],
+                            const SizedBox(
+                              height: 16,
+                            ),
+                          ],
+                        ),
+                      Text('Select an image for your tour',
+                          style: Theme.of(context).textTheme.titleMedium),
+                      const SizedBox(
+                        height: 16,
                       ),
-                    ),
-                  ],
+                      SizedBox(
+                        height: kIsWeb
+                            ? 146
+                            : ((_tour.tourguidePlaces.length + 1) / 2).ceil() *
+                                167,
+                        width: kIsWeb ? 146 : null,
+                        child: GridView.count(
+                          crossAxisCount: kIsWeb ? 1 : 2,
+                          physics: const NeverScrollableScrollPhysics(),
+                          crossAxisSpacing: 8.0,
+                          mainAxisSpacing: 8.0,
+                          childAspectRatio: 1.0, // Adjust as needed
+                          children: [
+                            for (int i = 0; i < _tour.tourguidePlaces.length; i++)
+                              if (!kIsWeb &&
+                                  _tour.tourguidePlaces[i].image != null)
+                                GestureDetector(
+                                  onTap: () {
+                                    _setTourImageSelection(i);
+                                  },
+                                  child: Stack(
+                                    fit: StackFit.expand,
+                                    children: [
+                                      FittedBox(
+                                        fit: BoxFit.cover,
+                                        clipBehavior: Clip.hardEdge,
+                                        child: _tour.tourguidePlaces[i].image!,
+                                      ),
+                                      if (_selectedImgIndex == i)
+                                        Container(
+                                          height: 146,
+                                          width: 146,
+                                          decoration: BoxDecoration(
+                                              color: Theme.of(context)
+                                                  .scaffoldBackgroundColor
+                                                  .withOpacity(0.4),
+                                              border: _selectedImgIndex == i
+                                                  ? Border.all(
+                                                      width: 2,
+                                                      color: Theme.of(context)
+                                                          .colorScheme
+                                                          .primary)
+                                                  : null),
+                                        ),
+                                      if (_selectedImgIndex == i)
+                                        Positioned(
+                                          top: 4,
+                                          right: 4,
+                                          child: Icon(
+                                            Icons.check_circle,
+                                            color: Theme.of(context)
+                                                .colorScheme
+                                                .primary,
+                                            size: 24,
+                                          ),
+                                        ),
+                                    ],
+                                  ),
+                                ),
+                            GestureDetector(
+                              onTap: () {
+                                if (kIsWeb && _imageWeb != null ||
+                                    !kIsWeb && _image != null) {
+                                  _setTourImageSelection(-1);
+                                }
+                              },
+                              child: SizedBox(
+                                height: kIsWeb ? 64 : 146,
+                                width: kIsWeb ? 64 : 146,
+                                child: kIsWeb
+                                    ? AddImageTileWeb(
+                                        initialValue: _imageWeb,
+                                        onSaved: (value) {
+                                          _imageWeb = value;
+                                        },
+                                        onChanged: (value) {
+                                          setState(() {
+                                            _imageWeb = value;
+                                          });
+                                          _setTourImageSelection(-1);
+                                        },
+                                        enabled: !_isFormSubmitted,
+                                        isSelected: _selectedImgIndex == -1,
+                                      )
+                                    : AddImageTile(
+                                        initialValue: _image,
+                                        onSaved: (value) {
+                                          _image = value;
+                                        },
+                                        onChanged: (value) {
+                                          setState(() {
+                                            _image = value;
+                                          });
+                                          _setTourImageSelection(-1);
+                                        },
+                                        enabled: !_isFormSubmitted,
+                                        isSelected: _selectedImgIndex == -1,
+                                      ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -987,13 +1019,13 @@ class _CreateEditTourState extends State<CreateEditTour> {
               isActive: _currentStep >= 4,
               state:
                   _maxStepReached > 4 ? StepState.complete : StepState.indexed,
-              content: Container(
+              content: SizedBox(
                 width: double.infinity,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Padding(
-                      padding: EdgeInsets.only(bottom: 16.0),
+                      padding: const EdgeInsets.only(bottom: 16.0),
                       // small body text
                       child: Text('Here\'s what your tour will look like',
                           style: Theme.of(context).textTheme.bodyMedium),
@@ -1005,7 +1037,7 @@ class _CreateEditTourState extends State<CreateEditTour> {
                               MyGlobals.createShimmerGradient(context),
                           child: TourTile(tour: _tour)),
                     ),
-                    SizedBox(
+                    const SizedBox(
                       height: 32,
                     ),
                   ],

@@ -77,9 +77,9 @@ class _AddImageTileWebContentState extends State<_AddImageTileWebContent> {
   Widget build(BuildContext context) {
     return IgnorePointer(
       ignoring: !widget.enabled,
-      child: SizedBox(
-        width: 146,
-        height: 146,
+      child: Container(
+        //width: 146,
+        //height: 146,
         child: Stack(
           children: [
             IgnorePointer(
@@ -90,7 +90,7 @@ class _AddImageTileWebContentState extends State<_AddImageTileWebContent> {
             if (_imageFile != null)
               ClipRRect(
                 child: kIsWeb
-                    ? Image.network(_imageFile!.path, fit: BoxFit.cover)
+                    ? Image.network(_imageFile!.path, fit: BoxFit.cover, width: 146, height: 146,)
                     : Image.file(File(_imageFile!.path),
                         fit: BoxFit.cover), // Use Image.file for mobile
               ),
@@ -127,7 +127,7 @@ class _AddImageTileWebContentState extends State<_AddImageTileWebContent> {
                   if (_imageFile != null)
                     const Text('Replace image',
                         style: TextStyle(color: Colors.white)),
-                  SizedBox(height: 15),
+                  const SizedBox(height: 15),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
@@ -137,8 +137,8 @@ class _AddImageTileWebContentState extends State<_AddImageTileWebContent> {
                             : () => logger
                                 .e("Clicked take image after form submit"),
                         style: ElevatedButton.styleFrom(
-                          shape: CircleBorder(),
-                          padding: EdgeInsets.all(15),
+                          shape: const CircleBorder(),
+                          padding: const EdgeInsets.all(15),
                         ),
                         child: Icon(Icons.camera_alt,
                             color: widget.enabled
