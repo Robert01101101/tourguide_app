@@ -92,7 +92,7 @@ class TourguideNavigation {
                 path: explorePath,
                 pageBuilder: (context, GoRouterState state) {
                   return getPage(
-                    child: const Explore(), //TODO change
+                    child: const Explore(),
                     state: state,
                   );
                 },

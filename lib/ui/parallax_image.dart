@@ -2,7 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:tourguide_app/utilities/providers/location_provider.dart';
 import '../../ui/google_places_img.dart'
-if (dart.library.html) '../../ui/google_places_img_web.dart' as gpi;
+    if (dart.library.html) '../../ui/google_places_img_web.dart' as gpi;
 import '../main.dart';
 
 class ParallaxImage extends StatefulWidget {
@@ -45,7 +45,6 @@ class _ParallaxImageState extends State<ParallaxImage> {
 
   @override
   Widget build(BuildContext context) {
-
     //logger.t("ParallaxImage.build()");
 
     return Transform.translate(
@@ -59,13 +58,12 @@ class _ParallaxImageState extends State<ParallaxImage> {
               kIsWeb ? Colors.transparent : Colors.white,
               kIsWeb ? Colors.black87 : Colors.black45
             ],
-          ).createShader(
-              Rect.fromLTRB(0, 0, rect.width, rect.height));
+          ).createShader(Rect.fromLTRB(0, 0, rect.width, rect.height));
         },
         blendMode: BlendMode.multiply,
         child: LayoutBuilder(
           builder: (context, constraints) {
-            return ClipRect (
+            return ClipRect(
               child: SizedBox(
                 width: constraints.maxWidth,
                 height: 300,
@@ -75,25 +73,24 @@ class _ParallaxImageState extends State<ParallaxImage> {
                   child: AbsorbPointer(
                     child: kIsWeb
                         ? gpi.GooglePlacesImg(
-                      //prevents CORS error, taken from places sdk example //TODO investigate if also usable on mobile
-                      photoMetadata: widget.currentPlaceImg
-                          .googlePlacesImg!.photoMetadata,
-                      placePhotoResponse: widget.currentPlaceImg
-                          .googlePlacesImg!
-                          .placePhotoResponse,
-                    )
-                        : widget.currentPlaceImg
-                        .googlePlacesImg!.placePhotoResponse
-                        .when(
-                      image: (image) => Image(
-                        image: image.image,
-                        gaplessPlayback: true,
-                      ),
-                      imageUrl: (imageUrl) => Image.network(
-                        imageUrl,
-                        gaplessPlayback: true,
-                      ),
-                    ),
+                            //prevents CORS error, taken from places sdk example //TODO investigate if also usable on mobile
+                            photoMetadata: widget
+                                .currentPlaceImg.googlePlacesImg!.photoMetadata,
+                            placePhotoResponse: widget.currentPlaceImg
+                                .googlePlacesImg!.placePhotoResponse,
+                          )
+                        : widget
+                            .currentPlaceImg.googlePlacesImg!.placePhotoResponse
+                            .when(
+                            image: (image) => Image(
+                              image: image.image,
+                              gaplessPlayback: true,
+                            ),
+                            imageUrl: (imageUrl) => Image.network(
+                              imageUrl,
+                              gaplessPlayback: true,
+                            ),
+                          ),
                   ),
                 ),
               ),

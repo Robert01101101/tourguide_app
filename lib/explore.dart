@@ -71,8 +71,6 @@ class ExploreState extends State<Explore> {
 
       super.initState();
 
-
-
       //to accurately measure height of page
       WidgetsBinding.instance.addPostFrameCallback((_) {
         _measureContentHeight();
@@ -248,8 +246,7 @@ class ExploreState extends State<Explore> {
                     } else {
                       return ParallaxImage(
                           scrollController: _scrollController,
-                          currentPlaceImg: currentPlaceImg
-                      );
+                          currentPlaceImg: currentPlaceImg);
                     }
                   },
                 ),
@@ -373,18 +370,27 @@ class ExploreState extends State<Explore> {
                         children: [
                           Text("Popular tours near you",
                               style: Theme.of(context).textTheme.headlineSmall),
-                          IconButton(
-                              onPressed: tourProvider.popularTours.contains(Tour.addTourTileId) ? null : () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) => ExploreMap(
-                                          tours: tourProvider.getToursByIds(
-                                              tourProvider.popularTours),
-                                          name: "Popular tours near you")),
-                                );
-                              },
-                              icon: const Icon(Icons.map))
+                          Semantics(
+                            label: 'Map View of Popular Tours near you',
+                            child: IconButton(
+                                onPressed: tourProvider.popularTours
+                                        .contains(Tour.addTourTileId)
+                                    ? null
+                                    : () {
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                              builder: (context) => ExploreMap(
+                                                  tours: tourProvider
+                                                      .getToursByIds(
+                                                          tourProvider
+                                                              .popularTours),
+                                                  name:
+                                                      "Popular tours near you")),
+                                        );
+                                      },
+                                icon: const Icon(Icons.map)),
+                          )
                         ],
                       ),
                       StandardLayoutChild(
@@ -398,43 +404,60 @@ class ExploreState extends State<Explore> {
                         children: [
                           Text("Local tours",
                               style: Theme.of(context).textTheme.headlineSmall),
-                          IconButton(
-                              onPressed: tourProvider.localTours.contains(Tour.addTourTileId) ? null : () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) => ExploreMap(
-                                          tours: tourProvider.getToursByIds(
-                                              tourProvider.localTours),
-                                          name: "Local tours")),
-                                );
-                              },
-                              icon: const Icon(Icons.map))
+                          Semantics(
+                            label: 'Map View of Local Tours',
+                            child: IconButton(
+                                onPressed: tourProvider.localTours
+                                        .contains(Tour.addTourTileId)
+                                    ? null
+                                    : () {
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                              builder: (context) => ExploreMap(
+                                                  tours: tourProvider
+                                                      .getToursByIds(
+                                                          tourProvider
+                                                              .localTours),
+                                                  name: "Local tours")),
+                                        );
+                                      },
+                                icon: const Icon(Icons.map)),
+                          )
                         ],
                       ),
                       StandardLayoutChild(
                         fullWidth: true,
                         child: HorizontalScroller(
-                            tours:
-                                tourProvider.getToursByIds(tourProvider.localTours)),
+                            tours: tourProvider
+                                .getToursByIds(tourProvider.localTours)),
                       ),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text("Tours around the world",
                               style: Theme.of(context).textTheme.headlineSmall),
-                          IconButton(
-                              onPressed: tourProvider.globalTours.contains(Tour.addTourTileId) ? null : () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) => ExploreMap(
-                                          tours: tourProvider.getToursByIds(
-                                              tourProvider.globalTours),
-                                          name: "Tours around the world")),
-                                );
-                              },
-                              icon: const Icon(Icons.map))
+                          Semantics(
+                            label: 'Map View of Tours around the world',
+                            child: IconButton(
+                                onPressed: tourProvider.globalTours
+                                        .contains(Tour.addTourTileId)
+                                    ? null
+                                    : () {
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                              builder: (context) => ExploreMap(
+                                                  tours: tourProvider
+                                                      .getToursByIds(
+                                                          tourProvider
+                                                              .globalTours),
+                                                  name:
+                                                      "Tours around the world")),
+                                        );
+                                      },
+                                icon: const Icon(Icons.map)),
+                          )
                         ],
                       ),
                       StandardLayoutChild(
@@ -463,12 +486,15 @@ class ExploreState extends State<Explore> {
                       child: Padding(
                         padding: const EdgeInsets.symmetric(
                             vertical: 4.0, horizontal: 0),
-                        child: IconButton(
-                            onPressed: () {
-                              _showOptionsDialog(context);
-                            },
-                            icon: const Icon(Icons.more_vert),
-                            color: const Color(0xeeF2F8F8)),
+                        child: Semantics(
+                          label: 'Change Location',
+                          child: IconButton(
+                              onPressed: () {
+                                _showOptionsDialog(context);
+                              },
+                              icon: const Icon(Icons.more_vert),
+                              color: const Color(0xeeF2F8F8)),
+                        ),
                       ),
                     ),
                   ],
@@ -575,7 +601,7 @@ class _OptionsDialogState extends State<OptionsDialog> {
                 if (_showConfirm)
                   SizedBox(
                       height:
-                      32), // Add spacing between the dropdown and the button
+                          32), // Add spacing between the dropdown and the button
                 if (_showConfirm)
                   ElevatedButton(
                     onPressed: () {

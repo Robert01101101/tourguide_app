@@ -144,120 +144,122 @@ class _ProfileSettingsState extends State<ProfileSettings> {
       appBar: AppBar(
         title: const Text('Profile Settings'),
       ),
-      body: userProvider.user != null && authProvider.user != null ?
-      SingleChildScrollView(
-        child: Column(
-          children: [
-            StandardLayout(
-              children: [
-                const SizedBox(
-                  height: 0,
-                ),
-                ListTile(
-                  leading: authProvider.googleSignInUser != null
-                      ? GoogleUserCircleAvatar(
-                          identity: authProvider.googleSignInUser!,
-                        )
-                      : null,
-                  title: Text(userProvider.user!.displayName ?? ''),
-                  subtitle: Text(userProvider.user!.email),
-                ),
-                const SizedBox(
-                  height: 8,
-                ),
-                Row(
-                  children: [
-                    Expanded(
-                      child: TextField(
-                        controller: _usernameController,
-                        maxLength: 25,
-                        decoration: InputDecoration(
-                          hintText: 'Enter your new username',
-                          labelText: 'Username',
-                          errorText: _profanityDetected
-                              ? 'No profanity please'
-                              : !_isUsernameAvailable
-                                  ? 'Username is already taken'
-                                  : null,
-                        ),
+      body: userProvider.user != null && authProvider.user != null
+          ? SingleChildScrollView(
+              child: Column(
+                children: [
+                  StandardLayout(
+                    children: [
+                      const SizedBox(
+                        height: 0,
                       ),
-                    ),
-                    SizedBox(
-                      width: 32,
-                    ),
-                    ElevatedButton(
-                        onPressed: (_profanityDetected ||
-                                _updatingUsername ||
-                                _newUsername == userProvider.user!.username)
-                            ? null
-                            : () => _setUsername(),
-                        child: _updatingUsername
-                            ? const Text("Saving")
-                            : const Text("Save")),
-                  ],
-                ),
-                Text("Your name will be displayed as:",
-                    style: Theme.of(context).textTheme.labelLarge),
-                Column(
-                  children: [
-                    RadioListTile<NameDisplaySetting>(
-                      title: Text(
-                          'Display Name \n(${userProvider.user!.displayName})'),
-                      value: NameDisplaySetting.displayName,
-                      groupValue: _nameDisplaySetting,
-                      onChanged: _onUseUsernameChanged,
-                    ),
-                    RadioListTile<NameDisplaySetting>(
-                      title:
-                          Text('Username \n(${userProvider.user!.username})'),
-                      value: NameDisplaySetting.username,
-                      groupValue: _nameDisplaySetting,
-                      onChanged: _onUseUsernameChanged,
-                    ),
-                    Align(
-                      alignment: Alignment.centerRight,
-                      child: ElevatedButton(
-                          onPressed: (_updatingUseUsername ||
-                                  (_nameDisplaySetting ==
-                                          NameDisplaySetting.username) ==
-                                      userProvider.user!.useUsername)
-                              ? null
-                              : () => _setUseUsername(),
-                          child: _updatingUseUsername
-                              ? const Text("Saving")
-                              : const Text("Save")),
-                    ),
-                  ],
-                ),
-                SizedBox(
-                  height: 32,
-                ),
-              ],
-            ),
-            StandardLayout(
-              children: [
-                ProfileListButton(
-                  label: 'Delete Account',
-                  leftIcon: Icons.delete_outline,
-                  rightIcon: Icons.arrow_forward_ios,
-                  isLastItem: true,
-                  color: Theme.of(context).colorScheme.error,
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      SlideTransitionRoute(
-                        page: ProfileSettingsDeleteAccount(),
-                        beginOffset: Offset(1.0, 0.0), // Slide in from right
+                      ListTile(
+                        leading: authProvider.googleSignInUser != null
+                            ? GoogleUserCircleAvatar(
+                                identity: authProvider.googleSignInUser!,
+                              )
+                            : null,
+                        title: Text(userProvider.user!.displayName ?? ''),
+                        subtitle: Text(userProvider.user!.email),
                       ),
-                    );
-                  },
-                ),
-              ],
-            ),
-          ],
-        ),
-      )
-      : const Text("Profile not loaded"),
+                      const SizedBox(
+                        height: 8,
+                      ),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: TextField(
+                              controller: _usernameController,
+                              maxLength: 25,
+                              decoration: InputDecoration(
+                                hintText: 'Enter your new username',
+                                labelText: 'Username',
+                                errorText: _profanityDetected
+                                    ? 'No profanity please'
+                                    : !_isUsernameAvailable
+                                        ? 'Username is already taken'
+                                        : null,
+                              ),
+                            ),
+                          ),
+                          SizedBox(
+                            width: 32,
+                          ),
+                          ElevatedButton(
+                              onPressed: (_profanityDetected ||
+                                      _updatingUsername ||
+                                      _newUsername ==
+                                          userProvider.user!.username)
+                                  ? null
+                                  : () => _setUsername(),
+                              child: _updatingUsername
+                                  ? const Text("Saving")
+                                  : const Text("Save")),
+                        ],
+                      ),
+                      Text("Your name will be displayed as:",
+                          style: Theme.of(context).textTheme.labelLarge),
+                      Column(
+                        children: [
+                          RadioListTile<NameDisplaySetting>(
+                            title: Text(
+                                'Display Name \n(${userProvider.user!.displayName})'),
+                            value: NameDisplaySetting.displayName,
+                            groupValue: _nameDisplaySetting,
+                            onChanged: _onUseUsernameChanged,
+                          ),
+                          RadioListTile<NameDisplaySetting>(
+                            title: Text(
+                                'Username \n(${userProvider.user!.username})'),
+                            value: NameDisplaySetting.username,
+                            groupValue: _nameDisplaySetting,
+                            onChanged: _onUseUsernameChanged,
+                          ),
+                          Align(
+                            alignment: Alignment.centerRight,
+                            child: ElevatedButton(
+                                onPressed: (_updatingUseUsername ||
+                                        (_nameDisplaySetting ==
+                                                NameDisplaySetting.username) ==
+                                            userProvider.user!.useUsername)
+                                    ? null
+                                    : () => _setUseUsername(),
+                                child: _updatingUseUsername
+                                    ? const Text("Saving")
+                                    : const Text("Save")),
+                          ),
+                        ],
+                      ),
+                      SizedBox(
+                        height: 32,
+                      ),
+                    ],
+                  ),
+                  StandardLayout(
+                    children: [
+                      ProfileListButton(
+                        label: 'Delete Account',
+                        leftIcon: Icons.delete_outline,
+                        rightIcon: Icons.arrow_forward_ios,
+                        isLastItem: true,
+                        color: Theme.of(context).colorScheme.error,
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            SlideTransitionRoute(
+                              page: ProfileSettingsDeleteAccount(),
+                              beginOffset:
+                                  Offset(1.0, 0.0), // Slide in from right
+                            ),
+                          );
+                        },
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            )
+          : const Text("Profile not loaded"),
     );
   }
 }
@@ -299,7 +301,7 @@ class _ProfileSettingsDeleteAccountState
     myAuth.AuthProvider authProvider = Provider.of(context, listen: false);
     TourProvider tourProvider = Provider.of(context, listen: false);
     TourguideUserProvider tourguideUserProvider =
-    Provider.of(context, listen: false);
+        Provider.of(context, listen: false);
 
     if (_deleteStarted) return;
     logger.w("Delete account confirmed and pressed");

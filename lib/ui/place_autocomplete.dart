@@ -59,9 +59,9 @@ class _PlaceAutocompleteState extends State<PlaceAutocomplete> {
     _debouncedSearch = _debounce<Iterable<AutocompletePrediction>?, String>(
         (query) => locationProvider.getAutocompleteSuggestions(query,
             restrictToCities: widget.restrictToCities,
-        restrictToSurroundingArea: widget.restrictToSurroundingArea,
-        searchLocationLat: widget.searchLocationLat,
-        searchLocationLng: widget.searchLocationLng));
+            restrictToSurroundingArea: widget.restrictToSurroundingArea,
+            searchLocationLat: widget.searchLocationLat,
+            searchLocationLng: widget.searchLocationLng));
     if (widget.textEditingController.text.isNotEmpty) {
       _isValidSelection = true;
     }
@@ -172,7 +172,11 @@ class _PlaceAutocompleteState extends State<PlaceAutocomplete> {
                           setState(() {
                             //user tapped option, so it's valid (if close enough)
                             //because web doesn't support location restrictions, enforce here
-                            _isValidSelection = widget.restrictToSurroundingArea && kIsWeb ? option.distanceMeters != null && option.distanceMeters! < 200000 : true;
+                            _isValidSelection =
+                                widget.restrictToSurroundingArea && kIsWeb
+                                    ? option.distanceMeters != null &&
+                                        option.distanceMeters! < 200000
+                                    : true;
                           });
                           if (widget.onPlaceInfoFetched != null) {
                             Place? place = await locationProvider

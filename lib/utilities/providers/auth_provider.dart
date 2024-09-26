@@ -40,8 +40,7 @@ class AuthProvider with ChangeNotifier {
   User? get user => _user;
 
   /// Google Sign In User
-  GoogleSignInAccount? get googleSignInUser =>
-      _googleSignInUser; //TODO - remove all usage outside provider, returning web users will not have this
+  GoogleSignInAccount? get googleSignInUser => _googleSignInUser;
   bool get isAuthorized => _isAuthorized;
   bool get isLoggingOut => _isLoggingOut;
   bool get silentSignInFailed => _silentSignInFailed;

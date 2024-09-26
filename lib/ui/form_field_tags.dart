@@ -105,7 +105,8 @@ class _FormFieldTagsContentState extends State<_FormFieldTagsContent> {
     // Initialize _duration and _descriptiveTags from widget.initialValue
     if (widget.initialValue != null) {
       _duration = widget.initialValue?['duration'] as String?;
-      _descriptiveTags = List<String>.from(widget.initialValue?['descriptive'] ?? []);
+      _descriptiveTags =
+          List<String>.from(widget.initialValue?['descriptive'] ?? []);
     }
   }
 
@@ -152,8 +153,7 @@ class _FormFieldTagsContentState extends State<_FormFieldTagsContent> {
           const SizedBox(height: 8),
           Wrap(
             spacing: 8,
-            runSpacing:
-                kIsWeb ? 8 : 0,
+            runSpacing: kIsWeb ? 8 : 0,
             children:
                 List<Widget>.generate(_descriptiveTagsPresets.length, (index) {
               String descriptiveTag = _descriptiveTagsPresets[index];

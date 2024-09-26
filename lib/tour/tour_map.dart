@@ -30,15 +30,16 @@ class TourMap extends StatefulWidget {
   final double? height;
   final double? heightWeb;
 
-  const TourMap(
-      {super.key,
-      required this.tourMapController,
-      required this.tour,
-      required this.tourRunningMap,
-      this.mapKey,
-      this.mapCurrentlyPinnedAtTop,
-      this.height,
-      this.heightWeb,});
+  const TourMap({
+    super.key,
+    required this.tourMapController,
+    required this.tour,
+    required this.tourRunningMap,
+    this.mapKey,
+    this.mapCurrentlyPinnedAtTop,
+    this.height,
+    this.heightWeb,
+  });
 
   @override
   State<TourMap> createState() => _TourMapState();
@@ -52,7 +53,6 @@ class _TourMapState extends State<TourMap> {
   final Set<Factory<OneSequenceGestureRecognizer>> _gestureRecognizersPan = {
     Factory<PanGestureRecognizer>(() => PanGestureRecognizer())
   };
-
 
   @override
   Widget build(BuildContext context) {
@@ -126,88 +126,107 @@ class _TourMapState extends State<TourMap> {
                       children: [
                         if (widget.tourRunningMap)
                           Column(
-                          children: [
-                            SizedBox(
-                              width: 38,
-                              height: 38,
-                              child: RawMaterialButton(
-                                onPressed: () async {
-                                  widget.tourMapController.triggerMoveCameraToMarkerAndHighlightMarker();
-                                },
-                                elevation: 1.0,
-                                highlightElevation: 2,
-                                fillColor: Colors.white.withOpacity(0.8),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(
-                                      3.0), // Adjust the radius as needed
-                                ),
-                                child: Padding(
-                                  padding: const EdgeInsets.all(
-                                      1.0), // Adjust inner padding as needed
-                                  child: Stack(
-                                    alignment: Alignment.center,
-                                    children: [
-                                      const Icon(Icons.circle,
-                                        color: Color(0xff666666),
-                                        size: 24.0, // Adjust the size of the icon as needed
-                                      ),
-                                      Text((widget.tourMapController.step + 1).toString(),
-                                      style: const TextStyle(
-                                        fontFamily: 'Roboto',
-                                        fontSize: 12,
-                                        color: Colors.white,
-                                        fontWeight: FontWeight.bold,
-                                      ),)
-                                    ],
+                            children: [
+                              SizedBox(
+                                width: 38,
+                                height: 38,
+                                child: RawMaterialButton(
+                                  onPressed: () async {
+                                    widget.tourMapController
+                                        .triggerMoveCameraToMarkerAndHighlightMarker();
+                                  },
+                                  elevation: 1.0,
+                                  highlightElevation: 2,
+                                  fillColor: Colors.white.withOpacity(0.8),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(
+                                        3.0), // Adjust the radius as needed
+                                  ),
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(
+                                        1.0), // Adjust inner padding as needed
+                                    child: Stack(
+                                      alignment: Alignment.center,
+                                      children: [
+                                        const Icon(
+                                          Icons.circle,
+                                          color: Color(0xff666666),
+                                          size:
+                                              24.0, // Adjust the size of the icon as needed
+                                        ),
+                                        Text(
+                                          (widget.tourMapController.step + 1)
+                                              .toString(),
+                                          style: const TextStyle(
+                                            fontFamily: 'Roboto',
+                                            fontSize: 12,
+                                            color: Colors.white,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        )
+                                      ],
+                                    ),
                                   ),
                                 ),
                               ),
-                            ),
-                            const SizedBox(height: 8,),
-                          ],
-                        ),
-                        if (locationProvider.permissionStatus == PermissionStatus.granted)
+                              const SizedBox(
+                                height: 8,
+                              ),
+                            ],
+                          ),
+                        if (locationProvider.permissionStatus ==
+                            PermissionStatus.granted)
                           Column(
                             children: [
                               SizedBox(
-                              width: 38,
-                              height: 38,
-                              child: RawMaterialButton(
-                                onPressed: () async {
-                                  // Get the current location
-                                  Position position = await Geolocator.getCurrentPosition(
-                                      desiredAccuracy: LocationAccuracy.high);
+                                width: 38,
+                                height: 38,
+                                child: RawMaterialButton(
+                                  onPressed: () async {
+                                    // Get the current location
+                                    Position position =
+                                        await Geolocator.getCurrentPosition(
+                                            desiredAccuracy:
+                                                LocationAccuracy.high);
 
-                                  // Get the map controller
-                                  final GoogleMapController mapController = await widget
-                                      .tourMapController.mapControllerCompleter.future;
+                                    // Get the map controller
+                                    final GoogleMapController mapController =
+                                        await widget.tourMapController
+                                            .mapControllerCompleter.future;
 
-                                  // Animate the camera to the current location
-                                  mapController.animateCamera(CameraUpdate.newCameraPosition(
-                                    CameraPosition(
-                                      target: LatLng(position.latitude, position.longitude),
-                                      zoom: 15.0, // Adjust the zoom level as needed
-                                    ),
-                                  ));
-                                },
-                                elevation: 1.0,
-                                highlightElevation: 2,
-                                fillColor: Colors.white.withOpacity(0.8),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(
-                                      3.0), // Adjust the radius as needed
-                                ),
-                                child: const Padding(
-                                  padding: EdgeInsets.all(
-                                      1.0), // Adjust inner padding as needed
-                                  child: Icon(Icons.my_location,
-                                    color: Color(0xff666666),
-                                    size: 24.0, // Adjust the size of the icon as needed
+                                    // Animate the camera to the current location
+                                    mapController.animateCamera(
+                                        CameraUpdate.newCameraPosition(
+                                      CameraPosition(
+                                        target: LatLng(position.latitude,
+                                            position.longitude),
+                                        zoom:
+                                            15.0, // Adjust the zoom level as needed
+                                      ),
+                                    ));
+                                  },
+                                  elevation: 1.0,
+                                  highlightElevation: 2,
+                                  fillColor: Colors.white.withOpacity(0.8),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(
+                                        3.0), // Adjust the radius as needed
+                                  ),
+                                  child: const Padding(
+                                    padding: EdgeInsets.all(
+                                        1.0), // Adjust inner padding as needed
+                                    child: Icon(
+                                      Icons.my_location,
+                                      color: Color(0xff666666),
+                                      size:
+                                          24.0, // Adjust the size of the icon as needed
                                     ),
                                   ),
                                 ),
                               ),
-                              const SizedBox(height: 8,),
+                              const SizedBox(
+                                height: 8,
+                              ),
                             ],
                           ),
                         SizedBox(
@@ -215,14 +234,15 @@ class _TourMapState extends State<TourMap> {
                           height: 38,
                           child: RawMaterialButton(
                             onPressed: () async {
-                              final controller = await widget
-                                  .tourMapController.mapControllerCompleter.future;
+                              final controller = await widget.tourMapController
+                                  .mapControllerCompleter.future;
                               widget.tourMapController.setFullScreen(
                                   !widget.tourMapController.isFullScreen);
-                              widget.tourMapController.setLoadingFullscreen(true);
+                              widget.tourMapController
+                                  .setLoadingFullscreen(true);
                               controller.moveCamera(
-                                CameraUpdate.newCameraPosition(
-                                    widget.tourMapController.currentCameraPosition),
+                                CameraUpdate.newCameraPosition(widget
+                                    .tourMapController.currentCameraPosition),
                               );
                             },
                             elevation: 1.0,
@@ -240,7 +260,8 @@ class _TourMapState extends State<TourMap> {
                                     ? Icons.fullscreen_exit
                                     : Icons.fullscreen,
                                 color: const Color(0xff666666),
-                                size: 32.0, // Adjust the size of the icon as needed
+                                size:
+                                    32.0, // Adjust the size of the icon as needed
                               ),
                             ),
                           ),
@@ -384,47 +405,60 @@ class _TourMapFullscreenState extends State<TourMapFullscreen> {
                                   children: [
                                     if (widget.tourRunningMap)
                                       Column(
-                                      children: [
-                                        SizedBox(
-                                          width: 38,
-                                          height: 38,
-                                          child: RawMaterialButton(
-                                            onPressed: () async {
-                                              widget.tourMapController.triggerMoveCameraToMarkerAndHighlightMarker();
-                                            },
-                                            elevation: 1.0,
-                                            highlightElevation: 2,
-                                            fillColor: Colors.white.withOpacity(0.8),
-                                            shape: RoundedRectangleBorder(
-                                              borderRadius: BorderRadius.circular(
-                                                  3.0), // Adjust the radius as needed
-                                            ),
-                                            child: Padding(
-                                              padding: const EdgeInsets.all(
-                                                  1.0), // Adjust inner padding as needed
-                                              child: Stack(
-                                                alignment: Alignment.center,
-                                                children: [
-                                                  const Icon(Icons.circle,
-                                                    color: Color(0xff666666),
-                                                    size: 24.0, // Adjust the size of the icon as needed
-                                                  ),
-                                                  Text((widget.tourMapController.step + 1).toString(),
-                                                    style: const TextStyle(
-                                                      fontFamily: 'Roboto',
-                                                      fontSize: 12,
-                                                      color: Colors.white,
-                                                      fontWeight: FontWeight.bold,
-                                                    ),)
-                                                ],
+                                        children: [
+                                          SizedBox(
+                                            width: 38,
+                                            height: 38,
+                                            child: RawMaterialButton(
+                                              onPressed: () async {
+                                                widget.tourMapController
+                                                    .triggerMoveCameraToMarkerAndHighlightMarker();
+                                              },
+                                              elevation: 1.0,
+                                              highlightElevation: 2,
+                                              fillColor:
+                                                  Colors.white.withOpacity(0.8),
+                                              shape: RoundedRectangleBorder(
+                                                borderRadius: BorderRadius.circular(
+                                                    3.0), // Adjust the radius as needed
+                                              ),
+                                              child: Padding(
+                                                padding: const EdgeInsets.all(
+                                                    1.0), // Adjust inner padding as needed
+                                                child: Stack(
+                                                  alignment: Alignment.center,
+                                                  children: [
+                                                    const Icon(
+                                                      Icons.circle,
+                                                      color: Color(0xff666666),
+                                                      size:
+                                                          24.0, // Adjust the size of the icon as needed
+                                                    ),
+                                                    Text(
+                                                      (widget.tourMapController
+                                                                  .step +
+                                                              1)
+                                                          .toString(),
+                                                      style: const TextStyle(
+                                                        fontFamily: 'Roboto',
+                                                        fontSize: 12,
+                                                        color: Colors.white,
+                                                        fontWeight:
+                                                            FontWeight.bold,
+                                                      ),
+                                                    )
+                                                  ],
+                                                ),
                                               ),
                                             ),
                                           ),
-                                        ),
-                                        const SizedBox(height: 8,),
-                                      ],
-                                    ),
-                                    if (locationProvider.permissionStatus == PermissionStatus.granted)
+                                          const SizedBox(
+                                            height: 8,
+                                          ),
+                                        ],
+                                      ),
+                                    if (locationProvider.permissionStatus ==
+                                        PermissionStatus.granted)
                                       Column(
                                         children: [
                                           SizedBox(
@@ -433,24 +467,37 @@ class _TourMapFullscreenState extends State<TourMapFullscreen> {
                                             child: RawMaterialButton(
                                               onPressed: () async {
                                                 // Get the current location
-                                                Position position = await Geolocator.getCurrentPosition(
-                                                    desiredAccuracy: LocationAccuracy.high);
+                                                Position position =
+                                                    await Geolocator
+                                                        .getCurrentPosition(
+                                                            desiredAccuracy:
+                                                                LocationAccuracy
+                                                                    .high);
 
                                                 // Get the map controller
-                                                final GoogleMapController mapController = await widget
-                                                    .tourMapController.mapControllerCompleter.future;
+                                                final GoogleMapController
+                                                    mapController = await widget
+                                                        .tourMapController
+                                                        .mapControllerCompleter
+                                                        .future;
 
                                                 // Animate the camera to the current location
-                                                mapController.animateCamera(CameraUpdate.newCameraPosition(
+                                                mapController.animateCamera(
+                                                    CameraUpdate
+                                                        .newCameraPosition(
                                                   CameraPosition(
-                                                    target: LatLng(position.latitude, position.longitude),
-                                                    zoom: 15.0, // Adjust the zoom level as needed
+                                                    target: LatLng(
+                                                        position.latitude,
+                                                        position.longitude),
+                                                    zoom:
+                                                        15.0, // Adjust the zoom level as needed
                                                   ),
                                                 ));
                                               },
                                               elevation: 1.0,
                                               highlightElevation: 2,
-                                              fillColor: Colors.white.withOpacity(0.8),
+                                              fillColor:
+                                                  Colors.white.withOpacity(0.8),
                                               shape: RoundedRectangleBorder(
                                                 borderRadius: BorderRadius.circular(
                                                     3.0), // Adjust the radius as needed
@@ -458,14 +505,18 @@ class _TourMapFullscreenState extends State<TourMapFullscreen> {
                                               child: const Padding(
                                                 padding: EdgeInsets.all(
                                                     1.0), // Adjust inner padding as needed
-                                                child: Icon(Icons.my_location,
+                                                child: Icon(
+                                                  Icons.my_location,
                                                   color: Color(0xff666666),
-                                                  size: 24.0, // Adjust the size of the icon as needed
+                                                  size:
+                                                      24.0, // Adjust the size of the icon as needed
                                                 ),
                                               ),
                                             ),
                                           ),
-                                          const SizedBox(height: 8,),
+                                          const SizedBox(
+                                            height: 8,
+                                          ),
                                         ],
                                       ),
                                     SizedBox(
@@ -477,18 +528,20 @@ class _TourMapFullscreenState extends State<TourMapFullscreen> {
                                               .tourMapController
                                               .mapControllerCompleter
                                               .future;
-                                          widget.tourMapController.setFullScreen(
-                                              !widget
-                                                  .tourMapController.isFullScreen);
+                                          widget.tourMapController
+                                              .setFullScreen(!widget
+                                                  .tourMapController
+                                                  .isFullScreen);
                                           controller.moveCamera(
-                                            CameraUpdate.newCameraPosition(widget
-                                                .tourMapController
-                                                .currentCameraPosition),
+                                            CameraUpdate.newCameraPosition(
+                                                widget.tourMapController
+                                                    .currentCameraPosition),
                                           );
                                         },
                                         elevation: 1.0,
                                         highlightElevation: 2,
-                                        fillColor: Colors.white.withOpacity(0.8),
+                                        fillColor:
+                                            Colors.white.withOpacity(0.8),
                                         shape: RoundedRectangleBorder(
                                           borderRadius: BorderRadius.circular(
                                               8.0), // Adjust the radius as needed
@@ -497,7 +550,8 @@ class _TourMapFullscreenState extends State<TourMapFullscreen> {
                                           padding: const EdgeInsets.all(
                                               1.0), // Adjust inner padding as needed
                                           child: Icon(
-                                            widget.tourMapController.isFullScreen
+                                            widget.tourMapController
+                                                    .isFullScreen
                                                 ? Icons.fullscreen_exit
                                                 : Icons.fullscreen,
                                             color: const Color(0xff666666),

@@ -154,16 +154,22 @@ class _TourTileState extends State<TourTile> {
                               child: kIsWeb
                                   ? Stack(
                                       children: [
-                                        isOfflineCreatedTour && widget.tour.imageFileToUploadWeb != null
-                                            ? Image.network(widget.tour.imageFileToUploadWeb!.path,
+                                        isOfflineCreatedTour &&
+                                                widget.tour
+                                                        .imageFileToUploadWeb !=
+                                                    null
+                                            ? Image.network(
+                                                widget.tour
+                                                    .imageFileToUploadWeb!.path,
                                                 width: TourTile.width,
-                                                height:
-                                                0.55 * TourTile.width.ceil(),
+                                                height: 0.55 *
+                                                    TourTile.width.ceil(),
                                                 fit: BoxFit.cover)
-                                            : Image.network(widget.tour.imageUrl!,
+                                            : Image.network(
+                                                widget.tour.imageUrl!,
                                                 width: TourTile.width,
-                                                height:
-                                                0.55 * TourTile.width.ceil(),
+                                                height: 0.55 *
+                                                    TourTile.width.ceil(),
                                                 fit: BoxFit.cover),
                                         Container(
                                           width: TourTile.width,
@@ -428,16 +434,17 @@ class _ExpandedTourTileOverlayState extends State<ExpandedTourTileOverlay> {
                       child: Stack(
                         children: [
                           kIsWeb
-                              ?
-                          isOfflineCreatedTour && widget.tour.imageFileToUploadWeb != null
-                              ? Image.network(widget.tour.imageFileToUploadWeb!.path,
-                                  width: MediaQuery.of(context).size.width,
-                                  height: 200.0,
-                                  fit: BoxFit.cover)
-                              : Image.network(widget.tour.imageUrl!,
-                                  width: MediaQuery.of(context).size.width,
-                                  height: 200.0,
-                                  fit: BoxFit.cover)
+                              ? isOfflineCreatedTour &&
+                                      widget.tour.imageFileToUploadWeb != null
+                                  ? Image.network(
+                                      widget.tour.imageFileToUploadWeb!.path,
+                                      width: MediaQuery.of(context).size.width,
+                                      height: 200.0,
+                                      fit: BoxFit.cover)
+                                  : Image.network(widget.tour.imageUrl!,
+                                      width: MediaQuery.of(context).size.width,
+                                      height: 200.0,
+                                      fit: BoxFit.cover)
                               : widget.tour.imageFile != null
                                   ? Image.file(widget.tour.imageFile!,
                                       width: MediaQuery.of(context).size.width,

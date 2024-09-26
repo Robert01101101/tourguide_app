@@ -304,19 +304,16 @@ class _TourRunningState extends State<TourRunning> {
               title: Transform.translate(
                 offset: Offset(0, -32),
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                      vertical: 4, horizontal: 56.0),
+                  padding:
+                      const EdgeInsets.symmetric(vertical: 4, horizontal: 56.0),
                   child: Text(
                       textAlign: TextAlign.left,
                       _tour.name,
-                      style: Theme.of(context)
-                          .textTheme
-                          .displaySmall!
-                          .copyWith(
-                            color: Theme.of(context).brightness ==
-                                    Brightness.light
-                                ? Theme.of(context).scaffoldBackgroundColor
-                                : Colors.white,
+                      style: Theme.of(context).textTheme.displaySmall!.copyWith(
+                            color:
+                                Theme.of(context).brightness == Brightness.light
+                                    ? Theme.of(context).scaffoldBackgroundColor
+                                    : Colors.white,
                           )),
                 ),
               ),
@@ -408,8 +405,7 @@ class _TourRunningState extends State<TourRunning> {
                               _setStep(step);
                             },
                             onStepContinue: () {
-                              if (_currentStep <
-                                  _tour.tourguidePlaces.length) {
+                              if (_currentStep < _tour.tourguidePlaces.length) {
                                 setState(() {
                                   _currentStep += 1;
                                 });
@@ -448,8 +444,8 @@ class _TourRunningState extends State<TourRunning> {
                                           const SizedBox(width: 8),
                                           if (_currentStep > 0)
                                             TextButton(
-                                              onPressed: controlsDetails
-                                                  .onStepCancel,
+                                              onPressed:
+                                                  controlsDetails.onStepCancel,
                                               style: ElevatedButton.styleFrom(
                                                 elevation: 0,
                                                 backgroundColor:
@@ -465,8 +461,8 @@ class _TourRunningState extends State<TourRunning> {
                                                           3.0), // Custom radius
                                                 ),
                                               ),
-                                              child: const Text(
-                                                  'Previous Place'),
+                                              child:
+                                                  const Text('Previous Place'),
                                             ),
                                           const SizedBox(
                                               width:
@@ -476,20 +472,17 @@ class _TourRunningState extends State<TourRunning> {
                                                     _tour.tourguidePlaces
                                                             .length -
                                                         1
-                                                ? controlsDetails
-                                                    .onStepContinue
+                                                ? controlsDetails.onStepContinue
                                                 : !_tourFinished
                                                     ? _finishTour
                                                     : null,
                                             style: ElevatedButton.styleFrom(
-                                              backgroundColor:
-                                                  Theme.of(context)
-                                                      .colorScheme
-                                                      .primary,
-                                              foregroundColor:
-                                                  Theme.of(context)
-                                                      .colorScheme
-                                                      .surfaceContainerLow,
+                                              backgroundColor: Theme.of(context)
+                                                  .colorScheme
+                                                  .primary,
+                                              foregroundColor: Theme.of(context)
+                                                  .colorScheme
+                                                  .surfaceContainerLow,
                                               //primary: Colors.grey, // Custom color for "Back" button
                                               shape: RoundedRectangleBorder(
                                                 borderRadius:
@@ -563,9 +556,8 @@ class _TourRunningState extends State<TourRunning> {
                                                         .textTheme
                                                         .titleMedium!
                                                         .copyWith(
-                                                          overflow:
-                                                              TextOverflow
-                                                                  .ellipsis,
+                                                          overflow: TextOverflow
+                                                              .ellipsis,
                                                         ),
                                                     maxLines: 2,
                                                   ),
@@ -642,8 +634,7 @@ class _TourRunningState extends State<TourRunning> {
                                     ? _targetKeys[_targetKeys.length - 1]
                                     : null,
                                 'We hope you\'ve enjoyed this tour!',
-                                style:
-                                    Theme.of(context).textTheme.bodyMedium),
+                                style: Theme.of(context).textTheme.bodyMedium),
                             SizedBox(height: 32.0),
                             Row(
                               mainAxisAlignment: MainAxisAlignment.center,
@@ -657,8 +648,7 @@ class _TourRunningState extends State<TourRunning> {
                       ),
                       if (!isOfflineCreatedTour)
                         Padding(
-                          padding:
-                              const EdgeInsets.symmetric(horizontal: 16.0),
+                          padding: const EdgeInsets.symmetric(horizontal: 16.0),
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.start,
                             children: [

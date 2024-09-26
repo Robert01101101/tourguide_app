@@ -90,7 +90,12 @@ class _AddImageTileWebContentState extends State<_AddImageTileWebContent> {
             if (_imageFile != null)
               ClipRRect(
                 child: kIsWeb
-                    ? Image.network(_imageFile!.path, fit: BoxFit.cover, width: 146, height: 146,)
+                    ? Image.network(
+                        _imageFile!.path,
+                        fit: BoxFit.cover,
+                        width: 146,
+                        height: 146,
+                      )
                     : Image.file(File(_imageFile!.path),
                         fit: BoxFit.cover), // Use Image.file for mobile
               ),

@@ -133,17 +133,19 @@ class _TourRatingBookmarkButtonsState extends State<TourRatingBookmarkButtons> {
   void saveTour() {
     myAuth.AuthProvider authProvider = Provider.of(context, listen: false);
     TourProvider tourProvider = Provider.of(context, listen: false);
-    TourguideUserProvider tourguideUserProvider = Provider.of(context, listen: false);
+    TourguideUserProvider tourguideUserProvider =
+        Provider.of(context, listen: false);
 
     if (authProvider.isAnonymous) {
       _showSignupDialog('save tours');
       return;
     }
-    if (widget.tour.isOfflineCreatedTour ?? false){
+    if (widget.tour.isOfflineCreatedTour ?? false) {
       return; // Tour creation tile should not have rating
     }
 
-    bool wasAlreadySaved = tourguideUserProvider.user!.savedTourIds.contains(widget.tour.id);
+    bool wasAlreadySaved =
+        tourguideUserProvider.user!.savedTourIds.contains(widget.tour.id);
     setState(() {
       wasAlreadySaved
           ? tourguideUserProvider.user!.savedTourIds.remove(widget.tour.id)

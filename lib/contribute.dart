@@ -114,15 +114,20 @@ class _ContributeState extends State<Contribute> {
                           Text("Tours you created",
                               style: Theme.of(context).textTheme.headlineSmall),
                           IconButton(
-                              onPressed: tourProvider.userCreatedTours.length <= 1 ? null : () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) => ExploreMap(
-                                          tours: tourProvider.getToursByIds(userCreatedTourIds),
-                                          name: "Tours you created")),
-                                );
-                              },
+                              onPressed: tourProvider.userCreatedTours.length <=
+                                      1
+                                  ? null
+                                  : () {
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                            builder: (context) => ExploreMap(
+                                                tours:
+                                                    tourProvider.getToursByIds(
+                                                        userCreatedTourIds),
+                                                name: "Tours you created")),
+                                      );
+                                    },
                               icon: const Icon(Icons.map))
                         ],
                       ),

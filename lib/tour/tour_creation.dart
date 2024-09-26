@@ -803,8 +803,7 @@ class _CreateEditTourState extends State<CreateEditTour> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              "${index + 1})  ${_tour.tourguidePlaces[index]
-                                      .title}", // Assuming _places[index] has a 'name' field
+                              "${index + 1})  ${_tour.tourguidePlaces[index].title}", // Assuming _places[index] has a 'name' field
                               style: Theme.of(context).textTheme.titleMedium,
                             ),
                             Padding(
@@ -891,7 +890,8 @@ class _CreateEditTourState extends State<CreateEditTour> {
                                 Flexible(
                                   child: Text(
                                     'Note: Picking images from relevant google maps places is not yet supported on the web. Please upload images manually.',
-                                    style: Theme.of(context).textTheme.bodyMedium,
+                                    style:
+                                        Theme.of(context).textTheme.bodyMedium,
                                   ),
                                 ),
                               ],
@@ -919,7 +919,9 @@ class _CreateEditTourState extends State<CreateEditTour> {
                           mainAxisSpacing: 8.0,
                           childAspectRatio: 1.0, // Adjust as needed
                           children: [
-                            for (int i = 0; i < _tour.tourguidePlaces.length; i++)
+                            for (int i = 0;
+                                i < _tour.tourguidePlaces.length;
+                                i++)
                               if (!kIsWeb &&
                                   _tour.tourguidePlaces[i].image != null)
                                 GestureDetector(

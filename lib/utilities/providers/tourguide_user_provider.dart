@@ -37,7 +37,8 @@ class TourguideUserProvider with ChangeNotifier {
     if (firebaseUser != null) {
       await _waitForRequiredData();
       await _loadUser();
-      logger.t("UserProvider() - _onAuthStateChanged() - User is loaded: ${_user.toString()}");
+      logger.t(
+          "UserProvider() - _onAuthStateChanged() - User is loaded: ${_user.toString()}");
       if (_user == null &&
           _authProvider != null &&
           !_authProvider!.isAnonymous) {

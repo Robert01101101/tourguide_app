@@ -133,7 +133,8 @@ class TourService {
     }
   }
 
-  static Future<void> deleteTourImage(DocumentReference tourDocReference) async {
+  static Future<void> deleteTourImage(
+      DocumentReference tourDocReference) async {
     String imageUrl = '';
     try {
       // Get the image URL from the tour document
@@ -145,10 +146,12 @@ class TourService {
         Reference storageRef = FirebaseStorage.instance.refFromURL(imageUrl);
         // Delete the image
         await storageRef.delete();
-        logger.i('Image at $imageUrl successfully deleted from Firebase Storage');
+        logger
+            .i('Image at $imageUrl successfully deleted from Firebase Storage');
       }
     } catch (e, stack) {
-      logger.e('Error deleting image from Firebase Storage with url $imageUrl:\n$e, stack: $stack');
+      logger.e(
+          'Error deleting image from Firebase Storage with url $imageUrl:\n$e, stack: $stack');
     }
   }
 
@@ -170,9 +173,10 @@ class TourService {
     return tour;
   }
 
-  static Future<void> getUserRatingsForTours(
-      Map<String, Tour> allCachedTours, List<String> realTourIds, String userId) async {
-    logger.t('Fetching user ratings for all tours. Tour count: ${allCachedTours.length}');
+  static Future<void> getUserRatingsForTours(Map<String, Tour> allCachedTours,
+      List<String> realTourIds, String userId) async {
+    logger.t(
+        'Fetching user ratings for all tours. Tour count: ${allCachedTours.length}');
     try {
       // Step 1: Create a map to hold all ratings for these tours
       Map<String, int> ratingsMap = {};
@@ -180,7 +184,8 @@ class TourService {
       // Fetch ratings in batches to avoid too many simultaneous requests
       int batchSize = 10;
       for (int i = 0; i < realTourIds.length; i += batchSize) {
-        List<String> batchTourIds = realTourIds.skip(i).take(batchSize).toList();
+        List<String> batchTourIds =
+            realTourIds.skip(i).take(batchSize).toList();
 
         // Fetch ratings for the current batch
         await Future.wait(batchTourIds.map((tourId) async {
@@ -216,7 +221,8 @@ class TourService {
         }
       }
     } catch (error, stack) {
-      logger.e('Error fetching user ratings.\nAll tour ids: ${allCachedTours.keys.join(', ')}\nError: $error, Stack: $stack');
+      logger.e(
+          'Error fetching user ratings.\nAll tour ids: ${allCachedTours.keys.join(', ')}\nError: $error, Stack: $stack');
     }
   }
 
@@ -505,7 +511,9 @@ class TourService {
 
       logger.i('Successfully created tour: ${tour.toString()}');
       downloadAndSaveImage(imageUrl, tourId);
-      return uploadedTourFromFirestore.copyWith(imageFile: tour.imageFile, imageFileToUploadWeb: tour.imageFileToUploadWeb);
+      return uploadedTourFromFirestore.copyWith(
+          imageFile: tour.imageFile,
+          imageFileToUploadWeb: tour.imageFileToUploadWeb);
     } catch (e, stack) {
       //log with stack
       logger.e('Error uploading tour: $e, stack: $stack');
@@ -517,7 +525,8 @@ class TourService {
     try {
       if (tour.imageFile != null) {
         // Delete the old image
-        DocumentReference tourRef = FirebaseFirestore.instance.collection('tours').doc(tour.id);
+        DocumentReference tourRef =
+            FirebaseFirestore.instance.collection('tours').doc(tour.id);
         deleteTourImage(tourRef);
         // Upload the new image
         String newImageUrl = await uploadImage(tour);
@@ -564,7 +573,8 @@ class TourService {
               await tour.imageFileToUploadWeb!.readAsBytes();
 
           // Get the MIME type (if necessary, infer based on file extension)
-          final String mimeType = tour.imageFileToUploadWeb!.mimeType ?? 'image/png';
+          final String mimeType =
+              tour.imageFileToUploadWeb!.mimeType ?? 'image/png';
 
           // Create metadata with the correct content type
           SettableMetadata metadata = SettableMetadata(contentType: mimeType);

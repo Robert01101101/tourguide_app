@@ -111,7 +111,8 @@ class TourProvider with ChangeNotifier {
         await TourService.overwriteToursInHive(
             TourService.globalToursBoxName, getToursByIds(_globalTours));
         await TourService.overwriteToursInHive(
-            TourService.userCreatedToursBoxName, getToursByIds(_userCreatedTours));
+            TourService.userCreatedToursBoxName,
+            getToursByIds(_userCreatedTours));
         await TourService.overwriteToursInHive(
             TourService.userSavedToursBoxName, getToursByIds(_userSavedTours));
       }
@@ -210,7 +211,8 @@ class TourProvider with ChangeNotifier {
     }
     notifyListeners();
 
-    await TourService.getUserRatingsForTours(_allCachedTours, getAllCachedRealTourIds(), userId);
+    await TourService.getUserRatingsForTours(
+        _allCachedTours, getAllCachedRealTourIds(), userId);
     _isLoadingTours = false;
     notifyListeners();
   }
@@ -284,7 +286,6 @@ class TourProvider with ChangeNotifier {
     _userSavedTours = List.empty();
     logger.t("TourProvider.resetTourProvider()");
   }
-
 
   //TODO: swap for approach where we use already cached list to avoid the first get call?
   Future<void> updateAuthorNameForAllTheirTours(

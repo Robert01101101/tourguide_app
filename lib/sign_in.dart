@@ -73,7 +73,8 @@ class _SignInState extends State<SignIn> {
             MyGlobals.signInReroutePath ?? TourguideNavigation.explorePath,
           );
           //anonymous login is handled in _signInGuest()
-          if (!authProvider.isAnonymous) FirebaseAnalytics.instance.logLogin(loginMethod: 'google');
+          if (!authProvider.isAnonymous)
+            FirebaseAnalytics.instance.logLogin(loginMethod: 'google');
         } else if (authProvider.googleSignInUser == null ||
             authProvider.silentSignInFailed) {
           logger.t(
@@ -91,7 +92,7 @@ class _SignInState extends State<SignIn> {
   }
 
   Future<void> _signInGuest() async {
-    if(_guestSignInStarted) return;
+    if (_guestSignInStarted) return;
     _guestSignInStarted = true;
     my_auth.AuthProvider authProvider = Provider.of(context, listen: false);
     if (_guestFormKey.currentState!.validate()) {
@@ -107,14 +108,56 @@ class _SignInState extends State<SignIn> {
           'company': _guestCompanyController.text,
         },
       );
+      //log to firestore (easier to view than GA)
+      String identifier = _guestEmailController.text.isNotEmpty
+          ? _guestEmailController.text
+          : _guestNameController.text.isNotEmpty
+              ? _guestNameController.text
+              : _guestCompanyController.text;
+      if (identifier.isNotEmpty) {
+        identifier = safeIdentifierForFirestore(identifier);
+        DocumentReference docRef = FirebaseFirestore.instance
+            .collection('guests')
+            .doc(safeIdentifierForFirestore(_guestEmailController.text));
+
+        await FirebaseFirestore.instance.runTransaction((transaction) async {
+          // Try to get snapshot of existing guest doc
+          DocumentSnapshot snapshot = await transaction.get(docRef);
+
+          // If the document exists, update the count, otherwise set it to 1
+          if (snapshot.exists) {
+            // Get the current count value and increment it
+            Map<String, dynamic>? data =
+                snapshot.data() as Map<String, dynamic>?;
+            int currentCount = data?['count'] ?? 0;
+            transaction.update(docRef, {
+              'name': _guestNameController.text,
+              'email': _guestEmailController.text,
+              'company': _guestCompanyController.text,
+              'timestamp': FieldValue.serverTimestamp(),
+              'count': currentCount + 1,
+            });
+          } else {
+            // If the document doesn't exist, create it with a count of 1
+            transaction.set(docRef, {
+              'name': _guestNameController.text,
+              'email': _guestEmailController.text,
+              'company': _guestCompanyController.text,
+              'timestamp': FieldValue.serverTimestamp(),
+              'count': 1,
+            });
+          }
+        });
+      }
       _guestSignInFormStep = false;
       await authProvider.signInWithFirebaseAnonymously();
     }
   }
 
-  String safeEmailForFirestore(String email) {
+  String safeIdentifierForFirestore(String email) {
     // Replace unsafe characters with valid ones
-    return email.replaceAll('.', 'DOT') // Replace '.' with '_'
+    return email
+        .replaceAll('.', 'DOT') // Replace '.' with '_'
         .replaceAll('#', 'HASHTAG')
         .replaceAll('\$', 'DOLLARSIGN')
         .replaceAll('[', 'SQBRACKETOPEN')
@@ -214,7 +257,7 @@ class _SignInState extends State<SignIn> {
                       });
                     },
                     //() =>
-                        //authProvider.signInWithFirebaseAnonymously(),
+                    //authProvider.signInWithFirebaseAnonymously(),
                     child: Text('SIGN IN AS GUEST',
                         style: Theme.of(context)
                             .textTheme
@@ -247,46 +290,45 @@ class _SignInState extends State<SignIn> {
                       textAlign: TextAlign.center,
                       style: Theme.of(context).textTheme.bodyMedium!.copyWith(
                           color:
-                          Theme.of(context).colorScheme.onSurfaceVariant)),
+                              Theme.of(context).colorScheme.onSurfaceVariant)),
                 ],
               ),
             ),
             SizedBox(
               width: min(MediaQuery.of(context).size.width - 48, 300),
               child: Form(
-                key: _guestFormKey,
-                child: Column(
-                  children: [
-                    TextFormField(
-                      controller: _guestNameController,
-                      decoration: const InputDecoration(
-                        labelText: 'Name',
+                  key: _guestFormKey,
+                  child: Column(
+                    children: [
+                      TextFormField(
+                        controller: _guestNameController,
+                        decoration: const InputDecoration(
+                          labelText: 'Name',
+                        ),
+                        onChanged: (value) {
+                          //authProvider.guestName = value;
+                        },
                       ),
-                      onChanged: (value) {
-                        //authProvider.guestName = value;
-                      },
-                    ),
-                    TextFormField(
-                      controller: _guestEmailController,
-                      decoration: const InputDecoration(
-                        labelText: 'Email',
+                      TextFormField(
+                        controller: _guestEmailController,
+                        decoration: const InputDecoration(
+                          labelText: 'Email',
+                        ),
+                        onChanged: (value) {
+                          //authProvider.guestEmail = value;
+                        },
                       ),
-                      onChanged: (value) {
-                        //authProvider.guestEmail = value;
-                      },
-                    ),
-                    TextFormField(
-                      controller: _guestCompanyController,
-                      decoration: const InputDecoration(
-                        labelText: 'Company',
+                      TextFormField(
+                        controller: _guestCompanyController,
+                        decoration: const InputDecoration(
+                          labelText: 'Company',
+                        ),
+                        onChanged: (value) {
+                          //authProvider.guestEmail = value;
+                        },
                       ),
-                      onChanged: (value) {
-                        //authProvider.guestEmail = value;
-                      },
-                    ),
-                  ],
-                )
-              ),
+                    ],
+                  )),
             ),
             // This method is used to separate mobile from web code with conditional exports.
             // See: src/sign_in_button.dart
@@ -306,8 +348,8 @@ class _SignInState extends State<SignIn> {
                             .textTheme
                             .labelMedium!
                             .copyWith(
-                            color: Theme.of(context).colorScheme.primary,
-                            fontWeight: FontWeight.bold))),
+                                color: Theme.of(context).colorScheme.primary,
+                                fontWeight: FontWeight.bold))),
                 const SizedBox(width: StandardLayout.defaultGap),
                 TextButton(
                     onPressed: _signInGuest,
@@ -316,8 +358,8 @@ class _SignInState extends State<SignIn> {
                             .textTheme
                             .labelMedium!
                             .copyWith(
-                            color: Theme.of(context).colorScheme.primary,
-                            fontWeight: FontWeight.bold))),
+                                color: Theme.of(context).colorScheme.primary,
+                                fontWeight: FontWeight.bold))),
               ],
             ),
           ],
@@ -340,76 +382,86 @@ class _SignInState extends State<SignIn> {
         title: const Text('Tourguide'),
         centerTitle: true,
       ),
-      body: LayoutBuilder(
-          builder: (context, constraints) {
-          return SingleChildScrollView(
-            child: ConstrainedBox(
-              constraints: BoxConstraints(
-                minHeight: constraints.maxHeight, // Take at least the full screen height
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(24.0),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    ConstrainedBox(
-                      constraints: BoxConstraints(
-                        minHeight: 450, // Set the minimum height to 550
-                        maxHeight: max(constraints.maxHeight*0.7, 450), // Optional: Limit the maximum height to the screen height
-                      ),
-                      child: ((authProvider.googleSignInUser != null &&
-                          authProvider.isAuthorized &&
-                          authProvider.user != null) ||
-                          authProvider.isLoggingOut ||
-                          authProvider.isLoggingIntoFirebaseMobile ||
-                          authProvider.isLoggingInAnonymously)
-                          ? _buildProcessingBody()
-                          : _buildButtonBody(),
+      body: LayoutBuilder(builder: (context, constraints) {
+        return SingleChildScrollView(
+          child: ConstrainedBox(
+            constraints: BoxConstraints(
+              minHeight:
+                  constraints.maxHeight, // Take at least the full screen height
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(24.0),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  ConstrainedBox(
+                    constraints: BoxConstraints(
+                      minHeight: 450, // Set the minimum height to 550
+                      maxHeight: max(constraints.maxHeight * 0.7,
+                          450), // Optional: Limit the maximum height to the screen height
                     ),
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: RichText(
-                        textAlign: TextAlign.center,
-                        text: TextSpan(
-                          style: Theme.of(context).textTheme.bodyMedium!.copyWith(
-                              color: Theme.of(context).colorScheme.onSurfaceVariant),
-                          children: [
-                            const TextSpan(text: 'By signing in, you agree to the \n'),
-                            TextSpan(
-                              text: 'Terms of Service',
-                              style: Theme.of(context).textTheme.bodyMedium!.copyWith(
-                                  decoration: TextDecoration.underline,
-                                  color: Theme.of(context).colorScheme.primary),
-                              recognizer: TapGestureRecognizer()
-                                ..onTap = () {
-                                  launchUrl(Uri.parse(
-                                      "https://tourguide.rmichels.com/termsOfService.html"));
-                                },
-                            ),
-                            const TextSpan(text: ' and '),
-                            TextSpan(
-                              text: 'Privacy Policy',
-                              style: Theme.of(context).textTheme.bodyMedium!.copyWith(
-                                  decoration: TextDecoration.underline,
-                                  color: Theme.of(context).colorScheme.primary),
-                              recognizer: TapGestureRecognizer()
-                                ..onTap = () {
-                                  launchUrl(Uri.parse(
-                                      "https://tourguide.rmichels.com/privacyPolicy.html"));
-                                },
-                            ),
-                            const TextSpan(text: '.'),
-                          ],
-                        ),
+                    child: ((authProvider.googleSignInUser != null &&
+                                authProvider.isAuthorized &&
+                                authProvider.user != null) ||
+                            authProvider.isLoggingOut ||
+                            authProvider.isLoggingIntoFirebaseMobile ||
+                            authProvider.isLoggingInAnonymously)
+                        ? _buildProcessingBody()
+                        : _buildButtonBody(),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: RichText(
+                      textAlign: TextAlign.center,
+                      text: TextSpan(
+                        style: Theme.of(context).textTheme.bodyMedium!.copyWith(
+                            color:
+                                Theme.of(context).colorScheme.onSurfaceVariant),
+                        children: [
+                          const TextSpan(
+                              text: 'By signing in, you agree to the \n'),
+                          TextSpan(
+                            text: 'Terms of Service',
+                            style: Theme.of(context)
+                                .textTheme
+                                .bodyMedium!
+                                .copyWith(
+                                    decoration: TextDecoration.underline,
+                                    color:
+                                        Theme.of(context).colorScheme.primary),
+                            recognizer: TapGestureRecognizer()
+                              ..onTap = () {
+                                launchUrl(Uri.parse(
+                                    "https://tourguide.rmichels.com/termsOfService.html"));
+                              },
+                          ),
+                          const TextSpan(text: ' and '),
+                          TextSpan(
+                            text: 'Privacy Policy',
+                            style: Theme.of(context)
+                                .textTheme
+                                .bodyMedium!
+                                .copyWith(
+                                    decoration: TextDecoration.underline,
+                                    color:
+                                        Theme.of(context).colorScheme.primary),
+                            recognizer: TapGestureRecognizer()
+                              ..onTap = () {
+                                launchUrl(Uri.parse(
+                                    "https://tourguide.rmichels.com/privacyPolicy.html"));
+                              },
+                          ),
+                          const TextSpan(text: '.'),
+                        ],
                       ),
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             ),
-          );
-        }
-      ),
+          ),
+        );
+      }),
     );
   }
 }

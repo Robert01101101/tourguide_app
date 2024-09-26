@@ -156,15 +156,17 @@ class _FullscreenTourPageState extends State<FullscreenTourPage> {
                       height: kIsWeb ? 300 : 200,
                       child: ClipRRect(
                         child: kIsWeb
-                            ? isOfflineCreatedTour && widget.tour.imageFileToUploadWeb != null
-                            ? Image.network(widget.tour.imageFileToUploadWeb!.path,
-                                width: MediaQuery.of(context).size.width,
-                                height: 300.0,
-                                fit: BoxFit.cover)
-                            : Image.network(widget.tour.imageUrl!,
-                                width: MediaQuery.of(context).size.width,
-                                height: 300.0,
-                                fit: BoxFit.cover)
+                            ? isOfflineCreatedTour &&
+                                    widget.tour.imageFileToUploadWeb != null
+                                ? Image.network(
+                                    widget.tour.imageFileToUploadWeb!.path,
+                                    width: MediaQuery.of(context).size.width,
+                                    height: 300.0,
+                                    fit: BoxFit.cover)
+                                : Image.network(widget.tour.imageUrl!,
+                                    width: MediaQuery.of(context).size.width,
+                                    height: 300.0,
+                                    fit: BoxFit.cover)
                             : widget.tour.imageFile != null
                                 ? Image.file(widget.tour.imageFile!,
                                     width: MediaQuery.of(context).size.width,
