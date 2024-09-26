@@ -2,7 +2,7 @@
 # https://github.com/firebase/firebase-tools
 # modified to work with flutter
 
-name: Deploy to Firebase Hosting on merge
+name: Build for Web and Deploy to Firebase Hosting
 'on':
   push:
     branches:

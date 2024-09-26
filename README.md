@@ -1,5 +1,8 @@
 # tourguide_app
 
+![Deploy workflow Google Play](https://github.com/Robert01101101/tourguide_app/actions/workflows/deploy.yaml/badge.svg)
+![Deploy workflow Firebase Hosting](https://github.com/Robert01101101/tourguide_app/actions/workflows/firebase-hosting.yml/badge.svg)
+
 [Project Page](https://rmichels.com/tourguide?portfolio_link=gitHubTourguide)
 
 [Web App](https://tourguide-firebase.web.app)
