@@ -6,7 +6,6 @@ import 'package:image_picker/image_picker.dart';
 
 part 'tourguide_place.g.dart';
 
-//TODO: change name to tour place? More accurate since the description etc is specific to this place's tour
 @HiveType(typeId: 1)
 class TourguidePlace {
   @HiveField(0)

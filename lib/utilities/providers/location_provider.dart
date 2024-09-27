@@ -24,8 +24,7 @@ enum PermissionStatus {
   permissionDeniedForever,
 }
 
-//TODO: Handle all types of errors as well as permission denied
-/// Global Location Provider so I can access location anywhere in the app
+/// Handles Location Tracking, Permissions, manually set Location, and Geocoding.
 class LocationProvider with ChangeNotifier {
   Position? _currentPosition;
   String _currentCity = '';
@@ -51,13 +50,8 @@ class LocationProvider with ChangeNotifier {
     _init();
   }
 
-  // Initialization method
   Future<void> _init() async {
     logger.t("LocationProvider._init()");
-    // Wait for remoteConfig to fetch and activate
-    //await remoteConfig.fetchAndActivate();
-
-    //logger.t("LocationProvider()");
     _places = FlutterGooglePlacesSdk(remoteConfig.getString('google_api_key')!);
     _loadSavedLocation();
     getCurrentLocation();

@@ -278,7 +278,7 @@ class _SignInState extends State<SignIn> {
           children: <Widget>[
             const SizedBox(height: 0),
             SizedBox(
-              width: 320,
+              width: min(MediaQuery.of(context).size.width - 48, 320),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
@@ -295,7 +295,7 @@ class _SignInState extends State<SignIn> {
               ),
             ),
             SizedBox(
-              width: min(MediaQuery.of(context).size.width - 48, 300),
+              width: min(MediaQuery.of(context).size.width - 48, 320),
               child: Form(
                   key: _guestFormKey,
                   child: Column(

@@ -46,7 +46,6 @@ class _GeminiChatState extends State<GeminiChat> with WidgetsBindingObserver {
   late GenerativeModel generativeModel;
   //CHAT from https://docs.flyer.chat/flutter/chat-ui/basic-usage
   final List<types.Message> _messages = [];
-  //TODO: Set correct ID
   static String userId = '82091008-a484-4a89-ae75-a22bf8d6f3ac';
   static String geminiId = '82091008-a484-4a89-ae75-a22bf8d6f3ab';
 
@@ -220,7 +219,6 @@ class _GeminiChatState extends State<GeminiChat> with WidgetsBindingObserver {
     }
   }
 
-  //TODO fix
   String _cleanUpAiResponseString(String responseString) {
     String cleanedUpString = responseString
         .replaceAll("* **", "*")

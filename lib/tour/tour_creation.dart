@@ -127,32 +127,22 @@ class _CreateEditTourState extends State<CreateEditTour> {
     });
   }
 
-  // TODO: ensure city matches the city of the places
-  // TODO: move to provider
-  // TODO; don't use context in async!!
   Future<void> _firestoreCreateTour() async {
     try {
-      /*  //should be handled by the form validation, don't validate form inactive due to not being in current step
-      if (!(_formKey.currentState!.validate() && _formKeyPlaces.currentState!.validate() && _formKeyPlacesDetails.currentState!.validate() && _formKeyDetails.currentState!.validate())){
-        //log the form that failed
-        if (!(_formKey.currentState!.validate())) logger.e('Error creating tour: Basic Info form validation failed');
-        if (!(_formKeyPlaces.currentState!.validate())) logger.e('Error creating tour: Places form validation failed');
-        if (!(_formKeyPlacesDetails.currentState!.validate())) logger.e('Error creating tour: Places Details form validation failed');
-        if (!(_formKeyDetails.currentState!.validate())) logger.e('Error creating tour: Details form validation failed');
-        throw Exception('Error creating tour: Form validation failed');
-      }*/
       final tourProvider = Provider.of<TourProvider>(context, listen: false);
+      final myAuth.AuthProvider authProvider =
+          Provider.of(context, listen: false);
       setState(() {
         _isFormSubmitted = true;
       });
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-            content: Text(
-                '${widget.isEditMode ? 'Updating' : 'Uploading'} tour...')),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+              content: Text(
+                  '${widget.isEditMode ? 'Updating' : 'Uploading'} tour...')),
+        );
+      }
       //Final update to tour data
-      final myAuth.AuthProvider authProvider =
-          Provider.of(context, listen: false);
       DateTime? createdDateTime = _tour.createdDateTime;
       _tour = _tour.copyWith(
         visibility: _tourIsPublic ? "public" : "private", //always true for now

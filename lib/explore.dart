@@ -8,6 +8,7 @@ import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:permission_handler/permission_handler.dart' as permission;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tourguide_app/explore_map.dart';
 import 'package:tourguide_app/ui/my_layouts.dart';
@@ -95,49 +96,9 @@ class ExploreState extends State<Explore> {
     }
   }
 
-  //TODO: Move
   Future<void> _downloadTours() async {
-    logger.t('downloadTours');
-
-    final tourProvider = Provider.of<TourProvider>(context, listen: false);
-    final locationProvider =
-        Provider.of<LocationProvider>(context, listen: false);
-    final myAuth.AuthProvider authProvider =
-        Provider.of(context, listen: false);
-    TourguideUserProvider userProvider =
-        Provider.of<TourguideUserProvider>(context, listen: false);
-
-    try {
-      await Future.doWhile(() async {
-        // Check if the currentPosition is null
-        if (locationProvider.currentPosition == null ||
-            (userProvider.user == null && !authProvider.isAnonymous)) {
-          // Wait for a short duration before checking again
-          await Future.delayed(const Duration(milliseconds: 100));
-          return true; // Continue looping
-        }
-        return false; // Exit loop if currentPosition is not null
-      }).timeout(const Duration(seconds: 3));
-    } catch (e) {
-      // Handle timeout
-      logger.e('Timeout waiting for location or user provider');
-      // You might want to handle this situation differently
-      return;
-    }
-
-    // Ensure currentPosition is not null before proceeding
-    if (locationProvider.currentPosition != null) {
-      await tourProvider.fetchAndSetTours(
-        locationProvider.currentPosition!.latitude,
-        locationProvider.currentPosition!.longitude,
-        authProvider.user!.uid,
-        authProvider.isAnonymous ? [] : userProvider.user!.savedTourIds,
-      );
-      _measureContentHeight();
-    } else {
-      // Handle the case where currentPosition is still null after timeout
-      logger.e('Current position is still null after timeout');
-    }
+    await MyGlobals.downloadTours(context);
+    _measureContentHeight();
   }
 
   void _showOptionsDialog(BuildContext context) {
@@ -313,11 +274,43 @@ class ExploreState extends State<Explore> {
                                     if (locationProvider.permissionStatus !=
                                         PermissionStatus.granted)
                                       TextSpan(
-                                          text:
-                                              '\n\nPlease enable location services',
-                                          style: Theme.of(context)
-                                              .textTheme
-                                              .titleMedium),
+                                        children: <TextSpan>[
+                                          TextSpan(
+                                            text: '\n\nPlease ',
+                                            style: Theme.of(context)
+                                                .textTheme
+                                                .titleMedium,
+                                          ),
+                                          kIsWeb
+                                              ? TextSpan(
+                                                  text:
+                                                      'enable location services',
+                                                  style: Theme.of(context)
+                                                      .textTheme
+                                                      .titleMedium,
+                                                )
+                                              : TextSpan(
+                                                  text:
+                                                      'enable location services',
+                                                  style: Theme.of(context)
+                                                      .textTheme
+                                                      .titleMedium!
+                                                      .copyWith(
+                                                        decoration:
+                                                            TextDecoration
+                                                                .underline,
+                                                      ),
+                                                  recognizer:
+                                                      TapGestureRecognizer()
+                                                        ..onTap = () {
+                                                          logger.t(
+                                                              'Tapped enable location services');
+                                                          permission
+                                                              .openAppSettings();
+                                                        },
+                                                ),
+                                        ],
+                                      ),
                                     if (locationProvider.permissionStatus !=
                                             PermissionStatus.granted &&
                                         locationProvider.currentCity != null &&

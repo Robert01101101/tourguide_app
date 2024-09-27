@@ -10,7 +10,6 @@ import 'package:tourguide_app/model/tourguide_report.dart';
 import 'package:tourguide_app/model/tourguide_user.dart';
 import 'package:tourguide_app/utilities/services/tour_service.dart';
 
-//TODO: optimize
 class TourProvider with ChangeNotifier {
   List<String> _popularTours = List.empty();
   List<String> _localTours = List.empty();
@@ -102,7 +101,7 @@ class TourProvider with ChangeNotifier {
           replaceCached: true);
       notifyListeners();
 
-      // Step 3: Update Hive with new data  //TODO: optimize
+      // Step 3: Update Hive with new data
       if (!kIsWeb) {
         await TourService.overwriteToursInHive(
             TourService.popularToursBoxName, getToursByIds(_popularTours));

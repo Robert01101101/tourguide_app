@@ -25,47 +25,8 @@ class Contribute extends StatefulWidget {
 class _ContributeState extends State<Contribute> {
   final ScrollController _scrollController = ScrollController();
 
-  //TODO: Move (dupe to Explore)
   Future<void> _downloadTours() async {
-    logger.t('downloadTours');
-
-    final tourProvider = Provider.of<TourProvider>(context, listen: false);
-    final locationProvider =
-        Provider.of<LocationProvider>(context, listen: false);
-    final myAuth.AuthProvider authProvider =
-        Provider.of(context, listen: false);
-    TourguideUserProvider userProvider =
-        Provider.of<TourguideUserProvider>(context, listen: false);
-
-    try {
-      await Future.doWhile(() async {
-        // Check if the currentPosition is null
-        if (locationProvider.currentPosition == null) {
-          // Wait for a short duration before checking again
-          await Future.delayed(Duration(milliseconds: 100));
-          return true; // Continue looping
-        }
-        return false; // Exit loop if currentPosition is not null
-      }).timeout(Duration(seconds: 2));
-    } catch (e) {
-      // Handle timeout
-      logger.e('Timeout waiting for location');
-      // You might want to handle this situation differently
-      return;
-    }
-
-    // Ensure currentPosition is not null before proceeding
-    if (locationProvider.currentPosition != null) {
-      await tourProvider.fetchAndSetTours(
-        locationProvider.currentPosition!.latitude,
-        locationProvider.currentPosition!.longitude,
-        authProvider.user!.uid,
-        userProvider.user!.savedTourIds,
-      );
-    } else {
-      // Handle the case where currentPosition is still null after timeout
-      logger.e('Current position is still null after timeout');
-    }
+    await MyGlobals.downloadTours(context);
   }
 
   @override

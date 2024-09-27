@@ -226,6 +226,49 @@ class MyGlobals {
       return false;
     }
   }
+
+  static Future<void> downloadTours(BuildContext context) async {
+    logger.t('downloadTours');
+
+    final tourProvider = Provider.of<TourProvider>(context, listen: false);
+    final locationProvider =
+        Provider.of<LocationProvider>(context, listen: false);
+    final myAuth.AuthProvider authProvider =
+        Provider.of(context, listen: false);
+    TourguideUserProvider userProvider =
+        Provider.of<TourguideUserProvider>(context, listen: false);
+
+    try {
+      await Future.doWhile(() async {
+        // Check if the currentPosition is null
+        if (locationProvider.currentPosition == null ||
+            (userProvider.user == null && !authProvider.isAnonymous)) {
+          // Wait for a short duration before checking again
+          await Future.delayed(const Duration(milliseconds: 100));
+          return true; // Continue looping
+        }
+        return false; // Exit loop if currentPosition is not null
+      }).timeout(const Duration(seconds: 3));
+    } catch (e) {
+      // Handle timeout
+      logger.e('Timeout waiting for location or user provider');
+      // You might want to handle this situation differently
+      return;
+    }
+
+    // Ensure currentPosition is not null before proceeding
+    if (locationProvider.currentPosition != null) {
+      await tourProvider.fetchAndSetTours(
+        locationProvider.currentPosition!.latitude,
+        locationProvider.currentPosition!.longitude,
+        authProvider.user!.uid,
+        authProvider.isAnonymous ? [] : userProvider.user!.savedTourIds,
+      );
+    } else {
+      // Handle the case where currentPosition is still null after timeout
+      logger.e('Current position is still null after timeout');
+    }
+  }
 }
 
 class SnackBarService {
