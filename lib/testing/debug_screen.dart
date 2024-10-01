@@ -6,7 +6,6 @@ import 'package:tourguide_app/utilities/map_utils.dart';
 import 'package:flutter/material.dart';
 
 import 'google_maps_sample.dart';
-import 'map.dart';
 
 //Debug Screen
 
@@ -95,15 +94,6 @@ class DebugScreenState extends State<DebugScreen> {
                           "Waterfront Vancouver BC Canada");
                     },
                     child: const Text("Google Maps Address link")),
-                ElevatedButton(
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => const MapScreen()),
-                      );
-                    },
-                    child: const Text("Old Map Menu Option")),
               ],
             )
           ],

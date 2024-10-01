@@ -1,12 +1,10 @@
-import 'package:bubble/bubble.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
-import 'package:flutter_chat_ui/flutter_chat_ui.dart' as chatUI;
-import 'dart:io';
 import 'package:firebase_vertexai/firebase_vertexai.dart';
+import 'package:scroll_to_index/scroll_to_index.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:tourguide_app/utilities/custom_import.dart';
@@ -16,17 +14,9 @@ import 'package:uuid/uuid.dart';
 import 'package:tourguide_app/main.dart';
 
 import 'dart:convert';
-import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart' show rootBundle;
-import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
 import 'package:flutter_chat_ui/flutter_chat_ui.dart';
-import 'package:http/http.dart' as http;
-import 'package:intl/date_symbol_data_local.dart';
-import 'package:path_provider/path_provider.dart';
-import 'package:uuid/uuid.dart';
-import 'dart:developer';
 
 //_________________________________________________________________________ CREATE FORM
 class GeminiChat extends StatefulWidget {
@@ -76,7 +66,7 @@ class _GeminiChatState extends State<GeminiChat> with WidgetsBindingObserver {
       _bot = types.User(
           id: geminiId,
           lastSeen: DateTime.now().millisecondsSinceEpoch,
-          firstName: 'AI Tourguide');
+          firstName: 'Gemini Tour Guide');
 
       _startNewChat();
     }
@@ -122,7 +112,7 @@ class _GeminiChatState extends State<GeminiChat> with WidgetsBindingObserver {
     _bot = types.User(
         id: geminiId,
         lastSeen: DateTime.now().millisecondsSinceEpoch,
-        firstName: 'AI Tourguide');
+        firstName: 'Gemini Tour Guide');
 
     _loadMessages();
   }
@@ -243,7 +233,7 @@ class _GeminiChatState extends State<GeminiChat> with WidgetsBindingObserver {
                   padding: const EdgeInsets.all(20.0),
                   child: Center(
                       child: Text(
-                          "Powered by Google's $geminiVersion.\n\nAI Tourguide might provide inaccurate information, use with care.")),
+                          "Powered by Google's $geminiVersion.\n\Gemini Tour Guide might provide inaccurate information, use with care.")),
                 ),
                 ListTile(
                   leading: const Icon(Icons.delete),
@@ -312,7 +302,7 @@ class _GeminiChatState extends State<GeminiChat> with WidgetsBindingObserver {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('AI Tourguide'),
+        title: Text('Gemini Tour Guide'),
         actions: [
           IconButton(
             icon: Icon(Icons.more_vert),
@@ -325,11 +315,33 @@ class _GeminiChatState extends State<GeminiChat> with WidgetsBindingObserver {
       ),
       body: Padding(
         padding:
-            EdgeInsets.fromLTRB(horizontalPadding, 0, horizontalPadding, 10),
+        EdgeInsets.fromLTRB(horizontalPadding, 0, horizontalPadding, 10),
         child: Chat(
           messages: _messages,
           onSendPressed: _handleSendPressed,
           user: _user!,
+          //scrollController: _scrollController,
+          showUserAvatars: true,
+          avatarBuilder: (userId) {
+            return Transform.translate(
+              offset: Offset(-18, 0), // Shift the avatar 8 pixels to the left
+              child: Transform.scale(
+                scale: 1.5,
+                alignment: Alignment.bottomLeft,
+                child: CircleAvatar(
+                  backgroundColor: Theme.of(context).colorScheme.surfaceContainer,
+                  radius: 9,
+                  child: Padding(
+                    padding: const EdgeInsets.all(4.0),
+                    child: CircleAvatar(
+                      backgroundColor: Theme.of(context).colorScheme.surfaceContainer,
+                      foregroundImage: const AssetImage('assets/other/google-gemini-icon.png'),
+                    ),
+                  ),
+                ),
+              ),
+            );/**/
+          },
           theme: DefaultChatTheme(
             backgroundColor: Theme.of(context).scaffoldBackgroundColor,
             primaryColor: Theme.of(context).colorScheme.secondary,
@@ -344,7 +356,7 @@ class _GeminiChatState extends State<GeminiChat> with WidgetsBindingObserver {
           ),
           bubbleBuilder: _customBubbleBuilder,
           textMessageBuilder: _textMessageBuilder,
-          scrollController: MyGlobals.scrollController,
+          //scrollController: MyGlobals.bottomNavBarScrollController,
         ),
       ),
     );

@@ -180,7 +180,6 @@ class MyGlobals {
   ///For web only, as I don't currently have a clean solution for users manually loading to a page other than the root //TODO: fix web routing
   static bool? userSignedIn;
   static String? signInReroutePath;
-  static AutoScrollController? scrollController; //TODO fix
   static List<String> processedImageUrls = [];
   static LinearGradient createShimmerGradient(BuildContext context) {
     return LinearGradient(
