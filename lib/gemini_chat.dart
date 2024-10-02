@@ -315,7 +315,7 @@ class _GeminiChatState extends State<GeminiChat> with WidgetsBindingObserver {
       ),
       body: Padding(
         padding:
-        EdgeInsets.fromLTRB(horizontalPadding, 0, horizontalPadding, 10),
+            EdgeInsets.fromLTRB(horizontalPadding, 0, horizontalPadding, 10),
         child: Chat(
           messages: _messages,
           onSendPressed: _handleSendPressed,
@@ -329,18 +329,21 @@ class _GeminiChatState extends State<GeminiChat> with WidgetsBindingObserver {
                 scale: 1.5,
                 alignment: Alignment.bottomLeft,
                 child: CircleAvatar(
-                  backgroundColor: Theme.of(context).colorScheme.surfaceContainer,
+                  backgroundColor:
+                      Theme.of(context).colorScheme.surfaceContainer,
                   radius: 9,
                   child: Padding(
                     padding: const EdgeInsets.all(4.0),
                     child: CircleAvatar(
-                      backgroundColor: Theme.of(context).colorScheme.surfaceContainer,
-                      foregroundImage: const AssetImage('assets/other/google-gemini-icon.png'),
+                      backgroundColor:
+                          Theme.of(context).colorScheme.surfaceContainer,
+                      foregroundImage: const AssetImage(
+                          'assets/other/google-gemini-icon.png'),
                     ),
                   ),
                 ),
               ),
-            );/**/
+            ); /**/
           },
           theme: DefaultChatTheme(
             backgroundColor: Theme.of(context).scaffoldBackgroundColor,

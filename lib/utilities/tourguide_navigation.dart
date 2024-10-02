@@ -262,11 +262,11 @@ class _BottomNavigationPageState extends State<BottomNavigationPage> {
       bottomNavigationBar: NavigationBarTheme(
         data: NavigationBarThemeData(
           labelTextStyle: WidgetStateProperty.resolveWith<TextStyle>(
-                (Set<WidgetState> states) {
+            (Set<WidgetState> states) {
               if (states.contains(WidgetState.selected)) {
                 return Theme.of(context).textTheme.labelMedium!.copyWith(
-                  fontWeight: FontWeight.bold,
-                );
+                      fontWeight: FontWeight.bold,
+                    );
               }
               return Theme.of(context).textTheme.labelMedium!;
             },

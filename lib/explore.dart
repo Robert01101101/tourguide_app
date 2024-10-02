@@ -22,7 +22,6 @@ import 'package:tourguide_app/utilities/providers/location_provider.dart';
 import 'package:tourguide_app/utilities/providers/tour_provider.dart';
 import 'package:tourguide_app/utilities/providers/tourguide_user_provider.dart';
 import 'main.dart';
-import 'package:tourguide_app/utilities/providers/auth_provider.dart' as myAuth;
 import '../../ui/google_places_img.dart'
     if (dart.library.html) '../../ui/google_places_img_web.dart' as gpi;
 import 'dart:ui' as ui;
@@ -138,10 +137,11 @@ class ExploreState extends State<Explore> {
 
   @override
   Widget build(BuildContext context) {
-    myAuth.AuthProvider authProvider = Provider.of(context);
+    TourguideUserProvider tourguideUserProvider =
+        Provider.of<TourguideUserProvider>(context);
     LocationProvider locationProvider = Provider.of<LocationProvider>(context);
     TourProvider tourProvider = Provider.of<TourProvider>(context);
-    String displayName = authProvider.user?.displayName ?? '';
+    String displayName = tourguideUserProvider.user?.displayName ?? '';
 
     logger.t('Explore.build()');
 
@@ -272,7 +272,10 @@ class ExploreState extends State<Explore> {
                                           text:
                                               ', ${displayName.split(' ').first}'),
                                     if (locationProvider.permissionStatus !=
-                                        PermissionStatus.granted)
+                                                PermissionStatus.granted ||
+                                            locationProvider.currentCity ==
+                                                null ||
+                                        locationProvider.currentCity.isEmpty)
                                       TextSpan(
                                         children: <TextSpan>[
                                           TextSpan(
@@ -281,75 +284,62 @@ class ExploreState extends State<Explore> {
                                                 .textTheme
                                                 .titleMedium,
                                           ),
-                                          kIsWeb
-                                              ? TextSpan(
-                                                  text:
-                                                      'enable location services',
-                                                  style: Theme.of(context)
-                                                      .textTheme
-                                                      .titleMedium,
-                                                )
-                                              : TextSpan(
-                                                  text:
-                                                      'enable location services',
-                                                  style: Theme.of(context)
-                                                      .textTheme
-                                                      .titleMedium!
-                                                      .copyWith(
-                                                        decoration:
-                                                            TextDecoration
-                                                                .underline,
-                                                      ),
-                                                  recognizer:
-                                                      TapGestureRecognizer()
-                                                        ..onTap = () {
-                                                          logger.t(
-                                                              'Tapped enable location services');
-                                                          permission
-                                                              .openAppSettings();
-                                                        },
+                                          if (locationProvider
+                                                  .permissionStatus !=
+                                              PermissionStatus.granted)
+                                            kIsWeb
+                                                ? TextSpan(
+                                                    text:
+                                                        'enable location services',
+                                                    style: Theme.of(context)
+                                                        .textTheme
+                                                        .titleMedium,
+                                                  )
+                                                : TextSpan(
+                                                    text:
+                                                        'enable location services',
+                                                    style: Theme.of(context)
+                                                        .textTheme
+                                                        .titleMedium!
+                                                        .copyWith(
+                                                          decoration:
+                                                              TextDecoration
+                                                                  .underline,
+                                                        ),
+                                                    recognizer:
+                                                        TapGestureRecognizer()
+                                                          ..onTap = () {
+                                                            logger.t(
+                                                                'Tapped enable location services');
+                                                            permission
+                                                                .openAppSettings();
+                                                          },
+                                                  ),
+                                          if (locationProvider.permissionStatus !=
+                                              PermissionStatus.granted)
+                                            TextSpan(
+                                                text:
+                                                    ' for full functionality, or ',
+                                                style: Theme.of(context)
+                                                    .textTheme
+                                                    .titleMedium),
+                                          TextSpan(
+                                            text: 'set your location',
+                                            style: Theme.of(context)
+                                                .textTheme
+                                                .titleMedium!
+                                                .copyWith(
+                                                  decoration:
+                                                      TextDecoration.underline,
                                                 ),
+                                            recognizer: TapGestureRecognizer()
+                                              ..onTap = () {
+                                                logger.t(
+                                                    'Tapped set your location');
+                                                _showOptionsDialog(context);
+                                              },
+                                          ),
                                         ],
-                                      ),
-                                    if (locationProvider.permissionStatus !=
-                                            PermissionStatus.granted &&
-                                        locationProvider.currentCity != null &&
-                                        locationProvider.currentCity.isNotEmpty)
-                                      TextSpan(
-                                          text: ' for full functionality',
-                                          style: Theme.of(context)
-                                              .textTheme
-                                              .titleMedium),
-                                    if (locationProvider.permissionStatus !=
-                                                PermissionStatus.granted &&
-                                            locationProvider.currentCity ==
-                                                null ||
-                                        locationProvider.currentCity.isEmpty)
-                                      TextSpan(
-                                          text: ', or ',
-                                          style: Theme.of(context)
-                                              .textTheme
-                                              .titleMedium),
-                                    if (locationProvider.permissionStatus !=
-                                                PermissionStatus.granted &&
-                                            locationProvider.currentCity ==
-                                                null ||
-                                        locationProvider.currentCity.isEmpty)
-                                      TextSpan(
-                                        text: 'set your location',
-                                        style: Theme.of(context)
-                                            .textTheme
-                                            .titleMedium!
-                                            .copyWith(
-                                              decoration:
-                                                  TextDecoration.underline,
-                                            ),
-                                        recognizer: TapGestureRecognizer()
-                                          ..onTap = () {
-                                            logger
-                                                .t('Tapped set your location');
-                                            _showOptionsDialog(context);
-                                          },
                                       ),
                                   ],
                                 ),
