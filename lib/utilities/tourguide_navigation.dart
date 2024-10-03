@@ -290,7 +290,7 @@ class _BottomNavigationPageState extends State<BottomNavigationPage> {
               label: 'Explore',
             ),
             NavigationDestination(
-              icon: Icon(Icons.chat),
+              icon: Icon(Icons.auto_awesome),
               label: 'Tour Guide',
             ),
             NavigationDestination(

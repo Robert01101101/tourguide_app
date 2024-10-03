@@ -248,7 +248,7 @@ class ExploreState extends State<Explore> {
                                     const TextSpan(text: 'Welcome'),
                                     if (locationProvider.currentCity != null &&
                                         locationProvider.currentCity.isNotEmpty)
-                                      TextSpan(text: ' to \r'),
+                                      TextSpan(text: ' to \n'),
                                     if (locationProvider.currentCity != null &&
                                         locationProvider.currentCity.isNotEmpty)
                                       TextSpan(
@@ -449,37 +449,7 @@ class ExploreState extends State<Explore> {
                             tours: tourProvider
                                 .getToursByIds((tourProvider.globalTours))),
                       ),
-                      /*Text("Debug", style: Theme.of(context).textTheme.headlineSmall),
-                          Row(
-                            children: [
-                              ElevatedButton(
-                                onPressed: () {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(builder: (context) => const DebugScreen()),
-                                  );
-                                },
-                                child: const Text('Debug Screen'),
-                              ),
-                            ],
-                          ),*/
                     ]),
-                    Align(
-                      alignment: Alignment.topRight,
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(
-                            vertical: 4.0, horizontal: 0),
-                        child: Semantics(
-                          label: 'Change Location',
-                          child: IconButton(
-                              onPressed: () {
-                                _showOptionsDialog(context);
-                              },
-                              icon: const Icon(Icons.more_vert),
-                              color: const Color(0xeeF2F8F8)),
-                        ),
-                      ),
-                    ),
                   ],
                 ),
               ],

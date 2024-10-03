@@ -453,36 +453,42 @@ class LocationProvider with ChangeNotifier {
           final bytes = await file.readAsBytes();
           final metadataJson = await metadataFile.readAsString();
           final metadataMap = json.decode(metadataJson);
-          final metadata = PhotoMetadata(
-            photoReference: metadataMap['photoReference'],
-            width: metadataMap['width'],
-            height: metadataMap['height'],
-            attributions: metadataMap['attributions'],
-          );
-          final googlePlacesImg = gpi.GooglePlacesImg(
-            photoMetadata: metadata,
-            placePhotoResponse:
-                FetchPlacePhotoResponse.image(Image.memory(bytes)),
-          );
+          //invalidate cache after 1 month
+          final cacheDateTime = DateTime.parse(metadataMap['cacheDate'] ??
+              DateTime.now().subtract(const Duration(days: 31)).toIso8601String());
+          if (!DateTime.now().isAfter(cacheDateTime.add(const Duration(days: 30)))){
+            final metadata = PhotoMetadata(
+              photoReference: metadataMap['photoReference'],
+              width: metadataMap['width'],
+              height: metadataMap['height'],
+              attributions: metadataMap['attributions'],
+            );
+            final googlePlacesImg = gpi.GooglePlacesImg(
+              photoMetadata: metadata,
+              placePhotoResponse:
+              FetchPlacePhotoResponse.image(Image.memory(bytes)),
+            );
 
-          final tourguidePlaceImg = TourguidePlaceImg(
-              googlePlacesImg: googlePlacesImg, file: file, imageUrl: null);
+            final tourguidePlaceImg = TourguidePlaceImg(
+                googlePlacesImg: googlePlacesImg, file: file, imageUrl: null);
 
-          // Cache the image in memory
-          _imageCache[placeId!] = tourguidePlaceImg;
+            // Cache the image in memory
+            _imageCache[placeId!] = tourguidePlaceImg;
 
-          if (setAsCurrentImage) {
-            _currentPlaceImg = tourguidePlaceImg;
-            notifyListeners();
+            if (setAsCurrentImage) {
+              _currentPlaceImg = tourguidePlaceImg;
+              notifyListeners();
+            }
+            return tourguidePlaceImg;
+          } else {
+            logger.i("locationProvider._fetchPlacePhoto() - found photo and metadata through placeid in local storage, but cache is outdated, refreshing");
           }
-          return tourguidePlaceImg;
         }
       }
 
       logger.t("locationProvider._fetchPlacePhoto() - placeId=$placeId");
 
       _places.isInitialized();
-      bool? isInitialized = await _places.isInitialized();
       final result = await _places.fetchPlace(
         placeId,
         fields: [PlaceField.PhotoMetadatas],
@@ -517,6 +523,7 @@ class LocationProvider with ChangeNotifier {
             'width': metadata.width,
             'height': metadata.height,
             'attributions': metadata.attributions,
+            'cacheDate': DateTime.now().toIso8601String(),
           };
           await metadataFile!.writeAsString(json.encode(metadataMap));
 

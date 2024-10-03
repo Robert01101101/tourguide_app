@@ -164,6 +164,8 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
       ],
       child: Consumer<ThemeProvider>(builder: (context, themeProvider, child) {
         return MaterialApp.router(
+          debugShowCheckedModeBanner: false,
+          //showPerformanceOverlay: true,
           scaffoldMessengerKey: SnackBarService.scaffoldKey,
           title: 'Tourguide App',
           routerConfig: TourguideNavigation.router,
