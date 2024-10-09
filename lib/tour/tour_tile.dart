@@ -388,6 +388,10 @@ class _ExpandedTourTileOverlayState extends State<ExpandedTourTileOverlay> {
     TourProvider tourProvider = Provider.of<TourProvider>(context);
     bool isOfflineCreatedTour = widget.tour.isOfflineCreatedTour ?? false;
 
+    double imageHeight = MediaQuery.of(context).size.height < 700
+        ? MediaQuery.of(context).size.height / 3.5
+        : 200;
+
     return Padding(
       padding: const EdgeInsets.fromLTRB(0, 12, 0, 0),
       child: Column(
@@ -439,20 +443,20 @@ class _ExpandedTourTileOverlayState extends State<ExpandedTourTileOverlay> {
                                   ? Image.network(
                                       widget.tour.imageFileToUploadWeb!.path,
                                       width: MediaQuery.of(context).size.width,
-                                      height: 200.0,
+                                      height: imageHeight,
                                       fit: BoxFit.cover)
                                   : Image.network(widget.tour.imageUrl!,
                                       width: MediaQuery.of(context).size.width,
-                                      height: 200.0,
+                                      height: imageHeight,
                                       fit: BoxFit.cover)
                               : widget.tour.imageFile != null
                                   ? Image.file(widget.tour.imageFile!,
                                       width: MediaQuery.of(context).size.width,
-                                      height: 200.0,
+                                      height: imageHeight,
                                       fit: BoxFit.cover)
                                   : Container(
                                       width: MediaQuery.of(context).size.width,
-                                      height: 200,
+                                      height: imageHeight,
                                       color: Colors.white,
                                     ),
                           if (tourProvider.isUserCreatedTour(widget.tour))

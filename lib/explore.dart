@@ -145,6 +145,10 @@ class ExploreState extends State<Explore> {
 
     logger.t('Explore.build()');
 
+    double topBannerImageHeight = MediaQuery.of(context).size.height < 750
+        ? MediaQuery.of(context).size.height / 2.5
+        : 300;
+
     Future<void> refresh() async {
       if (!tourProvider.isLoadingTours) {
         await locationProvider.refreshCurrentLocation();
@@ -170,12 +174,12 @@ class ExploreState extends State<Explore> {
                       return Stack(
                         children: [
                           Container(
-                            height: 300,
+                            height: topBannerImageHeight,
                             width: double.infinity,
                             color: Colors.black,
                           ),
                           Container(
-                            height: 300,
+                            height: topBannerImageHeight,
                             width: double.infinity,
                             decoration: BoxDecoration(
                               gradient: LinearGradient(
@@ -218,18 +222,18 @@ class ExploreState extends State<Explore> {
                       children: [
                         Container(
                           height:
-                              300, //should match google image (TODO: ensure it's never under 300)
+                              topBannerImageHeight, //should match google image (TODO: ensure it's never under 300)
                           color: Colors.transparent,
                         ),
                         Container(
                           color: Theme.of(context).scaffoldBackgroundColor,
-                          height: _contentHeight - 300,
+                          height: _contentHeight - topBannerImageHeight,
                         )
                       ],
                     ),
                     StandardLayout(children: [
                       SizedBox(
-                        height: 290,
+                        height: topBannerImageHeight - 10,
                         child: Padding(
                           padding: const EdgeInsets.symmetric(
                               vertical: 20, horizontal: 0),
@@ -272,9 +276,8 @@ class ExploreState extends State<Explore> {
                                           text:
                                               ', ${displayName.split(' ').first}'),
                                     if (locationProvider.permissionStatus !=
-                                                PermissionStatus.granted ||
-                                            locationProvider.currentCity ==
-                                                null ||
+                                            PermissionStatus.granted ||
+                                        locationProvider.currentCity == null ||
                                         locationProvider.currentCity.isEmpty)
                                       TextSpan(
                                         children: <TextSpan>[

@@ -47,6 +47,10 @@ class _ParallaxImageState extends State<ParallaxImage> {
   Widget build(BuildContext context) {
     //logger.t("ParallaxImage.build()");
 
+    double topBannerImageHeight = MediaQuery.of(context).size.height < 750
+        ? MediaQuery.of(context).size.height / 2.5
+        : 300;
+
     return Transform.translate(
       offset: Offset(0, _scrollOffset * 0.5),
       child: ShaderMask(
@@ -66,7 +70,7 @@ class _ParallaxImageState extends State<ParallaxImage> {
             return ClipRect(
               child: SizedBox(
                 width: constraints.maxWidth,
-                height: 300,
+                height: topBannerImageHeight,
                 child: FittedBox(
                   fit: BoxFit.cover,
                   alignment: Alignment.center,

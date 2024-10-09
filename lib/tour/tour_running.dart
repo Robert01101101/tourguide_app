@@ -383,6 +383,12 @@ class _TourRunningState extends State<TourRunning> {
               tourRunningMap: true,
               mapKey: _mapKey,
               mapCurrentlyPinnedAtTop: _mapCurrentlyPinnedAtTop,
+              height: MediaQuery.of(context).size.height < 700
+                  ? MediaQuery.of(context).size.height / 2
+                  : 350,
+              heightWeb: MediaQuery.of(context).size.height < 900
+                  ? MediaQuery.of(context).size.height / 2
+                  : 450,
             ),
           ),
           SliverToBoxAdapter(
@@ -565,17 +571,18 @@ class _TourRunningState extends State<TourRunning> {
                                               ],
                                             ),
                                           ),
-                                          Row(
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.end,
-                                            children: [
-                                              IconButton(
-                                                onPressed: () =>
-                                                    MapUtils.openMapWithQuery(
-                                                        place.title),
-                                                icon: Icon(Icons.directions),
-                                              ),
-                                            ],
+                                          /*IconButton(
+                                            onPressed: () =>
+                                                TourguideNavigation.router.go(
+                                                    TourguideNavigation.geminiChatPath,
+                                                ),
+                                            icon: Icon(Icons.auto_awesome),
+                                          ),*/
+                                          IconButton(
+                                            onPressed: () =>
+                                                MapUtils.openMapWithQuery(
+                                                    place.title),
+                                            icon: Icon(Icons.directions),
                                           ),
                                           IconButton(
                                             onPressed: () => _toggleTTS(

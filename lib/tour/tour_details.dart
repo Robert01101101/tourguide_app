@@ -227,8 +227,12 @@ class _FullscreenTourPageState extends State<FullscreenTourPage> {
                 tourMapController: _tourMapController,
                 tour: widget.tour,
                 tourRunningMap: false,
-                height: 220,
-                heightWeb: 320,
+                height: MediaQuery.of(context).size.height < 660
+                    ? MediaQuery.of(context).size.height / 3
+                    : 220,
+                heightWeb: MediaQuery.of(context).size.height < 960
+                    ? MediaQuery.of(context).size.height / 3
+                    : 320,
               ),
               if (widget.tour.tourguidePlaces.isNotEmpty)
                 SelectionArea(

@@ -208,12 +208,12 @@ class _SignInState extends State<SignIn> {
             const SizedBox(
                 width: 240,
                 child: Text(
-                    'Sign into the Google Firebase Cloud service for access to Tourguide.',
+                    'Sign into Tourguide with your Google account.',
                     textAlign: TextAlign.center)),
             ElevatedButton(
               onPressed: () => authProvider
                   .signInWithFirebase(authProvider.googleSignInUser!),
-              child: const Text('SIGN INTO FIREBASE SERVICE'),
+              child: const Text('SIGN INTO TOURGUIDE'),
             ),
           ],
         ),
@@ -396,9 +396,10 @@ class _SignInState extends State<SignIn> {
                 children: [
                   ConstrainedBox(
                     constraints: BoxConstraints(
-                      minHeight: 450, // Set the minimum height to 550
-                      maxHeight: max(constraints.maxHeight * 0.7,
-                          450), // Optional: Limit the maximum height to the screen height
+                      //set minHeight to
+                      minHeight: 100,
+                      maxHeight: min(constraints.maxHeight * 0.7,
+                          500), // Optional: Limit the maximum height to the screen height
                     ),
                     child: ((authProvider.googleSignInUser != null &&
                                 authProvider.isAuthorized &&

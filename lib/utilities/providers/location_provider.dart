@@ -455,8 +455,11 @@ class LocationProvider with ChangeNotifier {
           final metadataMap = json.decode(metadataJson);
           //invalidate cache after 1 month
           final cacheDateTime = DateTime.parse(metadataMap['cacheDate'] ??
-              DateTime.now().subtract(const Duration(days: 31)).toIso8601String());
-          if (!DateTime.now().isAfter(cacheDateTime.add(const Duration(days: 30)))){
+              DateTime.now()
+                  .subtract(const Duration(days: 31))
+                  .toIso8601String());
+          if (!DateTime.now()
+              .isAfter(cacheDateTime.add(const Duration(days: 30)))) {
             final metadata = PhotoMetadata(
               photoReference: metadataMap['photoReference'],
               width: metadataMap['width'],
@@ -466,7 +469,7 @@ class LocationProvider with ChangeNotifier {
             final googlePlacesImg = gpi.GooglePlacesImg(
               photoMetadata: metadata,
               placePhotoResponse:
-              FetchPlacePhotoResponse.image(Image.memory(bytes)),
+                  FetchPlacePhotoResponse.image(Image.memory(bytes)),
             );
 
             final tourguidePlaceImg = TourguidePlaceImg(
@@ -481,7 +484,8 @@ class LocationProvider with ChangeNotifier {
             }
             return tourguidePlaceImg;
           } else {
-            logger.i("locationProvider._fetchPlacePhoto() - found photo and metadata through placeid in local storage, but cache is outdated, refreshing");
+            logger.i(
+                "locationProvider._fetchPlacePhoto() - found photo and metadata through placeid in local storage, but cache is outdated, refreshing");
           }
         }
       }

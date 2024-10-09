@@ -27,8 +27,8 @@ class TourMap extends StatefulWidget {
   final bool tourRunningMap;
   final GlobalKey? mapKey;
   final bool? mapCurrentlyPinnedAtTop;
-  final double? height;
-  final double? heightWeb;
+  final double height;
+  final double heightWeb;
 
   const TourMap({
     super.key,
@@ -37,8 +37,8 @@ class TourMap extends StatefulWidget {
     required this.tourRunningMap,
     this.mapKey,
     this.mapCurrentlyPinnedAtTop,
-    this.height,
-    this.heightWeb,
+    required this.height,
+    required this.heightWeb,
   });
 
   @override
@@ -64,8 +64,8 @@ class _TourMapState extends State<TourMap> {
         //logger.t('TourMap - Consumer');
         return SizedBox(
           height: kIsWeb && !CrossplatformUtils.isMobile()
-              ? (widget.heightWeb ?? 450)
-              : (widget.height ?? 350), // Adjust height as needed
+              ? widget.heightWeb
+              : widget.height, // Adjust height as needed
           child: Stack(
             children: [
               Container(

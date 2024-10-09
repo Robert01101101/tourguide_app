@@ -74,6 +74,16 @@ class _TourguideOnboardState extends State<TourguideOnboard> {
 
   @override
   Widget build(BuildContext context) {
+    double contentMargin = MediaQuery.of(context).size.height < 1000
+        ? MediaQuery.of(context).size.height / 20
+        : 50;
+    double imageSize = MediaQuery.of(context).size.height < 1000
+        ? MediaQuery.of(context).size.height / 4
+        : 250;
+    double imagePadding = MediaQuery.of(context).size.height < 1000
+        ? MediaQuery.of(context).size.height / 40
+        : 25;
+
     PageDecoration pageDecoration = PageDecoration(
       titleTextStyle: Theme.of(context).textTheme.displaySmall!.copyWith(
             color: Colors.white,
@@ -81,8 +91,15 @@ class _TourguideOnboardState extends State<TourguideOnboard> {
       bodyTextStyle: Theme.of(context).textTheme.bodyLarge!.copyWith(
             color: Colors.white,
           ),
-      pageMargin: EdgeInsets.only(bottom: 80.0),
-      contentMargin: EdgeInsets.all(50),
+      pageMargin: const EdgeInsets.only(bottom: 80.0),
+      contentMargin: MediaQuery.of(context).size.height < 1000
+          ? EdgeInsets.symmetric(horizontal: contentMargin, vertical: 5)
+          : EdgeInsets.all(contentMargin),
+      imagePadding: EdgeInsets.only(bottom: imagePadding),
+      titlePadding: EdgeInsets.only(top: imagePadding / 1.5, bottom: imagePadding),
+      safeArea: 10,
+      imageFlex: 9,
+      bodyFlex: 10,
     );
 
     return Scaffold(
@@ -90,12 +107,27 @@ class _TourguideOnboardState extends State<TourguideOnboard> {
         key: _introKey,
         pages: [
           PageViewModel(
-            title: 'Welcome to \nTourguide',
-            body:
-                'Tourguide helps you find your way around and learn about the places you visit.\n\n'
-                'This app is still in development and may not work as expected. Please report any issues to the developers.',
+            title: 'Welcome to Tourguide',
+            bodyWidget: RichText(
+              textAlign: TextAlign.center,
+              text: TextSpan(
+                children: [
+                  TextSpan(text: 'Tourguide helps you find your way around and learn about the places you visit.', style: Theme.of(context).textTheme.bodyLarge!.copyWith(
+                    color: Colors.white,
+                  ),),
+                  TextSpan(
+                    text:
+                    "\n\n",
+                    style: Theme.of(context).textTheme.bodySmall,
+                  ),
+                  TextSpan(text: 'This app is still in development and may not work as expected. Please report any issues to the developers.', style: Theme.of(context).textTheme.bodyLarge!.copyWith(
+                    color: Colors.white,
+                  ),),
+                ],
+              ),
+            ),
             image: Image.asset('assets/onboarding/onboard1.png',
-                width: 250, height: 250),
+                width: imageSize, height: imageSize),
             decoration: pageDecoration.copyWith(
               pageColor: Color(0x00ffffff),
             ),
@@ -105,7 +137,7 @@ class _TourguideOnboardState extends State<TourguideOnboard> {
             body:
                 'Plan your day and route, find your way around, discover new places, and chat with an AI tourguide.',
             image: Image.asset('assets/onboarding/onboard2.png',
-                width: 250, height: 250),
+                width: imageSize, height: imageSize),
             decoration: pageDecoration.copyWith(
               pageColor: Color(0x11ffffff),
             ),
@@ -118,7 +150,22 @@ class _TourguideOnboardState extends State<TourguideOnboard> {
                 children: [
                   TextSpan(
                     text:
-                        "Tourguide is a community-driven app. You can contribute by adding new tours, updating information, and sharing your experiences.\n\n"
+                        "Tourguide is a community-driven app. You can contribute by adding new tours, updating information, and sharing your experiences.",
+                    style: Theme.of(context)
+                        .textTheme
+                        .bodyLarge!
+                        .copyWith(color: Colors.white),
+                  ),
+                  TextSpan(
+                    text:
+                    "\n\n",
+                    style: Theme.of(context)
+                        .textTheme
+                        .bodySmall!
+                        .copyWith(color: Colors.white),
+                  ),
+                  TextSpan(
+                    text:
                         "Please take a moment to review our ",
                     style: Theme.of(context)
                         .textTheme
@@ -149,7 +196,7 @@ class _TourguideOnboardState extends State<TourguideOnboard> {
               ),
             ),
             image: Image.asset('assets/onboarding/onboard3.png',
-                width: 250, height: 250),
+                width: imageSize, height: imageSize),
             decoration: pageDecoration.copyWith(
               pageColor: Color(0x22ffffff),
             ),
@@ -159,20 +206,20 @@ class _TourguideOnboardState extends State<TourguideOnboard> {
             body:
                 'Start exploring local tours, and have a great time! Please share any feedback with us.',
             image: Image.asset('assets/onboarding/onboard4.png',
-                width: 250, height: 250),
+                width: imageSize, height: imageSize),
             decoration: pageDecoration.copyWith(
               pageColor: Color(0x33ffffff),
             ),
           ),
         ],
         showSkipButton: true,
-        skip: Text('Skip',
+        skip: const Text('Skip',
             style: TextStyle(
                 fontSize: 18.0,
                 fontWeight: FontWeight.bold,
                 color: Colors.white)),
         next: const Icon(Icons.arrow_forward, color: Colors.white),
-        done: Text("Get Started",
+        done: const Text("Get Started",
             style: TextStyle(
                 fontSize: 18.0,
                 fontWeight: FontWeight.bold,
@@ -197,6 +244,7 @@ class _TourguideOnboardState extends State<TourguideOnboard> {
         ),*/
         globalBackgroundColor: TourguideTheme.tourguideColor,
         scrollPhysics: ClampingScrollPhysics(),
+
         //next: Icon(Icons.arrow_forward, color: Colors.white),
         //doneButtonPersist: true, // Persist done button across pages
         //animationDuration: 500, // Animation speed in milliseconds
