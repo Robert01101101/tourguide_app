@@ -96,7 +96,8 @@ class _TourguideOnboardState extends State<TourguideOnboard> {
           ? EdgeInsets.symmetric(horizontal: contentMargin, vertical: 5)
           : EdgeInsets.all(contentMargin),
       imagePadding: EdgeInsets.only(bottom: imagePadding),
-      titlePadding: EdgeInsets.only(top: imagePadding / 1.5, bottom: imagePadding),
+      titlePadding:
+          EdgeInsets.only(top: imagePadding / 1.5, bottom: imagePadding),
       safeArea: 10,
       imageFlex: 9,
       bodyFlex: 10,
@@ -112,17 +113,24 @@ class _TourguideOnboardState extends State<TourguideOnboard> {
               textAlign: TextAlign.center,
               text: TextSpan(
                 children: [
-                  TextSpan(text: 'Tourguide helps you find your way around and learn about the places you visit.', style: Theme.of(context).textTheme.bodyLarge!.copyWith(
-                    color: Colors.white,
-                  ),),
                   TextSpan(
                     text:
-                    "\n\n",
+                        'Tourguide helps you find your way around and learn about the places you visit.',
+                    style: Theme.of(context).textTheme.bodyLarge!.copyWith(
+                          color: Colors.white,
+                        ),
+                  ),
+                  TextSpan(
+                    text: "\n\n",
                     style: Theme.of(context).textTheme.bodySmall,
                   ),
-                  TextSpan(text: 'This app is still in development and may not work as expected. Please report any issues to the developers.', style: Theme.of(context).textTheme.bodyLarge!.copyWith(
-                    color: Colors.white,
-                  ),),
+                  TextSpan(
+                    text:
+                        'This app is still in development and may not work as expected. Please report any issues to the developers.',
+                    style: Theme.of(context).textTheme.bodyLarge!.copyWith(
+                          color: Colors.white,
+                        ),
+                  ),
                 ],
               ),
             ),
@@ -157,16 +165,14 @@ class _TourguideOnboardState extends State<TourguideOnboard> {
                         .copyWith(color: Colors.white),
                   ),
                   TextSpan(
-                    text:
-                    "\n\n",
+                    text: "\n\n",
                     style: Theme.of(context)
                         .textTheme
                         .bodySmall!
                         .copyWith(color: Colors.white),
                   ),
                   TextSpan(
-                    text:
-                        "Please take a moment to review our ",
+                    text: "Please take a moment to review our ",
                     style: Theme.of(context)
                         .textTheme
                         .bodyLarge!

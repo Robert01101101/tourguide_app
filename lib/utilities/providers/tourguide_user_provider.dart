@@ -1,4 +1,5 @@
 import 'package:firebase_analytics/firebase_analytics.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart' as auth;
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -78,8 +79,49 @@ class TourguideUserProvider with ChangeNotifier {
     }
   }
 
+  // Some sort of edge case state is creating duplicate docs, likely caused by inconsistent firebase auth id.
+  // Since google sign in is only auth method, and that id remains consistent, we can proof against it for now in here.
+  // This is a temporary fix, and should be removed once the root cause is found and fixed.
+  // Returns true if user creation should proceed.
+  Future<bool> _createUserDuplicatesFix() async {
+    logger.t("UserProvider._createUserDuplicatesFix()");
+    try {
+      //get doc that has the same googleSignInId
+      QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+          .collection('users')
+          .where('googleSignInId', isEqualTo: _authProvider!.googleSignInUser!.id)
+          .get();
+
+      if (querySnapshot.docs.isEmpty) return true;
+
+      //Edge case hit -> Firebase auth doesn't match, but there is a doc with the google sign in id
+
+      logger.w(
+          "UserProvider._createUserDuplicatesFix() - Found duplicate user doc, updating firebaseAuthId");
+      await querySnapshot.docs.first.reference
+          .update({'firebaseAuthId': _firebaseAuth.currentUser!.uid});
+
+      _loadUser();
+
+      //log to analytics: device type, time, auth anonymous, as much info as possible
+      await FirebaseAnalytics.instance
+          .logEvent(name: 'duplicate_user_fix', parameters: {
+        'googleSignInId': _authProvider!.googleSignInUser!.id,
+        'firebaseAuthId': _firebaseAuth.currentUser!.uid,
+        'deviceType': kIsWeb ? 'web' : 'mobile',
+        'authAnonymous': _authProvider!.isAnonymous,
+      });
+
+      return false;
+    } catch (e) {
+      logger.e('Error in UserProvider._createUserDuplicatesFix(): $e');
+      return true;
+    }
+  }
+
   Future<void> _createUser() async {
     logger.i("UserProvider._createUser()");
+    if (!(await _createUserDuplicatesFix())) return;
     final auth.User? firebaseUser = _firebaseAuth.currentUser;
     _user = TourguideUser(
       firebaseAuthId: firebaseUser!.uid,
@@ -91,6 +133,8 @@ class TourguideUserProvider with ChangeNotifier {
       savedTourIds: [],
       reports: [],
       useUsername: false,
+      createdDateTime: DateTime.now(),
+      lastSignInDateTime: DateTime.now(),
     );
     notifyListeners();
     await FirebaseFirestore.instance
@@ -140,12 +184,16 @@ class TourguideUserProvider with ChangeNotifier {
             data['emailSubscriptionsDisabled'] == null ||
             data['reports'] == null ||
             data['savedTourIds'] == null ||
-            data['useUsername'] == null) {
+            data['useUsername'] == null ||
+            data['createdDateTime'] == null ||
+            data['lastSignInDateTime'] == null) {
           logger.w(
               "UserProvider.loadUser() - User data is incomplete, patching user");
           _user = await _patchUser(data);
         } else {
-          _user = TourguideUser.fromMap(doc.data() as Map<String, dynamic>);
+          data['lastSignInDateTime'] = DateTime.now();
+          _user = TourguideUser.fromMap(data);
+          _patchUser(data);
         }
         notifyListeners();
       }
@@ -179,6 +227,8 @@ class TourguideUserProvider with ChangeNotifier {
       savedTourIds: List<String>.from(data['savedTourIds'] ?? []),
       reports: List<TourguideReport>.from(data['reports'] ?? []),
       useUsername: data['useUsername'] ?? false,
+      createdDateTime: data['createdDateTime'] ?? DateTime.now(),
+      lastSignInDateTime: data['lastSignInDateTime'] ?? DateTime.now(),
     );
     //update in Firestore
     await FirebaseFirestore.instance

@@ -135,6 +135,10 @@ class _FullscreenTourPageState extends State<FullscreenTourPage> {
 
     bool isOfflineCreatedTour = (widget.tour.isOfflineCreatedTour ?? false);
 
+    double imageHeight = MediaQuery.of(context).size.height < 750
+        ? MediaQuery.of(context).size.height / 2.5
+        : 300;
+
     return TourMapFullscreen(
       tour: widget.tour,
       tourMapController: _tourMapController,
@@ -153,7 +157,7 @@ class _FullscreenTourPageState extends State<FullscreenTourPage> {
                 child: Stack(
                   children: [
                     Container(
-                      height: kIsWeb ? 300 : 200,
+                      height: kIsWeb ? imageHeight : 200,
                       child: ClipRRect(
                         child: kIsWeb
                             ? isOfflineCreatedTour &&
@@ -161,11 +165,11 @@ class _FullscreenTourPageState extends State<FullscreenTourPage> {
                                 ? Image.network(
                                     widget.tour.imageFileToUploadWeb!.path,
                                     width: MediaQuery.of(context).size.width,
-                                    height: 300.0,
+                                    height: imageHeight,
                                     fit: BoxFit.cover)
                                 : Image.network(widget.tour.imageUrl!,
                                     width: MediaQuery.of(context).size.width,
-                                    height: 300.0,
+                                    height: imageHeight,
                                     fit: BoxFit.cover)
                             : widget.tour.imageFile != null
                                 ? Image.file(widget.tour.imageFile!,

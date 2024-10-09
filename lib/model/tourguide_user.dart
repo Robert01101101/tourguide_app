@@ -10,6 +10,8 @@ class TourguideUser {
   List<String> savedTourIds;
   List<TourguideReport> reports;
   bool useUsername;
+  DateTime createdDateTime;
+  DateTime lastSignInDateTime;
 
   TourguideUser({
     required this.firebaseAuthId,
@@ -21,6 +23,8 @@ class TourguideUser {
     required this.savedTourIds,
     required this.reports,
     required this.useUsername,
+    required this.createdDateTime,
+    required this.lastSignInDateTime,
   });
 
   // Convert a User object to a map for Firestore
@@ -35,6 +39,8 @@ class TourguideUser {
       'savedTourIds': savedTourIds ?? [],
       'reports': reports.map((report) => report.toMap()).toList() ?? [],
       'useUsername': useUsername,
+      'createdDateTime': createdDateTime,
+      'lastSignInDateTime': lastSignInDateTime,
     };
   }
 
@@ -60,6 +66,8 @@ class TourguideUser {
       savedTourIds: List<String>.from(map['savedTourIds']),
       reports: reports,
       useUsername: map['useUsername'],
+      createdDateTime: map['createdDateTime'],
+      lastSignInDateTime: map['lastSignInDateTime'],
     );
   }
 
@@ -73,6 +81,8 @@ class TourguideUser {
     List<String>? savedTourIds,
     List<TourguideReport>? reports,
     bool? useUsername,
+    DateTime? createdDateTime,
+    DateTime? lastSignInDateTime,
   }) {
     return TourguideUser(
       firebaseAuthId: firebaseAuthId ?? this.firebaseAuthId,
@@ -85,6 +95,8 @@ class TourguideUser {
       savedTourIds: savedTourIds ?? this.savedTourIds,
       reports: reports ?? this.reports,
       useUsername: useUsername ?? this.useUsername,
+      createdDateTime: createdDateTime ?? this.createdDateTime,
+      lastSignInDateTime: lastSignInDateTime ?? this.lastSignInDateTime,
     );
   }
 
@@ -100,6 +112,6 @@ class TourguideUser {
 
   @override
   String toString() {
-    return 'TourguideUser{firebaseAuthId: $firebaseAuthId, googleSignInId: $googleSignInId, username: $username, displayName: $displayName, email: $email, emailSubscriptionsDisabled: $emailSubscriptionsDisabled, savedTourIds: $savedTourIds, reports: $reports, useUsername: $useUsername}';
+    return 'TourguideUser{firebaseAuthId: $firebaseAuthId, googleSignInId: $googleSignInId, username: $username, displayName: $displayName, email: $email, emailSubscriptionsDisabled: $emailSubscriptionsDisabled, savedTourIds: $savedTourIds, reports: $reports, useUsername: $useUsername, createdDateTime: $createdDateTime, lastSignInDateTime: $lastSignInDateTime}';
   }
 }

@@ -207,8 +207,7 @@ class _SignInState extends State<SignIn> {
             const SizedBox(height: 0),
             const SizedBox(
                 width: 240,
-                child: Text(
-                    'Sign into Tourguide with your Google account.',
+                child: Text('Sign into Tourguide with your Google account.',
                     textAlign: TextAlign.center)),
             ElevatedButton(
               onPressed: () => authProvider
