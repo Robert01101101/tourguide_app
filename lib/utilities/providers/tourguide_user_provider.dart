@@ -79,49 +79,9 @@ class TourguideUserProvider with ChangeNotifier {
     }
   }
 
-  // Some sort of edge case state is creating duplicate docs, likely caused by inconsistent firebase auth id.
-  // Since google sign in is only auth method, and that id remains consistent, we can proof against it for now in here.
-  // This is a temporary fix, and should be removed once the root cause is found and fixed.
-  // Returns true if user creation should proceed.
-  Future<bool> _createUserDuplicatesFix() async {
-    logger.t("UserProvider._createUserDuplicatesFix()");
-    try {
-      //get doc that has the same googleSignInId
-      QuerySnapshot querySnapshot = await FirebaseFirestore.instance
-          .collection('users')
-          .where('googleSignInId', isEqualTo: _authProvider!.googleSignInUser!.id)
-          .get();
-
-      if (querySnapshot.docs.isEmpty) return true;
-
-      //Edge case hit -> Firebase auth doesn't match, but there is a doc with the google sign in id
-
-      logger.w(
-          "UserProvider._createUserDuplicatesFix() - Found duplicate user doc, updating firebaseAuthId");
-      await querySnapshot.docs.first.reference
-          .update({'firebaseAuthId': _firebaseAuth.currentUser!.uid});
-
-      _loadUser();
-
-      //log to analytics: device type, time, auth anonymous, as much info as possible
-      await FirebaseAnalytics.instance
-          .logEvent(name: 'duplicate_user_fix', parameters: {
-        'googleSignInId': _authProvider!.googleSignInUser!.id,
-        'firebaseAuthId': _firebaseAuth.currentUser!.uid,
-        'deviceType': kIsWeb ? 'web' : 'mobile',
-        'authAnonymous': _authProvider!.isAnonymous,
-      });
-
-      return false;
-    } catch (e) {
-      logger.e('Error in UserProvider._createUserDuplicatesFix(): $e');
-      return true;
-    }
-  }
 
   Future<void> _createUser() async {
     logger.i("UserProvider._createUser()");
-    if (!(await _createUserDuplicatesFix())) return;
     final auth.User? firebaseUser = _firebaseAuth.currentUser;
     _user = TourguideUser(
       firebaseAuthId: firebaseUser!.uid,
@@ -214,6 +174,26 @@ class TourguideUserProvider with ChangeNotifier {
   Future<TourguideUser> _patchUser(Map<String, dynamic> data) async {
     logger.t("UserProvider._patchUser()");
     final auth.User? firebaseUser = auth.FirebaseAuth.instance.currentUser;
+    DateTime? createdDateTime;
+    if (data['createdDateTime'] != null) {
+      if (data['createdDateTime'] is Timestamp) {
+        createdDateTime = (data['createdDateTime'] as Timestamp).toDate();
+      } else if (data['createdDateTime'] is DateTime) {
+        createdDateTime = data['createdDateTime'] as DateTime;
+      }
+    } else {
+      createdDateTime = null;
+    }
+    DateTime? lastSignInDateTime;
+    if (data['lastSignInDateTime'] != null) {
+      if (data['lastSignInDateTime'] is Timestamp) {
+        lastSignInDateTime = (data['lastSignInDateTime'] as Timestamp).toDate();
+      } else if (data['lastSignInDateTime'] is DateTime) {
+        lastSignInDateTime = data['lastSignInDateTime'] as DateTime;
+      }
+    } else {
+      lastSignInDateTime = null;
+    }
     TourguideUser patchedUser = TourguideUser(
       firebaseAuthId: firebaseUser!.uid,
       googleSignInId:
@@ -227,8 +207,8 @@ class TourguideUserProvider with ChangeNotifier {
       savedTourIds: List<String>.from(data['savedTourIds'] ?? []),
       reports: List<TourguideReport>.from(data['reports'] ?? []),
       useUsername: data['useUsername'] ?? false,
-      createdDateTime: data['createdDateTime'] ?? DateTime.now(),
-      lastSignInDateTime: data['lastSignInDateTime'] ?? DateTime.now(),
+      createdDateTime: createdDateTime ?? DateTime.now(),
+      lastSignInDateTime: lastSignInDateTime ?? DateTime.now(),
     );
     //update in Firestore
     await FirebaseFirestore.instance

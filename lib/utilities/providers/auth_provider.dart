@@ -85,7 +85,7 @@ class AuthProvider with ChangeNotifier {
         logger.i('User is currently signed out!');
       } else {
         logger.i('User is signed in!');
-        if (kIsWeb && _googleSignInUser == null) {
+        if (kIsWeb && _googleSignInUser == null && !isAnonymous && !_isLoggingInAnonymously) {
           _user = user;
           logger.t('AuthProvider._init() - _googleSignIn.signInSilently()');
           _googleSignIn.signInSilently().then((GoogleSignInAccount? account) {
@@ -147,25 +147,6 @@ class AuthProvider with ChangeNotifier {
   }
   // #enddocregion SignIn
 
-  // Prompts the user to authorize `scopes`.
-  //
-  // This action is **required** in platforms that don't perform Authentication
-  // and Authorization at the same time (like the web). However, I don't think I need it because I don't need authorization of scopes, and basic ID is enough.
-  //
-  // On the web, this must be called from an user interaction (button click).
-  // #docregion RequestScopes
-  Future<void> handleAuthorizeScopes() async {
-    logger.t('AuthProvider.handleAuthorizeScopes()');
-    final bool isAuthorized = await _googleSignIn.requestScopes(scopes);
-    // #enddocregion RequestScopes
-    _isAuthorized = isAuthorized;
-    logger
-        .t('AuthProvider.handleAuthorizeScopes() - isAuthorized=$isAuthorized');
-    notifyListeners();
-    //if (isAuthorized) {
-    //  await signInWithFirebase(_googleSignInUser!); //doing this causes pop up to be blocked, instead, we wait for the user to click the button
-    //}
-  }
 
   // Called when the current auth user changes (google sign in), so we automatically log into Firebase as well.
   // This is seperate form the google sign in / authorization worfklow and just for access to firebase.
@@ -173,11 +154,19 @@ class AuthProvider with ChangeNotifier {
     logger.t('AuthProvider.signInWithFirebase()');
     try {
       GoogleSignInAuthentication googleAuth = await account.authentication;
+      GoogleAuthProvider googleProvider = GoogleAuthProvider();
       AuthCredential credential = GoogleAuthProvider.credential(
         accessToken: googleAuth.accessToken,
         idToken: googleAuth.idToken,
       );
-      GoogleAuthProvider googleProvider = GoogleAuthProvider();
+
+      if (_auth.currentUser != null){
+        //this should fix issues with duplicate account creation
+        //I think this case hits when anonymous (guest) sign ins switch to google sign in
+        logger.w('AuthProvider.signInWithFirebase() - Linking with credential');
+        //await _auth.currentUser!.linkWithCredential(credential);
+      }
+
       UserCredential authResult = kIsWeb
           ? await _auth.signInWithPopup(googleProvider)
           : await _auth.signInWithCredential(credential);

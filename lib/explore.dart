@@ -50,8 +50,6 @@ class ExploreState extends State<Explore> {
       super.initState();
       return;
     } else {
-      _checkIfFirstTimeUserAfterAccountDeletion();
-
       //Firebase auth
       FirebaseAuth.instance.userChanges().listen((User? user) {
         if (!mounted) return;
@@ -83,16 +81,6 @@ class ExploreState extends State<Explore> {
   void dispose() {
     _scrollController.dispose();
     super.dispose();
-  }
-
-  void _checkIfFirstTimeUserAfterAccountDeletion() async {
-    var prefs = await SharedPreferences.getInstance();
-    if (prefs.getBool('firstTimeUser') == null) {
-      logger.i('_checkIfFirstTimeUserAfterAccountDeletion -> true');
-      TourguideNavigation.router.go(
-        TourguideNavigation.onboardingPath,
-      );
-    }
   }
 
   Future<void> _downloadTours() async {

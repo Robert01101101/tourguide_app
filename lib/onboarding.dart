@@ -34,6 +34,8 @@ class _TourguideOnboardState extends State<TourguideOnboard> {
     FlutterNativeSplash.remove();
     super.initState();
 
+    logger.t("onboarding.initState()");
+
     MyGlobals.initProviders(context);
     my_auth.AuthProvider authProvider =
         Provider.of<my_auth.AuthProvider>(context, listen: false);
@@ -42,8 +44,8 @@ class _TourguideOnboardState extends State<TourguideOnboard> {
       authProvider.addListener(() {
         _refreshRedirectPath(authProvider);
       });
+      _refreshRedirectPath(authProvider);
     });
-    _refreshRedirectPath(authProvider);
     FirebaseAnalytics.instance.logTutorialBegin(
       parameters: {
         'tutorialName': 'onboarding',
@@ -52,9 +54,9 @@ class _TourguideOnboardState extends State<TourguideOnboard> {
   }
 
   void _refreshRedirectPath(my_auth.AuthProvider authProvider) {
-    if (authProvider.user != null && authProvider.isAuthorized) {
+    if (authProvider.user != null) {
       logger.t(
-          "signIn.initState().authProviderListener -> user is no longer null, will skip signIn page");
+          "onboarding.initState().authProviderListener -> user is no longer null, will skip signIn page");
       pathToGoToNext = TourguideNavigation.explorePath;
     }
   }

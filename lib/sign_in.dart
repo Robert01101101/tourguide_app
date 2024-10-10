@@ -15,6 +15,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tourguide_app/ui/my_layouts.dart';
 import 'package:tourguide_app/utilities/providers/location_provider.dart';
 import 'package:tourguide_app/utilities/providers/tour_provider.dart';
@@ -64,17 +65,7 @@ class _SignInState extends State<SignIn> {
             (authProvider.googleSignInUser != null ||
                 authProvider.isAnonymous) &&
             !navigatedAwayFromSignIn) {
-          logger.t(
-              "signIn.initState().authProviderListener -> user is no longer null");
-          navigatedAwayFromSignIn = true;
-          MyGlobals.userSignedIn = true; //for web
-          // Navigate to the new screen once login is complete
-          TourguideNavigation.router.go(
-            MyGlobals.signInReroutePath ?? TourguideNavigation.explorePath,
-          );
-          //anonymous login is handled in _signInGuest()
-          if (!authProvider.isAnonymous)
-            FirebaseAnalytics.instance.logLogin(loginMethod: 'google');
+          _redirect();
         } else if (authProvider.googleSignInUser == null ||
             authProvider.silentSignInFailed) {
           logger.t(
@@ -89,6 +80,34 @@ class _SignInState extends State<SignIn> {
       }
       //authProvider.signInSilently();
     });
+  }
+
+  Future<void> _redirect() async{
+    my_auth.AuthProvider authProvider = Provider.of(context, listen: false);
+    logger.t(
+        "signIn.initState().authProviderListener -> user is no longer null -> _redirect()");
+    navigatedAwayFromSignIn = true;
+    MyGlobals.userSignedIn = true; //for web
+    // Navigate to the new screen once login is complete
+    if (await _checkIfFirstTimeUserAfterAccountDeletion()) return;
+    TourguideNavigation.router.go(
+      MyGlobals.signInReroutePath ?? TourguideNavigation.explorePath,
+    );
+    //anonymous login is handled in _signInGuest()
+    if (!authProvider.isAnonymous)
+      FirebaseAnalytics.instance.logLogin(loginMethod: 'google');
+  }
+
+  Future<bool> _checkIfFirstTimeUserAfterAccountDeletion() async {
+    var prefs = await SharedPreferences.getInstance();
+    if (prefs.getBool('firstTimeUser') == null) {
+      logger.i('_checkIfFirstTimeUserAfterAccountDeletion -> true');
+      TourguideNavigation.router.go(
+        TourguideNavigation.onboardingPath,
+      );
+      return true;
+    }
+    return false;
   }
 
   Future<void> _signInGuest() async {
@@ -396,9 +415,8 @@ class _SignInState extends State<SignIn> {
                   ConstrainedBox(
                     constraints: BoxConstraints(
                       //set minHeight to
-                      minHeight: 100,
-                      maxHeight: min(constraints.maxHeight * 0.7,
-                          500), // Optional: Limit the maximum height to the screen height
+                      minHeight: 150,
+                      maxHeight: constraints.maxHeight * 0.7, // Optional: Limit the maximum height to the screen height
                     ),
                     child: ((authProvider.googleSignInUser != null &&
                                 authProvider.isAuthorized &&

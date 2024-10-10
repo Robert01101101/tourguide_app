@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:tourguide_app/model/tourguide_report.dart';
 
 class TourguideUser {
@@ -53,6 +54,26 @@ class TourguideUser {
         return TourguideReport.fromMap(reportData as Map<String, dynamic>);
       }).toList();
     }
+    DateTime? createdDateTime;
+    if (map['createdDateTime'] != null) {
+      if (map['createdDateTime'] is Timestamp) {
+        createdDateTime = (map['createdDateTime'] as Timestamp).toDate();
+      } else if (map['createdDateTime'] is DateTime) {
+        createdDateTime = map['createdDateTime'] as DateTime;
+      }
+    } else {
+      createdDateTime = null;
+    }
+    DateTime? lastSignInDateTime;
+    if (map['lastSignInDateTime'] != null) {
+      if (map['lastSignInDateTime'] is Timestamp) {
+        lastSignInDateTime = (map['lastSignInDateTime'] as Timestamp).toDate();
+      } else if (map['lastSignInDateTime'] is DateTime) {
+        lastSignInDateTime = map['lastSignInDateTime'] as DateTime;
+      }
+    } else {
+      lastSignInDateTime = null;
+    }
 
     return TourguideUser(
       firebaseAuthId: map['firebaseAuthId'],
@@ -66,8 +87,8 @@ class TourguideUser {
       savedTourIds: List<String>.from(map['savedTourIds']),
       reports: reports,
       useUsername: map['useUsername'],
-      createdDateTime: map['createdDateTime'],
-      lastSignInDateTime: map['lastSignInDateTime'],
+      createdDateTime: createdDateTime ?? DateTime.now(),
+      lastSignInDateTime: lastSignInDateTime ?? DateTime.now(),
     );
   }
 
