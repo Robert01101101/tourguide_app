@@ -60,9 +60,10 @@ class _SignInState extends State<SignIn> {
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
       authProvider.addListener(() {
         logger.t(
-            "signIn.initState().authProviderListener -> user=${authProvider.user != null}, googleSignInUser=${authProvider.googleSignInUser != null}, isAuthorized=${authProvider.isAuthorized}, silentSignInFailed=${authProvider.silentSignInFailed}, isAnonymous=${authProvider.isAnonymous}");
+            "signIn.initState().authProviderListener -> user=${authProvider.user != null}, googleSignInUser=${authProvider.googleSignInUser != null}, authProvider.isSilentWebSignInProcessing=${authProvider.isSilentWebSignInProcessing}, isAuthorized=${authProvider.isAuthorized}, silentSignInFailed=${authProvider.silentSignInFailed}, isAnonymous=${authProvider.isAnonymous}, navigatedAwayFromSignIn=${navigatedAwayFromSignIn}");
         if (authProvider.user != null &&
-            (authProvider.googleSignInUser != null ||
+            (authProvider.googleSignInUser != null &&
+                    !authProvider.isSilentWebSignInProcessing ||
                 authProvider.isAnonymous) &&
             !navigatedAwayFromSignIn) {
           _redirect();
@@ -82,7 +83,7 @@ class _SignInState extends State<SignIn> {
     });
   }
 
-  Future<void> _redirect() async{
+  Future<void> _redirect() async {
     my_auth.AuthProvider authProvider = Provider.of(context, listen: false);
     logger.t(
         "signIn.initState().authProviderListener -> user is no longer null -> _redirect()");
@@ -416,7 +417,8 @@ class _SignInState extends State<SignIn> {
                     constraints: BoxConstraints(
                       //set minHeight to
                       minHeight: 150,
-                      maxHeight: constraints.maxHeight * 0.7, // Optional: Limit the maximum height to the screen height
+                      maxHeight: constraints.maxHeight *
+                          0.7, // Optional: Limit the maximum height to the screen height
                     ),
                     child: ((authProvider.googleSignInUser != null &&
                                 authProvider.isAuthorized &&

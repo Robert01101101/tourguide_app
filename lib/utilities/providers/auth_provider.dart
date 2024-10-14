@@ -33,6 +33,7 @@ class AuthProvider with ChangeNotifier {
   bool _isLoggingIntoFirebaseMobile = false;
   bool _isAnonymous = false;
   bool _isLoggingInAnonymously = false;
+  bool _isSilentWebSignInProcessing = false;
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
   // PUBLIC //
@@ -47,6 +48,7 @@ class AuthProvider with ChangeNotifier {
   bool get isAnonymous => _isAnonymous;
   bool get isLoggingIntoFirebaseMobile => _isLoggingIntoFirebaseMobile;
   bool get isLoggingInAnonymously => _isLoggingInAnonymously;
+  bool get isSilentWebSignInProcessing => _isSilentWebSignInProcessing;
 
   AuthProvider() {
     _init();
@@ -84,16 +86,16 @@ class AuthProvider with ChangeNotifier {
       if (user == null) {
         logger.i('User is currently signed out!');
       } else {
-        logger.i('User is signed in!');
-        if (kIsWeb && _googleSignInUser == null && !isAnonymous && !_isLoggingInAnonymously) {
+        logger.i('User is signed in! userId=${user.uid}');
+        if (kIsWeb &&
+            _googleSignInUser == null &&
+            !isAnonymous &&
+            !_isLoggingInAnonymously) {
           _user = user;
+          _isSilentWebSignInProcessing = true;
           logger.t('AuthProvider._init() - _googleSignIn.signInSilently()');
           _googleSignIn.signInSilently().then((GoogleSignInAccount? account) {
-            _googleSignInUser = account;
-            _isAuthorized = account != null;
-            logger.t(
-                'AuthProvider._init() - _googleSignIn.signInSilently() -> account is null=${account == null}, isAuthorized=$_isAuthorized');
-            notifyListeners();
+            _handleSilentGoogleSignInWeb(account);
           });
         }
       }
@@ -108,6 +110,63 @@ class AuthProvider with ChangeNotifier {
     // TODO - check for fixes to the google_sign_in package. This code is an example taken from the example application linked there.
     // TODO - however, it does not work as intended. The signInSilently() method triggers an error with FedCM / GIS on web.
     // TODO - it seems like it's no longer best practice to use this method on web.
+  }
+
+  /// Specifically for the case where we had duplicate accounts created on the web
+  /// https://trello.com/c/iQPPJtW2/92-duplicate-user-accounts
+  Future<void> _handleSilentGoogleSignInWeb(
+      GoogleSignInAccount? account) async {
+    _googleSignInUser = account;
+    _isAuthorized = account != null;
+
+    logger.t('_handleSilentGoogleSignInWeb() - _googleSignInUser=$account, _isAuthorized=$_isAuthorized');
+
+    if (_isAuthorized) {
+      logger.i('Trying to link with credential');
+      GoogleSignInAuthentication googleAuth = await account!.authentication;
+      AuthCredential credential = GoogleAuthProvider.credential(
+        accessToken: googleAuth.accessToken,
+        idToken: googleAuth.idToken,
+      );
+      try {
+        logger.i(
+            'before credential linking _auth.currentUser?.uid=${_auth.currentUser?.uid}, '
+            '_auth.currentUser?.isAnonymous=${_auth.currentUser?.isAnonymous}'
+            'GoogleSignInAccount param account.id=${account.id}');
+        final userCredential = await FirebaseAuth.instance.currentUser
+            ?.linkWithCredential(credential);
+        logger.i(
+            'after credential linking userId=${userCredential?.user?.uid}, firebaseAuthId=${_auth.currentUser?.uid}');
+        _isSilentWebSignInProcessing = false;
+      } on FirebaseAuthException catch (e) {
+        switch (e.code) {
+          case "provider-already-linked":
+            logger.e("The provider has already been linked to the user.");
+            break;
+          case "invalid-credential":
+            logger.e("The provider's credential is not valid.");
+            break;
+          case "credential-already-in-use":
+            logger.e(
+                "The account corresponding to the credential already exists, "
+                "or is already linked to a Firebase User.");
+            await _auth.signInWithCredential(credential);
+            logger.i(
+                'after _auth.signInWithCredential: _auth.currentUser?.uid=${_auth.currentUser?.uid}, '
+                '_auth.currentUser?.isAnonymous=${_auth.currentUser?.isAnonymous}'
+                'GoogleSignInAccount param account.id=${account.id}');
+            _isSilentWebSignInProcessing = false;
+            break;
+          // See the API reference for the full list of error codes.
+          default:
+            logger.e("Unknown error.");
+        }
+      }
+      logger.t('_handleSilentGoogleSignInWeb() - Done');
+    } else {
+      _isSilentWebSignInProcessing = false;
+    }
+    notifyListeners();
   }
 
   @override
@@ -147,7 +206,6 @@ class AuthProvider with ChangeNotifier {
   }
   // #enddocregion SignIn
 
-
   // Called when the current auth user changes (google sign in), so we automatically log into Firebase as well.
   // This is seperate form the google sign in / authorization worfklow and just for access to firebase.
   Future<void> signInWithFirebase(GoogleSignInAccount account) async {
@@ -160,7 +218,7 @@ class AuthProvider with ChangeNotifier {
         idToken: googleAuth.idToken,
       );
 
-      if (_auth.currentUser != null){
+      if (_auth.currentUser != null) {
         //this should fix issues with duplicate account creation
         //I think this case hits when anonymous (guest) sign ins switch to google sign in
         logger.w('AuthProvider.signInWithFirebase() - Linking with credential');
@@ -177,6 +235,7 @@ class AuthProvider with ChangeNotifier {
         _isAnonymous = false;
       }
       _isLoggingIntoFirebaseMobile = false;
+      _isSilentWebSignInProcessing = false;
       notifyListeners();
       logger.t(
           'AuthProvider.signInWithFirebase() - Firebase User Info: ${_user?.displayName}, ${_user?.email}');
@@ -199,6 +258,7 @@ class AuthProvider with ChangeNotifier {
       _user = authResult.user;
       _isAnonymous = true;
       _isLoggingInAnonymously = false;
+      _isSilentWebSignInProcessing = false;
       notifyListeners();
       logger.t(
           'AuthProvider.signInWithFirebase() - Firebase User Info: ${_user?.displayName}, ${_user?.email}');
@@ -226,6 +286,7 @@ class AuthProvider with ChangeNotifier {
       _isAuthorized = false;
       _silentSignInFailed = false;
       _isLoggingOut = false;
+      _isSilentWebSignInProcessing = false;
       notifyListeners();
       //SnackBarService.showSnackBar(content: 'You\'re signed out!');
       logger.t('AuthProvider.signOut() - User signed out.');
@@ -246,6 +307,7 @@ class AuthProvider with ChangeNotifier {
     _isLoggingIntoFirebaseMobile = false;
     _isAnonymous = false;
     _isLoggingInAnonymously = false;
+    _isSilentWebSignInProcessing = false;
     notifyListeners();
   }
 }
