@@ -137,7 +137,6 @@ class AuthProvider with ChangeNotifier {
             ?.linkWithCredential(credential);
         logger.i(
             'after credential linking userId=${userCredential?.user?.uid}, firebaseAuthId=${_auth.currentUser?.uid}');
-        _isSilentWebSignInProcessing = false;
       } on FirebaseAuthException catch (e) {
         switch (e.code) {
           case "provider-already-linked":
@@ -155,7 +154,6 @@ class AuthProvider with ChangeNotifier {
                 'after _auth.signInWithCredential: _auth.currentUser?.uid=${_auth.currentUser?.uid}, '
                 '_auth.currentUser?.isAnonymous=${_auth.currentUser?.isAnonymous}'
                 'GoogleSignInAccount param account.id=${account.id}');
-            _isSilentWebSignInProcessing = false;
             break;
           // See the API reference for the full list of error codes.
           default:
@@ -163,9 +161,8 @@ class AuthProvider with ChangeNotifier {
         }
       }
       logger.t('_handleSilentGoogleSignInWeb() - Done');
-    } else {
-      _isSilentWebSignInProcessing = false;
     }
+    _isSilentWebSignInProcessing = false;
     notifyListeners();
   }
 
