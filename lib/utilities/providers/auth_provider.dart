@@ -119,7 +119,8 @@ class AuthProvider with ChangeNotifier {
     _googleSignInUser = account;
     _isAuthorized = account != null;
 
-    logger.t('_handleSilentGoogleSignInWeb() - _googleSignInUser=$account, _isAuthorized=$_isAuthorized');
+    logger.t(
+        '_handleSilentGoogleSignInWeb() - _googleSignInUser=$account, _isAuthorized=$_isAuthorized');
 
     if (_isAuthorized) {
       logger.i('Trying to link with credential');

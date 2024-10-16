@@ -37,15 +37,7 @@ class TourguideUserProvider with ChangeNotifier {
     logger.t("UserProvider() - _onAuthStateChanged()");
     if (firebaseUser != null) {
       await _waitForRequiredData();
-
-      // Check if this is an anonymous user signing in with Google
-      if (_authProvider != null &&
-          _authProvider!.isAnonymous &&
-          _authProvider!.googleSignInUser != null) {
-        await _linkAnonymousAccountWithGoogle(firebaseUser);
-      } else {
-        await _loadUser();
-      }
+      await _loadUser();
 
       logger.t(
           "UserProvider() - _onAuthStateChanged() - User is loaded: ${_user.toString()}");
@@ -61,35 +53,6 @@ class TourguideUserProvider with ChangeNotifier {
       logger.t("UserProvider() - _onAuthStateChanged() - User is null");
       _user = null;
       notifyListeners();
-    }
-  }
-
-  Future<void> _linkAnonymousAccountWithGoogle(auth.User firebaseUser) async {
-    logger.t("UserProvider() - _linkAnonymousAccountWithGoogle()");
-    try {
-      // Get Google credentials
-      final googleAuth = await _authProvider!.googleSignInUser!.authentication;
-      final googleCredential = auth.GoogleAuthProvider.credential(
-        accessToken: googleAuth.accessToken,
-        idToken: googleAuth.idToken,
-      );
-
-      // Link the anonymous account with the Google credential
-      await firebaseUser.linkWithCredential(googleCredential);
-
-      // Update the user data in Firestore
-      await _loadUser();
-      if (_user != null) {
-        _user = _user!.copyWith(
-          googleSignInId: _authProvider!.googleSignInUser!.id,
-          email: _authProvider!.googleSignInUser!.email!,
-          displayName: _authProvider!.googleSignInUser!.displayName!,
-        );
-        await updateUser(_user!);
-      }
-    } catch (e) {
-      logger.e("Error linking anonymous account with Google: $e");
-      // Handle the error (e.g., show a message to the user)
     }
   }
 

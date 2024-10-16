@@ -521,9 +521,9 @@ class TourService {
     }
   }
 
-  static Future<Tour> updateTour(Tour tour) async {
+  static Future<Tour> updateTour(Tour tour, {bool enableImageUpdate = false}) async {
     try {
-      if (tour.imageFile != null) {
+      if (tour.imageFile != null && enableImageUpdate) {
         // Delete the old image
         DocumentReference tourRef =
             FirebaseFirestore.instance.collection('tours').doc(tour.id);

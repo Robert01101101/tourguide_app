@@ -266,8 +266,8 @@ class TourProvider with ChangeNotifier {
   }
 
   /// Updates the tour data in cache and firestore (for edits, reporting, etc)
-  Future<Tour> updateTour(Tour tour, {bool localUpdateOnly = false}) async {
-    if (!localUpdateOnly) tour = await TourService.updateTour(tour);
+  Future<Tour> updateTour(Tour tour, {bool localUpdateOnly = false, bool enableImageUpdate = false}) async {
+    if (!localUpdateOnly) tour = await TourService.updateTour(tour, enableImageUpdate: enableImageUpdate);
     _allCachedTours[tour.id] = tour;
     notifyListeners();
     return _allCachedTours[tour.id]!;

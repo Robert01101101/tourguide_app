@@ -153,7 +153,7 @@ class _CreateEditTourState extends State<CreateEditTour> {
       );
       // Validation passed, proceed with tour creation
       widget.isEditMode
-          ? await tourProvider.updateTour(_tour)
+          ? await tourProvider.updateTour(_tour, enableImageUpdate: true)
           : await tourProvider.uploadTour(_tour);
 
       if (mounted) {
