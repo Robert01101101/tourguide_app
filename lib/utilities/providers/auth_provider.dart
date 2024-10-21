@@ -216,13 +216,6 @@ class AuthProvider with ChangeNotifier {
         idToken: googleAuth.idToken,
       );
 
-      if (_auth.currentUser != null) {
-        //this should fix issues with duplicate account creation
-        //I think this case hits when anonymous (guest) sign ins switch to google sign in
-        logger.w('AuthProvider.signInWithFirebase() - Linking with credential');
-        //await _auth.currentUser!.linkWithCredential(credential);
-      }
-
       UserCredential authResult = kIsWeb
           ? await _auth.signInWithPopup(googleProvider)
           : await _auth.signInWithCredential(credential);
