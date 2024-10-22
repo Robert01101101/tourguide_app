@@ -210,7 +210,7 @@ class _ProfileSettingsState extends State<ProfileSettings> {
                           ),
                           RadioListTile<NameDisplaySetting>(
                             title: Text(
-                                'Username \n(${userProvider.user!.username})'),
+                                'Username \n(${userProvider.user!.username.isEmpty ? 'not set' : userProvider.user!.username})'),
                             value: NameDisplaySetting.username,
                             groupValue: _nameDisplaySetting,
                             onChanged: _onUseUsernameChanged,
@@ -230,7 +230,7 @@ class _ProfileSettingsState extends State<ProfileSettings> {
                           ),
                         ],
                       ),
-                      SizedBox(
+                      const SizedBox(
                         height: 32,
                       ),
                     ],
