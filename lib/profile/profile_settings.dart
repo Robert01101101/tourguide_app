@@ -73,12 +73,12 @@ class _ProfileSettingsState extends State<ProfileSettings> {
   // TODO: fix access to context -> don't do in async
   Future<void> _setUsername() async {
     logger.t('Setting username');
-    myAuth.AuthProvider authProvider = Provider.of(context);
     if (_updatingUsername) return;
     setState(() {
       _updatingUsername = true;
     });
     TourguideUserProvider userProvider = Provider.of(context, listen: false);
+    TourProvider tourProvider = Provider.of(context, listen: false);
     if (await userProvider.checkUsernameAvailability(_newUsername)) {
       setState(() {
         _isUsernameAvailable = true;
@@ -90,8 +90,14 @@ class _ProfileSettingsState extends State<ProfileSettings> {
       });
       return;
     }
+    logger.i('Updating username to $_newUsername');
     await userProvider.updateUser(userProvider.user!.copyWith(
         username: _newUsername, displayName: userProvider.user!.displayName!));
+    await tourProvider.updateAuthorNameForAllTheirTours(
+        userProvider.user!.firebaseAuthId,
+        userProvider.user!.useUsername
+            ? userProvider.user!.username
+            : userProvider.user!.displayName);
     if (mounted) {
       ScaffoldMessenger.of(context).hideCurrentSnackBar();
       ScaffoldMessenger.of(context).showSnackBar(
@@ -114,6 +120,8 @@ class _ProfileSettingsState extends State<ProfileSettings> {
     });
     TourguideUserProvider userProvider = Provider.of(context, listen: false);
     TourProvider tourProvider = Provider.of(context, listen: false);
+    logger.i(
+        'Updating useUsername to ${_nameDisplaySetting == NameDisplaySetting.username}');
     await userProvider.updateUser(userProvider.user!.copyWith(
         //TODO improve async safety
         useUsername: _nameDisplaySetting == NameDisplaySetting.username));

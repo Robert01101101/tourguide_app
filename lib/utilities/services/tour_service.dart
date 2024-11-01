@@ -521,7 +521,8 @@ class TourService {
     }
   }
 
-  static Future<Tour> updateTour(Tour tour, {bool enableImageUpdate = false}) async {
+  static Future<Tour> updateTour(Tour tour,
+      {bool enableImageUpdate = false}) async {
     try {
       if (tour.imageFile != null && enableImageUpdate) {
         // Delete the old image
@@ -617,6 +618,8 @@ class TourService {
 
   static Future<void> updateAuthorNameForAllTheirTours(
       String authorId, String authorNewName) async {
+    logger.i(
+        'Updating author name for all tours with authorId: $authorId to $authorNewName');
     try {
       // Step 1: Query Firestore for all tours with the given authorId
       QuerySnapshot querySnapshot = await FirebaseFirestore.instance

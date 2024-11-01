@@ -52,7 +52,8 @@ class _PlaceAutocompleteState extends State<PlaceAutocomplete> {
 
   @override
   void initState() {
-    //logger.i('PlaceAutocomplete.initState(), textEditingController.text=${widget.textEditingController.text}');
+    logger.i(
+        'PlaceAutocomplete.initState(), textEditingController.text=${widget.textEditingController.text}, _isValidSelection=${_isValidSelection}');
     super.initState();
     LocationProvider locationProvider =
         Provider.of<LocationProvider>(context, listen: false);

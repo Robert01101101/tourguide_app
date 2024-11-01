@@ -220,13 +220,16 @@ class ExploreState extends State<Explore> {
                       ],
                     ),
                     StandardLayout(children: [
+                      ////  Welcome Text  ////
                       SizedBox(
                         height: topBannerImageHeight - 10,
                         child: Padding(
                           padding: const EdgeInsets.symmetric(
                               vertical: 20, horizontal: 0),
                           child: Align(
-                            alignment: Alignment.bottomCenter,
+                            alignment: MediaQuery.of(context).size.width > 600
+                                ? Alignment.bottomCenter
+                                : Alignment.bottomLeft,
                             child: GradientText(
                               gradient: const LinearGradient(colors: [
                                 Color(0xeeF2F8F8),
