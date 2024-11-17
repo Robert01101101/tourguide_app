@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:tourguide_app/profile/app_settings.dart';
+import 'package:tourguide_app/profile/premium.dart';
 import 'package:tourguide_app/profile/profile_settings.dart';
 import 'package:tourguide_app/profile/to_tour_list.dart';
 import 'package:tourguide_app/ui/my_layouts.dart';
@@ -84,6 +85,21 @@ class _ProfileState extends State<Profile> {
               enableHorizontalPadding: false,
               enableVerticalPadding: false,
               children: [
+                ProfileListButton(
+                  label: 'Premium',
+                  leftIcon: Icons.workspace_premium_rounded,
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      SlideTransitionRoute(
+                        page: const Premium(),
+                        beginOffset:
+                            const Offset(1.0, 0.0), // Slide in from right
+                      ),
+                    );
+                  },
+                  disabled: authProvider.isAnonymous,
+                ),
                 ProfileListButton(
                   label: 'Saved Tours',
                   leftIcon: Icons.bookmark_outline_rounded,
@@ -190,6 +206,9 @@ class _ProfileState extends State<Profile> {
                   },
                   isLastItem: true,
                 ),
+                const SizedBox(
+                  height: 16,
+                )
               ],
             ),
           ],

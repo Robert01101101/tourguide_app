@@ -8,10 +8,9 @@ class MyBannerAdWidget extends StatefulWidget {
   final AdSize adSize;
 
   /// The AdMob ad unit to show.
-  ///
-  /// TODO: replace this test ad unit with your own ad unit
-  final String adUnitId =
-      'ca-app-pub-3940256099942544/9214589741'; //using test id atm. actual id: 'ca-app-pub-1613093835357473/1828126609';
+  final String adUnitId = 'ca-app-pub-1613093835357473/1828126609';
+  //actual id: 'ca-app-pub-1613093835357473/1828126609';
+  //test id: 'ca-app-pub-3940256099942544/9214589741';
 
   MyBannerAdWidget({
     super.key,
