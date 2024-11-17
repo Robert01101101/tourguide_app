@@ -89,7 +89,7 @@ Future<void> main() async {
   }
 
   //Admob
-  unawaited(MobileAds.instance.initialize());
+  if (!kIsWeb) unawaited(MobileAds.instance.initialize());
 
   //Splash
   FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);

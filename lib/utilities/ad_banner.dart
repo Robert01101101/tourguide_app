@@ -1,5 +1,6 @@
-import 'dart:io';
+import 'dart:io' show Platform;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 
@@ -27,13 +28,17 @@ class _MyBannerAdWidgetState extends State<MyBannerAdWidget> {
 
   @override
   Widget build(BuildContext context) {
+    if (kIsWeb) {
+      return const SizedBox();
+    }
+
     return SafeArea(
       child: SizedBox(
         width: widget.adSize.width.toDouble(),
         height: widget.adSize.height.toDouble(),
         child: _bannerAd == null
             // Nothing to render yet.
-            ? SizedBox()
+            ? const SizedBox()
             // The actual ad.
             : AdWidget(ad: _bannerAd!),
       ),
@@ -43,7 +48,9 @@ class _MyBannerAdWidgetState extends State<MyBannerAdWidget> {
   @override
   void initState() {
     super.initState();
-    _loadAd();
+    if (!kIsWeb) {
+      _loadAd();
+    }
   }
 
   @override
