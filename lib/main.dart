@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:core';
 import 'dart:ui';
 
@@ -26,6 +27,7 @@ import 'package:tourguide_app/utilities/providers/tourguide_user_provider.dart';
 import 'firebase_options.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:tourguide_app/utilities/providers/auth_provider.dart' as myAuth;
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 
 import 'model/tour.dart';
 import 'model/tourguide_place.dart';
@@ -85,6 +87,9 @@ Future<void> main() async {
       return true;
     };
   }
+
+  //Admob
+  unawaited(MobileAds.instance.initialize());
 
   //Splash
   FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);

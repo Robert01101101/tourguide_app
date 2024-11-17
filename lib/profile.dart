@@ -11,6 +11,7 @@ import 'package:tourguide_app/utilities/providers/auth_provider.dart' as myAuth;
 import 'package:tourguide_app/utilities/providers/tour_provider.dart';
 import 'package:tourguide_app/utilities/providers/tourguide_user_provider.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:tourguide_app/utilities/ad_banner.dart';
 
 class Profile extends StatefulWidget {
   const Profile({super.key});
@@ -74,6 +75,10 @@ class _ProfileState extends State<Profile> {
                   height: 8,
                 ),
               ],
+            ),
+            MyBannerAdWidget(),
+            const SizedBox(
+              height: 32,
             ),
             StandardLayout(
               enableHorizontalPadding: false,
