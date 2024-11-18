@@ -846,12 +846,11 @@ packages:
   flutter_tts:
     dependency: "direct main"
     description:
-      path: "."
-      ref: web_progress_handler
-      resolved-ref: "7156e06ddbf9577ab22faf579788909f1d6baa48"
-      url: "https://github.com/Robert01101101/flutter_tts.git"
-    source: git
-    version: "4.0.2"
+      name: flutter_tts
+      sha256: cbec5f0447223e1b4c47f893c7f8ef663ac582120c147e4a1e2cade7f2e8b0c8
+      url: "https://pub.dev"
+    source: hosted
+    version: "4.2.0"
   flutter_web_plugins:
     dependency: transitive
     description: flutter

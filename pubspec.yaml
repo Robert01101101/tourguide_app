@@ -92,10 +92,7 @@ dependencies:
   package_info_plus: ^8.0.2
   android_intent_plus: ^5.1.0
   permission_handler: ^11.3.1
-  flutter_tts:
-    git:
-      url: https://github.com/Robert01101101/flutter_tts.git
-      ref: web_progress_handler
+  flutter_tts: ^4.2.0
   intl: ^0.19.0
   characters: ^1.3.0
   image_picker: ^1.1.2
