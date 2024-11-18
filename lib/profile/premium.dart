@@ -5,6 +5,7 @@ import 'package:tourguide_app/ui/my_layouts.dart';
 import 'package:tourguide_app/ui/shimmer_loading.dart';
 import 'package:tourguide_app/utilities/custom_import.dart';
 import 'package:tourguide_app/utilities/providers/tour_provider.dart';
+import 'package:purchases_flutter/purchases_flutter.dart';
 
 class Premium extends StatefulWidget {
   const Premium({super.key});
