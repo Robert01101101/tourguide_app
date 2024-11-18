@@ -3,9 +3,10 @@ import 'dart:io' show Platform;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
+import 'package:tourguide_app/main.dart';
 
 class MyBannerAdWidget extends StatefulWidget {
-  /// The requested size of the banner. Defaults to [AdSize.banner].
+  /// The requested size of the banner.
   final AdSize adSize;
 
   /// The AdMob ad unit to show.
@@ -15,7 +16,7 @@ class MyBannerAdWidget extends StatefulWidget {
 
   MyBannerAdWidget({
     super.key,
-    this.adSize = AdSize.banner,
+    this.adSize = AdSize.mediumRectangle,
   });
 
   @override
@@ -78,7 +79,7 @@ class _MyBannerAdWidgetState extends State<MyBannerAdWidget> {
         },
         // Called when an ad request failed.
         onAdFailedToLoad: (ad, error) {
-          debugPrint('BannerAd failed to load: $error');
+          logger.w('BannerAd failed to load: $error');
           ad.dispose();
         },
       ),

@@ -29,7 +29,7 @@ class _PremiumState extends State<Premium> {
             const SizedBox(height: 0),
             Text("Premium", style: Theme.of(context).textTheme.headlineSmall),
             Text(
-                "Purchase Premium to remove all ads. Premium mode is currently under development, and purchases should be available soon. Current users of Tourguide will automatically be given Premium access when it becomes available",
+                "Purchase Premium to remove all ads. \n\nPremium mode is currently under development, and purchases should be available soon. Current users of Tourguide will automatically be given Premium access when it becomes available.",
                 style: Theme.of(context).textTheme.bodyLarge),
           ],
         ),

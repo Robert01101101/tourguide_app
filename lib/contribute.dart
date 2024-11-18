@@ -6,6 +6,7 @@ import 'package:tourguide_app/tour/tour_creation.dart';
 import 'package:tourguide_app/ui/horizontal_scroller.dart';
 import 'package:tourguide_app/ui/my_layouts.dart';
 import 'package:tourguide_app/ui/shimmer_loading.dart';
+import 'package:tourguide_app/utilities/ad_banner.dart';
 import 'package:tourguide_app/utilities/custom_import.dart';
 import 'package:tourguide_app/utilities/providers/location_provider.dart';
 import 'package:tourguide_app/utilities/providers/tour_provider.dart';
@@ -98,6 +99,10 @@ class _ContributeState extends State<Contribute> {
                             tours: tourProvider
                                 .getToursByIds(tourProvider.userCreatedTours),
                             leftPadding: true),
+                      ),
+                      StandardLayoutChild(
+                        fullWidth: true,
+                        child: MyBannerAdWidget(),
                       ),
                       /*Text("Review unreviewed tours", style: Theme.of(context).textTheme.headlineSmall),
                 StandardLayoutChild(
