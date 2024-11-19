@@ -57,7 +57,7 @@ android {
         applicationId "com.robertmichelsdigitalmedia.tourguideapp"
         // You can update the following values to match your application needs.
         // For more information, see: https://docs.flutter.dev/deployment/android#reviewing-the-gradle-build-configuration.
-        minSdkVersion 23 //required for firebase, google maps
+        minSdkVersion 24 //23 required for firebase, google maps, 24 required for revenuecat
         targetSdkVersion flutter.targetSdkVersion
         versionCode flutterVersionCode.toInteger()
         versionName flutterVersionName

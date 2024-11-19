@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:core';
+import 'dart:io';
 import 'dart:ui';
 
 import 'package:firebase_analytics/firebase_analytics.dart';
@@ -28,6 +29,7 @@ import 'firebase_options.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:tourguide_app/utilities/providers/auth_provider.dart' as myAuth;
 import 'package:google_mobile_ads/google_mobile_ads.dart';
+import 'package:purchases_flutter/purchases_flutter.dart';
 
 import 'model/tour.dart';
 import 'model/tourguide_place.dart';
@@ -88,8 +90,13 @@ Future<void> main() async {
     };
   }
 
-  //Admob
-  if (!kIsWeb) unawaited(MobileAds.instance.initialize());
+  if (!kIsWeb) {
+    //Admob
+    unawaited(MobileAds.instance.initialize());
+
+    //IAP with RevenueCat
+    initPlatformState();
+  }
 
   //Splash
   FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
@@ -116,6 +123,17 @@ Future<void> fetchConfig() async {
 String getFormattedTime() {
   DateTime now = DateTime.now();
   return " - at ${DateFormat('HH:mm:ss.SSS').format(now)}";
+}
+
+/// IAP with RevenueCat
+Future<void> initPlatformState() async {
+  await Purchases.setLogLevel(LogLevel.verbose);
+
+  if (Platform.isAndroid) {
+    PurchasesConfiguration configuration;
+    configuration = PurchasesConfiguration('goog_TKPBdFYTixkXXKwHjcUhJzNBlNZ');
+    await Purchases.configure(configuration);
+  }
 }
 
 class MyApp extends StatefulWidget {
