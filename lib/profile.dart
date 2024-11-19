@@ -85,21 +85,22 @@ class _ProfileState extends State<Profile> {
               enableHorizontalPadding: false,
               enableVerticalPadding: false,
               children: [
-                ProfileListButton(
-                  label: 'Premium',
-                  leftIcon: Icons.workspace_premium_rounded,
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      SlideTransitionRoute(
-                        page: const Premium(),
-                        beginOffset:
-                            const Offset(1.0, 0.0), // Slide in from right
-                      ),
-                    );
-                  },
-                  disabled: authProvider.isAnonymous,
-                ),
+                if (!kIsWeb)
+                  ProfileListButton(
+                    label: 'Premium',
+                    leftIcon: Icons.workspace_premium_rounded,
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        SlideTransitionRoute(
+                          page: const Premium(),
+                          beginOffset:
+                              const Offset(1.0, 0.0), // Slide in from right
+                        ),
+                      );
+                    },
+                    disabled: authProvider.isAnonymous,
+                  ),
                 ProfileListButton(
                   label: 'Saved Tours',
                   leftIcon: Icons.bookmark_outline_rounded,
