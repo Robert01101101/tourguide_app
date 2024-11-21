@@ -16,6 +16,7 @@ import 'package:tourguide_app/utilities/ad_interstitial.dart';
 import 'package:tourguide_app/utilities/map_utils.dart';
 import 'package:tourguide_app/tour/tour_map.dart';
 import 'package:tourguide_app/utilities/providers/tour_provider.dart';
+import 'package:tourguide_app/utilities/providers/tourguide_user_provider.dart';
 import 'package:visibility_detector/visibility_detector.dart';
 import '../utilities/custom_import.dart';
 import '../utilities/services/tts_service.dart';
@@ -50,6 +51,8 @@ class _TourRunningState extends State<TourRunning> {
   @override
   void initState() {
     super.initState();
+    TourguideUserProvider userProvider =
+        Provider.of<TourguideUserProvider>(context, listen: false);
     TourProvider tourProvider =
         Provider.of<TourProvider>(context, listen: false);
     _tour = tourProvider.selectedTour!;
@@ -91,7 +94,7 @@ class _TourRunningState extends State<TourRunning> {
         });
       }
     });
-    if (!kIsWeb) {
+    if (!kIsWeb && userProvider.user!.premium == false) {
       _interstitialAdWidget.loadInterstitialAd();
     }
   }
@@ -279,12 +282,14 @@ class _TourRunningState extends State<TourRunning> {
   @override
   Widget build(BuildContext context) {
     bool isOfflineCreatedTour = (_tour.isOfflineCreatedTour ?? false);
+    TourguideUserProvider userProvider =
+        Provider.of<TourguideUserProvider>(context);
 
     //logger.t('TourRunning.build()');
 
     return PopScope(
       onPopInvoked: (didPop) {
-        if (didPop && !kIsWeb) {
+        if (didPop && !kIsWeb && userProvider.user!.premium == false) {
           _interstitialAdWidget.showInterstitialAd(context);
         }
       },

@@ -6,6 +6,7 @@ import 'package:tourguide_app/ui/shimmer_loading.dart';
 import 'package:tourguide_app/utilities/custom_import.dart';
 import 'package:tourguide_app/utilities/providers/tour_provider.dart';
 import 'package:purchases_ui_flutter/purchases_ui_flutter.dart';
+import 'package:tourguide_app/utilities/providers/tourguide_user_provider.dart';
 
 class Premium extends StatefulWidget {
   const Premium({super.key});
@@ -22,7 +23,8 @@ class _PremiumState extends State<Premium> {
 
   @override
   Widget build(BuildContext context) {
-    TourProvider tourProvider = Provider.of<TourProvider>(context);
+    TourguideUserProvider userProvider =
+        Provider.of<TourguideUserProvider>(context);
 
     return Scaffold(
       appBar: AppBar(
@@ -34,12 +36,25 @@ class _PremiumState extends State<Premium> {
           children: [
             const SizedBox(height: 0),
             Text("Premium", style: Theme.of(context).textTheme.headlineSmall),
-            Text(
-                "Purchase Premium to remove all ads. \n\nPremium mode is currently under development, and purchases should be available soon. Current users of Tourguide will automatically be given Premium access when it becomes available.",
-                style: Theme.of(context).textTheme.bodyLarge),
-            ElevatedButton(
-                onPressed: presentPaywall,
-                child: const Text("Purchase Premium")),
+            Visibility(
+              visible: userProvider.user!.premium == false,
+              child: Column(
+                children: [
+                  Text(
+                      "Purchase Premium to remove all ads. \n\nPremium mode is currently under development, and purchases should be available soon. Current users of Tourguide will automatically be given Premium access when it becomes available.",
+                      style: Theme.of(context).textTheme.bodyLarge),
+                  ElevatedButton(
+                      onPressed: presentPaywall,
+                      child: const Text("Purchase Premium")),
+                ],
+              ),
+            ),
+            Visibility(
+              visible: userProvider.user!.premium == true,
+              child: Text(
+                  "You are a premium user. Contact support if you are still seeing ads, or have questions or requests related to your purchase.",
+                  style: Theme.of(context).textTheme.bodyLarge),
+            ),
           ],
         ),
       ),

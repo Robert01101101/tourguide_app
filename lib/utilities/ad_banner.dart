@@ -3,7 +3,9 @@ import 'dart:io' show Platform;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
+import 'package:provider/provider.dart';
 import 'package:tourguide_app/main.dart';
+import 'package:tourguide_app/utilities/providers/tourguide_user_provider.dart';
 
 class MyBannerAdWidget extends StatefulWidget {
   /// The requested size of the banner.
@@ -14,7 +16,7 @@ class MyBannerAdWidget extends StatefulWidget {
   //actual id: 'ca-app-pub-1613093835357473/1828126609';
   //test id: 'ca-app-pub-3940256099942544/9214589741';
 
-  MyBannerAdWidget({
+  const MyBannerAdWidget({
     super.key,
     this.adSize = AdSize.mediumRectangle,
   });
@@ -29,7 +31,10 @@ class _MyBannerAdWidgetState extends State<MyBannerAdWidget> {
 
   @override
   Widget build(BuildContext context) {
-    if (kIsWeb) {
+    TourguideUserProvider userProvider =
+        Provider.of<TourguideUserProvider>(context);
+
+    if (kIsWeb || userProvider.user!.premium == true) {
       return const SizedBox();
     }
 
@@ -49,7 +54,9 @@ class _MyBannerAdWidgetState extends State<MyBannerAdWidget> {
   @override
   void initState() {
     super.initState();
-    if (!kIsWeb) {
+    TourguideUserProvider userProvider =
+        Provider.of<TourguideUserProvider>(context, listen: false);
+    if (!kIsWeb && userProvider.user!.premium == false) {
       _loadAd();
     }
   }

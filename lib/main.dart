@@ -43,6 +43,7 @@ var logger = kIsWeb
         level: logger_mobile.Level.all, //filter: ProductionFilter(),
       );
 final FirebaseRemoteConfig remoteConfig = FirebaseRemoteConfig.instance;
+final String revenueCatApiKey = 'goog_TKPBdFYTixkXXKwHjcUhJzNBlNZ';
 
 Future<void> main() async {
   WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
@@ -131,7 +132,7 @@ Future<void> initPlatformState() async {
 
   if (Platform.isAndroid) {
     PurchasesConfiguration configuration;
-    configuration = PurchasesConfiguration('goog_TKPBdFYTixkXXKwHjcUhJzNBlNZ');
+    configuration = PurchasesConfiguration(revenueCatApiKey);
     await Purchases.configure(configuration);
   }
 }

@@ -14,6 +14,10 @@ class TourguideUser {
   DateTime createdDateTime;
   DateTime lastSignInDateTime;
 
+  /// mutable, NOT stored in Firestore, true if user is premium,
+  /// based on RevenueCat entitlements set in Firebase Auth as custom claims
+  bool? premium;
+
   TourguideUser({
     required this.firebaseAuthId,
     required this.googleSignInId,
@@ -26,6 +30,7 @@ class TourguideUser {
     required this.useUsername,
     required this.createdDateTime,
     required this.lastSignInDateTime,
+    this.premium,
   });
 
   // Convert a User object to a map for Firestore
@@ -104,6 +109,7 @@ class TourguideUser {
     bool? useUsername,
     DateTime? createdDateTime,
     DateTime? lastSignInDateTime,
+    bool? premium,
   }) {
     return TourguideUser(
       firebaseAuthId: firebaseAuthId ?? this.firebaseAuthId,
@@ -118,6 +124,7 @@ class TourguideUser {
       useUsername: useUsername ?? this.useUsername,
       createdDateTime: createdDateTime ?? this.createdDateTime,
       lastSignInDateTime: lastSignInDateTime ?? this.lastSignInDateTime,
+      premium: premium ?? this.premium,
     );
   }
 
@@ -133,6 +140,6 @@ class TourguideUser {
 
   @override
   String toString() {
-    return 'TourguideUser{firebaseAuthId: $firebaseAuthId, googleSignInId: $googleSignInId, username: $username, displayName: $displayName, email: $email, emailSubscriptionsDisabled: $emailSubscriptionsDisabled, savedTourIds: $savedTourIds, reports: $reports, useUsername: $useUsername, createdDateTime: $createdDateTime, lastSignInDateTime: $lastSignInDateTime}';
+    return 'TourguideUser{firebaseAuthId: $firebaseAuthId, googleSignInId: $googleSignInId, username: $username, displayName: $displayName, email: $email, emailSubscriptionsDisabled: $emailSubscriptionsDisabled, savedTourIds: $savedTourIds, reports: $reports, useUsername: $useUsername, createdDateTime: $createdDateTime, lastSignInDateTime: $lastSignInDateTime, premium: $premium}';
   }
 }

@@ -7,6 +7,7 @@ import 'package:provider/provider.dart';
 import 'package:tourguide_app/model/tourguide_report.dart';
 import 'package:tourguide_app/utilities/providers/auth_provider.dart'
     as my_auth;
+import 'package:purchases_flutter/purchases_flutter.dart'; // Import the Purchases SDK
 
 import '../../main.dart';
 import '../../model/tourguide_user.dart';
@@ -38,6 +39,7 @@ class TourguideUserProvider with ChangeNotifier {
     if (firebaseUser != null) {
       await _waitForRequiredData();
       await _loadUser();
+      _configurePurchases();
 
       logger.t(
           "UserProvider() - _onAuthStateChanged() - User is loaded: ${_user.toString()}");
@@ -103,6 +105,7 @@ class TourguideUserProvider with ChangeNotifier {
         .doc(firebaseUser.uid)
         .set(_user!.toMap());
     await FirebaseAnalytics.instance.logSignUp(signUpMethod: 'google');
+    _configurePurchases();
   }
 
   Future<void> _sendWelcomeEmail() async {
@@ -156,6 +159,7 @@ class TourguideUserProvider with ChangeNotifier {
           _user = TourguideUser.fromMap(data);
           _patchUser(data);
         }
+        _configurePurchases();
         notifyListeners();
       }
     } else {
@@ -242,6 +246,7 @@ class TourguideUserProvider with ChangeNotifier {
   Future<void> updateUser(TourguideUser updatedUser) async {
     logger.t("UserProvider.updateUser()");
     _user = updatedUser;
+    _configurePurchases();
     notifyListeners();
     await FirebaseFirestore.instance
         .collection('users')
@@ -293,5 +298,47 @@ class TourguideUserProvider with ChangeNotifier {
     };
 
     await FirebaseFirestore.instance.collection('emails').add(emailData);
+  }
+
+  /// RevenueCat - once we get firebaseAuthId, we can configure Purchases ID (same ID)
+  Future<void> _configurePurchases() async {
+    if (_user == null) {
+      return;
+    }
+    await Purchases.configure(
+      PurchasesConfiguration(revenueCatApiKey)
+        ..appUserID = _user!.firebaseAuthId, // Use the user's Firebase Auth ID
+    );
+    //_getCurrentUserClaims();
+    logger.i('User is premium: ${await _checkUserPremiumStatus()}');
+  }
+
+  /// RevenueCat - test whether custom claims have been set correctly (for debugging only for now, but this could be used for firestore security rules)
+  Future<Map<dynamic, dynamic>> _getCurrentUserClaims() async {
+    final user = auth.FirebaseAuth.instance.currentUser;
+
+    if (user == null) {
+      logger.e('User is null, cannot get current user claims');
+      return {};
+    }
+
+    final idTokenResult = await user.getIdTokenResult(true);
+
+    logger.i('Current user claims: ${idTokenResult.claims}');
+
+    return idTokenResult.claims!;
+  }
+
+  Future<bool> _checkUserPremiumStatus() async {
+    Map<dynamic, dynamic> claims = await _getCurrentUserClaims();
+    if (claims['revenueCatEntitlements'] == null) {
+      return false;
+    }
+    bool isPremium = claims['revenueCatEntitlements']!.contains('Premium');
+    if (_user != null && _user!.premium != isPremium) {
+      _user!.premium = isPremium;
+      notifyListeners();
+    }
+    return isPremium;
   }
 }
