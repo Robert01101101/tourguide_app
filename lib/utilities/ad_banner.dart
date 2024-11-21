@@ -34,7 +34,8 @@ class _MyBannerAdWidgetState extends State<MyBannerAdWidget> {
     TourguideUserProvider userProvider =
         Provider.of<TourguideUserProvider>(context);
 
-    if (kIsWeb || userProvider.user!.premium == true) {
+    if (kIsWeb ||
+        (userProvider.user != null && userProvider.user!.premium == true)) {
       return const SizedBox();
     }
 
@@ -56,7 +57,8 @@ class _MyBannerAdWidgetState extends State<MyBannerAdWidget> {
     super.initState();
     TourguideUserProvider userProvider =
         Provider.of<TourguideUserProvider>(context, listen: false);
-    if (!kIsWeb && userProvider.user!.premium == false) {
+    if (!(kIsWeb ||
+        (userProvider.user != null && userProvider.user!.premium == true))) {
       _loadAd();
     }
   }

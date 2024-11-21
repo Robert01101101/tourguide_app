@@ -94,7 +94,8 @@ class _TourRunningState extends State<TourRunning> {
         });
       }
     });
-    if (!kIsWeb && userProvider.user!.premium == false) {
+    if (!kIsWeb &&
+        (userProvider.user == null || userProvider.user!.premium == false)) {
       _interstitialAdWidget.loadInterstitialAd();
     }
   }
@@ -289,7 +290,10 @@ class _TourRunningState extends State<TourRunning> {
 
     return PopScope(
       onPopInvoked: (didPop) {
-        if (didPop && !kIsWeb && userProvider.user!.premium == false) {
+        if (didPop &&
+            !kIsWeb &&
+            (userProvider.user == null ||
+                userProvider.user!.premium == false)) {
           _interstitialAdWidget.showInterstitialAd(context);
         }
       },

@@ -39,10 +39,15 @@ class _PremiumState extends State<Premium> {
             Visibility(
               visible: userProvider.user!.premium == false,
               child: Column(
+                mainAxisAlignment: MainAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
                       "Purchase Premium to remove all ads. \n\nPremium mode is currently under development, and purchases should be available soon. Current users of Tourguide will automatically be given Premium access when it becomes available.",
                       style: Theme.of(context).textTheme.bodyLarge),
+                  const SizedBox(
+                    height: 16,
+                  ),
                   ElevatedButton(
                       onPressed: presentPaywall,
                       child: const Text("Purchase Premium")),
