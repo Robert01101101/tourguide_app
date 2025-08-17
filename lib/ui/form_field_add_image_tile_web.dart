@@ -208,17 +208,6 @@ class _AddImageTileWebContentState extends State<_AddImageTileWebContent> {
   }
 
   Future<void> _pickImage(ImageSource source) async {
-    // Check and request permissions if needed
-    if (source == ImageSource.camera) {
-      if (await Permission.camera.request().isDenied) {
-        return; // Permission denied, do not proceed
-      }
-    } else if (source == ImageSource.gallery) {
-      if (await Permission.photos.request().isDenied) {
-        return; // Permission denied, do not proceed
-      }
-    }
-
     try {
       final pickedFile = await ImagePicker().pickImage(source: source);
       if (pickedFile != null) {
