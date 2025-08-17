@@ -2,7 +2,6 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:permission_handler/permission_handler.dart';
 
 import '../main.dart';
 
@@ -209,16 +208,16 @@ class _AddImageTileContentState extends State<_AddImageTileContent> {
   }
 
   Future<void> _pickImage(ImageSource source) async {
-    // Check and request permissions if needed
-    if (source == ImageSource.camera) {
-      if (await Permission.camera.request().isDenied) {
-        return; // Permission denied, do not proceed
-      }
-    } else if (source == ImageSource.gallery) {
-      if (await Permission.photos.request().isDenied) {
-        return; // Permission denied, do not proceed
-      }
-    }
+    // Check and request permissions if needed (no longer needed, image_picker handles it)
+    // if (source == ImageSource.camera) {
+    //   if (await Permission.camera.request().isDenied) {
+    //     return; // Permission denied, do not proceed
+    //   }
+    // } else if (source == ImageSource.gallery) {
+    //   if (await Permission.photos.request().isDenied) {
+    //     return; // Permission denied, do not proceed
+    //   }
+    // }
 
     try {
       final pickedFile = await ImagePicker().pickImage(source: source);

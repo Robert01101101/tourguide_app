@@ -291,7 +291,7 @@ class _BottomNavigationPageState extends State<BottomNavigationPage> {
             ),
             NavigationDestination(
               icon: Icon(Icons.auto_awesome),
-              label: 'Tour Guide',
+              label: 'Guide',
             ),
             NavigationDestination(
               icon: Icon(Icons.library_add),
