@@ -30,7 +30,7 @@ class TourguideUser {
     required this.useUsername,
     required this.createdDateTime,
     required this.lastSignInDateTime,
-    this.premium,
+    this.premium = false,
   });
 
   // Convert a User object to a map for Firestore

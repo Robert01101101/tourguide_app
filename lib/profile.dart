@@ -77,7 +77,7 @@ class _ProfileState extends State<Profile> {
                 ),
               ],
             ),
-            MyBannerAdWidget(),
+            //MyBannerAdWidget(),
             const SizedBox(
               height: 32,
             ),

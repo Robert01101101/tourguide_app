@@ -46,7 +46,7 @@ class _TourRunningState extends State<TourRunning> {
   double _mapYposition = 0;
   final GlobalKey _mapKey = GlobalKey();
   bool _ignoreStopEvent = false; //rly scrappy solution TODO: better fix
-  final MyInterstitialAdWidget _interstitialAdWidget = MyInterstitialAdWidget();
+  //final MyInterstitialAdWidget _interstitialAdWidget = MyInterstitialAdWidget();
 
   @override
   void initState() {
@@ -94,8 +94,9 @@ class _TourRunningState extends State<TourRunning> {
         });
       }
     });
-    if (!kIsWeb && userProvider.user!.premium == false) {
-      _interstitialAdWidget.loadInterstitialAd();
+    if (!kIsWeb &&
+        (userProvider.user == null || userProvider.user!.premium == false)) {
+      //_interstitialAdWidget.loadInterstitialAd();
     }
   }
 
@@ -103,7 +104,7 @@ class _TourRunningState extends State<TourRunning> {
   void dispose() {
     _ttsService.stop();
     _ttsSubscription?.cancel();
-    _interstitialAdWidget?.dispose();
+    //_interstitialAdWidget?.dispose();
     super.dispose();
   }
 
@@ -289,8 +290,11 @@ class _TourRunningState extends State<TourRunning> {
 
     return PopScope(
       onPopInvoked: (didPop) {
-        if (didPop && !kIsWeb && userProvider.user!.premium == false) {
-          _interstitialAdWidget.showInterstitialAd(context);
+        if (didPop &&
+            !kIsWeb &&
+            (userProvider.user == null ||
+                userProvider.user!.premium == false)) {
+          //_interstitialAdWidget.showInterstitialAd(context);
         }
       },
       child: TourMapFullscreen(
