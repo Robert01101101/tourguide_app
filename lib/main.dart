@@ -28,7 +28,7 @@ import 'package:tourguide_app/utilities/providers/tourguide_user_provider.dart';
 import 'firebase_options.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:tourguide_app/utilities/providers/auth_provider.dart' as myAuth;
-import 'package:google_mobile_ads/google_mobile_ads.dart';
+//import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:purchases_flutter/purchases_flutter.dart';
 
 import 'model/tour.dart';
@@ -93,7 +93,7 @@ Future<void> main() async {
 
   if (!kIsWeb) {
     //Admob
-    unawaited(MobileAds.instance.initialize());
+    //unawaited(MobileAds.instance.initialize());
 
     //IAP with RevenueCat
     initPlatformState();

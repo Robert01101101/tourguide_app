@@ -100,10 +100,10 @@ class _ContributeState extends State<Contribute> {
                                 .getToursByIds(tourProvider.userCreatedTours),
                             leftPadding: true),
                       ),
-                      StandardLayoutChild(
-                        fullWidth: true,
-                        child: MyBannerAdWidget(),
-                      ),
+                      // StandardLayoutChild(
+                      //   fullWidth: true,
+                      //   child: MyBannerAdWidget(),
+                      // ),
                       /*Text("Review unreviewed tours", style: Theme.of(context).textTheme.headlineSmall),
                 StandardLayoutChild(
                   fullWidth: true,
