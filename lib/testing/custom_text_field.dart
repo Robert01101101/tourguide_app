@@ -4,9 +4,9 @@ class CustomTextField extends StatefulWidget {
   final String labelText;
 
   const CustomTextField({
-    Key? key,
+    super.key,
     required this.labelText,
-  }) : super(key: key);
+  });
 
   @override
   CustomTextFieldState createState() => CustomTextFieldState();

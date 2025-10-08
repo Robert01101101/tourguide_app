@@ -1,5 +1,4 @@
 import 'package:tourguide_app/onboarding.dart';
-import 'package:tourguide_app/profile/profile_settings.dart';
 import 'package:tourguide_app/sign_in.dart';
 import 'package:tourguide_app/gemini_chat.dart';
 import 'package:tourguide_app/tour/tour_running.dart';
@@ -213,8 +212,8 @@ class TourguideNavigation {
   bool isFirstTime = true;
 
   Future<void> checkFirstTimeUser() async {
-    var _prefs = await SharedPreferences.getInstance();
-    isFirstTime = _prefs.getBool('firstTimeUser') ?? true;
+    var prefs = await SharedPreferences.getInstance();
+    isFirstTime = prefs.getBool('firstTimeUser') ?? true;
     logger.i('isFirstTime: $isFirstTime');
   }
 }

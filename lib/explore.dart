@@ -7,9 +7,7 @@ import 'package:flutter_google_places_sdk/flutter_google_places_sdk.dart';
 import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:google_sign_in/google_sign_in.dart';
 import 'package:permission_handler/permission_handler.dart' as permission;
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tourguide_app/explore_map.dart';
 import 'package:tourguide_app/ui/my_layouts.dart';
 import 'package:tourguide_app/ui/horizontal_scroller.dart';
@@ -21,10 +19,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:tourguide_app/utilities/providers/location_provider.dart';
 import 'package:tourguide_app/utilities/providers/tour_provider.dart';
 import 'package:tourguide_app/utilities/providers/tourguide_user_provider.dart';
-import 'main.dart';
-import '../../ui/google_places_img.dart'
-    if (dart.library.html) '../../ui/google_places_img_web.dart' as gpi;
-import 'dart:ui' as ui;
 
 import 'model/tour.dart';
 
@@ -241,11 +235,9 @@ class ExploreState extends State<Explore> {
                                       Theme.of(context).textTheme.displayMedium,
                                   children: <TextSpan>[
                                     const TextSpan(text: 'Welcome'),
-                                    if (locationProvider.currentCity != null &&
-                                        locationProvider.currentCity.isNotEmpty)
-                                      TextSpan(text: ' to \n'),
-                                    if (locationProvider.currentCity != null &&
-                                        locationProvider.currentCity.isNotEmpty)
+                                    if (locationProvider.currentCity.isNotEmpty)
+                                      const TextSpan(text: ' to \n'),
+                                    if (locationProvider.currentCity.isNotEmpty)
                                       TextSpan(
                                           text: locationProvider.currentCity,
                                           style: GoogleFonts.vollkorn(
@@ -261,14 +253,12 @@ class ExploreState extends State<Explore> {
                                               logger.t('Tapped city name');
                                               _showOptionsDialog(context);
                                             }),
-                                    if (displayName != null &&
-                                        displayName.isNotEmpty)
+                                    if (displayName.isNotEmpty)
                                       TextSpan(
                                           text:
                                               ', ${displayName.split(' ').first}'),
                                     if (locationProvider.permissionStatus !=
                                             PermissionStatus.granted ||
-                                        locationProvider.currentCity == null ||
                                         locationProvider.currentCity.isEmpty)
                                       TextSpan(
                                         children: <TextSpan>[
@@ -457,7 +447,7 @@ class ExploreState extends State<Explore> {
 
 //TODO - get rid of this?
 class GradientText extends StatelessWidget {
-  const GradientText({
+  const GradientText({super.key, 
     required this.richText,
     required this.gradient,
   });
@@ -501,7 +491,7 @@ class _OptionsDialogState extends State<OptionsDialog> {
     KeyboardVisibilityController keyboardVisibilityController =
         KeyboardVisibilityController();
     keyboardSubscription =
-        keyboardVisibilityController!.onChange.listen((bool visible) {
+        keyboardVisibilityController.onChange.listen((bool visible) {
       setState(() {
         _alignment = visible ? Alignment.topCenter : Alignment.center;
       });
@@ -539,14 +529,14 @@ class _OptionsDialogState extends State<OptionsDialog> {
                   onPlaceInfoFetched: (Place? place) {
                     // Handle place info fetched
                     setState(() {
-                      logger.i('onPlaceInfoFetched: ${place}');
+                      logger.i('onPlaceInfoFetched: $place');
                       newPlace = place;
                       _showConfirm = true; // Show the Confirm button
                     });
                   },
                 ),
                 if (_showConfirm)
-                  SizedBox(
+                  const SizedBox(
                       height:
                           32), // Add spacing between the dropdown and the button
                 if (_showConfirm)
@@ -560,7 +550,7 @@ class _OptionsDialogState extends State<OptionsDialog> {
                         Navigator.of(context).pop();
                       }
                     },
-                    child: Text('Confirm'),
+                    child: const Text('Confirm'),
                   ),
               ],
             ),

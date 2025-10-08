@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:tourguide_app/utilities/providers/location_provider.dart';
 import '../../ui/google_places_img.dart'
     if (dart.library.html) '../../ui/google_places_img_web.dart' as gpi;
-import '../main.dart';
 
 class ParallaxImage extends StatefulWidget {
   ScrollController scrollController;

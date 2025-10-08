@@ -4,12 +4,9 @@ import 'package:profanity_filter/profanity_filter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tourguide_app/ui/my_layouts.dart';
 import 'package:tourguide_app/utilities/custom_import.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:tourguide_app/utilities/providers/auth_provider.dart' as myAuth;
-import 'package:tourguide_app/utilities/providers/location_provider.dart';
 import 'package:tourguide_app/utilities/providers/tour_provider.dart';
 import 'package:tourguide_app/utilities/providers/tourguide_user_provider.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 enum NameDisplaySetting { displayName, username }
 
@@ -92,7 +89,7 @@ class _ProfileSettingsState extends State<ProfileSettings> {
     }
     logger.i('Updating username to $_newUsername');
     await userProvider.updateUser(userProvider.user!.copyWith(
-        username: _newUsername, displayName: userProvider.user!.displayName!));
+        username: _newUsername, displayName: userProvider.user!.displayName));
     await tourProvider.updateAuthorNameForAllTheirTours(
         userProvider.user!.firebaseAuthId,
         userProvider.user!.useUsername
@@ -190,7 +187,7 @@ class _ProfileSettingsState extends State<ProfileSettings> {
                               ),
                             ),
                           ),
-                          SizedBox(
+                          const SizedBox(
                             width: 32,
                           ),
                           ElevatedButton(
@@ -255,9 +252,9 @@ class _ProfileSettingsState extends State<ProfileSettings> {
                           Navigator.push(
                             context,
                             SlideTransitionRoute(
-                              page: ProfileSettingsDeleteAccount(),
+                              page: const ProfileSettingsDeleteAccount(),
                               beginOffset:
-                                  Offset(1.0, 0.0), // Slide in from right
+                                  const Offset(1.0, 0.0), // Slide in from right
                             ),
                           );
                         },
@@ -385,7 +382,7 @@ class _ProfileSettingsDeleteAccountState
       body: SingleChildScrollView(
           child: StandardLayout(
         children: [
-          SizedBox(
+          const SizedBox(
             height: 0,
           ),
           Text("Confirm Account Deletion",
@@ -401,7 +398,7 @@ class _ProfileSettingsDeleteAccountState
               '\n'
               'Your Tourguide Team',
               style: Theme.of(context).textTheme.bodyLarge),
-          SizedBox(
+          const SizedBox(
             height: 16,
           ),
           TextFormField(

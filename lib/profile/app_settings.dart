@@ -1,4 +1,3 @@
-import 'package:android_intent_plus/android_intent.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:tourguide_app/ui/my_layouts.dart';
 import 'package:tourguide_app/ui/tts_settings.dart';
@@ -168,7 +167,7 @@ class _AppSettingsState extends State<AppSettings> {
                 initialSelection: initialThemeMode,
                 onSelected: (String? value) {
                   // This is called when the user selects an item.
-                  String themeModeString = 'ThemeMode.' + value!.toLowerCase();
+                  String themeModeString = 'ThemeMode.${value!.toLowerCase()}';
                   themeProvider.setThemeModeWithString(themeModeString);
                 },
                 dropdownMenuEntries:
@@ -182,7 +181,7 @@ class _AppSettingsState extends State<AppSettings> {
                 children: [
                   Text("Text to Speech",
                       style: Theme.of(context).textTheme.titleLarge),
-                  TtsSettings(),
+                  const TtsSettings(),
                 ],
               ),
               const SizedBox(height: 16),
@@ -195,7 +194,7 @@ class _AppSettingsState extends State<AppSettings> {
                     style: Theme.of(context).textTheme.bodyLarge,
                   ),
                   Text(
-                    _packageInfo!.version,
+                    _packageInfo.version,
                     style: Theme.of(context).textTheme.bodyLarge,
                   ),
                   Text(
@@ -203,7 +202,7 @@ class _AppSettingsState extends State<AppSettings> {
                     style: Theme.of(context).textTheme.bodyLarge,
                   ),
                   Text(
-                    _packageInfo!.buildNumber,
+                    _packageInfo.buildNumber,
                     style: Theme.of(context).textTheme.bodyLarge,
                   ),
                 ],

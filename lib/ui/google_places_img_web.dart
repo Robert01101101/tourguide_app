@@ -15,15 +15,14 @@ class GooglePlacesImg extends StatelessWidget {
 
   /// Construct a google place img using metadata and response object
   const GooglePlacesImg(
-      {Key? key, required this.photoMetadata, required this.placePhotoResponse})
-      : super(key: key);
+      {super.key, required this.photoMetadata, required this.placePhotoResponse});
 
   @override
   Widget build(BuildContext context) {
     final imageUrl =
         placePhotoResponse.whenOrNull(imageUrl: (imageUrl) => imageUrl);
     if (imageUrl == null) {
-      return Text('Invalid image url!');
+      return const Text('Invalid image url!');
     }
 
     // ignore: undefined_prefixed_name
@@ -31,7 +30,7 @@ class GooglePlacesImg extends StatelessWidget {
         (int viewId) => html.Element.img()..setAttribute('src', imageUrl));
 
     final view = HtmlElementView(viewType: photoMetadata.photoReference);
-    return Container(
+    return SizedBox(
       width: photoMetadata.width.toDouble(),
       height: photoMetadata.height.toDouble(),
       child: view,

@@ -1,9 +1,9 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
-import '../main.dart';
 
 class FormFieldTags<T> extends FormField<Map<String, dynamic>> {
+  @override
   final bool enabled;
 
   FormFieldTags({
@@ -11,9 +11,8 @@ class FormFieldTags<T> extends FormField<Map<String, dynamic>> {
     super.validator,
     Widget? hintText,
     required this.enabled,
-    Map<String, dynamic>? initialValue,
+    super.initialValue,
   }) : super(
-          initialValue: initialValue,
           builder: (state) {
             return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -47,9 +46,6 @@ class _FormFieldTagsContent extends StatefulWidget {
   //final bool isSelected;
 
   const _FormFieldTagsContent({
-    super.key,
-    //required this.initialValue,
-    //required this.state,
     required this.onChanged,
     required this.enabled,
     //this.isSelected = false,
@@ -163,8 +159,9 @@ class _FormFieldTagsContentState extends State<_FormFieldTagsContent> {
                 onSelected: (bool selected) {
                   setState(() {
                     if (selected) {
-                      if (_descriptiveTags.length < 5)
+                      if (_descriptiveTags.length < 5) {
                         _descriptiveTags.add(descriptiveTag);
+                      }
                     } else {
                       _descriptiveTags.remove(descriptiveTag);
                     }

@@ -25,11 +25,11 @@ class _ExploreMapState extends State<ExploreMap> {
   final Completer<GoogleMapController> _mapControllerCompleter =
       Completer<GoogleMapController>();
   bool _isLoading = true;
-  CameraPosition _currentCameraPosition = CameraPosition(
+  CameraPosition _currentCameraPosition = const CameraPosition(
     target: LatLng(0, 0),
     zoom: 14.0,
   );
-  Set<Marker> _markers = Set<Marker>();
+  Set<Marker> _markers = <Marker>{};
 
   @override
   void initState() {

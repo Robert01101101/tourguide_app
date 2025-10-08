@@ -1,21 +1,16 @@
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
 import 'package:firebase_vertexai/firebase_vertexai.dart';
-import 'package:scroll_to_index/scroll_to_index.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:tourguide_app/utilities/custom_import.dart';
 import 'package:tourguide_app/utilities/providers/location_provider.dart';
 import 'package:tourguide_app/utilities/providers/tourguide_user_provider.dart';
 import 'package:uuid/uuid.dart';
-import 'package:tourguide_app/main.dart';
 
 import 'dart:convert';
 
-import 'package:flutter/material.dart';
 import 'package:flutter_chat_ui/flutter_chat_ui.dart';
 
 //_________________________________________________________________________ CREATE FORM
@@ -29,7 +24,7 @@ class GeminiChat extends StatefulWidget {
 class _GeminiChatState extends State<GeminiChat> with WidgetsBindingObserver {
   var apiKey;
   String aiTourResponse = ''; // Variable to store the generated tour
-  var uuid = Uuid();
+  var uuid = const Uuid();
   String geminiVersion = 'gemini-1.5-flash';
   types.User? _user, _bot;
   late ChatSession _chat;
@@ -95,11 +90,9 @@ class _GeminiChatState extends State<GeminiChat> with WidgetsBindingObserver {
         Provider.of<LocationProvider>(context, listen: false);
     String initialPrompt =
         'Please act as my friendly and knowledgeable tour guide, and respond in normal written English. Your name is AI Tourguide. Try to keep your response short unless I ask for detailed or longer responses, and avoid asking clarifying questions unless my question is extremely broad or requires clarification. If I ask for an address, inform me that information like a specific address might be inaccurate. If I ask for the location of something, say where you think it is, but suggest to confirm the location in Google Maps, and that your stated location might be inaccurate. Don\'t be shy to remind me of your limitations.';
-    if (locationProvider.currentCity != null) {
-      initialPrompt +=
-          " I am currently located in ${locationProvider.currentCity}, ${locationProvider.currentState}, ${locationProvider.currentCountry}";
-    }
-    logger.t("geminiChat._startNewChat() - initialPrompt=$initialPrompt");
+    initialPrompt +=
+        " I am currently located in ${locationProvider.currentCity}, ${locationProvider.currentState}, ${locationProvider.currentCountry}";
+      logger.t("geminiChat._startNewChat() - initialPrompt=$initialPrompt");
 
     _chat = generativeModel.startChat(history: [
       Content("user", Content.text(initialPrompt).parts),
@@ -225,7 +218,7 @@ class _GeminiChatState extends State<GeminiChat> with WidgetsBindingObserver {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Options'),
+          title: const Text('Options'),
           content: SingleChildScrollView(
             child: ListBody(
               children: <Widget>[
@@ -233,7 +226,7 @@ class _GeminiChatState extends State<GeminiChat> with WidgetsBindingObserver {
                   padding: const EdgeInsets.all(20.0),
                   child: Center(
                       child: Text(
-                          "Powered by Google's $geminiVersion.\n\Gemini Tour Guide might provide inaccurate information, use with care.")),
+                          "Powered by Google's $geminiVersion.\nGemini Tour Guide might provide inaccurate information, use with care.")),
                 ),
                 ListTile(
                   leading: const Icon(Icons.delete),
@@ -302,10 +295,10 @@ class _GeminiChatState extends State<GeminiChat> with WidgetsBindingObserver {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('Gemini Tour Guide'),
+        title: const Text('Gemini Tour Guide'),
         actions: [
           IconButton(
-            icon: Icon(Icons.more_vert),
+            icon: const Icon(Icons.more_vert),
             onPressed: () {
               // Show options menu
               _showOptionsDialog(context);
@@ -324,7 +317,7 @@ class _GeminiChatState extends State<GeminiChat> with WidgetsBindingObserver {
           showUserAvatars: true,
           avatarBuilder: (userId) {
             return Transform.translate(
-              offset: Offset(-18, 0), // Shift the avatar 8 pixels to the left
+              offset: const Offset(-18, 0), // Shift the avatar 8 pixels to the left
               child: Transform.scale(
                 scale: 1.5,
                 alignment: Alignment.bottomLeft,
@@ -348,7 +341,7 @@ class _GeminiChatState extends State<GeminiChat> with WidgetsBindingObserver {
           theme: DefaultChatTheme(
             backgroundColor: Theme.of(context).scaffoldBackgroundColor,
             primaryColor: Theme.of(context).colorScheme.secondary,
-            inputBackgroundColor: Color(0xff434949),
+            inputBackgroundColor: const Color(0xff434949),
             //border radius 5 up 20 down
             inputBorderRadius: const BorderRadius.only(
               topLeft: Radius.circular(20),
@@ -382,7 +375,7 @@ class _GeminiChatState extends State<GeminiChat> with WidgetsBindingObserver {
         ? Center(
             child: Container(
                 decoration: BoxDecoration(
-                  borderRadius: BorderRadius.all(Radius.circular(36)),
+                  borderRadius: const BorderRadius.all(Radius.circular(36)),
                   color: Theme.of(context).colorScheme.secondary,
                 ),
                 child: Padding(
@@ -454,8 +447,8 @@ class _GeminiChatState extends State<GeminiChat> with WidgetsBindingObserver {
 
     return Container(
       padding: isAiCustomPrompt
-          ? EdgeInsets.all(16)
-          : EdgeInsets.symmetric(vertical: 18, horizontal: 20),
+          ? const EdgeInsets.all(16)
+          : const EdgeInsets.symmetric(vertical: 18, horizontal: 20),
       child: SelectableText.rich(
         TextSpan(
           children: _parseTextWithMarkdown(textMessage.text),
@@ -484,7 +477,7 @@ class _GeminiChatState extends State<GeminiChat> with WidgetsBindingObserver {
         spans.add(TextSpan(text: text.substring(start, match.start)));
       }
       spans.add(TextSpan(
-          text: match.group(1), style: TextStyle(fontWeight: FontWeight.bold)));
+          text: match.group(1), style: const TextStyle(fontWeight: FontWeight.bold)));
       start = match.end;
     }
 

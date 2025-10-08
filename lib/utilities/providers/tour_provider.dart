@@ -2,8 +2,6 @@ import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
-import 'package:hive_flutter/hive_flutter.dart';
 import 'package:tourguide_app/main.dart';
 import 'package:tourguide_app/model/tour.dart';
 import 'package:tourguide_app/model/tourguide_report.dart';
@@ -139,8 +137,9 @@ class TourProvider with ChangeNotifier {
     if (localImage != null && !tour.requestMediaRedownload) {
       tour.imageFile = localImage;
     } else {
-      if (tour.requestMediaRedownload)
+      if (tour.requestMediaRedownload) {
         logger.t('Requesting image redownload: ${tour.id}');
+      }
       if (!kIsWeb) {
         await TourService.downloadAndSaveImage(tour.imageUrl, tour.id);
         final File? downloadedImage =
@@ -159,12 +158,12 @@ class TourProvider with ChangeNotifier {
       List<String> updatedTours = [];
       for (Tour tour in tours) {
         //logger.t('Processing tour: ${tour.id}');
-        if (tour.reports.length > 0 && tour.authorId != userId) {
+        if (tour.reports.isNotEmpty && tour.authorId != userId) {
           logger.w('Tour has reports, removing: ${tour.id}');
           continue; // Skip tours with reports
         }
         if (tour.id.isEmpty || tour.id == Tour.addTourTileId) {
-          logger.w('Tour has invalid id:\"${tour.id}\", skipping');
+          logger.w('Tour has invalid id:"${tour.id}", skipping');
           continue;
         }
         if (_allCachedTours.containsKey(tour.id) && !replaceCached) {
@@ -268,9 +267,10 @@ class TourProvider with ChangeNotifier {
   /// Updates the tour data in cache and firestore (for edits, reporting, etc)
   Future<Tour> updateTour(Tour tour,
       {bool localUpdateOnly = false, bool enableImageUpdate = false}) async {
-    if (!localUpdateOnly)
+    if (!localUpdateOnly) {
       tour = await TourService.updateTour(tour,
           enableImageUpdate: enableImageUpdate);
+    }
     _allCachedTours[tour.id] = tour;
     notifyListeners();
     return _allCachedTours[tour.id]!;
@@ -359,7 +359,7 @@ class TourProvider with ChangeNotifier {
           'authId': reportedTourAuthor.firebaseAuthId,
         }
       },
-      'userId': reportedTourAuthor!.firebaseAuthId,
+      'userId': reportedTourAuthor.firebaseAuthId,
     };
 
     await FirebaseFirestore.instance.collection('emails').add(emailData);

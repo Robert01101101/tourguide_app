@@ -1,4 +1,3 @@
-import 'dart:async';
 import 'dart:core';
 import 'dart:io';
 import 'dart:ui';
@@ -8,16 +7,12 @@ import 'package:firebase_app_check/firebase_app_check.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:firebase_remote_config/firebase_remote_config.dart';
 import 'package:flutter/foundation.dart';
-import 'package:hive/hive.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:logger/logger.dart' as logger_mobile;
 import 'package:logger/web.dart' as logger_web;
-import 'package:provider/provider.dart';
-import 'package:scroll_to_index/scroll_to_index.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tourguide_app/ui/tourguide_theme.dart';
-import 'package:tourguide_app/utilities/crossplatform_utils.dart';
 import 'package:tourguide_app/utilities/providers/auth_provider.dart';
 import 'package:tourguide_app/utilities/custom_import.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -43,7 +38,7 @@ var logger = kIsWeb
         level: logger_mobile.Level.all, //filter: ProductionFilter(),
       );
 final FirebaseRemoteConfig remoteConfig = FirebaseRemoteConfig.instance;
-final String revenueCatApiKey = 'goog_TKPBdFYTixkXXKwHjcUhJzNBlNZ';
+const String revenueCatApiKey = 'goog_TKPBdFYTixkXXKwHjcUhJzNBlNZ';
 
 Future<void> main() async {
   WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
@@ -110,8 +105,8 @@ Future<void> fetchConfig() async {
     // Set settings to fetch from the server with a timeout and a minimum fetch interval
     await remoteConfig.setConfigSettings(
       RemoteConfigSettings(
-        fetchTimeout: Duration(minutes: 1),
-        minimumFetchInterval: Duration(hours: 1),
+        fetchTimeout: const Duration(minutes: 1),
+        minimumFetchInterval: const Duration(hours: 1),
       ),
     );
     // Fetch and activate the remote config values
@@ -305,6 +300,6 @@ class SnackBarService {
 
 extension StringExtension on String {
   String capitalize() {
-    return "${this[0].toUpperCase()}${this.substring(1).toLowerCase()}";
+    return "${this[0].toUpperCase()}${substring(1).toLowerCase()}";
   }
 }

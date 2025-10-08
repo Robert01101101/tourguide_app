@@ -5,7 +5,6 @@
 // ignore_for_file: avoid_print
 
 import 'dart:async';
-import 'dart:convert' show json;
 import 'dart:math';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -14,16 +13,11 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tourguide_app/ui/my_layouts.dart';
-import 'package:tourguide_app/utilities/providers/location_provider.dart';
-import 'package:tourguide_app/utilities/providers/tour_provider.dart';
-import 'package:tourguide_app/utilities/providers/tourguide_user_provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'ui/sign_in_button.dart';
 import 'package:tourguide_app/utilities/custom_import.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:tourguide_app/utilities/providers/auth_provider.dart'
     as my_auth;
 import 'package:flutter_native_splash/flutter_native_splash.dart';
@@ -60,7 +54,7 @@ class _SignInState extends State<SignIn> {
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
       authProvider.addListener(() {
         logger.t(
-            "signIn.initState().authProviderListener -> user=${authProvider.user != null}, googleSignInUser=${authProvider.googleSignInUser != null}, authProvider.isSilentWebSignInProcessing=${authProvider.isSilentWebSignInProcessing}, isAuthorized=${authProvider.isAuthorized}, silentSignInFailed=${authProvider.silentSignInFailed}, isAnonymous=${authProvider.isAnonymous}, navigatedAwayFromSignIn=${navigatedAwayFromSignIn}");
+            "signIn.initState().authProviderListener -> user=${authProvider.user != null}, googleSignInUser=${authProvider.googleSignInUser != null}, authProvider.isSilentWebSignInProcessing=${authProvider.isSilentWebSignInProcessing}, isAuthorized=${authProvider.isAuthorized}, silentSignInFailed=${authProvider.silentSignInFailed}, isAnonymous=${authProvider.isAnonymous}, navigatedAwayFromSignIn=$navigatedAwayFromSignIn");
         if (authProvider.user != null &&
             (authProvider.googleSignInUser != null &&
                     !authProvider.isSilentWebSignInProcessing ||
@@ -95,8 +89,9 @@ class _SignInState extends State<SignIn> {
       MyGlobals.signInReroutePath ?? TourguideNavigation.explorePath,
     );
     //anonymous login is handled in _signInGuest()
-    if (!authProvider.isAnonymous)
+    if (!authProvider.isAnonymous) {
       FirebaseAnalytics.instance.logLogin(loginMethod: 'google');
+    }
   }
 
   Future<bool> _checkIfFirstTimeUserAfterAccountDeletion() async {

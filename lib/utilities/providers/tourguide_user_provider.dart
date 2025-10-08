@@ -3,7 +3,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart' as auth;
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:provider/provider.dart';
 import 'package:tourguide_app/model/tourguide_report.dart';
 import 'package:tourguide_app/utilities/providers/auth_provider.dart'
     as my_auth;
@@ -70,7 +69,9 @@ class TourguideUserProvider with ChangeNotifier {
       if (firebaseUser != null &&
               _authProvider != null &&
               _authProvider!.googleSignInUser != null ||
-          _authProvider != null && _authProvider!.isAnonymous) break;
+          _authProvider != null && _authProvider!.isAnonymous) {
+        break;
+      }
       await Future.delayed(checkInterval);
     }
 
@@ -91,7 +92,7 @@ class TourguideUserProvider with ChangeNotifier {
       googleSignInId: _authProvider!.googleSignInUser!.id,
       username: '',
       displayName: _authProvider!.googleSignInUser!.displayName!,
-      email: _authProvider!.googleSignInUser!.email!,
+      email: _authProvider!.googleSignInUser!.email,
       emailSubscriptionsDisabled: [],
       savedTourIds: [],
       reports: [],
@@ -208,7 +209,7 @@ class TourguideUserProvider with ChangeNotifier {
       username: data['username'] ?? '',
       displayName:
           data['displayName'] ?? _authProvider!.googleSignInUser!.displayName!,
-      email: data['email'] ?? _authProvider!.googleSignInUser!.email!,
+      email: data['email'] ?? _authProvider!.googleSignInUser!.email,
       emailSubscriptionsDisabled:
           List<String>.from(data['emailSubscriptionsDisabled'] ?? []),
       savedTourIds: List<String>.from(data['savedTourIds'] ?? []),

@@ -30,7 +30,7 @@ class MapSampleState extends State<MapSample> {
       tilt: 59.440717697143555,
       zoom: 19.151926040649414);
 
-  int _counter = 0;
+  final int _counter = 0;
   Position? _currentPosition;
 
   //do on page load
@@ -132,10 +132,10 @@ class MapSampleState extends State<MapSample> {
           ),
           _currentPosition != null
               ? Text(
-                  'LAT: ${(_currentPosition!!).latitude}, \n LNG: ${(_currentPosition!!).longitude}', //cast to non nullable
-                  style: TextStyle(fontSize: 24),
+                  'LAT: ${(_currentPosition!).latitude}, \n LNG: ${(_currentPosition!).longitude}', //cast to non nullable
+                  style: const TextStyle(fontSize: 24),
                 )
-              : CircularProgressIndicator(),
+              : const CircularProgressIndicator(),
           const SizedBox(
             height: 20,
           ),

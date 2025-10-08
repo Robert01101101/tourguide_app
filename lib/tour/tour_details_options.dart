@@ -1,7 +1,5 @@
 import 'dart:async';
-import 'package:flutter/material.dart';
 import 'package:profanity_filter/profanity_filter.dart';
-import 'package:provider/provider.dart';
 import 'package:tourguide_app/model/tour.dart';
 import 'package:tourguide_app/model/tourguide_report.dart';
 import 'package:tourguide_app/model/tourguide_user.dart';
@@ -15,7 +13,7 @@ class TourDetailsOptions extends StatefulWidget {
   final VoidCallback onDeletePressed;
   final Tour tour;
 
-  TourDetailsOptions({
+  const TourDetailsOptions({super.key, 
     required this.onEditPressed,
     required this.onDeletePressed,
     required this.tour,
@@ -153,7 +151,7 @@ class _TourDetailsOptionsState extends State<TourDetailsOptions> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              const Text("You\'re the author of this tour."),
+                              const Text("You're the author of this tour."),
                               const SizedBox(height: 8.0),
                               if (widget.tour.reports.isNotEmpty)
                                 Column(
@@ -329,7 +327,7 @@ class _TourDetailsOptionsState extends State<TourDetailsOptions> {
                       );
                     }).toList(),
                   ),
-                  SizedBox(height: 8.0),
+                  const SizedBox(height: 8.0),
                   ElevatedButton.icon(
                     onPressed: () {
                       setState(() {
@@ -396,7 +394,7 @@ class _TourDetailsOptionsState extends State<TourDetailsOptions> {
           ? null
           : [
               TextButton(
-                child: Text('Cancel'),
+                child: const Text('Cancel'),
                 onPressed: () {
                   setState(() {
                     _isReportingTour = false;
@@ -404,8 +402,8 @@ class _TourDetailsOptionsState extends State<TourDetailsOptions> {
                 },
               ),
               TextButton(
-                child: Text('Submit Report'),
                 onPressed: _selectedReportOption.isEmpty ? null : _submitReport,
+                child: const Text('Submit Report'),
               ),
             ],
     );

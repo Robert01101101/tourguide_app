@@ -1,8 +1,5 @@
 import 'dart:async';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/gestures.dart';
-import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:sliver_tools/sliver_tools.dart';
 import 'package:tourguide_app/model/tour.dart';
 import 'package:tourguide_app/tour/tour_tag.dart';
@@ -12,7 +9,6 @@ import 'package:tourguide_app/tour/tourguide_user_profile_view.dart';
 import 'package:tourguide_app/ui/my_layouts.dart';
 import 'package:tourguide_app/tour/tour_rating_bookmark_buttons.dart';
 import 'package:tourguide_app/ui/tts_text.dart';
-import 'package:tourguide_app/utilities/ad_interstitial.dart';
 import 'package:tourguide_app/utilities/map_utils.dart';
 import 'package:tourguide_app/tour/tour_map.dart';
 import 'package:tourguide_app/utilities/providers/tour_provider.dart';
@@ -35,7 +31,7 @@ class _TourRunningState extends State<TourRunning> {
   final TtsService _ttsService = TtsService();
   StreamSubscription<TtsState>? _ttsSubscription;
   final ScrollController _scrollController = ScrollController();
-  List<GlobalKey> _targetKeys = [];
+  final List<GlobalKey> _targetKeys = [];
   Tour _tour = Tour.empty();
   int _currentStep = 0;
   bool _currentStepVisible = true;
@@ -323,7 +319,7 @@ class _TourRunningState extends State<TourRunning> {
               flexibleSpace: FlexibleSpaceBar(
                 centerTitle: true,
                 title: Transform.translate(
-                  offset: Offset(0, -32),
+                  offset: const Offset(0, -32),
                   child: Padding(
                     padding: const EdgeInsets.symmetric(
                         vertical: 4, horizontal: 56.0),
@@ -341,17 +337,17 @@ class _TourRunningState extends State<TourRunning> {
                             )),
                   ),
                 ),
-                titlePadding: EdgeInsets.only(bottom: 0.0),
+                titlePadding: const EdgeInsets.only(bottom: 0.0),
                 expandedTitleScale: 1,
                 collapseMode: CollapseMode.parallax,
                 background: Stack(
                   fit: StackFit.expand,
                   children: [
-                    Container(
+                    SizedBox(
                       height: kIsWeb ? 400 : 230,
                       child: ClipRRect(
                         child: kIsWeb
-                            ? Image.network(_tour.imageUrl!,
+                            ? Image.network(_tour.imageUrl,
                                 width: MediaQuery.of(context).size.width,
                                 height: 400.0,
                                 fit: BoxFit.cover)
@@ -427,10 +423,10 @@ class _TourRunningState extends State<TourRunning> {
                         if (_tour.tourguidePlaces.isNotEmpty)
                           Transform.translate(
                             // Move the stepper up to hide top margin, seems to be the easiest way to achieve it
-                            offset: Offset(0, -32),
+                            offset: const Offset(0, -32),
                             child: Stepper(
                               currentStep: _currentStep,
-                              physics: NeverScrollableScrollPhysics(),
+                              physics: const NeverScrollableScrollPhysics(),
                               onStepTapped: (step) {
                                 _setStep(step);
                               },
@@ -531,7 +527,7 @@ class _TourRunningState extends State<TourRunning> {
                                                   ? const Text('Next Place')
                                                   : const Text('Finish Tour'),
                                             ),
-                                            Spacer(),
+                                            const Spacer(),
                                           ],
                                         ),
                                       ),
@@ -585,7 +581,7 @@ class _TourRunningState extends State<TourRunning> {
                                                   const SizedBox(width: 8.0),
                                                   Flexible(
                                                     child: Text(
-                                                      "${place.title}",
+                                                      place.title,
                                                       style: Theme.of(context)
                                                           .textTheme
                                                           .titleMedium!
@@ -611,7 +607,7 @@ class _TourRunningState extends State<TourRunning> {
                                               onPressed: () =>
                                                   MapUtils.openMapWithQuery(
                                                       place.title),
-                                              icon: Icon(Icons.directions),
+                                              icon: const Icon(Icons.directions),
                                             ),
                                             IconButton(
                                               onPressed: () => _toggleTTS(
@@ -623,7 +619,7 @@ class _TourRunningState extends State<TourRunning> {
                                             ),
                                           ],
                                         ),
-                                        SizedBox(height: 6.0),
+                                        const SizedBox(height: 6.0),
                                         VisibilityDetector(
                                           key: Key('place$index'),
                                           onVisibilityChanged:
@@ -672,14 +668,14 @@ class _TourRunningState extends State<TourRunning> {
                                   'We hope you\'ve enjoyed this tour!',
                                   style:
                                       Theme.of(context).textTheme.bodyMedium),
-                              SizedBox(height: 32.0),
+                              const SizedBox(height: 32.0),
                               Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
                                   TourRatingBookmarkButtons(tour: _tour),
                                 ],
                               ),
-                              SizedBox(height: 32.0),
+                              const SizedBox(height: 32.0),
                             ],
                           ),
                         ),

@@ -1,18 +1,7 @@
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:go_router/go_router.dart';
-import 'package:google_sign_in/google_sign_in.dart';
 import 'package:profanity_filter/profanity_filter.dart';
 import 'package:tourguide_app/model/tourguide_report.dart';
-import 'package:tourguide_app/model/tourguide_user.dart';
-import 'package:tourguide_app/profile/app_settings.dart';
-import 'package:tourguide_app/profile/profile_settings.dart';
-import 'package:tourguide_app/profile/to_tour_list.dart';
-import 'package:tourguide_app/ui/my_layouts.dart';
 import 'package:tourguide_app/ui/report_dialogue.dart';
 import 'package:tourguide_app/utilities/custom_import.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:tourguide_app/utilities/providers/auth_provider.dart' as myAuth;
-import 'package:tourguide_app/utilities/providers/tour_provider.dart';
 import 'package:tourguide_app/utilities/providers/tourguide_user_provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -21,10 +10,9 @@ class TourguideUserProfileView extends StatefulWidget {
   final String tourguideUserDisplayName;
 
   const TourguideUserProfileView(
-      {Key? key,
+      {super.key,
       required this.tourguideUserId,
-      required this.tourguideUserDisplayName})
-      : super(key: key);
+      required this.tourguideUserDisplayName});
 
   @override
   State<TourguideUserProfileView> createState() =>
@@ -40,7 +28,7 @@ class _TourguideUserProfileViewState extends State<TourguideUserProfileView> {
     bool isCurrentUser =
         widget.tourguideUserId == tourguideUserProvider.user!.firebaseAuthId;
 
-    void _showReportDialog(BuildContext context) {
+    void showReportDialog(BuildContext context) {
       showDialog(
         context: context,
         builder: (BuildContext context) {
@@ -79,7 +67,7 @@ class _TourguideUserProfileViewState extends State<TourguideUserProfileView> {
             ProfileListButton(
               label: 'Report User',
               leftIcon: Icons.report_outlined,
-              onPressed: () => _showReportDialog(context),
+              onPressed: () => showReportDialog(context),
               disabled: isCurrentUser,
             ),
             ProfileListButton(
@@ -102,8 +90,7 @@ class TourguideUserProfileViewReportOptions extends StatefulWidget {
   final String tourguideUserId;
 
   const TourguideUserProfileViewReportOptions(
-      {Key? key, required this.tourguideUserId})
-      : super(key: key);
+      {super.key, required this.tourguideUserId});
 
   @override
   State<TourguideUserProfileViewReportOptions> createState() =>
@@ -151,12 +138,12 @@ class _TourguideUserProfileViewReportOptionsState
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Thank You'),
-          content: Text(
+          title: const Text('Thank You'),
+          content: const Text(
               'Thank you for your report. We will review the user and take appropriate action if necessary.'),
           actions: [
             TextButton(
-              child: Text('OK'),
+              child: const Text('OK'),
               onPressed: () {
                 Navigator.of(context).pop();
               },
@@ -170,7 +157,7 @@ class _TourguideUserProfileViewReportOptionsState
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: Text('Report User'),
+      title: const Text('Report User'),
       content: SingleChildScrollView(
         child: ListBody(
           children: <Widget>[
@@ -185,7 +172,7 @@ class _TourguideUserProfileViewReportOptionsState
       ),
       actions: [
         TextButton(
-          child: Text('Cancel'),
+          child: const Text('Cancel'),
           onPressed: () {
             setState(() {
               Navigator.of(context).pop();
@@ -193,8 +180,8 @@ class _TourguideUserProfileViewReportOptionsState
           },
         ),
         TextButton(
-          child: Text('Submit Report'),
           onPressed: _selectedReportOption.isEmpty ? null : _submitReport,
+          child: const Text('Submit Report'),
         ),
       ],
     );

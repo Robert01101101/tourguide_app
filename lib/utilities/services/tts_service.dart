@@ -110,8 +110,9 @@ class TtsService {
   Future<void> _saveSettings() async {
     final prefs = await SharedPreferences.getInstance();
     prefs.setDouble('tts_rate', rate);
-    if (languageNotifier != null && languageNotifier.value != null)
+    if (languageNotifier.value != null) {
       prefs.setString('tts_language', languageNotifier.value!);
+    }
     hasSavedSettings.value = true;
   }
 

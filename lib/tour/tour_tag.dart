@@ -64,7 +64,7 @@ class TourTagsAndRatingRow extends StatelessWidget {
         Expanded(
           child: TourTagsRow(tags: tags, selectable: false),
         ),
-        SizedBox(width: 4),
+        const SizedBox(width: 4),
         Material(
           elevation: 1,
           color: Theme.of(context)
@@ -81,7 +81,7 @@ class TourTagsAndRatingRow extends StatelessWidget {
                         : Icons.thumb_down_outlined,
                     color: Theme.of(context).colorScheme.secondary,
                     size: 14),
-                SizedBox(width: 3),
+                const SizedBox(width: 3),
                 Text(
                   '${(rating).sign == 1 ? '+' : ''}$rating',
                   style: Theme.of(context).textTheme.labelMedium!.copyWith(

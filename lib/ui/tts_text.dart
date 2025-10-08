@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'package:tourguide_app/utilities/services/tts_service.dart';
 
 import '../main.dart';
@@ -14,12 +13,12 @@ class TtsText extends StatefulWidget {
   final void Function(String tappedWord)? onWordTapped;
 
   const TtsText({
-    Key? key,
+    super.key,
     required this.text,
     required this.ttsService,
     required this.currentlyPlayingItem,
     this.onWordTapped,
-  }) : super(key: key);
+  });
 
   @override
   _TtsTextState createState() => _TtsTextState();
@@ -43,7 +42,9 @@ class _TtsTextState extends State<TtsText> {
       if (!widget.currentlyPlayingItem) {
         if (startOffset != 0 ||
             endOffset != 0 ||
-            tappedStringCharacterOffset != 0) resetTtsViz();
+            tappedStringCharacterOffset != 0) {
+          resetTtsViz();
+        }
         return;
       }
 
@@ -146,8 +147,9 @@ class _TtsTextState extends State<TtsText> {
           : SystemMouseCursors.basic,
       child: GestureDetector(
         onTapUp: (details) {
-          if (widget.currentlyPlayingItem)
+          if (widget.currentlyPlayingItem) {
             _detectWordTapped(details.globalPosition);
+          }
         },
         child: Container(
             key: _richTextKey,

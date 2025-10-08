@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:tourguide_app/model/tour.dart';
 import 'package:tourguide_app/tour/tour_tile.dart';
