@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:tourguide_app/utilities/providers/location_provider.dart';
 import 'package:flutter_google_places_sdk/flutter_google_places_sdk.dart';
@@ -20,7 +19,7 @@ class PlaceAutocomplete extends StatefulWidget {
   final InputDecoration? decoration;
   final bool customLabel;
 
-  PlaceAutocomplete({
+  const PlaceAutocomplete({super.key, 
     required this.textEditingController,
     required this.isFormSubmitted,
     required this.onItemSelected,
@@ -53,7 +52,7 @@ class _PlaceAutocompleteState extends State<PlaceAutocomplete> {
   @override
   void initState() {
     logger.i(
-        'PlaceAutocomplete.initState(), textEditingController.text=${widget.textEditingController.text}, _isValidSelection=${_isValidSelection}');
+        'PlaceAutocomplete.initState(), textEditingController.text=${widget.textEditingController.text}, _isValidSelection=$_isValidSelection');
     super.initState();
     LocationProvider locationProvider =
         Provider.of<LocationProvider>(context, listen: false);
@@ -92,7 +91,7 @@ class _PlaceAutocompleteState extends State<PlaceAutocomplete> {
           },
           initialValue: widget.textEditingController.value,
           displayStringForOption: (AutocompletePrediction option) =>
-              option.fullText!,
+              option.fullText,
           fieldViewBuilder: (BuildContext context,
               TextEditingController fieldTextEditingController,
               FocusNode fieldFocusNode,
@@ -156,17 +155,17 @@ class _PlaceAutocompleteState extends State<PlaceAutocomplete> {
               alignment: Alignment.topLeft,
               child: Material(
                 elevation: 4.0,
-                child: Container(
+                child: SizedBox(
                   width: constraints.maxWidth, // Match width to the text field
                   child: ListView.builder(
-                    padding: EdgeInsets.all(8.0),
+                    padding: const EdgeInsets.all(8.0),
                     itemCount: options.length,
                     shrinkWrap: true,
                     itemBuilder: (BuildContext context, int index) {
                       final AutocompletePrediction option =
                           options.elementAt(index);
                       return ListTile(
-                        title: Text(option.fullText!),
+                        title: Text(option.fullText),
                         onTap: () async {
                           onSelected(option);
                           widget.onItemSelected(option);
@@ -181,7 +180,7 @@ class _PlaceAutocompleteState extends State<PlaceAutocomplete> {
                           });
                           if (widget.onPlaceInfoFetched != null) {
                             Place? place = await locationProvider
-                                .getLocationDetailsFromPlaceId(option.placeId!);
+                                .getLocationDetailsFromPlaceId(option.placeId);
                             widget.onPlaceInfoFetched!(place);
                           }
                         },
@@ -193,9 +192,9 @@ class _PlaceAutocompleteState extends State<PlaceAutocomplete> {
             );
           },
           onSelected: (AutocompletePrediction selection) {
-            widget.textEditingController.text = selection.fullText!;
+            widget.textEditingController.text = selection.fullText;
             widget.textEditingController.selection = TextSelection.fromPosition(
-                TextPosition(offset: selection.fullText!.length));
+                TextPosition(offset: selection.fullText.length));
           },
         );
       },

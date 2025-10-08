@@ -6,22 +6,19 @@ import 'package:image_picker/image_picker.dart';
 import '../main.dart';
 
 class AddImageTile extends FormField<File?> {
+  @override
   final bool enabled;
   final bool isSelected;
 
   AddImageTile({
-    Key? key,
-    File? initialValue,
-    FormFieldSetter<File?>? onSaved,
-    FormFieldValidator<File?>? validator,
+    super.key,
+    super.initialValue,
+    super.onSaved,
+    super.validator,
     ValueChanged<File?>? onChanged,
     required this.enabled,
     required this.isSelected,
   }) : super(
-          key: key,
-          initialValue: initialValue,
-          onSaved: onSaved,
-          validator: validator,
           builder: (FormFieldState<File?> state) {
             return _AddImageTileContent(
               initialValue: initialValue,
@@ -47,7 +44,6 @@ class _AddImageTileContent extends StatefulWidget {
   final bool isSelected;
 
   const _AddImageTileContent({
-    super.key,
     required this.initialValue,
     required this.state,
     required this.onChanged,
@@ -123,7 +119,7 @@ class _AddImageTileContentState extends State<_AddImageTileContent> {
                     if (_imageFile != null)
                       const Text('Replace image',
                           style: TextStyle(color: Colors.white)),
-                    SizedBox(height: 15),
+                    const SizedBox(height: 15),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
@@ -133,23 +129,23 @@ class _AddImageTileContentState extends State<_AddImageTileContent> {
                               : () => logger
                                   .e("Clicked take image after form submit"),
                           style: ElevatedButton.styleFrom(
-                            shape: CircleBorder(),
-                            padding: EdgeInsets.all(15),
+                            shape: const CircleBorder(),
+                            padding: const EdgeInsets.all(15),
                           ),
                           child: Icon(Icons.camera_alt,
                               color: widget.enabled
                                   ? Theme.of(context).colorScheme.primary
                                   : Colors.grey),
                         ),
-                        SizedBox(width: 15),
+                        const SizedBox(width: 15),
                         ElevatedButton(
                           onPressed: widget.enabled
                               ? () => _pickImage(ImageSource.gallery)
                               : () => logger
                                   .e("Clicked pick image after form submit"),
                           style: ElevatedButton.styleFrom(
-                            shape: CircleBorder(),
-                            padding: EdgeInsets.all(15),
+                            shape: const CircleBorder(),
+                            padding: const EdgeInsets.all(15),
                           ),
                           child: Icon(Icons.collections,
                               color: widget.enabled

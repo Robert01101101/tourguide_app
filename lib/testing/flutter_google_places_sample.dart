@@ -23,12 +23,12 @@ class _FlutterGooglePlacesSampleState extends State<FlutterGooglePlacesSample> {
   List<PlaceTypeFilter> _placeTypesFilter = [PlaceTypeFilter.ESTABLISHMENT];
 
   bool _locationBiasEnabled = true;
-  LatLngBounds _locationBias = LatLngBounds(
+  LatLngBounds _locationBias = const LatLngBounds(
       southwest: LatLng(lat: 32.0810305, lng: 34.785707),
       northeast: LatLng(lat: 32.0935937, lng: 34.8013896));
 
   bool _locationRestrictionEnabled = false;
-  LatLngBounds _locationRestriction = LatLngBounds(
+  LatLngBounds _locationRestriction = const LatLngBounds(
       southwest: LatLng(lat: 32.0583974, lng: 34.7633473),
       northeast: LatLng(lat: 32.0876885, lng: 34.8040563));
 
@@ -42,7 +42,7 @@ class _FlutterGooglePlacesSampleState extends State<FlutterGooglePlacesSample> {
 
   //
   final TextEditingController _fetchPlaceIdController = TextEditingController();
-  List<PlaceField> _placeFields = [
+  final List<PlaceField> _placeFields = [
     PlaceField.Address,
     PlaceField.AddressComponents,
     PlaceField.BusinessStatus,
@@ -76,7 +76,7 @@ class _FlutterGooglePlacesSampleState extends State<FlutterGooglePlacesSample> {
   void initState() {
     super.initState();
 
-    _places = FlutterGooglePlacesSdk(remoteConfig.getString('google_api_key')!);
+    _places = FlutterGooglePlacesSdk(remoteConfig.getString('google_api_key'));
     _places.isInitialized().then((value) {
       logger.t('Places Initialized: $value');
     });
@@ -91,20 +91,20 @@ class _FlutterGooglePlacesSampleState extends State<FlutterGooglePlacesSample> {
       appBar: AppBar(
         title: const Text("title"),
         actions: [
-          new IconButton(
+          IconButton(
               onPressed: _openSettingsModal, icon: const Icon(Icons.settings)),
         ],
       ),
       body: Padding(
-        padding: EdgeInsets.all(30),
+        padding: const EdgeInsets.all(30),
         child: ListView(
           children: predictionsWidgets +
               [
-                SizedBox(height: 16),
+                const SizedBox(height: 16),
               ] +
               fetchPlaceWidgets +
               [
-                SizedBox(height: 16),
+                const SizedBox(height: 16),
               ] +
               fetchPlacePhotoWidgets,
         ),
@@ -121,7 +121,7 @@ class _FlutterGooglePlacesSampleState extends State<FlutterGooglePlacesSample> {
   }
 
   String? _countriesValidator(String? input) {
-    if (input == null || input.length == 0) {
+    if (input == null || input.isEmpty) {
       return null; // valid
     }
 
@@ -130,7 +130,7 @@ class _FlutterGooglePlacesSampleState extends State<FlutterGooglePlacesSample> {
         .map((part) => part.trim())
         .map((part) {
           if (part.length != 2) {
-            return "Country part '${part}' must be 2 characters";
+            return "Country part '$part' must be 2 characters";
           }
           return null;
         })
@@ -206,7 +206,7 @@ class _FlutterGooglePlacesSampleState extends State<FlutterGooglePlacesSample> {
         countries: _countriesEnabled ? _countries : null,
         placeTypesFilter: _placeTypesFilter,
         newSessionToken: false,
-        origin: LatLng(lat: 43.12, lng: 95.20),
+        origin: const LatLng(lat: 43.12, lng: 95.20),
         locationBias: _locationBiasEnabled ? _locationBias : null,
         locationRestriction:
             _locationRestrictionEnabled ? _locationRestriction : null,
@@ -233,7 +233,7 @@ class _FlutterGooglePlacesSampleState extends State<FlutterGooglePlacesSample> {
       onTap: () => _onItemClicked(item),
       child: Column(children: [
         Text(item.fullText),
-        Text(item.primaryText + ' - ' + item.secondaryText),
+        Text('${item.primaryText} - ${item.secondaryText}'),
         const Divider(thickness: 2),
       ]),
     );
@@ -312,7 +312,7 @@ class _FlutterGooglePlacesSampleState extends State<FlutterGooglePlacesSample> {
 
       // -- Error widget + Result
       _buildErrorWidget(_fetchingPlaceErr),
-      WebSelectableText('Result: ' + (_place?.toString() ?? 'N/A')),
+      WebSelectableText('Result: ${_place?.toString() ?? 'N/A'}'),
     ];
   }
 
@@ -337,7 +337,7 @@ class _FlutterGooglePlacesSampleState extends State<FlutterGooglePlacesSample> {
       // --
       TextFormField(
         onChanged: _onPredictTextChanged,
-        decoration: InputDecoration(label: Text("Query")),
+        decoration: const InputDecoration(label: Text("Query")),
       ),
       // -- Countries
       _buildEnabledOption(
@@ -346,7 +346,7 @@ class _FlutterGooglePlacesSampleState extends State<FlutterGooglePlacesSample> {
         TextFormField(
           enabled: _countriesEnabled,
           onChanged: _onCountriesTextChanged,
-          decoration: InputDecoration(label: Text("Countries")),
+          decoration: const InputDecoration(label: Text("Countries")),
           validator: _countriesValidator,
           autovalidateMode: AutovalidateMode.onUserInteraction,
           initialValue: _countries.join(","),
@@ -356,7 +356,8 @@ class _FlutterGooglePlacesSampleState extends State<FlutterGooglePlacesSample> {
       DropdownButton<PlaceTypeFilter>(
         items: PlaceTypeFilter.values
             .map((item) => DropdownMenuItem<PlaceTypeFilter>(
-                child: Text(item.value), value: item))
+                value: item,
+                child: Text(item.value)))
             .toList(growable: false),
         value: _placeTypesFilter.isEmpty ? null : _placeTypesFilter[0],
         onChanged: _onPlaceTypeFilterChanged,
@@ -405,7 +406,7 @@ class _FlutterGooglePlacesSampleState extends State<FlutterGooglePlacesSample> {
             .map(_buildPredictionItem)
             .toList(growable: false),
       ),
-      Image(
+      const Image(
         image: FlutterGooglePlacesSdk.ASSET_POWERED_BY_GOOGLE_ON_WHITE,
       ),
     ];
@@ -448,12 +449,11 @@ class LocationField extends StatefulWidget {
 
   /// Create a LocationField
   const LocationField(
-      {Key? key,
+      {super.key,
       required this.label,
       required this.enabled,
       required this.value,
-      required this.onChanged})
-      : super(key: key);
+      required this.onChanged});
 
   @override
   State<StatefulWidget> createState() => _LocationFieldState();
@@ -482,7 +482,7 @@ class _LocationFieldState extends State<LocationField> {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: EdgeInsets.all(5.0),
+      padding: const EdgeInsets.all(5.0),
       child: InputDecorator(
         decoration: InputDecoration(
           enabled: widget.enabled,
@@ -506,7 +506,7 @@ class _LocationFieldState extends State<LocationField> {
       child: TextFormField(
         enabled: widget.enabled,
         keyboardType:
-            TextInputType.numberWithOptions(signed: true, decimal: true),
+            const TextInputType.numberWithOptions(signed: true, decimal: true),
         inputFormatters: [
           FilteringTextInputFormatter.allow(RegExp(r'[\d.]')),
         ],
@@ -523,7 +523,7 @@ class _LocationFieldState extends State<LocationField> {
     final neLat = double.parse(ctrlNELat.value.text);
 
     LatLngBounds bounds = LatLngBounds(
-        southwest: LatLng(lat: 0.0, lng: 0.0),
+        southwest: const LatLng(lat: 0.0, lng: 0.0),
         northeast: LatLng(lat: neLat, lng: 0.0));
 
     widget.onChanged(bounds);
@@ -544,7 +544,7 @@ class WebSelectableText extends StatelessWidget {
   ///
   /// If the platform is web, the widget created is [SelectableText].
   /// Otherwise, it's a [Text].
-  const WebSelectableText(this.data, {Key? key}) : super(key: key);
+  const WebSelectableText(this.data, {super.key});
 
   @override
   Widget build(BuildContext context) {

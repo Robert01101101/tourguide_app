@@ -63,7 +63,7 @@ class TourguideTheme {
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
-          textStyle: TextStyle(fontWeight: FontWeight.w500),
+          textStyle: const TextStyle(fontWeight: FontWeight.w500),
         ),
       ),
     );

@@ -1,32 +1,26 @@
 import 'dart:io';
-import 'dart:typed_data';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:permission_handler/permission_handler.dart';
-import 'dart:io' if (dart.library.html) 'dart:html' as html;
 
 import '../main.dart'; // Conditional import
 
 //TODO: Better solution with web support, try to merge the mobile and web Widgets into one
 class AddImageTileWeb extends FormField<XFile?> {
   // Use XFile instead of File
+  @override
   final bool enabled;
   final bool isSelected;
 
   AddImageTileWeb({
-    Key? key,
-    XFile? initialValue, // Change initialValue type to XFile
-    FormFieldSetter<XFile?>? onSaved,
-    FormFieldValidator<XFile?>? validator,
+    super.key,
+    super.initialValue, // Change initialValue type to XFile
+    super.onSaved,
+    super.validator,
     ValueChanged<XFile?>? onChanged,
     required this.enabled,
     required this.isSelected,
   }) : super(
-          key: key,
-          initialValue: initialValue,
-          onSaved: onSaved,
-          validator: validator,
           builder: (FormFieldState<XFile?> state) {
             return _AddImageTileWebContent(
               initialValue: initialValue,
@@ -52,7 +46,6 @@ class _AddImageTileWebContent extends StatefulWidget {
   final bool isSelected;
 
   const _AddImageTileWebContent({
-    super.key,
     required this.initialValue,
     required this.state,
     required this.onChanged,

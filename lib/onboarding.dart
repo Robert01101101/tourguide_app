@@ -1,16 +1,11 @@
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:introduction_screen/introduction_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:tourguide_app/sign_in.dart';
 import 'package:tourguide_app/ui/tourguide_theme.dart';
-import 'package:tourguide_app/utilities/providers/location_provider.dart';
-import 'package:tourguide_app/utilities/providers/tour_provider.dart';
-import 'package:tourguide_app/utilities/providers/tourguide_user_provider.dart';
 import 'package:tourguide_app/utilities/tourguide_navigation.dart';
 import 'package:tourguide_app/utilities/providers/auth_provider.dart'
     as my_auth;
@@ -62,8 +57,8 @@ class _TourguideOnboardState extends State<TourguideOnboard> {
   }
 
   void _completeOnboarding() async {
-    var _prefs = await SharedPreferences.getInstance();
-    _prefs.setBool('firstTimeUser', false);
+    var prefs = await SharedPreferences.getInstance();
+    prefs.setBool('firstTimeUser', false);
     TourguideNavigation.router.go(
       pathToGoToNext,
     );
@@ -139,7 +134,7 @@ class _TourguideOnboardState extends State<TourguideOnboard> {
             image: Image.asset('assets/onboarding/onboard1.png',
                 width: imageSize, height: imageSize),
             decoration: pageDecoration.copyWith(
-              pageColor: Color(0x00ffffff),
+              pageColor: const Color(0x00ffffff),
             ),
           ),
           PageViewModel(
@@ -149,7 +144,7 @@ class _TourguideOnboardState extends State<TourguideOnboard> {
             image: Image.asset('assets/onboarding/onboard2.png',
                 width: imageSize, height: imageSize),
             decoration: pageDecoration.copyWith(
-              pageColor: Color(0x11ffffff),
+              pageColor: const Color(0x11ffffff),
             ),
           ),
           PageViewModel(
@@ -206,7 +201,7 @@ class _TourguideOnboardState extends State<TourguideOnboard> {
             image: Image.asset('assets/onboarding/onboard3.png',
                 width: imageSize, height: imageSize),
             decoration: pageDecoration.copyWith(
-              pageColor: Color(0x22ffffff),
+              pageColor: const Color(0x22ffffff),
             ),
           ),
           PageViewModel(
@@ -216,7 +211,7 @@ class _TourguideOnboardState extends State<TourguideOnboard> {
             image: Image.asset('assets/onboarding/onboard4.png',
                 width: imageSize, height: imageSize),
             decoration: pageDecoration.copyWith(
-              pageColor: Color(0x33ffffff),
+              pageColor: const Color(0x33ffffff),
             ),
           ),
         ],
@@ -251,7 +246,7 @@ class _TourguideOnboardState extends State<TourguideOnboard> {
           ),
         ),*/
         globalBackgroundColor: TourguideTheme.tourguideColor,
-        scrollPhysics: ClampingScrollPhysics(),
+        scrollPhysics: const ClampingScrollPhysics(),
 
         //next: Icon(Icons.arrow_forward, color: Colors.white),
         //doneButtonPersist: true, // Persist done button across pages

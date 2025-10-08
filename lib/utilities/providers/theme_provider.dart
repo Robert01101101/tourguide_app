@@ -1,7 +1,5 @@
 // theme_provider.dart
-import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:tourguide_app/ui/tourguide_theme.dart';
 import 'package:tourguide_app/utilities/custom_import.dart';
 
 class ThemeProvider with ChangeNotifier {

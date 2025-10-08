@@ -3,7 +3,6 @@ import 'package:provider/provider.dart';
 import 'package:tourguide_app/utilities/providers/auth_provider.dart' as myAuth;
 import 'package:tourguide_app/utilities/providers/tour_provider.dart';
 
-import '../main.dart';
 import '../model/tour.dart';
 import '../utilities/providers/tourguide_user_provider.dart';
 import '../utilities/services/tour_service.dart';
@@ -37,8 +36,9 @@ class _TourRatingBookmarkButtonsState extends State<TourRatingBookmarkButtons> {
       _showSignupDialog('rate tours');
       return;
     }
-    if (widget.tour.isOfflineCreatedTour ?? false)
+    if (widget.tour.isOfflineCreatedTour ?? false) {
       return; // Tour creation tile should not have rating
+    }
 
     TourProvider tourProvider = Provider.of(context, listen: false);
 
@@ -68,8 +68,9 @@ class _TourRatingBookmarkButtonsState extends State<TourRatingBookmarkButtons> {
       _showSignupDialog('rate tours');
       return;
     }
-    if (widget.tour.isOfflineCreatedTour ?? false)
+    if (widget.tour.isOfflineCreatedTour ?? false) {
       return; // Tour creation tile should not have rating
+    }
 
     TourProvider tourProvider = Provider.of(context, listen: false);
 
@@ -166,8 +167,8 @@ class _TourRatingBookmarkButtonsState extends State<TourRatingBookmarkButtons> {
           onPressed:
               (widget.tour.isOfflineCreatedTour ?? false) ? null : saveTour,
           style: ElevatedButton.styleFrom(
-            shape: CircleBorder(),
-            padding: EdgeInsets.all(0),
+            shape: const CircleBorder(),
+            padding: const EdgeInsets.all(0),
             foregroundColor: tourguideUserProvider.user != null &&
                     tourguideUserProvider.user!.savedTourIds
                         .contains(widget.tour.id)
@@ -175,7 +176,7 @@ class _TourRatingBookmarkButtonsState extends State<TourRatingBookmarkButtons> {
                 : Colors.grey,
             backgroundColor: Theme.of(context).colorScheme.surfaceContainer,
           ),
-          child: Icon(Icons.bookmark_rounded), // Replace with your desired icon
+          child: const Icon(Icons.bookmark_rounded), // Replace with your desired icon
         ),
         Material(
           elevation: 1,
@@ -195,8 +196,8 @@ class _TourRatingBookmarkButtonsState extends State<TourRatingBookmarkButtons> {
                             ? Theme.of(context).colorScheme.primary
                             : Colors.grey),
                     iconSize: 18,
-                    padding: EdgeInsets.all(0),
-                    constraints: BoxConstraints(),
+                    padding: const EdgeInsets.all(0),
+                    constraints: const BoxConstraints(),
                   ),
                 ),
                 Text(
@@ -215,8 +216,8 @@ class _TourRatingBookmarkButtonsState extends State<TourRatingBookmarkButtons> {
                             ? Theme.of(context).colorScheme.primary
                             : Colors.grey),
                     iconSize: 18,
-                    padding: EdgeInsets.all(0),
-                    constraints: BoxConstraints(),
+                    padding: const EdgeInsets.all(0),
+                    constraints: const BoxConstraints(),
                   ),
                 ),
               ],

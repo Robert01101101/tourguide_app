@@ -1,11 +1,9 @@
 import 'dart:async';
-import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:flutter/foundation.dart';
 import 'package:tourguide_app/main.dart';
 import 'package:tourguide_app/utilities/tourguide_navigation.dart';
-import 'package:universal_html/js_util.dart';
 
 const List<String> scopes = <String>[
   'email',
@@ -71,7 +69,7 @@ class AuthProvider with ChangeNotifier {
       _isAuthorized = isAuthorized;
       _isAnonymous = _isAuthorized;
       logger.t(
-          "AuthProvider._googleSignIn.onCurrentUserChanged -> isAuthorized=${_isAuthorized}, _googleSignInUser=$_googleSignInUser, _user=$_user");
+          "AuthProvider._googleSignIn.onCurrentUserChanged -> isAuthorized=$_isAuthorized, _googleSignInUser=$_googleSignInUser, _user=$_user");
       notifyListeners();
 
       //sign in with Firebase if authorized (on web the user has to press the button)
@@ -170,10 +168,8 @@ class AuthProvider with ChangeNotifier {
   @override
   void dispose() {
     logger.t('AuthProvider.dispose()');
-    if (_userAuthSub != null) {
-      _userAuthSub.cancel();
-    }
-    super.dispose();
+    _userAuthSub.cancel();
+      super.dispose();
   }
 
   void _signInSilently() async {

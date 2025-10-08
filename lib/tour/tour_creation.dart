@@ -18,7 +18,6 @@ import 'package:tourguide_app/utilities/custom_import.dart';
 import 'package:flutter_google_places_sdk/flutter_google_places_sdk.dart';
 import 'package:tourguide_app/utilities/providers/auth_provider.dart' as myAuth;
 
-import 'package:tourguide_app/main.dart';
 import 'package:tourguide_app/utilities/providers/location_provider.dart';
 import 'package:profanity_filter/profanity_filter.dart';
 
@@ -48,12 +47,12 @@ class _CreateEditTourState extends State<CreateEditTour> {
       GlobalKey<FormFieldState>();
   AutovalidateMode _formValidateMode = AutovalidateMode.disabled;
   AutovalidateMode _formPlacesValidateMode = AutovalidateMode.disabled;
-  AutovalidateMode _formPlacesDetailsValidateMode = AutovalidateMode.disabled;
+  final AutovalidateMode _formPlacesDetailsValidateMode = AutovalidateMode.disabled;
   AutovalidateMode _formDetailsValidateMode = AutovalidateMode.disabled;
   final List<TextEditingController> _placeControllers = [];
 
   Tour _tour = Tour.isOfflineCreatedTour();
-  bool _tourIsPublic = true; // Initial boolean value
+  final bool _tourIsPublic = true; // Initial boolean value
   bool _isFormSubmitted = false;
   final int _descriptionMaxChars = 250;
   final int _placeDescriptionMaxChars = 5000;
@@ -305,13 +304,13 @@ class _CreateEditTourState extends State<CreateEditTour> {
               _tour = _tour.copyWith(
                   imageFileToUploadWeb: _selectedImgIndex == -1
                       ? _imageWeb
-                      : _tour.tourguidePlaces[_selectedImgIndex!]
+                      : _tour.tourguidePlaces[_selectedImgIndex]
                           .imageFileToUploadWeb);
             } else {
               _tour = _tour.copyWith(
                   imageFile: _selectedImgIndex == -1
                       ? _image
-                      : _tour.tourguidePlaces[_selectedImgIndex!].imageFile);
+                      : _tour.tourguidePlaces[_selectedImgIndex].imageFile);
             }
             logger.i("Reviewing tour: ${_tour.toString()}");
             break;
@@ -422,7 +421,7 @@ class _CreateEditTourState extends State<CreateEditTour> {
       if (tourguidePlaceImg == null) {
         logger.w("_updateTourguidePlaceDetails() - tourguidePlaceImg is null");
       } else {
-        tourguidePlaceImg!.googlePlacesImg!.placePhotoResponse?.maybeWhen(
+        tourguidePlaceImg.googlePlacesImg!.placePhotoResponse.maybeWhen(
           image: (image) {
             photo = image;
             logger.i(
@@ -431,7 +430,7 @@ class _CreateEditTourState extends State<CreateEditTour> {
           imageUrl: (imageUrl) {
             photoUrl = imageUrl;
             logger.i(
-                "_updateTourguidePlaceDetails() - googlePlacesImg!.placePhotoResponse?.maybeWhen -> returned imagUrl=${imageUrl}");
+                "_updateTourguidePlaceDetails() - googlePlacesImg!.placePhotoResponse?.maybeWhen -> returned imagUrl=$imageUrl");
           },
           orElse: () {
             logger.w(
@@ -441,8 +440,8 @@ class _CreateEditTourState extends State<CreateEditTour> {
       }
       TourguidePlace newTourguidePlace = TourguidePlace(
         latitude: googlePlaceWithDetails!.latLng!.lat,
-        longitude: googlePlaceWithDetails!.latLng!.lng,
-        googleMapPlaceId: googlePlaceWithDetails!.id!,
+        longitude: googlePlaceWithDetails.latLng!.lng,
+        googleMapPlaceId: googlePlaceWithDetails.id!,
         title: primaryText,
         description: '',
         photoUrl: photoUrl ?? '',
@@ -539,7 +538,7 @@ class _CreateEditTourState extends State<CreateEditTour> {
                             ? const Text('Update Tour')
                             : const Text('Create Tour'),
                   ),
-                  Spacer(),
+                  const Spacer(),
                   /*if (_currentStep == 1) //TODO Map view
                     IconButton(
                         padding: EdgeInsets.all(10),
@@ -598,8 +597,7 @@ class _CreateEditTourState extends State<CreateEditTour> {
                         if (value == null || value.isEmpty) {
                           return 'Please enter a description for your tour';
                         }
-                        if (value != null &&
-                            value.characters.length > _descriptionMaxChars) {
+                        if (value.characters.length > _descriptionMaxChars) {
                           return 'Please enter a maximum of $_descriptionMaxChars characters';
                         }
                         return null;
@@ -668,7 +666,7 @@ class _CreateEditTourState extends State<CreateEditTour> {
                       children: [
                         ReorderableListView(
                           buildDefaultDragHandles: false,
-                          physics: ClampingScrollPhysics(),
+                          physics: const ClampingScrollPhysics(),
                           shrinkWrap: true,
                           proxyDecorator: (child, index, animation) {
                             return AnimatedBuilder(
@@ -755,7 +753,7 @@ class _CreateEditTourState extends State<CreateEditTour> {
                           width: double.infinity,
                           child: ElevatedButton.icon(
                             onPressed: _addPlace,
-                            icon: Icon(Icons.add),
+                            icon: const Icon(Icons.add),
                             label: const Text('Add Place'),
                           ),
                         ),
@@ -833,8 +831,7 @@ class _CreateEditTourState extends State<CreateEditTour> {
                                       if (value == null || value.isEmpty) {
                                         return 'Please enter a description';
                                       }
-                                      if (value != null &&
-                                          value.characters.length >
+                                      if (value.characters.length >
                                               _placeDescriptionMaxChars) {
                                         return 'Please enter a maximum of $_placeDescriptionMaxChars characters';
                                       }

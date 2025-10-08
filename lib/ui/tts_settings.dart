@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:io';
 
 import 'package:android_intent_plus/android_intent.dart';
 import 'package:flutter/foundation.dart';
@@ -114,7 +113,7 @@ class _TtsSettingsState extends State<TtsSettings> {
             ),
           ],
         ),
-        SizedBox(height: 4.0),
+        const SizedBox(height: 4.0),
         Row(
           mainAxisAlignment: MainAxisAlignment.start,
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -133,9 +132,9 @@ class _TtsSettingsState extends State<TtsSettings> {
                           return _languageDropDownSection(
                               snapshot.data as List<dynamic>);
                         } else if (snapshot.hasError) {
-                          return Text('Error loading languages...');
+                          return const Text('Error loading languages...');
                         } else
-                          return Text('Loading Languages...');
+                          return const Text('Loading Languages...');
                       }),
                   ValueListenableBuilder<bool>(
                       valueListenable:
@@ -149,11 +148,11 @@ class _TtsSettingsState extends State<TtsSettings> {
                               mainAxisAlignment: MainAxisAlignment.start,
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                SizedBox(width: 4.0),
+                                const SizedBox(width: 4.0),
                                 Icon(Icons.error,
                                     size: 16.0,
                                     color: Theme.of(context).colorScheme.error),
-                                SizedBox(width: 4.0),
+                                const SizedBox(width: 4.0),
                                 Text("Not installed",
                                     style:
                                         Theme.of(context).textTheme.bodySmall),
@@ -164,13 +163,13 @@ class _TtsSettingsState extends State<TtsSettings> {
                       }),
                 ],
               ),
-            if (!kIsWeb) SizedBox(width: 16.0),
+            if (!kIsWeb) const SizedBox(width: 16.0),
             Column(
               mainAxisAlignment: MainAxisAlignment.start,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text("Speed", style: Theme.of(context).textTheme.titleSmall),
-                SizedBox(height: 14.0),
+                const SizedBox(height: 14.0),
                 ValueListenableBuilder<double>(
                     valueListenable: _ttsService.rateNotifier,
                     builder: (context, rate, child) {
@@ -183,7 +182,7 @@ class _TtsSettingsState extends State<TtsSettings> {
                         min: 0.0,
                         max: 1.0,
                         divisions: 10,
-                        label: "${rate}",
+                        label: "$rate",
                         activeColor: Theme.of(context).colorScheme.primary,
                       );
                     }),
@@ -191,7 +190,7 @@ class _TtsSettingsState extends State<TtsSettings> {
             ),
           ],
         ),
-        SizedBox(height: 16.0),
+        const SizedBox(height: 16.0),
         Wrap(
           children: [
             if (!kIsWeb)

@@ -1,8 +1,4 @@
-import 'dart:async';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:tourguide_app/model/tour.dart';
 import 'package:tourguide_app/tour/tour_tag.dart';
 import 'package:tourguide_app/tour/tour_creation.dart';
@@ -13,7 +9,6 @@ import 'package:tourguide_app/tour/tour_map.dart';
 import 'package:tourguide_app/utilities/providers/tour_provider.dart';
 import 'tour_rating_bookmark_buttons.dart';
 import '../utilities/custom_import.dart';
-import '../utilities/providers/tourguide_user_provider.dart';
 import '../utilities/services/tts_service.dart';
 import 'package:tourguide_app/utilities/providers/auth_provider.dart'
     as my_auth;
@@ -156,7 +151,7 @@ class _FullscreenTourPageState extends State<FullscreenTourPage> {
                 enableVerticalPadding: false,
                 child: Stack(
                   children: [
-                    Container(
+                    SizedBox(
                       height: kIsWeb ? imageHeight : 200,
                       child: ClipRRect(
                         child: kIsWeb
@@ -167,7 +162,7 @@ class _FullscreenTourPageState extends State<FullscreenTourPage> {
                                     width: MediaQuery.of(context).size.width,
                                     height: imageHeight,
                                     fit: BoxFit.cover)
-                                : Image.network(widget.tour.imageUrl!,
+                                : Image.network(widget.tour.imageUrl,
                                     width: MediaQuery.of(context).size.width,
                                     height: imageHeight,
                                     fit: BoxFit.cover)
@@ -274,7 +269,7 @@ class _FullscreenTourPageState extends State<FullscreenTourPage> {
                                       ),
                                   maxLines: 2,
                                 ),
-                                SizedBox(height: 6),
+                                const SizedBox(height: 6),
                                 Text(
                                   place
                                       .description, // Assuming each place has a 'description' field

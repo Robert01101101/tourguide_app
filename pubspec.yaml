@@ -103,6 +103,10 @@ dependencies:
 
 
 
+  flutter_chat_types: any
+  uuid: any
+  collection: any
+  google_sign_in_web: any
 dev_dependencies:
   flutter_test:
     sdk: flutter

@@ -1,20 +1,14 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:tourguide_app/model/tour.dart';
-import 'package:tourguide_app/tour/tour_creation.dart';
 import 'package:tourguide_app/ui/horizontal_scroller.dart';
 import 'package:tourguide_app/ui/my_layouts.dart';
 import 'package:tourguide_app/ui/shimmer_loading.dart';
-import 'package:tourguide_app/utilities/ad_banner.dart';
 import 'package:tourguide_app/utilities/custom_import.dart';
-import 'package:tourguide_app/utilities/providers/location_provider.dart';
 import 'package:tourguide_app/utilities/providers/tour_provider.dart';
 import 'package:tourguide_app/utilities/providers/auth_provider.dart' as myAuth;
-import 'package:tourguide_app/utilities/providers/tourguide_user_provider.dart';
 
 import 'explore_map.dart';
-import 'main.dart';
 
 class Contribute extends StatefulWidget {
   const Contribute({super.key});

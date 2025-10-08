@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:developer';
 import 'dart:io';
 import 'dart:math' as math;
 import 'dart:ui' as ui;
@@ -44,7 +43,7 @@ class LocationProvider with ChangeNotifier {
   TourguidePlaceImg? get currentPlaceImg => _currentPlaceImg;
   PermissionStatus get permissionStatus => _permissionStatus;
 
-  Map<String, TourguidePlaceImg> _imageCache = {};
+  final Map<String, TourguidePlaceImg> _imageCache = {};
 
   LocationProvider() {
     _init();
@@ -52,7 +51,7 @@ class LocationProvider with ChangeNotifier {
 
   Future<void> _init() async {
     logger.t("LocationProvider._init()");
-    _places = FlutterGooglePlacesSdk(remoteConfig.getString('google_api_key')!);
+    _places = FlutterGooglePlacesSdk(remoteConfig.getString('google_api_key'));
     _loadSavedLocation();
     getCurrentLocation();
   }
@@ -128,7 +127,7 @@ class LocationProvider with ChangeNotifier {
         position.longitude,
       );
 
-      if (placemarks != null && placemarks.isNotEmpty) {
+      if (placemarks.isNotEmpty) {
         _currentCity = placemarks.first.locality ?? '';
         logger.t(
             "LocationProvider._getLocationDetailsFromCoordinates() - _currentCity=$_currentCity!");
@@ -157,7 +156,7 @@ class LocationProvider with ChangeNotifier {
 
       String host = 'https://maps.google.com/maps/api/geocode/json';
       final url =
-          '$host?key=${remoteConfig.getString('google_api_key')!}&language=en&latlng=$lat,$lng';
+          '$host?key=${remoteConfig.getString('google_api_key')}&language=en&latlng=$lat,$lng';
 
       var response = await http.get(Uri.parse(url));
       if (response.statusCode == 200) {
@@ -230,20 +229,20 @@ class LocationProvider with ChangeNotifier {
 
       if (setAsCurrentPlace) {
         _currentCity = placeDetails.place!.addressComponents!
-            .firstWhere((element) => element.types!.contains("locality"))
-            .name!;
+            .firstWhere((element) => element.types.contains("locality"))
+            .name;
         _currentState = placeDetails.place!.addressComponents!
             .firstWhere((element) =>
-                element.types!.contains("administrative_area_level_1"))
-            .name!;
+                element.types.contains("administrative_area_level_1"))
+            .name;
         _currentCountry = placeDetails.place!.addressComponents!
-            .firstWhere((element) => element.types!.contains("country"))
-            .name!;
+            .firstWhere((element) => element.types.contains("country"))
+            .name;
         _placeId = placeId;
         fetchPlacePhoto();
         notifyListeners();
         logger.t(
-            "LocationProvider.getLocationDetailsFromPlaceId() - setAsCurrentPlace - _currentCity=${_currentCity}");
+            "LocationProvider.getLocationDetailsFromPlaceId() - setAsCurrentPlace - _currentCity=$_currentCity");
       }
 
       return placeDetails.place;
@@ -256,15 +255,15 @@ class LocationProvider with ChangeNotifier {
   void setCurrentPlace(Place place) async {
     try {
       _currentCity = place.addressComponents!
-          .firstWhere((element) => element.types!.contains("locality"))
-          .name!;
+          .firstWhere((element) => element.types.contains("locality"))
+          .name;
       _currentState = place.addressComponents!
           .firstWhere((element) =>
-              element.types!.contains("administrative_area_level_1"))
-          .name!;
+              element.types.contains("administrative_area_level_1"))
+          .name;
       _currentCountry = place.addressComponents!
-          .firstWhere((element) => element.types!.contains("country"))
-          .name!;
+          .firstWhere((element) => element.types.contains("country"))
+          .name;
       _currentPosition = Position(
           latitude: place.latLng!.lat,
           longitude: place.latLng!.lng,
@@ -281,7 +280,7 @@ class LocationProvider with ChangeNotifier {
       _saveLocation();
       notifyListeners();
       logger.t(
-          "LocationProvider.setCurrentPlace() - _currentCity=${_currentCity}");
+          "LocationProvider.setCurrentPlace() - _currentCity=$_currentCity");
     } catch (e) {
       logger.e(e);
     }
@@ -292,7 +291,7 @@ class LocationProvider with ChangeNotifier {
       bool restrictToSurroundingArea = false,
       double? searchLocationLat,
       double? searchLocationLng}) async {
-    if (query == null || query.isEmpty) {
+    if (query.isEmpty) {
       logger.w("Query is null or empty: $query");
       return null;
     }
@@ -415,7 +414,7 @@ class LocationProvider with ChangeNotifier {
         //Ensure id is loaded
         //TODO: Fix bad code for waiting for placeId, improve approach to caching
         int attempts = 0;
-        while (_placeId == null || _placeId == "") {
+        while (_placeId == "") {
           await Future.delayed(const Duration(milliseconds: 100));
           attempts++;
           if (attempts > 100) {
@@ -426,11 +425,11 @@ class LocationProvider with ChangeNotifier {
       }
 
       // Check if the image is already cached in memory
-      if (_imageCache.containsKey(placeId!)) {
+      if (_imageCache.containsKey(placeId)) {
         logger.t(
             "locationProvider._fetchPlacePhoto() - found photo in cache for $placeId");
         if (setAsCurrentImage) {
-          _currentPlaceImg = _imageCache[placeId!];
+          _currentPlaceImg = _imageCache[placeId];
           notifyListeners();
         }
         return _currentPlaceImg;
@@ -476,7 +475,7 @@ class LocationProvider with ChangeNotifier {
                 googlePlacesImg: googlePlacesImg, file: file, imageUrl: null);
 
             // Cache the image in memory
-            _imageCache[placeId!] = tourguidePlaceImg;
+            _imageCache[placeId] = tourguidePlaceImg;
 
             if (setAsCurrentImage) {
               _currentPlaceImg = tourguidePlaceImg;
@@ -515,49 +514,45 @@ class LocationProvider with ChangeNotifier {
           },
         );
 
-        if (imageBytes != null) {
-          // Save the image to local storage
-          await file!.writeAsBytes(imageBytes);
-          logger.t(
-              "locationProvider._fetchPlacePhoto() - saving photo and metadata through placeid in local storage");
+        // Save the image to local storage
+        await file!.writeAsBytes(imageBytes);
+        logger.t(
+            "locationProvider._fetchPlacePhoto() - saving photo and metadata through placeid in local storage");
 
-          // Save metadata to local storage
-          final metadataMap = {
-            'photoReference': metadata!.photoReference,
-            'width': metadata.width,
-            'height': metadata.height,
-            'attributions': metadata.attributions,
-            'cacheDate': DateTime.now().toIso8601String(),
-          };
-          await metadataFile!.writeAsString(json.encode(metadataMap));
+        // Save metadata to local storage
+        final metadataMap = {
+          'photoReference': metadata.photoReference,
+          'width': metadata.width,
+          'height': metadata.height,
+          'attributions': metadata.attributions,
+          'cacheDate': DateTime.now().toIso8601String(),
+        };
+        await metadataFile!.writeAsString(json.encode(metadataMap));
 
-          // Cache the image
-          final googlePlacesImg = gpi.GooglePlacesImg(
-            photoMetadata: metadata,
-            placePhotoResponse:
-                FetchPlacePhotoResponse.image(Image.memory(imageBytes)),
-          );
-          final tourguidePlaceImg = TourguidePlaceImg(
-              googlePlacesImg: googlePlacesImg, file: file, imageUrl: null);
-          _imageCache[placeId!] = tourguidePlaceImg;
+        // Cache the image
+        final googlePlacesImg = gpi.GooglePlacesImg(
+          photoMetadata: metadata,
+          placePhotoResponse:
+              FetchPlacePhotoResponse.image(Image.memory(imageBytes)),
+        );
+        final tourguidePlaceImg = TourguidePlaceImg(
+            googlePlacesImg: googlePlacesImg, file: file, imageUrl: null);
+        _imageCache[placeId] = tourguidePlaceImg;
 
-          if (setAsCurrentImage) {
-            _currentPlaceImg = tourguidePlaceImg;
-            notifyListeners();
-          }
-          return tourguidePlaceImg;
-        } else {
-          return null;
+        if (setAsCurrentImage) {
+          _currentPlaceImg = tourguidePlaceImg;
+          notifyListeners();
         }
-      } else {
+        return tourguidePlaceImg;
+            } else {
         //on web,
         response.when(
           image: (image) {
-            logger.t('image:' + image.toString());
+            logger.t('image:$image');
             return _imageToBytes(image);
           },
           imageUrl: (imageUrl) {
-            logger.t('imageUrl:' + imageUrl);
+            logger.t('imageUrl:$imageUrl');
             // Cache the image
             final googlePlacesImg = gpi.GooglePlacesImg(
               photoMetadata: metadata,
@@ -583,6 +578,7 @@ class LocationProvider with ChangeNotifier {
           "locationProvider._fetchPlacePhoto() - Exception occured: $err, placeId=$placeId, setAsCurrentImage=$setAsCurrentImage \n$stack");
       return null;
     }
+    return null;
   }
 
   Future<Uint8List> _fetchImageBytesFromUrl(String imageUrl) async {
@@ -603,7 +599,7 @@ class LocationProvider with ChangeNotifier {
     // Create a completer to handle async resolution
     Completer<Uint8List> completer = Completer<Uint8List>();
     // Resolve the image configuration and listen for updates
-    image.image.resolve(ImageConfiguration()).addListener(
+    image.image.resolve(const ImageConfiguration()).addListener(
       ImageStreamListener((ImageInfo imageInfo, bool synchronousCall) async {
         // Convert the image to ByteData in PNG format
         final byteData =

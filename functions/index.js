@@ -1,6 +1,6 @@
 const {onRequest} = require("firebase-functions/v2/https");
+const {onDocumentDeleted} = require("firebase-functions/v2/firestore");
 const admin = require("firebase-admin");
-const functions = require("firebase-functions");
 const axios = require("axios");
 admin.initializeApp();
 
@@ -8,7 +8,7 @@ const validateAuthId = (authId) => {
   return typeof authId === "string" && authId.length > 0 && authId.length < 50;
 };
 
-// Unsuscribe user from email category via unsubscribe button in email
+// Unsubscribe user from email category via unsubscribe button in email
 exports.unsubscribeUser = onRequest(async (req, res) => {
   const authId = req.query.authId;
   const emailCategory = req.query.emailCategory;
@@ -117,35 +117,36 @@ exports.fetchDirections = onRequest({cors: true}, fetchDirections);
 
 // Cloud Function to recalculate tour ratings when a rating document is deleted.
 // For when a user is deleted. Triggered when a rating document is deleted.
-exports.recalculateTourRatingsOnRatingDelete = functions.firestore
-    .document("tours/{tourId}/ratings/{ratingId}")
-    .onDelete(async (snap, context) => {
-      const tourId = context.params.tourId;
-      const db = admin.firestore();
+exports.recalculateTourRatingsOnRatingDelete = onDocumentDeleted(
+  "tours/{tourId}/ratings/{ratingId}",
+  async (event) => {
+    const tourId = event.params.tourId;
+    const db = admin.firestore();
 
-      // Get all remaining ratings for this tour
-      const ratingsSnapshot = await db.collection("tours")
-          .doc(tourId).collection("ratings").get();
+    // Get all remaining ratings for this tour
+    const ratingsSnapshot = await db.collection("tours")
+        .doc(tourId).collection("ratings").get();
 
-      let upvotes = 0;
-      let downvotes = 0;
+    let upvotes = 0;
+    let downvotes = 0;
 
-      // Recalculate upvotes and downvotes
-      ratingsSnapshot.forEach((doc) => {
-        const rating = doc.data().value;
-        if (rating === 1) {
-          upvotes++;
-        } else if (rating === -1) {
-          downvotes++;
-        }
-      });
-
-      // Update the tour document with the new counts
-      await db.collection("tours").doc(tourId).update({
-        upvotes: upvotes,
-        downvotes: downvotes,
-      });
-
-      console.log(`Recalculated ratings for tour:
-        ${tourId}, upvotes: ${upvotes}, downvotes: ${downvotes}`);
+    // Recalculate upvotes and downvotes
+    ratingsSnapshot.forEach((doc) => {
+      const rating = doc.data().value;
+      if (rating === 1) {
+        upvotes++;
+      } else if (rating === -1) {
+        downvotes++;
+      }
     });
+
+    // Update the tour document with the new counts
+    await db.collection("tours").doc(tourId).update({
+      upvotes: upvotes,
+      downvotes: downvotes,
+    });
+
+    console.log(`Recalculated ratings for tour:
+      ${tourId}, upvotes: ${upvotes}, downvotes: ${downvotes}`);
+  }
+);

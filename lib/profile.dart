@@ -1,4 +1,3 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_sign_in/google_sign_in.dart';
@@ -12,7 +11,6 @@ import 'package:tourguide_app/utilities/providers/auth_provider.dart' as myAuth;
 import 'package:tourguide_app/utilities/providers/tour_provider.dart';
 import 'package:tourguide_app/utilities/providers/tourguide_user_provider.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:tourguide_app/utilities/ad_banner.dart';
 
 class Profile extends StatefulWidget {
   const Profile({super.key});
@@ -228,7 +226,7 @@ class ProfileListButton extends StatelessWidget {
   final Color? color;
   final bool? disabled;
 
-  const ProfileListButton({
+  const ProfileListButton({super.key, 
     required this.label,
     required this.leftIcon,
     this.rightIcon,
@@ -243,8 +241,8 @@ class ProfileListButton extends StatelessWidget {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16.0),
+        const Padding(
+          padding: EdgeInsets.symmetric(horizontal: 16.0),
           child: Divider(height: 1, color: Colors.grey),
         ),
         TextButton(
@@ -258,7 +256,7 @@ class ProfileListButton extends StatelessWidget {
                   BorderRadius.circular(0), // Set to 0 for sharp corners
             ),
             foregroundColor:
-                color != null ? color : Theme.of(context).colorScheme.primary,
+                color ?? Theme.of(context).colorScheme.primary,
           ),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -267,12 +265,12 @@ class ProfileListButton extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Icon(leftIcon), // Left icon
-                  SizedBox(
+                  const SizedBox(
                       width:
                           16), // Adjust spacing between icon and text as needed
                   Text(
                     label,
-                    style: TextStyle(fontWeight: FontWeight.bold),
+                    style: const TextStyle(fontWeight: FontWeight.bold),
                   ),
                 ],
               ),
@@ -285,8 +283,8 @@ class ProfileListButton extends StatelessWidget {
           ),
         ),
         if (isLastItem ?? false)
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0),
+          const Padding(
+            padding: EdgeInsets.symmetric(horizontal: 16.0),
             child: Divider(height: 1, color: Colors.grey),
           ),
       ],

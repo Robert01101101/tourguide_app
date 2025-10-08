@@ -106,7 +106,7 @@ class _TourTileState extends State<TourTile> {
 
   @override
   Widget build(BuildContext context) {
-    bool textDataReady = widget.tour.name != null && widget.tour.name != "";
+    bool textDataReady = widget.tour.name != "";
     TourProvider tourProvider = Provider.of<TourProvider>(context);
     bool isLoadingImage = widget.tour.imageFile == null && !kIsWeb;
     bool isOfflineCreatedTour = widget.tour.isOfflineCreatedTour ?? false;
@@ -166,7 +166,7 @@ class _TourTileState extends State<TourTile> {
                                                     TourTile.width.ceil(),
                                                 fit: BoxFit.cover)
                                             : Image.network(
-                                                widget.tour.imageUrl!,
+                                                widget.tour.imageUrl,
                                                 width: TourTile.width,
                                                 height: 0.55 *
                                                     TourTile.width.ceil(),
@@ -406,7 +406,7 @@ class _ExpandedTourTileOverlayState extends State<ExpandedTourTileOverlay> {
                   children: [
                     Expanded(
                       child: Container(
-                        padding: EdgeInsets.fromLTRB(16, 0, 0, 0),
+                        padding: const EdgeInsets.fromLTRB(16, 0, 0, 0),
                         child: Text(
                           widget.tour.name,
                           style: Theme.of(context)
@@ -445,7 +445,7 @@ class _ExpandedTourTileOverlayState extends State<ExpandedTourTileOverlay> {
                                       width: MediaQuery.of(context).size.width,
                                       height: imageHeight,
                                       fit: BoxFit.cover)
-                                  : Image.network(widget.tour.imageUrl!,
+                                  : Image.network(widget.tour.imageUrl,
                                       width: MediaQuery.of(context).size.width,
                                       height: imageHeight,
                                       fit: BoxFit.cover)
@@ -463,7 +463,7 @@ class _ExpandedTourTileOverlayState extends State<ExpandedTourTileOverlay> {
                             Align(
                                 alignment: Alignment.topRight,
                                 child: Padding(
-                                  padding: EdgeInsets.all(8.0),
+                                  padding: const EdgeInsets.all(8.0),
                                   child: Row(
                                     mainAxisAlignment: MainAxisAlignment.end,
                                     children: [

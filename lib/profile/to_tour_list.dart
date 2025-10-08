@@ -26,7 +26,7 @@ class _ToTourListState extends State<ToTourList> {
         linearGradient: MyGlobals.createShimmerGradient(context),
         child: StandardLayout(
           children: [
-            SizedBox(height: 0),
+            const SizedBox(height: 0),
             Text("To Tour List",
                 style: Theme.of(context).textTheme.headlineSmall),
             StandardLayoutChild(

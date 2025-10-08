@@ -392,7 +392,7 @@ class _TourMapFullscreenState extends State<TourMapFullscreen> {
                             ),
                             if (widget.tourMapController.isLoadingFullscreen)
                               Container(
-                                color: Color(0xffe8eaed),
+                                color: const Color(0xffe8eaed),
                                 child: const Center(
                                   child: CircularProgressIndicator(),
                                 ),
@@ -579,8 +579,8 @@ class _TourMapFullscreenState extends State<TourMapFullscreen> {
 class TourMapController with ChangeNotifier {
   //#region FIELDS
   // Private fields
-  Set<Marker> _markers = Set<Marker>();
-  Set<Polyline> _polylines = Set<Polyline>();
+  Set<Marker> _markers = <Marker>{};
+  Set<Polyline> _polylines = <Polyline>{};
   final Completer<GoogleMapController> _mapControllerCompleter =
       Completer<GoogleMapController>();
   bool _isFullScreen = false;
@@ -666,8 +666,8 @@ class TourMapController with ChangeNotifier {
     logger.t('resetTourMapController - hashCode=$hashCode');
     moveCameraToMarkerAndHighlightMarker = null;
     _tour = Tour.empty();
-    _markers = Set<Marker>();
-    _polylines = Set<Polyline>();
+    _markers = <Marker>{};
+    _polylines = <Polyline>{};
     _defaultMarkerBitmaps = [];
     _highlightedMarkerBitmaps = [];
     _routeSegments = [];
@@ -826,7 +826,7 @@ class TourMapController with ChangeNotifier {
           .join('|');*/
         waypointsString = waypoints
             .sublist(1, waypoints.length - 1)
-            .map((point) => 'via:place_id:${point}')
+            .map((point) => 'via:place_id:$point')
             .join('|');
       }
 
@@ -983,10 +983,11 @@ class TourMapController with ChangeNotifier {
           } while (b >= Big0x20);
           BigInt rshifted = result >> 1;
           int dlat;
-          if (result.isOdd)
+          if (result.isOdd) {
             dlat = (~rshifted).toInt();
-          else
+          } else {
             dlat = rshifted.toInt();
+          }
           lat += dlat;
 
           shift = 0;
@@ -998,10 +999,11 @@ class TourMapController with ChangeNotifier {
           } while (b >= Big0x20);
           rshifted = result >> 1;
           int dlng;
-          if (result.isOdd)
+          if (result.isOdd) {
             dlng = (~rshifted).toInt();
-          else
+          } else {
             dlng = rshifted.toInt();
+          }
           lng += dlng;
 
           poly.add(LatLng((lat / 1E5).toDouble(), (lng / 1E5).toDouble()));
@@ -1049,7 +1051,7 @@ class TourMapController with ChangeNotifier {
     logger.t('_addPolyline');
     _polylines.add(
       Polyline(
-        polylineId: PolylineId('Route'),
+        polylineId: const PolylineId('Route'),
         color: Colors.blue,
         width: 5,
         points: polylineCoordinates,

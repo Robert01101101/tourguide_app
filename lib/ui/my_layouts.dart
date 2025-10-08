@@ -11,13 +11,13 @@ class StandardLayout extends StatelessWidget {
   final bool disableAdaptiveHorizontalPadding;
 
   const StandardLayout({
-    Key? key,
+    super.key,
     required this.children,
     this.gap = defaultGap,
     this.enableVerticalPadding = true,
     this.enableHorizontalPadding = true,
     this.disableAdaptiveHorizontalPadding = false,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
