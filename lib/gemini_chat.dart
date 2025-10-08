@@ -25,7 +25,7 @@ class _GeminiChatState extends State<GeminiChat> with WidgetsBindingObserver {
   var apiKey;
   String aiTourResponse = ''; // Variable to store the generated tour
   var uuid = const Uuid();
-  String geminiVersion = 'gemini-1.5-flash';
+  String geminiVersion = 'gemini-2.5-flash';
   types.User? _user, _bot;
   late ChatSession _chat;
   late GenerativeModel generativeModel;
